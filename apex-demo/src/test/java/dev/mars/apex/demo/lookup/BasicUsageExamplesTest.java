@@ -16,12 +16,12 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -72,14 +72,14 @@ public class BasicUsageExamplesTest {
     
     private static final Logger logger = LoggerFactory.getLogger(BasicUsageExamplesTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration config;
     private YamlRuleConfiguration dataConfig;
 
     @BeforeEach
     void setUp() {
         // Initialize APEX services following established patterns
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         try {
             // Load both configuration and data files
@@ -90,7 +90,7 @@ public class BasicUsageExamplesTest {
             logger.info("  - Configuration loaded: {}", config.getMetadata().getName());
             logger.info("  - Data scenarios loaded: {}", dataConfig.getMetadata().getName());
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configurations: {}", e.getMessage());
             fail("Failed to load configurations: " + e.getMessage());
         }
@@ -100,7 +100,7 @@ public class BasicUsageExamplesTest {
      * Create RulesEngine with EnrichmentService for enrichment processing
      * Following the established pattern from BarrierOptionNestedEnrichmentTest
      */
-    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws YamlConfigurationException {
+    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws ConfigurationException {
         // Create basic configuration from YAML using the static factory method
         RulesEngine baseEngine = RulesEngine.fromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();
@@ -133,7 +133,7 @@ public class BasicUsageExamplesTest {
         assertEquals("Basic Usage Examples Data", dataConfig.getMetadata().getName(), "Should have correct data name");
         assertEquals("dataset", dataConfig.getMetadata().getType(), "Should be dataset type");
 
-        logger.info("✓ Configuration loading validation passed");
+        logger.info("[OK] Configuration loading validation passed");
         logger.info("  - Config: {} ({})", config.getMetadata().getName(), config.getMetadata().getType());
         logger.info("  - Data: {} ({})", dataConfig.getMetadata().getName(), dataConfig.getMetadata().getType());
     }
@@ -157,7 +157,7 @@ public class BasicUsageExamplesTest {
             RuleResult validResult = engine.evaluate(config, validUserData);
             assertNotNull(validResult, "Valid user result should not be null");
             
-            logger.info("✓ Valid user data processed successfully");
+            logger.info("[OK] Valid user data processed successfully");
             logger.info("  - Name: {} → {}", validUserData.get("name"), validResult.getEnrichedData().get("validatedName"));
             logger.info("  - Age: {} → {}", validUserData.get("age"), validResult.getEnrichedData().get("validatedAge"));
             logger.info("  - Email: {} → {}", validUserData.get("email"), validResult.getEnrichedData().get("validatedEmail"));
@@ -171,7 +171,7 @@ public class BasicUsageExamplesTest {
             RuleResult partialResult = engine.evaluate(config, partialUserData);
             assertNotNull(partialResult, "Partial user result should not be null");
 
-            logger.info("✓ Partial user data processed successfully");
+            logger.info("[OK] Partial user data processed successfully");
             logger.info("  - Name: {} → {}", partialUserData.get("name"), partialResult.getEnrichedData().get("validatedName"));
             logger.info("  - Age: {} → {}", partialUserData.get("age"), partialResult.getEnrichedData().get("validatedAge"));
 
@@ -201,7 +201,7 @@ public class BasicUsageExamplesTest {
             RuleResult premiumResult = engine.evaluate(config, premiumCustomerData);
             assertNotNull(premiumResult, "Premium customer result should not be null");
 
-            logger.info("✓ Premium customer data processed successfully");
+            logger.info("[OK] Premium customer data processed successfully");
             logger.info("  - Customer Type: {} → {}", premiumCustomerData.get("customerType"), premiumResult.getEnrichedData().get("processedCustomerType"));
             logger.info("  - Product Category: {} → {}", premiumCustomerData.get("productCategory"), premiumResult.getEnrichedData().get("processedProductCategory"));
             logger.info("  - Trade Value: {} → {}", premiumCustomerData.get("tradeValue"), premiumResult.getEnrichedData().get("processedTradeValue"));
@@ -217,7 +217,7 @@ public class BasicUsageExamplesTest {
             RuleResult standardResult = engine.evaluate(config, standardCustomerData);
             assertNotNull(standardResult, "Standard customer result should not be null");
             
-            logger.info("✓ Standard customer data processed successfully");
+            logger.info("[OK] Standard customer data processed successfully");
 
         } catch (Exception e) {
             logger.error("X Business object processing enrichment failed: {}", e.getMessage());
@@ -245,7 +245,7 @@ public class BasicUsageExamplesTest {
 
             // Validate SpEL expression: #amount * 0.05 = 1000 * 0.05 = 50.0
             Object calculatedResult = interestResult.getEnrichedData().get("calculatedResult");
-            logger.info("✓ Interest calculation processed successfully");
+            logger.info("[OK] Interest calculation processed successfully");
             logger.info("  - Amount: {} → Calculated Result: {}", interestData.get("amount"), calculatedResult);
             logger.info("  - Expected: 50.0 (1000 * 0.05)");
 
@@ -261,7 +261,7 @@ public class BasicUsageExamplesTest {
             assertNotNull(completeResult, "Complete calculation result should not be null");
 
             Object completeCalculatedResult = completeResult.getEnrichedData().get("calculatedResult");
-            logger.info("✓ Complete calculation processed successfully");
+            logger.info("[OK] Complete calculation processed successfully");
             logger.info("  - Amount: {} → Calculated Result: {}", completeData.get("amount"), completeCalculatedResult);
             logger.info("  - Expected: 100.0 (2000 * 0.05)");
 
@@ -304,7 +304,7 @@ public class BasicUsageExamplesTest {
             RuleResult workflowResult = engine.evaluate(config, workflowData);
             assertNotNull(workflowResult, "Workflow result should not be null");
 
-            logger.info("✓ Integrated workflow processed successfully");
+            logger.info("[OK] Integrated workflow processed successfully");
             logger.info("  - Step 1 (Basic Field Validation): Name → {}", workflowResult.getEnrichedData().get("validatedName"));
             logger.info("  - Step 2 (Business Object Processing): Customer Type → {}", workflowResult.getEnrichedData().get("processedCustomerType"));
             logger.info("  - Step 3 (Expression Evaluation): Calculated Result → {}", workflowResult.getEnrichedData().get("calculatedResult"));

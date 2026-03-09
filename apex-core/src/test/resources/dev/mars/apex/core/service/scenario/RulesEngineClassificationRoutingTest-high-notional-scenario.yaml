@@ -25,7 +25,7 @@ scenario:
     
     # Stage 1: High-value validation
     - stage-name: "validation"
-      config-file: "src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-validation-rules.yaml"
+      config-file: "dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-validation-rules.yaml"
       execution-order: 1
       failure-policy: "terminate"
       required: true
@@ -36,7 +36,7 @@ scenario:
     
     # Stage 2: Enrichment
     - stage-name: "enrichment"
-      config-file: "src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-enrichment-rules.yaml"
+      config-file: "dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-enrichment-rules.yaml"
       execution-order: 2
       failure-policy: "continue-with-warnings"
       required: false

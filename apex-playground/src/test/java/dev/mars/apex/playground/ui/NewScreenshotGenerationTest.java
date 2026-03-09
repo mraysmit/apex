@@ -231,8 +231,7 @@ class NewScreenshotGenerationTest {
         
         // Create invalid YAML
         WebElement yamlEditor = driver.findElement(By.id("yamlRulesEditor"));
-        yamlEditor.clear();
-        yamlEditor.sendKeys("""
+        CodeMirrorTestHelper.setYamlContent(driver, """
             metadata:
               name: "Invalid YAML Example"
             rules:

@@ -18,11 +18,11 @@
 
 package dev.mars.apex.sync.pipeline;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.sync.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -89,7 +89,7 @@ public class DataTransformationH2Test {
                 stmt.execute("INSERT INTO employees VALUES (4, 'Alice', 'Williams', 'alice.williams@company.com', 'Sales', 70000.00)");
             }
         }
-        log.info("✓ Source database (SQL Server mode) initialized with 4 employees");
+        log.info("[OK] Source database (SQL Server mode) initialized with 4 employees");
 
         // Setup target database (simulating PostgreSQL) - empty, will be populated by sync
         try (Connection conn = DriverManager.getConnection(TARGET_URL, "sa", "")) {
@@ -106,7 +106,7 @@ public class DataTransformationH2Test {
                 """);
             }
         }
-        log.info("✓ Target database (PostgreSQL mode) initialized with empty transformed table");
+        log.info("[OK] Target database (PostgreSQL mode) initialized with empty transformed table");
     }
 
     @Test
@@ -115,7 +115,7 @@ public class DataTransformationH2Test {
         log.info("\n=== Data Transformation Test: SQL Server → PostgreSQL (H2 Mode) ===\n");
 
         // Load YAML configuration and run pipeline
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/pipeline/DataTransformationH2Test.yaml"
         );
@@ -125,7 +125,7 @@ public class DataTransformationH2Test {
 
         // Verify pipeline execution
         assertTrue(result.isSuccess(), "Pipeline failed: " + result.getMessage());
-        log.info("✓ Pipeline executed successfully");
+        log.info("[OK] Pipeline executed successfully");
 
         // Print execution metrics
         printExecutionMetrics(result);
@@ -185,7 +185,7 @@ public class DataTransformationH2Test {
                 }
 
                 assertEquals(4, count, "Should have transformed all 4 employees");
-                log.info("✓ All {} records verified with correct transformations", count);
+                log.info("[OK] All {} records verified with correct transformations", count);
             }
         }
     }
@@ -196,7 +196,7 @@ public class DataTransformationH2Test {
         log.info("\n=== String Concatenation Transformation Test ===\n");
 
         // Run the pipeline
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/pipeline/DataTransformationH2Test.yaml"
         );
@@ -214,7 +214,7 @@ public class DataTransformationH2Test {
                 assertTrue(rs.next());
                 assertEquals("John Doe", rs.getString("full_name"), 
                     "full_name should be concatenation of first_name and last_name");
-                log.info("✓ String concatenation verified: 'John' + ' ' + 'Doe' = 'John Doe'");
+                log.info("[OK] String concatenation verified: 'John' + ' ' + 'Doe' = 'John Doe'");
             }
         }
         
@@ -227,7 +227,7 @@ public class DataTransformationH2Test {
         log.info("\n=== Calculated Field Test (SpEL Expression) ===\n");
 
         // Run the pipeline
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/pipeline/DataTransformationH2Test.yaml"
         );
@@ -247,7 +247,7 @@ public class DataTransformationH2Test {
                 double bonus = rs.getDouble("annual_bonus");
                 assertEquals(7500.00, bonus, 0.01, 
                     "annual_bonus should be 10% of salary (75000 * 0.10 = 7500)");
-                log.info("✓ Calculated field verified: salary 75000 × 0.10 = bonus {}", bonus);
+                log.info("[OK] Calculated field verified: salary 75000 × 0.10 = bonus {}", bonus);
             }
         }
         

@@ -28,7 +28,7 @@ import dev.mars.apex.core.service.validation.Validator;
  * @since 2025-07-27
  * @version 1.0
  */
-public class CompositeLookup implements IDataLookup {
+public class CompositeLookup implements DataLookup {
     private String name;
     private Validator<Object> validator;
     private GenericTransformer<Object> transformer;

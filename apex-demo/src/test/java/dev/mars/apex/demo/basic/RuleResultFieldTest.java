@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ public class RuleResultFieldTest extends DemoTestBase {
             assertTrue((Boolean) enrichedData.get("requiresApproval"),
                 "Rule 2 should have evaluated to true based on isHighValue");
 
-            logger.info("✓ Basic rule chaining test completed successfully");
+            logger.info("[OK] Basic rule chaining test completed successfully");
             
         } catch (Exception e) {
             logger.error("Basic rule chaining test failed", e);
@@ -122,7 +122,7 @@ public class RuleResultFieldTest extends DemoTestBase {
             assertTrue((Boolean) enrichedData.get("requiresCreditCheck"),
                 "requiresCreditCheck should be true for BBB rating");
 
-            logger.info("✓ Multiple result fields test completed successfully");
+            logger.info("[OK] Multiple result fields test completed successfully");
             
         } catch (Exception e) {
             logger.error("Multiple result fields test failed", e);
@@ -166,7 +166,7 @@ public class RuleResultFieldTest extends DemoTestBase {
             assertFalse((Boolean) validation.get("isHighValue"),
                 "validation.isHighValue should be false for 8M notional");
 
-            logger.info("✓ Nested field storage test completed successfully");
+            logger.info("[OK] Nested field storage test completed successfully");
             
         } catch (Exception e) {
             logger.error("Nested field storage test failed", e);
@@ -213,7 +213,7 @@ public class RuleResultFieldTest extends DemoTestBase {
             assertTrue((Boolean) enrichedData.get("requiresApproval"),
                 "requiresApproval should be true (high value + credit check)");
 
-            logger.info("✓ Conditional logic test completed successfully");
+            logger.info("[OK] Conditional logic test completed successfully");
             
         } catch (Exception e) {
             logger.error("Conditional logic test failed", e);
@@ -256,7 +256,7 @@ public class RuleResultFieldTest extends DemoTestBase {
             assertTrue(finalSize < initialSize + 10, 
                 "Should not have excessive result fields stored");
 
-            logger.info("✓ No overhead test completed successfully");
+            logger.info("[OK] No overhead test completed successfully");
             
         } catch (Exception e) {
             logger.error("No overhead test failed", e);

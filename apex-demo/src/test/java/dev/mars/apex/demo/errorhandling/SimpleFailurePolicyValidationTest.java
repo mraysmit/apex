@@ -16,7 +16,7 @@
 
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - How validation failures interact with different failure policies
  * - How validation results are captured and reported
  *
- * Uses DataTypeScenarioService to execute validation scenarios and verifies
+ * Uses RulesEngine to execute validation scenarios and verifies
  * that validation rule processing works correctly under various conditions.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
@@ -58,7 +58,7 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up validation failure policy test environment");
-        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
+        logger.info("[OK] Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -83,8 +83,8 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
         assertTrue(scenarioResult.hasWarnings() || !scenarioResult.getFailedStages().isEmpty(),
                   "Scenario should have warnings or failed stages from validation failures");
         
-        logger.info("✓ Validation rules failed as expected for missing required fields");
-        logger.info("✓ Validation failures handled gracefully without stack traces");
+        logger.info("[OK] Validation rules failed as expected for missing required fields");
+        logger.info("[OK] Validation failures handled gracefully without stack traces");
         logger.info("Validation rule failure test completed");
     }
 
@@ -110,8 +110,8 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
                   "Scenario should be successful with valid data");
         assertFalse(scenarioResult.isTerminated(), "Scenario should not be terminated");
         
-        logger.info("✓ Validation rules passed with valid data");
-        logger.info("✓ All required fields validated successfully");
+        logger.info("[OK] Validation rules passed with valid data");
+        logger.info("[OK] All required fields validated successfully");
         logger.info("Valid data validation test completed");
     }
 
@@ -135,8 +135,8 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
         assertNotNull(scenarioResult, "Result should not be null even with SpEL exceptions");
         // The system should handle SpEL exceptions gracefully without throwing them
         
-        logger.info("✓ SpEL exceptions handled gracefully");
-        logger.info("✓ No stack traces thrown for missing properties");
+        logger.info("[OK] SpEL exceptions handled gracefully");
+        logger.info("[OK] No stack traces thrown for missing properties");
         logger.info("SpEL exception handling test completed");
     }
 }

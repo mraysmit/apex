@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             // Load YAML configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalFxTransactionWorkingExampleTest.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully: " + config.getMetadata().getName());
+            logger.info("[OK] Configuration loaded successfully: " + config.getMetadata().getName());
 
             // Given: SWIFT system with standard NDF value
             Map<String, Object> data = new HashMap<>();
@@ -86,9 +86,9 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Then: Validate conditional mapping results
-            logger.info("✓ Enrichment completed. Validating results...");
-            logger.info("✓ Actual result keys: {}", result.keySet());
-            logger.info("✓ Full result: {}", result);
+            logger.info("[OK] Enrichment completed. Validating results...");
+            logger.info("[OK] Actual result keys: {}", result.keySet());
+            logger.info("[OK] Full result: {}", result);
 
             // Validate NDF mapping (should keep original value)
             assertEquals("1", result.get("IS_NDF"), "NDF value should remain '1' for SWIFT standard value");
@@ -104,12 +104,12 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             assertEquals("HIGH", result.get("SETTLEMENT_PRIORITY"), "USD should have HIGH priority");
 
             // Validate risk assessment - check what we actually got
-            logger.info("✓ Risk score: {}", result.get("riskScore"));
-            logger.info("✓ Risk category: {}", result.get("riskCategory"));
+            logger.info("[OK] Risk score: {}", result.get("riskScore"));
+            logger.info("[OK] Risk category: {}", result.get("riskCategory"));
             assertNotNull(result.get("riskScore"), "Risk score should be calculated");
 
             // For now, let's be flexible about what fields are present
-            logger.info("✓ Available fields: {}", result.keySet());
+            logger.info("[OK] Available fields: {}", result.keySet());
 
             // Validate audit trail if present
             if (result.containsKey("processingDecisions")) {
@@ -119,7 +119,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
                 assertNotNull(result.get("processedTimestamp"), "Timestamp should be recorded");
             }
 
-            logger.info("✓ SWIFT standard NDF test completed successfully. Final result: {}", result);
+            logger.info("[OK] SWIFT standard NDF test completed successfully. Final result: {}", result);
 
         } catch (Exception e) {
             logger.error("Test failed with exception: " + e.getMessage(), e);
@@ -165,7 +165,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             assertTrue(result.get("SETTLEMENT_INSTRUCTION").toString().startsWith("CHAPS_"),
                 "GBP transactions should use CHAPS");
 
-            logger.info("✓ SWIFT Y/N flag conversion test completed successfully. NDF result: {}", result.get("IS_NDF"));
+            logger.info("[OK] SWIFT Y/N flag conversion test completed successfully. NDF result: {}", result.get("IS_NDF"));
 
         } catch (Exception e) {
             logger.error("Test failed with exception: " + e.getMessage(), e);
@@ -211,7 +211,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             assertTrue(result.get("SETTLEMENT_INSTRUCTION").toString().startsWith("TARGET2_"),
                 "EUR transactions should use TARGET2");
 
-            logger.info("✓ REUTERS system test completed successfully. NDF result: {}", result.get("IS_NDF"));
+            logger.info("[OK] REUTERS system test completed successfully. NDF result: {}", result.get("IS_NDF"));
 
         } catch (Exception e) {
             logger.error("Test failed with exception: " + e.getMessage(), e);
@@ -262,7 +262,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             assertTrue(riskCategory.equals("HIGH") || riskCategory.equals("CRITICAL"),
                 "High-value transactions should have HIGH or CRITICAL risk category");
 
-            logger.info("✓ High-value transaction test completed. Risk score: {}, Category: {}",
+            logger.info("[OK] High-value transaction test completed. Risk score: {}, Category: {}",
                 riskScore, riskCategory);
 
         } catch (Exception e) {
@@ -302,7 +302,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Then: Validate comprehensive audit trail
-            logger.info("✓ Enrichment completed. Validating audit trail...");
+            logger.info("[OK] Enrichment completed. Validating audit trail...");
 
             // Validate all audit fields are present
             assertNotNull(result.get("processingDecisions"), "Processing decisions should be logged");
@@ -318,8 +318,8 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             assertTrue(processingDecisions.contains("RISK:"), "Should log risk assessment");
             assertTrue(processingDecisions.contains("COMPLIANCE:"), "Should log compliance decision");
 
-            logger.info("✓ Audit trail test completed. Processing decisions: {}", processingDecisions);
-            logger.info("✓ All conditional FX transaction tests completed successfully!");
+            logger.info("[OK] Audit trail test completed. Processing decisions: {}", processingDecisions);
+            logger.info("[OK] All conditional FX transaction tests completed successfully!");
 
         } catch (Exception e) {
             logger.error("Test failed with exception: " + e.getMessage(), e);

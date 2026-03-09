@@ -1,10 +1,10 @@
 package dev.mars.apex.sync.unit.comparison;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.sync.ColoredTestOutputExtension;
 import dev.mars.apex.sync.SyncTestBase;
 import org.junit.jupiter.api.*;
@@ -68,7 +68,7 @@ public class TypeWideningTest extends SyncTestBase {
             + postgres.getMappedPort(5432) + "/apex_widening_test";
     }
 
-    private YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     @BeforeEach
     void setupSchemas() throws Exception {
@@ -120,7 +120,7 @@ public class TypeWideningTest extends SyncTestBase {
                 )
                 """);
 
-            logger.info("✓ Created schemas with widened types: source_schema → target_schema");
+            logger.info("[OK] Created schemas with widened types: source_schema → target_schema");
         }
     }
 
@@ -151,7 +151,7 @@ public class TypeWideningTest extends SyncTestBase {
             assertTrue(steps.stream().anyMatch(s -> "read-target-schema".equals(s.getName())),
                 "Target schema read step should be present");
             
-            logger.info("✓ Integer widening detection test passed");
+            logger.info("[OK] Integer widening detection test passed");
         } finally {
             System.clearProperty("POSTGRES_HOST");
             System.clearProperty("POSTGRES_PORT");
@@ -182,7 +182,7 @@ public class TypeWideningTest extends SyncTestBase {
             List<ExecutionStep> steps = result.getExecutionPath();
             assertFalse(steps.isEmpty(), "Execution path should contain steps");
             
-            logger.info("✓ Decimal precision widening detection test passed");
+            logger.info("[OK] Decimal precision widening detection test passed");
         } finally {
             System.clearProperty("POSTGRES_HOST");
             System.clearProperty("POSTGRES_PORT");

@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * - PARTIAL_SUCCESS: Some stages succeeded, others failed with warnings
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-27
  */
 public class ScenarioExecutionResult {
     
@@ -53,7 +53,7 @@ public class ScenarioExecutionResult {
     private final Map<String, String> skippedStages; // stageName -> reason (ConcurrentHashMap for thread-safety)
     private final AtomicLong totalExecutionTimeMs;
     private final Map<String, Object> scenarioOutputs;
-    private final List<dev.mars.apex.core.engine.model.ExecutionStep> executionPath; // Trace execution
+    private final List<dev.mars.apex.engine.model.ExecutionStep> executionPath; // Trace execution
     
     public ScenarioExecutionResult(String scenarioId) {
         this.scenarioId = scenarioId;
@@ -116,15 +116,15 @@ public class ScenarioExecutionResult {
         return new HashMap<>(scenarioOutputs);
     }
 
-    public List<dev.mars.apex.core.engine.model.ExecutionStep> getExecutionPath() {
+    public List<dev.mars.apex.engine.model.ExecutionStep> getExecutionPath() {
         return new ArrayList<>(executionPath);
     }
 
-    public void addExecutionStep(dev.mars.apex.core.engine.model.ExecutionStep step) {
+    public void addExecutionStep(dev.mars.apex.engine.model.ExecutionStep step) {
         this.executionPath.add(step);
     }
 
-    public void addExecutionSteps(List<dev.mars.apex.core.engine.model.ExecutionStep> steps) {
+    public void addExecutionSteps(List<dev.mars.apex.engine.model.ExecutionStep> steps) {
         if (steps != null) {
             this.executionPath.addAll(steps);
         }

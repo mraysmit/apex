@@ -1,12 +1,12 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.config.yaml.YamlRuleFactory;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.core.config.RuleFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,13 +27,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Classpath Rule Group Processing Test")
 class ClasspathRuleGroupProcessingTest {
 
-    private YamlConfigurationLoader yamlLoader;
-    private YamlRuleFactory ruleFactory;
+    private ConfigurationLoader yamlLoader;
+    private RuleFactory ruleFactory;
 
     @BeforeEach
     void setUp() {
-        yamlLoader = new YamlConfigurationLoader();
-        ruleFactory = new YamlRuleFactory();
+        yamlLoader = new ConfigurationLoader();
+        ruleFactory = new RuleFactory();
     }
 
     @Test

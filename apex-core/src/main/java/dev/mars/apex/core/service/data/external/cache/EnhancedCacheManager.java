@@ -40,7 +40,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * - Thread-safe operations
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-22
  * @version 1.0
  */
 public class EnhancedCacheManager {
@@ -88,7 +88,7 @@ public class EnhancedCacheManager {
             this.keyPrefix = "";
         }
         
-        LOGGER.info("Enhanced cache manager initialized: enabled={}, maxSize={}, defaultTTL={}s, maxIdle={}s, keyPrefix='{}'", 
+        LOGGER.debug("Enhanced cache manager initialized: enabled={}, maxSize={}, defaultTTL={}s, maxIdle={}s, keyPrefix='{}'", 
             enabled, maxSize, defaultTtlSeconds, maxIdleSeconds, keyPrefix);
     }
     

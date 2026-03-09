@@ -22,14 +22,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
-
-import dev.mars.apex.core.engine.config.MapPropertyAccessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-
 /**
  * Configuration class representing a complete data type processing scenario.
  *
@@ -56,14 +48,14 @@ import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
  * - SpEL-based classification rules for Map<String, Object> data
  * - Embedded classification rules in scenario files (Option B)
  * - Validation ensures either classification-rule OR data-types exists
+ * - Classification rule evaluation is handled by {@link dev.mars.apex.engine.scenario.ScenarioRegistryManager}
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-08-02
  */
 public class ScenarioConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenarioConfiguration.class);
-    private static final ExpressionParser parser = new SpelExpressionParser();
 
     private String scenarioId;
     private String name;
@@ -165,10 +157,8 @@ public class ScenarioConfiguration {
 
     /**
      * Sets legacy rule configurations.
-     *
-     * @deprecated Use setProcessingStages for new stage-based configuration
+     * When possible, prefer {@link #setProcessingStages(List)} for new stage-based configuration.
      */
-    @Deprecated
     public void setRuleConfigurations(List<String> ruleConfigurations) {
         this.ruleConfigurations = ruleConfigurations;
     }
@@ -378,79 +368,7 @@ public class ScenarioConfiguration {
         return classificationRuleCondition != null && !classificationRuleCondition.trim().isEmpty();
     }
 
-    /**
-     * Evaluates the classification rule against the provided data using the provided evaluator service.
-     *
-     * Uses SpEL (Spring Expression Language) to evaluate the classification rule condition
-     * against a Map of data. Data fields are accessible directly by name (e.g., tradeId, amount)
-     * or as variables with # prefix (e.g., #tradeId, #amount).
-     *
-     * @param data the data to evaluate against (Map<String, Object>)
-     * @param evaluatorService the service to use for creating the evaluation context
-     * @return true if the classification rule matches, false otherwise
-     */
-    public boolean matchesClassificationRule(Map<String, Object> data, ExpressionEvaluatorService evaluatorService) {
-        if (!hasClassificationRule()) {
-            return false;
-        }
 
-        if (data == null) {
-            logger.debug("Cannot evaluate classification rule against null data for scenario: " + scenarioId);
-            return false;
-        }
-
-        try {
-            Expression expression = parser.parseExpression(classificationRuleCondition);
-            StandardEvaluationContext context = evaluatorService.createEvaluationContext(data);
-
-            Boolean result = expression.getValue(context, Boolean.class);
-            return result != null && result;
-
-        } catch (Exception e) {
-            logger.warn("Failed to evaluate classification rule for scenario '" + scenarioId + "': " + e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Evaluates the classification rule against the provided data.
-     *
-     * Uses SpEL (Spring Expression Language) to evaluate the classification rule condition
-     * against a Map of data. Data fields are accessible directly by name (e.g., tradeId, amount)
-     * or as variables with # prefix (e.g., #tradeId, #amount).
-     *
-     * @deprecated Use {@link #matchesClassificationRule(Map, ExpressionEvaluatorService)} instead to ensure consistent context creation.
-     * @param data the data to evaluate against (Map<String, Object>)
-     * @return true if the classification rule matches, false otherwise
-     */
-    @Deprecated
-    public boolean matchesClassificationRule(Map<String, Object> data) {
-        if (!hasClassificationRule()) {
-            return false;
-        }
-
-        if (data == null) {
-            logger.debug("Cannot evaluate classification rule against null data for scenario: " + scenarioId);
-            return false;
-        }
-
-        try {
-            Expression expression = parser.parseExpression(classificationRuleCondition);
-            StandardEvaluationContext context = new StandardEvaluationContext(data);
-            context.addPropertyAccessor(new MapPropertyAccessor());
-            // Add map entries as variables for #fieldName access
-            for (Map.Entry<String, Object> entry : data.entrySet()) {
-                context.setVariable(entry.getKey(), entry.getValue());
-            }
-
-            Boolean result = expression.getValue(context, Boolean.class);
-            return result != null && result;
-
-        } catch (Exception e) {
-            logger.warn("Failed to evaluate classification rule for scenario '" + scenarioId + "': " + e.getMessage());
-            return false;
-        }
-    }
 
     /**
      * Validates the scenario configuration.
@@ -497,127 +415,5 @@ public class ScenarioConfiguration {
         sb.append('}');
 
         return sb.toString();
-    }
-}
-
-/**
- * Configuration for routing data to scenarios.
- */
-class RoutingConfiguration {
-    private String strategy;
-    private String defaultScenario;
-    private List<RoutingRule> rules;
-    
-    // Getters and Setters
-    public String getStrategy() {
-        return strategy;
-    }
-    
-    public void setStrategy(String strategy) {
-        this.strategy = strategy;
-    }
-    
-    public String getDefaultScenario() {
-        return defaultScenario;
-    }
-    
-    public void setDefaultScenario(String defaultScenario) {
-        this.defaultScenario = defaultScenario;
-    }
-    
-    public List<RoutingRule> getRules() {
-        return rules;
-    }
-    
-    public void setRules(List<RoutingRule> rules) {
-        this.rules = rules;
-    }
-    
-    /**
-     * Routes data to a scenario based on routing rules.
-     * 
-     * @param data the data object
-     * @param dataType the determined data type
-     * @return scenario ID or null if no rule matches
-     */
-    public String routeData(Object data, String dataType) {
-        if (rules == null) {
-            return null;
-        }
-        
-        for (RoutingRule rule : rules) {
-            if (rule.matches(data, dataType)) {
-                return rule.getTargetScenario();
-            }
-        }
-        
-        return null;
-    }
-}
-
-/**
- * Individual routing rule.
- */
-class RoutingRule {
-    private String condition;
-    private String targetScenario;
-    
-    // Getters and Setters
-    public String getCondition() {
-        return condition;
-    }
-    
-    public void setCondition(String condition) {
-        this.condition = condition;
-    }
-    
-    public String getTargetScenario() {
-        return targetScenario;
-    }
-    
-    public void setTargetScenario(String targetScenario) {
-        this.targetScenario = targetScenario;
-    }
-    
-    /**
-     * Checks if this routing rule matches the given data.
-     * 
-     * @param data the data object
-     * @param dataType the determined data type
-     * @return true if the rule matches
-     */
-    public boolean matches(Object data, String dataType) {
-        if (condition == null) {
-            return false;
-        }
-        
-        // Simple condition evaluation - in a real implementation,
-        // this would use the SpEL expression evaluator
-        if (condition.contains("class.simpleName")) {
-            String expectedType = extractSimpleClassName(condition);
-            return dataType.equals(expectedType);
-        }
-        
-        if (condition.contains("dataType")) {
-            String expectedType = extractDataType(condition);
-            return dataType.equals(expectedType);
-        }
-        
-        // Add more condition evaluation logic as needed
-        return false;
-    }
-    
-    private String extractSimpleClassName(String condition) {
-        // Extract class name from condition like "#class.simpleName == 'OtcOption'"
-        int start = condition.indexOf("'") + 1;
-        int end = condition.lastIndexOf("'");
-        return start > 0 && end > start ? condition.substring(start, end) : "";
-    }
-    
-    private String extractDataType(String condition) {
-        // Extract data type from condition like "#tradeType == 'CommoditySwap'"
-        int start = condition.indexOf("'") + 1;
-        int end = condition.lastIndexOf("'");
-        return start > 0 && end > start ? condition.substring(start, end) : "";
     }
 }

@@ -16,12 +16,18 @@ package dev.mars.apex.core.config.component;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.StageExecutionResult;
+import dev.mars.apex.core.util.TestErrorContext;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +55,14 @@ class ComponentFailurePolicyTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentFailurePolicyTest.class);
 
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        // Mark that this test class intentionally triggers ERROR/WARN logs
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ComponentFailurePolicyTest intentionally triggers ERROR/WARN logs");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: missing file errors from ScenarioRegistryLoader, validation failures");
+    }
+
     @BeforeEach
     void setUp() {
         logger.info("=".repeat(80));
@@ -60,49 +74,58 @@ class ComponentFailurePolicyTest {
         logger.info("");
     }
 
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(ComponentFailurePolicyTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ComponentFailurePolicyTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
+
     @Test
     @DisplayName("Should execute component successfully when all files pass")
     void testComponentSuccessfulExecution() throws Exception {
         logger.info("=== Testing Component Successful Execution ===");
 
-        // Load scenario that uses partial-sections-component
-        RulesEngine engine = RulesEngine.fromScenarioRegistry(
-            "src/test/resources/scenario/component-failure-policy-test-registry.yaml"
-        );
+        TestErrorContext.withExpectedErrors("loading registry with intentionally missing config files", () -> {
+            // Load scenario that uses partial-sections-component
+            RulesEngine engine = RulesEngine.fromScenarioRegistry(
+                "src/test/resources/scenario/component-failure-policy-test-registry.yaml"
+            );
 
-        // Create valid test data that matches the validation rules
-        Map<String, Object> validData = new HashMap<>();
-        validData.put("tradeId", "TRADE-001");
-        validData.put("instrumentType", "OPTION");
-        validData.put("quantity", 100.0);
-        validData.put("price", 50.0);
-        validData.put("currency", "USD");
+            // Create valid test data that matches the validation rules
+            Map<String, Object> validData = new HashMap<>();
+            validData.put("tradeId", "TRADE-001");
+            validData.put("instrumentType", "OPTION");
+            validData.put("quantity", 100.0);
+            validData.put("price", 50.0);
+            validData.put("currency", "USD");
 
-        // Execute scenario
-        ScenarioExecutionResult result = engine.evaluateScenario("component-success-test", validData);
+            // Execute scenario
+            ScenarioExecutionResult result = engine.evaluateScenario("component-success-test", validData);
 
-        // Log detailed results
-        logger.info("\n=== DETAILED REPORT ===");
-        logger.info(result.getDetailedReport());
-        logger.info("\n=== EXECUTION SUMMARY ===");
-        logger.info(result.getExecutionSummary());
-        logger.info("\n=== STAGE RESULTS ===");
-        result.getStageResults().forEach(stageResult -> {
-            logger.info("Stage: {} - ResultType: {} - Successful: {} - Error: {}",
-                stageResult.getStageName(),
-                stageResult.getResultType(),
-                stageResult.isSuccessful(),
-                stageResult.getErrorMessage());
+            // Log detailed results
+            logger.info("\n=== DETAILED REPORT ===");
+            logger.info(result.getDetailedReport());
+            logger.info("\n=== EXECUTION SUMMARY ===");
+            logger.info(result.getExecutionSummary());
+            logger.info("\n=== STAGE RESULTS ===");
+            result.getStageResults().forEach(stageResult -> {
+                logger.info("Stage: {} - ResultType: {} - Successful: {} - Error: {}",
+                    stageResult.getStageName(),
+                    stageResult.getResultType(),
+                    stageResult.isSuccessful(),
+                    stageResult.getErrorMessage());
+            });
+
+            // Verify successful execution
+            assertNotNull(result, "Result should not be null");
+            assertTrue(result.isSuccessful(), "Scenario should be successful. Summary: " + result.getExecutionSummary());
+            assertFalse(result.isTerminated(), "Scenario should not be terminated");
+            assertFalse(result.requiresReview(), "Scenario should not require review");
+            assertFalse(result.hasWarnings(), "Scenario should not have warnings");
+
+            logger.info("[OK] Component executed successfully with all files passing");
         });
-
-        // Verify successful execution
-        assertNotNull(result, "Result should not be null");
-        assertTrue(result.isSuccessful(), "Scenario should be successful. Summary: " + result.getExecutionSummary());
-        assertFalse(result.isTerminated(), "Scenario should not be terminated");
-        assertFalse(result.requiresReview(), "Scenario should not require review");
-        assertFalse(result.hasWarnings(), "Scenario should not have warnings");
-
-        logger.info("✓ Component executed successfully with all files passing");
     }
 
     @Test
@@ -110,25 +133,27 @@ class ComponentFailurePolicyTest {
     void testComponentRefContinueWithWarnings() throws Exception {
         logger.info("=== Testing Component-Ref Continue-With-Warnings Policy ===");
 
-        // Load scenario
-        RulesEngine engine = RulesEngine.fromScenarioRegistry(
-            "src/test/resources/scenario/component-failure-policy-test-registry.yaml"
-        );
+        TestErrorContext.withExpectedErrors("loading registry with intentionally missing config files", () -> {
+            // Load scenario
+            RulesEngine engine = RulesEngine.fromScenarioRegistry(
+                "src/test/resources/scenario/component-failure-policy-test-registry.yaml"
+            );
 
-        // Create data that will fail validation in the nested component
-        Map<String, Object> invalidData = new HashMap<>();
-        invalidData.put("tradeId", "TRADE-002");
-        // Missing required fields to trigger validation failure
+            // Create data that will fail validation in the nested component
+            Map<String, Object> invalidData = new HashMap<>();
+            invalidData.put("tradeId", "TRADE-002");
+            // Missing required fields to trigger validation failure
 
-        // Execute scenario
-        ScenarioExecutionResult result = engine.evaluateScenario("component-continue-test", invalidData);
+            // Execute scenario
+            ScenarioExecutionResult result = engine.evaluateScenario("component-continue-test", invalidData);
 
-        // Verify continue-with-warnings behavior
-        assertNotNull(result, "Result should not be null");
-        assertFalse(result.isTerminated(), "Scenario should not be terminated");
-        assertTrue(result.hasWarnings(), "Scenario should have warnings");
+            // Verify continue-with-warnings behavior
+            assertNotNull(result, "Result should not be null");
+            assertFalse(result.isTerminated(), "Scenario should not be terminated");
+            assertTrue(result.hasWarnings(), "Scenario should have warnings");
 
-        logger.info("✓ Component-ref failed but processing continued with warnings");
+            logger.info("[OK] Component-ref failed but processing continued with warnings");
+        });
     }
 
     @Test
@@ -136,25 +161,27 @@ class ComponentFailurePolicyTest {
     void testConfigFileTerminatePolicy() throws Exception {
         logger.info("=== Testing Config-File Terminate Policy ===");
 
-        // Load scenario
-        RulesEngine engine = RulesEngine.fromScenarioRegistry(
-            "src/test/resources/scenario/component-failure-policy-test-registry.yaml"
-        );
+        TestErrorContext.withExpectedErrors("loading registry with intentionally missing config files and triggering terminate policy", () -> {
+            // Load scenario
+            RulesEngine engine = RulesEngine.fromScenarioRegistry(
+                "src/test/resources/scenario/component-failure-policy-test-registry.yaml"
+            );
 
-        // Create data that will fail the config-file with terminate policy
-        Map<String, Object> invalidData = new HashMap<>();
-        invalidData.put("tradeId", "TRADE-003");
-        // Data designed to fail enrichment rules
+            // Create data that will fail the config-file with terminate policy
+            Map<String, Object> invalidData = new HashMap<>();
+            invalidData.put("tradeId", "TRADE-003");
+            // Data designed to fail enrichment rules
 
-        // Execute scenario
-        ScenarioExecutionResult result = engine.evaluateScenario("component-terminate-test", invalidData);
+            // Execute scenario
+            ScenarioExecutionResult result = engine.evaluateScenario("component-terminate-test", invalidData);
 
-        // Verify terminate behavior
-        assertNotNull(result, "Result should not be null");
-        assertTrue(result.isTerminated(), "Scenario should be terminated");
-        assertFalse(result.isSuccessful(), "Scenario should not be successful");
+            // Verify terminate behavior
+            assertNotNull(result, "Result should not be null");
+            assertTrue(result.isTerminated(), "Scenario should be terminated");
+            assertFalse(result.isSuccessful(), "Scenario should not be successful");
 
-        logger.info("✓ Config-file failed with terminate policy - scenario terminated");
+            logger.info("[OK] Config-file failed with terminate policy - scenario terminated");
+        });
     }
 }
 

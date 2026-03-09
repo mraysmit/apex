@@ -26,7 +26,7 @@ import java.util.List;
  * storage, retrieval, and management of cached data.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public interface CacheManager {

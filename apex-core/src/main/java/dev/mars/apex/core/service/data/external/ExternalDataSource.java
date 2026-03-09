@@ -17,7 +17,6 @@ package dev.mars.apex.core.service.data.external;
  */
 
 
-import dev.mars.apex.core.service.data.DataSource;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 
 import java.util.List;
@@ -38,11 +37,54 @@ import java.util.Map;
  * - Configuration-driven initialization
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
-public interface ExternalDataSource extends DataSource {
+public interface ExternalDataSource {
     
+    /**
+     * Get the name of this data source.
+     * 
+     * @return The name of the data source
+     */
+    String getName();
+
+    /**
+     * Get the type of data this source provides.
+     * 
+     * @return The type of data (e.g., "products", "customers", "trades")
+     */
+    String getDataType();
+
+    /**
+     * Check if this data source can provide the specified data type.
+     * 
+     * @param dataType The type of data to check for
+     * @return True if this data source can provide the specified data type, false otherwise
+     */
+    boolean supportsDataType(String dataType);
+
+    /**
+     * Get data from this source.
+     *
+     * @param <T> The type of data to return
+     * @param dataType The type of data to get
+     * @param parameters Optional parameters to filter or customize the data
+     * @return The requested data, or null if the data type is not supported
+     */
+    <T> T getData(String dataType, Object... parameters);
+
+    /**
+     * Perform a lookup operation using a key.
+     * This is a convenience method that delegates to getData with the key as a parameter.
+     *
+     * @param key The lookup key
+     * @return The lookup result, or null if not found
+     */
+    default Object lookup(String key) {
+        return getData(getDataType(), key);
+    }
+
     /**
      * Get the type of this external data source.
      * 

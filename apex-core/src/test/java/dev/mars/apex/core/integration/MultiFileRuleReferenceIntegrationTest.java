@@ -1,13 +1,22 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.core.config.ConfigurationMerger;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleGroup;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,20 +28,32 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Integration tests for multi-file rule reference resolution.
  * 
- * Tests the createRulesEngineFromMultipleFiles() method with rule references
+ * Tests multi-file merging with rule references
  * across multiple files to ensure proper merging and validation.
  */
 @DisplayName("Multi-File Rule Reference Integration Tests")
 class MultiFileRuleReferenceIntegrationTest {
 
-    private YamlRulesEngineService rulesEngineService;
+    private ConfigurationLoader configLoader;
     
     @TempDir
     Path tempDir;
 
     @BeforeEach
     void setUp() {
-        rulesEngineService = new YamlRulesEngineService();
+        configLoader = new ConfigurationLoader();
+    }
+
+    /**
+     * Helper: load and merge multiple YAML files into a single RulesEngine.
+     */
+    private RulesEngine createRulesEngineFromMultipleFiles(String... filePaths) throws Exception {
+        YamlRuleConfiguration merged = new YamlRuleConfiguration();
+        for (String filePath : filePaths) {
+            ConfigurationMerger.merge(merged, configLoader.loadFromFileWithoutValidation(filePath));
+        }
+        configLoader.processReferencesAndValidate(merged);
+        return RulesEngine.fromYamlConfig(merged);
     }
 
     @Test
@@ -80,7 +101,7 @@ class MultiFileRuleReferenceIntegrationTest {
         Files.writeString(ruleGroupsFile, ruleGroupsYaml);
         
         // Create rules engine from multiple files
-        RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
+        RulesEngine engine = createRulesEngineFromMultipleFiles(
             rulesFile.toString(),
             ruleGroupsFile.toString()
         );
@@ -289,7 +310,7 @@ class MultiFileRuleReferenceIntegrationTest {
         Files.writeString(mainConfigFile, formattedMainConfig);
         
         // Create rules engine from multiple files
-        RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
+        RulesEngine engine = createRulesEngineFromMultipleFiles(
             mainConfigFile.toString(),
             ruleGroupsFile.toString()
         );

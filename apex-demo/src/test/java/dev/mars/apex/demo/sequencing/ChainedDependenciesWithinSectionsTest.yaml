@@ -1,7 +1,6 @@
 metadata:
   name: "Chained Dependencies Within Sections Test"
   type: "rule-config"
-  processing-mode: "sequential"
   description: "Tests E1->E2 chaining within enrichments section, then R1->R2 chaining within rules section"
 
 # ENRICHMENT CHAIN: E1 -> E2

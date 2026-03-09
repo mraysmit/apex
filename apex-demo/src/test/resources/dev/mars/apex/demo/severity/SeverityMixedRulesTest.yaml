@@ -19,7 +19,7 @@ rules:
   - id: "account-balance-critical"
     name: "Account Balance Critical Check"
     condition: "#balance != null && #balance < 0"
-    message: "CRITICAL: Account balance {{#balance}} is negative - immediate action required"
+    message: Account balance {{#balance}} is negative - immediate action required"
     severity: "ERROR"
     priority: 1
 
@@ -63,7 +63,7 @@ rules:
   - id: "transaction-amount-critical"
     name: "Transaction Amount Critical Check"
     condition: "#amount != null && #amount > 100000"
-    message: "CRITICAL: Transaction amount {{#amount}} exceeds maximum limit"
+    message: Transaction amount {{#amount}} exceeds maximum limit"
     severity: "ERROR"
     priority: 7
 

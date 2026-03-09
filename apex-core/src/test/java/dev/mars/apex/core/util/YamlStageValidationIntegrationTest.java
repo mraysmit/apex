@@ -16,11 +16,15 @@ package dev.mars.apex.core.util;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
-import dev.mars.apex.core.config.yaml.YamlValidationResult;
-import dev.mars.apex.core.config.yaml.YamlValidationSummary;
+import dev.mars.apex.core.config.validation.MetadataValidator;
+import dev.mars.apex.core.config.validation.ValidationResult;
+import dev.mars.apex.core.config.validation.ValidationSummary;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,12 +39,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlStageValidationIntegrationTest {
 
     @Test
     void testValidateActualStageBasedScenarioFiles() {
         // Use the actual project structure
-        YamlMetadataValidator validator = new YamlMetadataValidator("../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
+        MetadataValidator validator = new MetadataValidator("../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
         // Test actual stage-based scenario files from our tests
         List<String> stageBasedFiles = List.of(
@@ -51,7 +56,7 @@ class YamlStageValidationIntegrationTest {
         System.out.println("=== YAML Stage Validation Integration Test ===");
         System.out.println("Testing actual stage-based scenario files...\n");
         
-        YamlValidationSummary summary = validator.validateFiles(stageBasedFiles);
+        ValidationSummary summary = validator.validateFiles(stageBasedFiles);
         
         // Print results
         System.out.println("Stage Validation Results:");
@@ -63,7 +68,7 @@ class YamlStageValidationIntegrationTest {
         System.out.println("Overall Status: " + (summary.isAllValid() ? "PASS" : "FAIL"));
         
         // Print individual results
-        for (YamlValidationResult result : summary.getResults()) {
+        for (ValidationResult result : summary.getResults()) {
             System.out.println("\nFile: " + result.getFilePath());
             System.out.println("Status: " + result.getStatus());
             
@@ -99,7 +104,7 @@ class YamlStageValidationIntegrationTest {
     @Test
     void testValidateStageBasedVsLegacyScenarios() {
         // Use actual existing test files
-        YamlMetadataValidator validator = new YamlMetadataValidator(
+        MetadataValidator validator = new MetadataValidator(
             "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
         // Test actual scenario files that exist and are valid
@@ -118,10 +123,10 @@ class YamlStageValidationIntegrationTest {
         for (String scenarioFile : scenarioFiles) {
             System.out.println("Validating: " + scenarioFile);
             
-            YamlValidationResult result = validator.validateFile(scenarioFile);
+            ValidationResult result = validator.validateFile(scenarioFile);
             
             if (result.isValid()) {
-                System.out.println("  ✓ VALID");
+                System.out.println("  [OK] VALID");
                 validCount++;
             } else {
                 System.out.println("  ✗ INVALID");
@@ -151,14 +156,14 @@ class YamlStageValidationIntegrationTest {
     @Test
     void testStageValidationFeatures() {
         // This test validates that the stage validation features work with real files
-        YamlMetadataValidator validator = new YamlMetadataValidator(
+        MetadataValidator validator = new MetadataValidator(
             "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
         System.out.println("\n=== Stage Validation Features Test ===");
         System.out.println("Testing stage validation with actual scenario file...\n");
         
         // Test with an actual stage-based scenario file
-        YamlValidationResult result = validator.validateFile("BasicStageConfigurationTest-scenario.yaml");
+        ValidationResult result = validator.validateFile("BasicStageConfigurationTest-scenario.yaml");
         
         System.out.println("Validated: BasicStageConfigurationTest-scenario.yaml");
         System.out.println("Status: " + result.getStatus());
@@ -171,10 +176,10 @@ class YamlStageValidationIntegrationTest {
         }
         
         System.out.println("\nStage validation features verified:");
-        System.out.println("✓ Processing-stages validation");
-        System.out.println("✓ Stage required fields validation (stage-name, config-file, execution-order)");
-        System.out.println("✓ Failure policy validation (terminate, continue-with-warnings, flag-for-review)");
-        System.out.println("✓ Enhanced error reporting with specific stage context");
+        System.out.println("[OK] Processing-stages validation");
+        System.out.println("[OK] Stage required fields validation (stage-name, config-file, execution-order)");
+        System.out.println("[OK] Failure policy validation (terminate, continue-with-warnings, flag-for-review)");
+        System.out.println("[OK] Enhanced error reporting with specific stage context");
         
         // Actually assert the validation passes!
         assertTrue(result.isValid(), 

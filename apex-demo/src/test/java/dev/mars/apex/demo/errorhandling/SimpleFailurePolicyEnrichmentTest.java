@@ -16,7 +16,7 @@
 
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - How enrichment results are captured and field mappings work
  * - How enrichment stages handle missing or invalid data
  *
- * Uses DataTypeScenarioService to execute enrichment scenarios and verifies
+ * Uses RulesEngine to execute enrichment scenarios and verifies
  * that enrichment processing works correctly under various failure conditions.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
@@ -58,7 +58,7 @@ public class SimpleFailurePolicyEnrichmentTest extends DemoTestBase {
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up enrichment failure policy test environment");
-        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
+        logger.info("[OK] Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -83,8 +83,8 @@ public class SimpleFailurePolicyEnrichmentTest extends DemoTestBase {
         assertFalse(scenarioResult.isTerminated(), "Scenario should not be terminated");
         assertEquals(2, scenarioResult.getStageResults().size(), "Both stages should have executed");
         
-        logger.info("✓ Enrichment stage executed despite validation failure");
-        logger.info("✓ Data enrichment completed successfully");
+        logger.info("[OK] Enrichment stage executed despite validation failure");
+        logger.info("[OK] Data enrichment completed successfully");
         logger.info("Enrichment after validation failure test completed");
     }
 
@@ -109,8 +109,8 @@ public class SimpleFailurePolicyEnrichmentTest extends DemoTestBase {
         assertNotNull(scenarioResult, "Scenario result should not be null");
         assertFalse(scenarioResult.getStageResults().isEmpty(), "Should have stage results");
         
-        logger.info("✓ Enrichment calculations performed successfully");
-        logger.info("✓ Field mappings applied correctly");
+        logger.info("[OK] Enrichment calculations performed successfully");
+        logger.info("[OK] Field mappings applied correctly");
         logger.info("Enrichment field mappings test completed");
     }
 
@@ -134,8 +134,8 @@ public class SimpleFailurePolicyEnrichmentTest extends DemoTestBase {
         assertNotNull(scenarioResult, "Result should not be null even with missing data");
         // Enrichment should handle missing fields gracefully
         
-        logger.info("✓ Enrichment handled missing data gracefully");
-        logger.info("✓ No exceptions thrown for missing enrichment fields");
+        logger.info("[OK] Enrichment handled missing data gracefully");
+        logger.info("[OK] No exceptions thrown for missing enrichment fields");
         logger.info("Enrichment missing data test completed");
     }
 }

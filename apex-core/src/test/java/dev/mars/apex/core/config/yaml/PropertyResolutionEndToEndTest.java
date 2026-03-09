@@ -1,12 +1,24 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.AfterEach;
 
-import java.util.logging.Logger;
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.DisplayName;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,15 +30,15 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class PropertyResolutionEndToEndTest {
 
-    private static final Logger LOGGER = Logger.getLogger(PropertyResolutionEndToEndTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionEndToEndTest.class);
     
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
         LOGGER.info("Setting up PropertyResolutionEndToEndTest");
         
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
         
         // Set up test environment variables and system properties
         System.setProperty("DB_HOST", "production-db.example.com");
@@ -90,7 +102,7 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("super_secret_password", userDbConfig.getConnection().getPassword());
         assertEquals("public", userDbConfig.getConnection().getSchema());
         
-        LOGGER.info("✓ PostgreSQL database properties resolved correctly");
+        LOGGER.info("[OK] PostgreSQL database properties resolved correctly");
         
         // Test H2 database with mixed property resolution (some with defaults)
         YamlDataSource testDatabase = config.getDataSources().stream()
@@ -110,7 +122,7 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("test_admin", testDbConfig.getConnection().getUsername());
         assertEquals("", testDbConfig.getConnection().getPassword()); // Default empty password
         
-        LOGGER.info("✓ H2 database properties with defaults resolved correctly");
+        LOGGER.info("[OK] H2 database properties with defaults resolved correctly");
         
         // Verify enrichments were loaded correctly
         assertNotNull(config.getEnrichments());
@@ -120,7 +132,7 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("user-lookup", userLookup.getId());
         assertEquals("User Lookup Enrichment", userLookup.getName());
         
-        LOGGER.info("✓ Enrichments loaded correctly");
+        LOGGER.info("[OK] Enrichments loaded correctly");
         
         // Verify rules were loaded correctly
         assertNotNull(config.getRules());
@@ -130,9 +142,9 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("user-validation", userValidation.getId());
         assertEquals("User Validation Rule", userValidation.getName());
         
-        LOGGER.info("✓ Rules loaded correctly");
+        LOGGER.info("[OK] Rules loaded correctly");
         
-        LOGGER.info("✓ Complete end-to-end property resolution test passed");
+        LOGGER.info("[OK] Complete end-to-end property resolution test passed");
     }
 
     @Test
@@ -177,7 +189,7 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("./target/test/testdb", testDbConfig.getConnection().getDatabase()); // Default
         assertEquals("sa", testDbConfig.getConnection().getUsername()); // Default
         
-        LOGGER.info("✓ Default value handling works correctly");
+        LOGGER.info("[OK] Default value handling works correctly");
     }
 
     @Test
@@ -191,7 +203,7 @@ public class PropertyResolutionEndToEndTest {
         System.clearProperty("DB_PASSWORD");
         
         // This should throw an exception because required properties are missing
-        Exception exception = assertThrows(YamlConfigurationException.class, () -> {
+        Exception exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromClasspath("lookups/test-config-with-properties.yaml");
         });
         
@@ -200,6 +212,7 @@ public class PropertyResolutionEndToEndTest {
         assertTrue(message.contains("Property not found"), 
             "Exception should indicate missing property: " + message);
         
-        LOGGER.info("✓ Missing required properties handled correctly: " + message);
+        LOGGER.info("[OK] Missing required properties handled correctly: " + message);
     }
 }
+

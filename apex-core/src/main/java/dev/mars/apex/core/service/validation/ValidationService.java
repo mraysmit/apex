@@ -1,9 +1,11 @@
 package dev.mars.apex.core.service.validation;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RuleBuilder;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,11 +125,12 @@ public class ValidationService {
         typedValidator.validate(value);
 
         // Create a rule for the validation
-        Rule validationRule = new Rule(
-            "Validation Rule for " + validatorName,
-            "#validation.validate(#value)",
-            "Validation using " + validatorName
-        );
+        Rule validationRule = new RuleBuilder()
+            .withName("Validation Rule for " + validatorName)
+            .withCondition("#validation.validate(#value)")
+            .withMessage("Validation using " + validatorName)
+            .withSeverity(SeverityConstants.INFO)
+            .build();
         SLF4J_LOGGER.debug("Created validation rule: '{}' with condition: '{}'",
             validationRule.getName(), validationRule.getCondition());
 

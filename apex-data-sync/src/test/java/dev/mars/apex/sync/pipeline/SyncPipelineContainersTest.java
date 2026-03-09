@@ -18,13 +18,13 @@
 
 package dev.mars.apex.sync.pipeline;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlDataSink;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.core.config.model.YamlDataSink;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ public class SyncPipelineContainersTest {
     
     private static GenericContainer<?> sqlServer;
     private static GenericContainer<?> postgres;
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     @BeforeAll
     static void checkDockerAndStartContainers() {

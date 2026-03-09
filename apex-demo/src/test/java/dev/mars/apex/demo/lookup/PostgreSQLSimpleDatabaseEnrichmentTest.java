@@ -18,9 +18,9 @@ import dev.mars.apex.demo.DemoTestBase;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +101,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
                 ('CUST005', 'Manufacturing Co', 'INDUSTRIAL', 'GOLD', 'EU', 'SUSPENDED', '2023-05-12')
                 """);
 
-            logger.info("✓ H2 database setup completed for simple database enrichment testing");
+            logger.info("[OK] H2 database setup completed for simple database enrichment testing");
 
         } catch (Exception e) {
             logger.error("Failed to setup H2 database: " + e.getMessage(), e);
@@ -114,7 +114,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should validate H2 database setup and connectivity")
     void testH2DatabaseSetup() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 1: H2 Database Setup Validation");
+        logger.info("H2 Database Setup Validation");
         logger.info("=".repeat(80));
 
         String jdbcUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME + ";MODE=PostgreSQL";
@@ -167,7 +167,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should perform comprehensive customer profile database enrichment")
     void testComprehensiveCustomerProfileDatabaseEnrichment() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 2: Comprehensive Customer Profile Database Enrichment");
+        logger.info("Comprehensive Customer Profile Database Enrichment");
         logger.info("=".repeat(80));
 
         try {
@@ -237,7 +237,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should handle multiple customer profiles with different tiers")
     void testMultipleCustomerProfileEnrichment() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 3: Multiple Customer Profile Enrichment Testing");
+        logger.info("Multiple Customer Profile Enrichment Testing");
         logger.info("=".repeat(80));
 
         try {
@@ -284,7 +284,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should handle non-existent customer gracefully")
     void testNonExistentCustomerHandling() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 4: Non-Existent Customer Handling");
+        logger.info("Non-Existent Customer Handling");
         logger.info("=".repeat(80));
 
         try {
@@ -327,7 +327,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should validate enrichment condition handling")
     void testEnrichmentConditionHandling() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 5: Enrichment Condition Handling");
+        logger.info("Enrichment Condition Handling");
         logger.info("=".repeat(80));
 
         try {
@@ -384,7 +384,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }

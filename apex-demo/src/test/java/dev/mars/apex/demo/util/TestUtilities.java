@@ -40,7 +40,7 @@ import java.util.*;
  * ============================================================================
  * REAL APEX SERVICES USED:
  * - EnrichmentService: Real APEX enrichment processor for test utilities processing
- * - YamlConfigurationLoader: Real YAML configuration loading and validation
+ * - ConfigurationLoader: Real YAML configuration loading and validation
  * - ExpressionEvaluatorService: Real SpEL expression evaluation for utility operations
  * - LookupServiceRegistry: Real lookup service integration for test data
  * ============================================================================

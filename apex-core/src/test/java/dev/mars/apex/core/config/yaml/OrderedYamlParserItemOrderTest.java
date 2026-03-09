@@ -1,11 +1,25 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
+import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration;
+import dev.mars.apex.core.config.sequential.OrderedYamlParser;
+import dev.mars.apex.core.config.sequential.ProcessingItem;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,11 +37,12 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Multiple items within same section
  * - Edge cases (empty sections, missing IDs, etc.)
  * 
- * @author APEX Sequential Processing Implementation - Step 2
+ * @author Mark Andrew Ray-Smith Cityline Ltd  - Step 2
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class OrderedYamlParserItemOrderTest {
     
-    private static final Logger LOGGER = Logger.getLogger(OrderedYamlParserItemOrderTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderedYamlParserItemOrderTest.class);
     
     private OrderedYamlParser parser;
     
@@ -39,7 +54,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should extract item order from simple YAML with enrichments and rules")
-    void testSimpleItemOrderExtraction() throws YamlConfigurationException {
+    void testSimpleItemOrderExtraction() throws ConfigurationException {
         LOGGER.info("Testing simple item order extraction...");
         
         String yaml = """
@@ -91,7 +106,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should extract item order with interleaved sections (E1, R1, E2, R2)")
-    void testInterleavedItemOrder() throws YamlConfigurationException {
+    void testInterleavedItemOrder() throws ConfigurationException {
         LOGGER.info("Testing interleaved item order extraction...");
         
         // Note: YAML doesn't allow duplicate keys, so we can't have multiple enrichments/rules sections
@@ -151,7 +166,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should handle empty sections gracefully")
-    void testEmptySections() throws YamlConfigurationException {
+    void testEmptySections() throws ConfigurationException {
         LOGGER.info("Testing empty sections handling...");
         
         String yaml = """
@@ -183,7 +198,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should handle items without IDs gracefully")
-    void testItemsWithoutIds() throws YamlConfigurationException {
+    void testItemsWithoutIds() throws ConfigurationException {
         LOGGER.info("Testing items without IDs handling...");
         
         String yaml = """
@@ -223,7 +238,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should extract all section types correctly")
-    void testAllSectionTypes() throws YamlConfigurationException {
+    void testAllSectionTypes() throws ConfigurationException {
         LOGGER.info("Testing all section types extraction...");
         
         String yaml = """
@@ -280,4 +295,5 @@ class OrderedYamlParserItemOrderTest {
         LOGGER.info("All section types extraction test PASSED");
     }
 }
+
 

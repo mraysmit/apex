@@ -1,12 +1,16 @@
 package dev.mars.apex.core.dbschema;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.test.TestContainerImages;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -76,7 +80,7 @@ class MultiSchemaDataSourceTest {
             .withExposedPorts(5432)
             .waitingFor(Wait.forListeningPort());
 
-    private YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     private String jdbcUrl() {
         return "jdbc:postgresql://" + postgres.getHost() + ":" 
@@ -131,7 +135,7 @@ class MultiSchemaDataSourceTest {
                     """, schema, schema, schema));
             }
 
-            logger.info("✓ Created schemas with test data: trading, sales, inventory");
+            logger.info("[OK] Created schemas with test data: trading, sales, inventory");
         }
     }
 
@@ -163,7 +167,7 @@ class MultiSchemaDataSourceTest {
         assertNotNull(tradingDs);
         assertEquals("trading", tradingDs.getConnection().get("schema"));
 
-        logger.info("✓ APEX correctly read schema parameters from YAML");
+        logger.info("[OK] APEX correctly read schema parameters from YAML");
     }
 
     @Test
@@ -194,7 +198,7 @@ class MultiSchemaDataSourceTest {
         assertEquals("Apple Inc. (inventory)", enrichedData.get("inventory_product"));
         assertEquals("inventory", enrichedData.get("inventory_schema"));
 
-        logger.info("✓ All enrichments accessed their configured schemas correctly");
+        logger.info("[OK] All enrichments accessed their configured schemas correctly");
     }
 
     @Test
@@ -231,7 +235,7 @@ class MultiSchemaDataSourceTest {
         assertNotEquals(tradingProduct, salesProduct, "Trading and sales schemas should have different data");
         assertNotEquals(salesProduct, inventoryProduct, "Sales and inventory schemas should have different data");
 
-        logger.info("✓ Schema isolation validated - no cross-schema leakage");
+        logger.info("[OK] Schema isolation validated - no cross-schema leakage");
     }
 
     @Test
@@ -281,6 +285,7 @@ class MultiSchemaDataSourceTest {
                   lookup-dataset:
                     type: "database"
                     data-source-ref: "public-db"
+                    key-field: "key"
                     query: "SELECT schema_name FROM products WHERE product_id = :key"
                 field-mappings:
                   - source-field: "schema_name"
@@ -296,7 +301,7 @@ class MultiSchemaDataSourceTest {
         RuleResult result = engine.evaluate(config, testData);
         assertEquals("public", result.getEnrichedData().get("schema_name"));
 
-        logger.info("✓ APEX correctly defaults to public schema");
+        logger.info("[OK] APEX correctly defaults to public schema");
     }
 
     @Test
@@ -321,6 +326,6 @@ class MultiSchemaDataSourceTest {
         assertTrue(schemas.contains("sales"));
         assertTrue(schemas.contains("inventory"));
 
-        logger.info("✓ Multiple data sources configured with distinct schemas");
+        logger.info("[OK] Multiple data sources configured with distinct schemas");
     }
 }

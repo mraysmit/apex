@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for Phase 2: Conditional Mappings (Design V1) functionality.
+ * Test class forConditional Mappings (Design V1) functionality.
  * Tests the new conditional-mappings syntax in field-enrichment.
  */
 public class ConditionalMappingsPhase2Test extends DemoTestBase {
@@ -47,7 +47,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             // Load YAML configuration with conditional-mappings syntax
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingsPhase2Test.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully: " + config.getMetadata().getName());
+            logger.info("[OK] Configuration loaded successfully: " + config.getMetadata().getName());
 
             // Verify enrichments are present
             assertNotNull(config.getEnrichments(), "Enrichments should not be null");
@@ -66,7 +66,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             assertNotNull(conditionalEnrichment.getConditionalMappings(), "Conditional mappings should not be null");
             assertFalse(conditionalEnrichment.getConditionalMappings().isEmpty(), "Conditional mappings should not be empty");
 
-            logger.info("✓ Conditional mappings syntax validated successfully");
+            logger.info("[OK] Conditional mappings syntax validated successfully");
 
         } catch (Exception e) {
             logger.error("Failed to load conditional mappings YAML: " + e.getMessage());
@@ -103,7 +103,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             // The first conditional mapping should set result to 'OR_MATCHED'
             assertEquals("OR_MATCHED", enrichedData.get("result"), "Result should be 'OR_MATCHED' for OR condition");
 
-            logger.info("✓ OR condition processing completed successfully");
+            logger.info("[OK] OR condition processing completed successfully");
             logger.info("Result: " + enrichedData);
 
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             // The first conditional mapping should set result to 'OR_MATCHED'
             assertEquals("OR_MATCHED", enrichedData.get("result"), "Result should be 'OR_MATCHED' for second OR condition");
 
-            logger.info("✓ Second OR condition processing completed successfully");
+            logger.info("[OK] Second OR condition processing completed successfully");
             logger.info("Result: " + enrichedData);
 
         } catch (Exception e) {
@@ -180,7 +180,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             assertEquals("AND_MATCHED", enrichedData.get("result"), "Result should be 'AND_MATCHED' for AND conditions");
             assertEquals("TEST", enrichedData.get("system"), "System should be set to 'TEST'");
 
-            logger.info("✓ AND condition processing completed successfully");
+            logger.info("[OK] AND condition processing completed successfully");
             logger.info("Result: " + enrichedData);
 
         } catch (Exception e) {

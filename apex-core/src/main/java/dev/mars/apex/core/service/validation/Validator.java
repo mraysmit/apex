@@ -1,7 +1,7 @@
 package dev.mars.apex.core.service.validation;
 
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.common.NamedService;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.core.service.NamedService;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -22,8 +22,8 @@ import dev.mars.apex.core.service.common.NamedService;
 /**
  * Interface for validation services.
  *
- * This interface is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+ * This interface is part of the APEX Rules Engine, providing
+ * production-ready rules evaluation capabilities.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27

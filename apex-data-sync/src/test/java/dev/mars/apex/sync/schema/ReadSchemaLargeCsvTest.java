@@ -19,9 +19,9 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,7 +137,7 @@ public class ReadSchemaLargeCsvTest extends SyncTestBase {
             .findFirst()
             .orElse(null);
         assertNotNull(emailColumn, "Should have email column");
-        logger.info("✓ Large CSV schema validated: {} columns", schema.getColumns().size());
+        logger.info("[OK] Large CSV schema validated: {} columns", schema.getColumns().size());
         
         // Validate execution rate
         validateExecutionRate(1, 1, "Large CSV schema reading");

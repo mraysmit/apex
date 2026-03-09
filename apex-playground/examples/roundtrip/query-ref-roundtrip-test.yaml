@@ -1,0 +1,33 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Test query-ref pattern import in lookup datasets
+# Phase 2 regression test for query-ref fallback fix
+# ============================================================================
+
+metadata:
+  id: "query-ref-roundtrip-test"
+  name: "Query Ref Roundtrip Test"
+  version: "1.0.0"
+  description: "Verifies query-ref is imported when query is absent"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/customer-database.yaml"
+    enabled: true
+
+enrichments:
+  - id: "customer-lookup"
+    type: "lookup-enrichment"
+    description: "Look up customer data using query-ref"
+    lookup-config:
+      lookup-key: "customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "customer-database"
+        query-ref: "getActiveCustomer"
+      field-mappings:
+        - source-field: "customerName"
+          target-field: "resolvedCustomerName"

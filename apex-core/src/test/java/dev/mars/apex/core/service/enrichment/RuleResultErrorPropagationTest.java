@@ -1,14 +1,21 @@
 package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.cache.ApexCacheManager;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Nested;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,16 +85,16 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-01-21
  * @version 1.0 - Comprehensive error propagation verification
  */
-@DisplayName("CRITICAL: RuleResult Error Propagation Verification")
+@DisplayName("RuleResult Error Propagation Verification")
 public class RuleResultErrorPropagationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleResultErrorPropagationTest.class);
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
         ApexCacheManager.resetInstance();
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     /**
@@ -105,7 +112,7 @@ public class RuleResultErrorPropagationTest {
         assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
             "RuleResult.getResultType() must be ERROR for: " + errorContext);
         
-        LOGGER.info("✓ Error properly propagated to RuleResult for: {}", errorContext);
+        LOGGER.info("[OK] Error properly propagated to RuleResult for: {}", errorContext);
         LOGGER.info("  - isSuccess: {}", result.isSuccess());
         LOGGER.info("  - hasFailures: {}", result.hasFailures());
         LOGGER.info("  - failureMessages: {}", result.getFailureMessages());
@@ -780,10 +787,10 @@ public class RuleResultErrorPropagationTest {
         LOGGER.info("");
         LOGGER.info("The APEX Rules Engine MUST propagate ALL errors to RuleResult:");
         LOGGER.info("");
-        LOGGER.info("  ✓ RuleResult.isSuccess() returns FALSE for any error");
-        LOGGER.info("  ✓ RuleResult.hasFailures() returns TRUE for any error");
-        LOGGER.info("  ✓ RuleResult.getFailureMessages() contains error details");
-        LOGGER.info("  ✓ RuleResult.getResultType() returns ERROR for system failures");
+        LOGGER.info("  [OK] RuleResult.isSuccess() returns FALSE for any error");
+        LOGGER.info("  [OK] RuleResult.hasFailures() returns TRUE for any error");
+        LOGGER.info("  [OK] RuleResult.getFailureMessages() contains error details");
+        LOGGER.info("  [OK] RuleResult.getResultType() returns ERROR for system failures");
         LOGGER.info("");
         LOGGER.info("Error categories covered by this test suite:");
         LOGGER.info("");
@@ -815,7 +822,7 @@ public class RuleResultErrorPropagationTest {
         LOGGER.info("     - Empty/null YAML");
         LOGGER.info("");
         LOGGER.info("=".repeat(80));
-        LOGGER.info("CRITICAL: If any test in this suite fails, the APEX system");
+        LOGGER.info("If any test in this suite fails, the APEX system");
         LOGGER.info("cannot be trusted to correctly report errors to callers.");
         LOGGER.info("=".repeat(80));
         

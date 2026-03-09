@@ -1,0 +1,71 @@
+# ============================================================================
+# Step Dependencies Test (Topological Sort)
+# ============================================================================
+# Tests that pipeline steps with dependencies are executed in correct order.
+# This exercises the topologicalSort() method in PipelineExecutor.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "step-dependencies-test"
+  name: "Step Dependencies Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests step dependency ordering"
+
+data-sources:
+  - name: "dependency-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:dependency_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getSourceData: "SELECT id, data_value FROM source_data"
+
+data-sinks:
+  - name: "dependency-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:dependency_test"
+      username: "sa"
+      password: ""
+
+pipeline:
+  name: "dependency-pipeline"
+  description: "Pipeline with step dependencies"
+
+  steps:
+    # This step has no dependencies - should run first
+    - name: "extract-source"
+      type: "extract"
+      source: "dependency-source"
+      operation: "getSourceData"
+      description: "Extract source data"
+
+    # This step depends on extract - should run second
+    - name: "transform-data"
+      type: "transform"
+      description: "Transform extracted data"
+      depends-on: ["extract-source"]
+      transformations:
+        - name: "add-timestamp"
+          type: "field-add"
+          field: "processedAt"
+          value: "2025-01-01T12:00:00"
+
+    # This step depends on transform - should run third
+    - name: "load-target"
+      type: "load"
+      description: "Load transformed data"
+      depends-on: ["transform-data"]
+      sink: "dependency-sink"
+      table-name: "target_data"

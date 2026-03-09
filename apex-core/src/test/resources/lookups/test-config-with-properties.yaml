@@ -117,6 +117,7 @@ enrichments:
         type: "database"
         data-source-ref: "user-database"
         query-ref: "getUserById"
+        key-field: "id"
       lookup-key: "#userId"
       cache-enabled: true
       cache-ttl-seconds: 300

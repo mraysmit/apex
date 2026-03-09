@@ -16,7 +16,7 @@
 
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - The ScenarioExecutionResult.requiresReview() returns true
  * - Review flags are set for manual intervention
  *
- * Uses DataTypeScenarioService to execute scenarios with stages and verifies
+ * Uses RulesEngine to execute scenarios with stages and verifies
  * that flag-for-review behavior works correctly.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
@@ -58,7 +58,7 @@ public class SimpleFailurePolicyReviewTest extends DemoTestBase {
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up flag-for-review failure policy test environment");
-        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
+        logger.info("[OK] Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -87,8 +87,8 @@ public class SimpleFailurePolicyReviewTest extends DemoTestBase {
         assertEquals(2, scenarioResult.getStageResults().size(), "Both stages should have executed");
         assertTrue(scenarioResult.getSkippedStages().isEmpty(), "No stages should be skipped");
         
-        logger.info("✓ Flag-for-review policy flagged scenario for manual review");
-        logger.info("✓ Review flags were set: {}", scenarioResult.getReviewFlags().size());
+        logger.info("[OK] Flag-for-review policy flagged scenario for manual review");
+        logger.info("[OK] Review flags were set: {}", scenarioResult.getReviewFlags().size());
         logger.info("Flag-for-review failure policy test completed");
     }
 
@@ -112,8 +112,8 @@ public class SimpleFailurePolicyReviewTest extends DemoTestBase {
         assertFalse(scenarioResult.isTerminated(), "Scenario should not be terminated");
         assertTrue(scenarioResult.getSkippedStages().isEmpty(), "No stages should be skipped");
         
-        logger.info("✓ Review flags set despite successful subsequent stages");
-        logger.info("✓ All stages executed: {}", scenarioResult.getStageResults().size());
+        logger.info("[OK] Review flags set despite successful subsequent stages");
+        logger.info("[OK] All stages executed: {}", scenarioResult.getStageResults().size());
         logger.info("Mixed results review test completed");
     }
 }

@@ -23,8 +23,15 @@ import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.datasource.HealthCheckConfig;
 import dev.mars.apex.core.service.data.external.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -52,11 +59,23 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class DatabaseDataSourceTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseDataSourceTest.class);
+    
     private DataSource dataSource;
     private DatabaseDataSource databaseDataSource;
     private DataSourceConfiguration configuration;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(DatabaseDataSourceTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] DatabaseDataSourceTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(DatabaseDataSourceTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: connection errors, query failures, invalid SQL operations");
+    }
 
     @BeforeEach
     void setUp() throws DataSourceException, SQLException {
@@ -273,9 +292,11 @@ class DatabaseDataSourceTest {
             "UPDATE test_users SET name = 'Updated User 2' WHERE id = 2"
         );
         
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         assertThrows(DataSourceException.class, () -> {
             databaseDataSource.batchUpdate(updates);
         });
+        logger.info("========== END OF INTENTIONAL ERROR TEST ==========");
         
         // Verify no changes were applied due to rollback
         try {
@@ -444,16 +465,18 @@ class DatabaseDataSourceTest {
     @Test
     @DisplayName("Should handle SQL exceptions in query execution")
     void testSQLExceptionHandling() {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         assertThrows(DataSourceException.class, () -> {
             databaseDataSource.query("SELECT * FROM nonexistent_table", Collections.emptyMap());
         });
+        logger.info("========== END OF INTENTIONAL ERROR TEST ==========");
     }
 
     @Test
     @DisplayName("Should handle null parameters in query")
     void testNullParametersInQuery() {
-        // The implementation doesn't handle null parameters gracefully
-        assertThrows(NullPointerException.class, () -> {
+        // Implementation validates null parameters and throws DataSourceException
+        assertThrows(DataSourceException.class, () -> {
             databaseDataSource.query("SELECT * FROM test_users", null);
         });
     }
@@ -461,17 +484,21 @@ class DatabaseDataSourceTest {
     @Test
     @DisplayName("Should handle empty query string")
     void testEmptyQueryString() {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         assertThrows(DataSourceException.class, () -> {
             databaseDataSource.query("", Collections.emptyMap());
         });
+        logger.info("========== END OF INTENTIONAL ERROR TEST ==========");
     }
 
     @Test
     @DisplayName("Should handle null query string")
     void testNullQueryString() {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         assertThrows(DataSourceException.class, () -> {
             databaseDataSource.query(null, Collections.emptyMap());
         });
+        logger.info("========== END OF INTENTIONAL ERROR TEST ==========");
     }
 
     // ========================================
@@ -526,5 +553,12 @@ class DatabaseDataSourceTest {
             stmt.execute("INSERT INTO test_users VALUES (1, 'Test User 1')");
             stmt.execute("INSERT INTO test_users VALUES (2, 'Test User 2')");
         }
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(DatabaseDataSourceTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] DatabaseDataSourceTest intentional error tests completed");
+        MDC.remove("testContext");
     }
 }

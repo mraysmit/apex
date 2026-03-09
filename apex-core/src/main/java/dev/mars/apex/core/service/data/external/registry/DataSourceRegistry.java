@@ -17,34 +17,95 @@ package dev.mars.apex.core.service.data.external.registry;
  */
 
 
+import com.zaxxer.hikari.HikariDataSource;
+import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.service.data.external.*;
+import dev.mars.apex.core.service.data.external.database.DatabaseDataSource;
+import dev.mars.apex.core.service.data.external.database.JdbcTemplateFactory;
+import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
+import dev.mars.apex.core.service.data.external.rest.RestApiDataSource;
+import dev.mars.apex.core.service.data.external.rest.RestTemplateFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+import java.net.http.HttpClient;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Central registry for managing external data sources.
+ * Central registry for managing external data sources - the SINGLE SOURCE OF TRUTH.
  * 
- * This class provides centralized registration, discovery, and lifecycle
- * management for all external data sources in the system.
+ * <h2>Architecture Overview</h2>
+ * <p>
+ * This class is the unified caching layer for all external data sources in APEX.
+ * It consolidates what was previously 4 separate caching mechanisms into a single,
+ * consistent design:
+ * </p>
+ * <pre>
+ * ┌─────────────────────────────────────────────────────────────────┐
+ * │              DataSourceRegistry (Singleton)                     │
+ * │         SINGLE SOURCE OF TRUTH for ExternalDataSource           │
+ * │                                                                 │
+ * │   Caches:                                                       │
+ * │   - dataSources: ExternalDataSource instances by name           │
+ * │   - jdbcPoolCache: HikariCP pools by connection key             │
+ * │   - httpClientCache: HttpClient instances by base URL           │
+ * │   - pendingCreations: Deduplication for concurrent requests     │
+ * └─────────────────────────────────────────────────────────────────┘
+ *                                │
+ *                     calls when cache miss
+ *                                ↓
+ * ┌─────────────────────────────────────────────────────────────────┐
+ * │                      DataSourceFactory                          │
+ * │              Low-level factory (creates instances)              │
+ * │   - createDataSource() → always creates fresh instance          │
+ * │   - Maintains underlying resource caches (JDBC, HTTP)           │
+ * └─────────────────────────────────────────────────────────────────┘
+ * </pre>
  * 
- * Features:
- * - Thread-safe data source registration and lookup
- * - Health monitoring and status tracking
- * - Automatic cleanup of failed data sources
- * - Event-driven notifications for data source changes
- * - Query capabilities for data source discovery
+ * <h2>Key Design Principles</h2>
+ * <ul>
+ *   <li><b>Single Source of Truth:</b> All components (RulesEngine, PipelineExecutionManager,
+ *       DatasetLookupServiceFactory) use this registry for data source access</li>
+ *   <li><b>Thread-Safe Deduplication:</b> Concurrent requests for the same data source
+ *       are automatically deduplicated via CompletableFuture pattern</li>
+ *   <li><b>Resource Sharing:</b> JDBC connection pools and HTTP clients are shared
+ *       across data sources with the same connection details</li>
+ *   <li><b>Lazy Creation:</b> Data sources are created on first access via getOrCreate()</li>
+ * </ul>
+ * 
+ * <h2>Usage Patterns</h2>
+ * <pre>
+ * // Primary API - get existing or create new (RECOMMENDED)
+ * ExternalDataSource ds = DataSourceRegistry.getInstance().getOrCreate("my-db", config);
+ * 
+ * // Lookup only (no creation)
+ * Optional&lt;ExternalDataSource&gt; ds = DataSourceRegistry.getInstance().get("my-db");
+ * 
+ * // Check existence
+ * if (DataSourceRegistry.getInstance().contains("my-db")) { ... }
+ * </pre>
+ * 
+ * <h2>Thread Safety</h2>
+ * <p>
+ * All operations are thread-safe. The getOrCreate() method uses CompletableFuture-based
+ * deduplication to ensure that only one creation operation occurs for concurrent
+ * requests with the same data source name.
+ * </p>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
- * @version 1.0
+ * @since 2025-07-30
+ * @version 2.0
+ * @see DataSourceFactory
+ * @see ExternalDataSource
  */
 public class DataSourceRegistry {
     
@@ -54,10 +115,18 @@ public class DataSourceRegistry {
     private static volatile DataSourceRegistry instance;
     private static final Object LOCK = new Object();
     
-    // Registry storage
+    // Registry storage - primary data source registry
     private final Map<String, DataSourceRegistration> dataSources = new ConcurrentHashMap<>();
     private final Map<DataSourceType, Set<String>> typeIndex = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> tagIndex = new ConcurrentHashMap<>();
+    
+    // Connection pool caches - shared across data sources for efficiency
+    // These are keyed by connection details, not data source name, allowing pool reuse
+    private final Map<String, DataSource> jdbcPoolCache = new ConcurrentHashMap<>();
+    private final Map<String, HttpClient> httpClientCache = new ConcurrentHashMap<>();
+    
+    // Deduplication for concurrent creation requests
+    private final Map<String, CompletableFuture<ExternalDataSource>> pendingCreations = new ConcurrentHashMap<>();
     
     // Event listeners - use thread-safe collection
     private final List<DataSourceRegistryListener> listeners = new java.util.concurrent.CopyOnWriteArrayList<>();
@@ -133,6 +202,275 @@ public class DataSourceRegistry {
         }
     }
     
+    // ========================================================================
+    // PRIMARY API: getOrCreate - Unified data source access
+    // ========================================================================
+    
+    /**
+     * Get existing data source or create and register a new one.
+     * 
+     * This is the PRIMARY API for obtaining data sources. It handles:
+     * - Checking if data source already exists (fast path)
+     * - Creating new data source if needed
+     * - Deduplicating concurrent creation requests
+     * - Automatic registration
+     * - Reusing shared connection pools (JDBC, HTTP)
+     * 
+     * Thread-safe and idempotent - calling multiple times with the same name
+     * returns the same data source instance.
+     * 
+     * @param name Unique name for the data source (e.g., "postgres-database")
+     * @param config Configuration for creation (only used if not already registered)
+     * @return The data source (existing or newly created)
+     * @throws DataSourceException if creation fails
+     */
+    public ExternalDataSource getOrCreate(String name, DataSourceConfiguration config) throws DataSourceException {
+        Objects.requireNonNull(name, "Data source name cannot be null");
+        Objects.requireNonNull(config, "Data source configuration cannot be null");
+        
+        // Fast path: already registered
+        DataSourceRegistration existing = dataSources.get(name);
+        if (existing != null) {
+            LOGGER.debug("Returning cached data source from registry: {}", name);
+            return existing.getDataSource();
+        }
+        
+        // Slow path: need to create (with deduplication)
+        return createWithDeduplication(name, config);
+    }
+    
+    /**
+     * Get data source by name (lookup only, no creation).
+     * 
+     * Use this when you want to check if a data source exists without
+     * triggering creation.
+     * 
+     * @param name The name of the data source
+     * @return Optional containing the data source, or empty if not found
+     */
+    public Optional<ExternalDataSource> get(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        DataSourceRegistration registration = dataSources.get(name);
+        return Optional.ofNullable(registration).map(DataSourceRegistration::getDataSource);
+    }
+    
+    /**
+     * Check if a data source exists in the registry.
+     * 
+     * @param name The name to check
+     * @return true if a data source with this name is registered
+     */
+    public boolean contains(String name) {
+        return name != null && dataSources.containsKey(name);
+    }
+    
+    /**
+     * Create data source with deduplication for concurrent requests.
+     */
+    private ExternalDataSource createWithDeduplication(String name, DataSourceConfiguration config) 
+            throws DataSourceException {
+        
+        // Use computeIfAbsent to ensure only one creation per name
+        CompletableFuture<ExternalDataSource> future = pendingCreations.computeIfAbsent(name,
+            k -> CompletableFuture.supplyAsync(() -> {
+                try {
+                    return createAndRegister(name, config);
+                } catch (DataSourceException e) {
+                    throw new DataSourceResolutionException("Failed to create data source: " + name, e);
+                } finally {
+                    pendingCreations.remove(k);
+                }
+            }));
+        
+        try {
+            return future.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                "Data source creation was interrupted: " + name, e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof DataSourceResolutionException && cause.getCause() instanceof DataSourceException) {
+                throw (DataSourceException) cause.getCause();
+            } else if (cause instanceof DataSourceException) {
+                throw (DataSourceException) cause;
+            } else {
+                throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                    "Failed to create data source: " + name, cause);
+            }
+        }
+    }
+    
+    /**
+     * Create a new data source and register it.
+     */
+    private ExternalDataSource createAndRegister(String name, DataSourceConfiguration config) 
+            throws DataSourceException {
+        
+        // Double-check in case another thread registered while we were waiting
+        DataSourceRegistration existing = dataSources.get(name);
+        if (existing != null) {
+            LOGGER.debug("Data source '{}' was registered by another thread, returning existing", name);
+            return existing.getDataSource();
+        }
+        
+        LOGGER.info("Creating new data source: {} (type: {})", name, config.getDataSourceType());
+        
+        // Create the data source using shared pools where applicable
+        ExternalDataSource dataSource = createDataSourceWithSharedPools(name, config);
+        
+        // Register it (using synchronized block for consistency with register())
+        synchronized (this) {
+            // Final check inside synchronized block
+            existing = dataSources.get(name);
+            if (existing != null) {
+                LOGGER.debug("Data source '{}' was registered while acquiring lock, returning existing", name);
+                // Shutdown the one we just created since we won't use it
+                try {
+                    dataSource.shutdown();
+                } catch (Exception e) {
+                    LOGGER.debug("Error shutting down duplicate data source: {}", e.getMessage());
+                }
+                return existing.getDataSource();
+            }
+            
+            DataSourceRegistration registration = new DataSourceRegistration(dataSource);
+            dataSources.put(name, registration);
+            
+            // Update type index
+            DataSourceType type = dataSource.getSourceType();
+            typeIndex.computeIfAbsent(type, k -> ConcurrentHashMap.newKeySet()).add(name);
+            
+            // Update tag index
+            Set<String> tags = getDataSourceTags(dataSource);
+            for (String tag : tags) {
+                tagIndex.computeIfAbsent(tag, k -> ConcurrentHashMap.newKeySet()).add(name);
+            }
+            
+            LOGGER.info("Registered new data source: {} (type: {})", name, type);
+            notifyListeners(DataSourceRegistryEvent.registered(name, dataSource));
+        }
+        
+        return dataSource;
+    }
+    
+    /**
+     * Create data source, reusing shared connection pools where applicable.
+     */
+    private ExternalDataSource createDataSourceWithSharedPools(String name, DataSourceConfiguration config) 
+            throws DataSourceException {
+        
+        DataSourceType type = config.getDataSourceType();
+        
+        switch (type) {
+            case DATABASE:
+                return createDatabaseDataSourceWithSharedPool(config);
+            case REST_API:
+                return createRestApiDataSourceWithSharedClient(config);
+            default:
+                // Other types don't need shared resources - use factory
+                return DataSourceFactory.getInstance().createDataSource(config);
+        }
+    }
+    
+    /**
+     * Create database data source using a shared JDBC connection pool.
+     * Multiple data sources with the same connection details share one HikariCP pool.
+     */
+    private ExternalDataSource createDatabaseDataSourceWithSharedPool(DataSourceConfiguration config) 
+            throws DataSourceException {
+        
+        // Pool key based on connection details (not data source name)
+        String poolKey = buildJdbcPoolKey(config);
+        
+        // Check if we already have this pool
+        boolean poolExisted = jdbcPoolCache.containsKey(poolKey);
+        
+        // Get or create the HikariCP pool
+        DataSource jdbcPool = jdbcPoolCache.computeIfAbsent(poolKey, k -> {
+            try {
+                LOGGER.info("Creating new JDBC connection pool: {}", poolKey);
+                return JdbcTemplateFactory.createDataSource(config);
+            } catch (DataSourceException e) {
+                throw new DataSourceResolutionException("Failed to create JDBC connection pool: " + poolKey, e);
+            }
+        });
+        
+        if (poolExisted) {
+            LOGGER.info("Reusing existing JDBC connection pool: {}", poolKey);
+        }
+        
+        // Create wrapper using shared pool
+        return new DatabaseDataSource(jdbcPool, config);
+    }
+    
+    /**
+     * Create REST API data source using a shared HTTP client.
+     */
+    private ExternalDataSource createRestApiDataSourceWithSharedClient(DataSourceConfiguration config) 
+            throws DataSourceException {
+        
+        String clientKey = buildHttpClientKey(config);
+        
+        boolean clientExisted = httpClientCache.containsKey(clientKey);
+        
+        HttpClient client = httpClientCache.computeIfAbsent(clientKey, k -> {
+            try {
+                LOGGER.info("Creating new HTTP client: {}", clientKey);
+                return RestTemplateFactory.createHttpClient(config);
+            } catch (DataSourceException e) {
+                throw new DataSourceResolutionException("Failed to create HTTP client: " + clientKey, e);
+            }
+        });
+        
+        if (clientExisted) {
+            LOGGER.info("Reusing existing HTTP client: {}", clientKey);
+        }
+        
+        return new RestApiDataSource(client, config);
+    }
+    
+    /**
+     * Build cache key for JDBC connection pool.
+     * Key is based on connection details, not data source name.
+     * 
+     * IMPORTANT: Schema IS included because the schema is baked into the JDBC URL
+     * (e.g., PostgreSQL uses currentSchema parameter). Different schemas need
+     * separate connection pools to ensure correct query routing.
+     */
+    private String buildJdbcPoolKey(DataSourceConfiguration config) {
+        StringBuilder key = new StringBuilder("jdbc:");
+        if (config.getConnection() != null) {
+            key.append(config.getConnection().getHost()).append(":");
+            key.append(config.getConnection().getPort()).append(":");
+            key.append(config.getConnection().getDatabase()).append(":");
+            key.append(config.getConnection().getUsername()).append(":");
+            // Schema IS included - JDBC URL contains schema (e.g., PostgreSQL currentSchema)
+            String schema = config.getConnection().getSchema();
+            key.append(schema != null ? schema : "default");
+        }
+        return key.toString();
+    }
+    
+    /**
+     * Build cache key for HTTP client.
+     */
+    private String buildHttpClientKey(DataSourceConfiguration config) {
+        StringBuilder key = new StringBuilder("http:");
+        if (config.getConnection() != null) {
+            key.append(config.getConnection().getBaseUrl()).append(":");
+            key.append(config.getConnection().getTimeout()).append(":");
+            key.append(config.getConnection().isSslEnabled());
+        }
+        return key.toString();
+    }
+    
+    // ========================================================================
+    // EXISTING API: Registration and lookup methods
+    // ========================================================================
+    
     /**
      * Unregister a data source from the registry.
      * 
@@ -179,6 +517,7 @@ public class DataSourceRegistry {
                 dataSource.shutdown();
             } catch (Exception e) {
                 LOGGER.warn("Error shutting down data source '{}': {}", name, e.getMessage());
+                LOGGER.debug("Full exception details:", e);
             }
             
             LOGGER.info("Unregistered data source '{}'", name);
@@ -365,12 +704,23 @@ public class DataSourceRegistry {
     
     /**
      * Shutdown the registry and all registered data sources.
+     * Also closes all shared connection pools.
      */
     public void shutdown() {
         LOGGER.info("Shutting down data source registry with {} registered data sources", dataSources.size());
         
         // Stop monitoring
         stopHealthMonitoring();
+        
+        // Wait for any pending creations to complete
+        for (CompletableFuture<ExternalDataSource> future : pendingCreations.values()) {
+            try {
+                future.get(5, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                LOGGER.debug("Error waiting for pending creation during shutdown: {}", e.getMessage());
+            }
+        }
+        pendingCreations.clear();
         
         // Shutdown all data sources
         for (DataSourceRegistration registration : dataSources.values()) {
@@ -382,6 +732,25 @@ public class DataSourceRegistry {
             }
         }
         
+        // Close JDBC connection pools
+        LOGGER.info("Closing {} JDBC connection pools", jdbcPoolCache.size());
+        for (Map.Entry<String, DataSource> entry : jdbcPoolCache.entrySet()) {
+            try {
+                DataSource pool = entry.getValue();
+                if (pool instanceof HikariDataSource) {
+                    ((HikariDataSource) pool).close();
+                    LOGGER.debug("Closed JDBC pool: {}", entry.getKey());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Error closing JDBC pool '{}': {}", entry.getKey(), e.getMessage());
+                LOGGER.debug("Full exception details:", e);
+            }
+        }
+        jdbcPoolCache.clear();
+        
+        // Clear HTTP clients (no explicit close needed)
+        httpClientCache.clear();
+        
         // Clear registry
         synchronized (this) {
             dataSources.clear();
@@ -390,7 +759,66 @@ public class DataSourceRegistry {
         }
         listeners.clear();
         
-        LOGGER.info("Data source registry shut down");
+        LOGGER.info("Data source registry shut down completely");
+    }
+    
+    /**
+     * Clear all caches and registered data sources.
+     * This method CLOSES connection pools to ensure proper isolation.
+     */
+    public void clear() {
+        LOGGER.info("Clearing registry for testing - {} data sources, {} pools", 
+            dataSources.size(), jdbcPoolCache.size());
+        
+        // Wait for pending creations
+        pendingCreations.values().forEach(f -> {
+            try {
+                f.get(5, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                LOGGER.debug("Error waiting for pending creation: {}", e.getMessage());
+            }
+        });
+        pendingCreations.clear();
+        
+        // Clear data sources (don't shut them down - they might be reused)
+        synchronized (this) {
+            dataSources.clear();
+            typeIndex.clear();
+            tagIndex.clear();
+        }
+        
+        // Close JDBC connection pools (critical for Testcontainers - ports change between test classes)
+        LOGGER.info("Closing {} JDBC connection pools for test isolation", jdbcPoolCache.size());
+        for (Map.Entry<String, DataSource> entry : jdbcPoolCache.entrySet()) {
+            try {
+                DataSource pool = entry.getValue();
+                if (pool instanceof HikariDataSource) {
+                    ((HikariDataSource) pool).close();
+                    LOGGER.debug("Closed JDBC pool: {}", entry.getKey());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Error closing JDBC pool '{}': {}", entry.getKey(), e.getMessage());
+                LOGGER.debug("Full exception details:", e);
+            }
+        }
+        jdbcPoolCache.clear();
+        httpClientCache.clear();
+        
+        LOGGER.info("Registry cleared for testing");
+    }
+    
+    /**
+     * Get pool cache statistics for monitoring/debugging.
+     * 
+     * @return Map of cache name to size
+     */
+    public Map<String, Integer> getPoolCacheStats() {
+        Map<String, Integer> stats = new HashMap<>();
+        stats.put("jdbcPools", jdbcPoolCache.size());
+        stats.put("httpClients", httpClientCache.size());
+        stats.put("dataSources", dataSources.size());
+        stats.put("pendingCreations", pendingCreations.size());
+        return stats;
     }
 
     /**
@@ -469,7 +897,8 @@ public class DataSourceRegistry {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Error during health check", e);
+            LOGGER.error("Error during health check: {}", e.getMessage());
+            LOGGER.debug("Stack trace for registry health check error:", e);
         }
     }
 
@@ -506,7 +935,8 @@ public class DataSourceRegistry {
             try {
                 listener.onDataSourceEvent(event);
             } catch (Exception e) {
-                LOGGER.error("Error notifying registry listener", e);
+                LOGGER.error("Error notifying registry listener: {}", e.getMessage());
+                LOGGER.debug("Stack trace for registry listener notification error:", e);
             }
         }
     }

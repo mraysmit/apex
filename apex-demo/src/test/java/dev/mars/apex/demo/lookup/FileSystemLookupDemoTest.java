@@ -16,9 +16,9 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
     @DisplayName("Should perform JSON file lookup with real product data")
     void testJsonFileProductLookup() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 1: JSON File Product Lookup");
+        logger.info("JSON File Product Lookup");
         logger.info("=".repeat(80));
 
         try {
@@ -117,7 +117,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
     @DisplayName("Should perform JSON file lookup with different product")
     void testJsonFileProductLookupDifferentProduct() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 2: JSON File Product Lookup - Different Product");
+        logger.info("JSON File Product Lookup - Different Product");
         logger.info("=".repeat(80));
 
         try {
@@ -175,7 +175,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
     @DisplayName("Should handle multiple products with different categories")
     void testMultipleProductLookups() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 3: Multiple Product Lookups Testing");
+        logger.info("Multiple Product Lookups Testing");
         logger.info("=".repeat(80));
 
         try {
@@ -222,7 +222,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
     @DisplayName("Should handle non-existent product gracefully")
     void testNonExistentProductHandling() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 4: Non-Existent Product Handling");
+        logger.info("Non-Existent Product Handling");
         logger.info("=".repeat(80));
 
         try {
@@ -262,7 +262,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
     @DisplayName("Should validate enrichment conditions properly")
     void testEnrichmentConditionValidation() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 5: Enrichment Condition Validation");
+        logger.info("Enrichment Condition Validation");
         logger.info("=".repeat(80));
 
         try {

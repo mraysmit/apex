@@ -19,11 +19,11 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReadSchemaDatabaseEnumerationPipelineStageTestExclusions extends SyncTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ReadSchemaDatabaseEnumerationPipelineStageTestExclusions.class);
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
     private RulesEngine rulesEngine;
     private Connection testConnection;
     private String dbName;
@@ -145,7 +145,7 @@ class ReadSchemaDatabaseEnumerationPipelineStageTestExclusions extends SyncTestB
                 logger.info("  Included table: {}", table));
         }
 
-        logger.info("✓ Successfully enumerated tables with exclusion filter");
+        logger.info("[OK] Successfully enumerated tables with exclusion filter");
     }
 
     private void setupTestDatabase() throws Exception {

@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -100,7 +100,7 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             assertEquals(enriched1.get("tradeStatus"), enriched2.get("tradeStatus"),
                 "transformation and expression should produce identical results");
 
-            logger.info("✓ String constants test passed - both keywords work identically");
+            logger.info("[OK] String constants test passed - both keywords work identically");
             
         } catch (Exception e) {
             logger.error("String constants test failed", e);
@@ -175,7 +175,7 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             assertEquals(enriched1.get("isHighRisk"), enriched2.get("isHighRisk"),
                 "transformation and expression should produce identical boolean false");
 
-            logger.info("✓ Boolean constants test passed - both keywords work identically");
+            logger.info("[OK] Boolean constants test passed - both keywords work identically");
             
         } catch (Exception e) {
             logger.error("Boolean constants test failed", e);
@@ -264,7 +264,7 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             assertEquals(enriched1.get("notionalAmount"), enriched2.get("notionalAmount"),
                 "transformation and expression should produce identical large decimal");
 
-            logger.info("✓ Numeric constants test passed - both keywords work identically");
+            logger.info("[OK] Numeric constants test passed - both keywords work identically");
 
         } catch (Exception e) {
             logger.error("Numeric constants test failed", e);
@@ -327,7 +327,7 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             assertEquals(enriched1.get("optionalField"), enriched2.get("optionalField"),
                 "transformation and expression should produce identical null handling");
 
-            logger.info("✓ Null constants test passed - both keywords work identically");
+            logger.info("[OK] Null constants test passed - both keywords work identically");
 
         } catch (Exception e) {
             logger.error("Null constants test failed", e);
@@ -441,7 +441,7 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             assertEquals(enriched1.get("riskLevel"), enriched2.get("riskLevel"),
                 "transformation and expression should produce identical results in conditional-mapping");
 
-            logger.info("✓ Conditional mapping test passed - both keywords work identically");
+            logger.info("[OK] Conditional mapping test passed - both keywords work identically");
 
         } catch (Exception e) {
             logger.error("Conditional mapping test failed", e);
@@ -495,7 +495,7 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             assertEquals(200, enriched.get("field4"),
                 "expression keyword should work for numeric in mixed config");
 
-            logger.info("✓ Mixed usage test passed - both keywords work together");
+            logger.info("[OK] Mixed usage test passed - both keywords work together");
 
         } catch (Exception e) {
             logger.error("Mixed usage test failed", e);
@@ -549,7 +549,7 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             assertEquals(50000000, enriched.get("approvalLimit"),
                 "Legacy transformation keyword should still work for numbers");
 
-            logger.info("✓ Backward compatibility test passed - legacy YAML files work correctly");
+            logger.info("[OK] Backward compatibility test passed - legacy YAML files work correctly");
 
         } catch (Exception e) {
             logger.error("Backward compatibility test failed", e);
@@ -593,7 +593,7 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             assertEquals("TEST_VALUE", enriched.get("outputField"),
                 "Without transformation/expression, should copy source field directly");
 
-            logger.info("✓ Missing transformation test passed - direct field copy works as expected");
+            logger.info("[OK] Missing transformation test passed - direct field copy works as expected");
 
         } catch (Exception e) {
             logger.error("Missing transformation test failed", e);
@@ -638,21 +638,21 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             // CRITICAL: These assertions would have FAILED in the production outage
             // because the transformation keyword was not recognized
             assertNotNull(enriched.get("criticalStatus"),
-                "CRITICAL: criticalStatus must not be null - this was the production outage!");
+                "criticalStatus must not be null - this was the production outage!");
             assertEquals("VALIDATED", enriched.get("criticalStatus"),
-                "CRITICAL: criticalStatus must be set to VALIDATED");
+                "criticalStatus must be set to VALIDATED");
 
             assertNotNull(enriched.get("approvalRequired"),
-                "CRITICAL: approvalRequired must not be null");
+                "approvalRequired must not be null");
             assertTrue((Boolean) enriched.get("approvalRequired"),
-                "CRITICAL: approvalRequired must be true");
+                "approvalRequired must be true");
 
             assertNotNull(enriched.get("riskScore"),
-                "CRITICAL: riskScore must not be null");
+                "riskScore must not be null");
             assertEquals(100, enriched.get("riskScore"),
-                "CRITICAL: riskScore must be 100");
+                "riskScore must be 100");
 
-            logger.info("✓ Silent failure prevention test passed - all critical values are set correctly");
+            logger.info("[OK] Silent failure prevention test passed - all critical values are set correctly");
             logger.info("  This test would have CAUGHT the production outage!");
 
         } catch (Exception e) {
@@ -742,7 +742,7 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             assertEquals(1500.0, enrichedTransformation.get("totalValue"),
                 "totalValue should be 150 * 10 = 1500");
 
-            logger.info("✓ Complex SpEL expressions test passed - both keywords work identically");
+            logger.info("[OK] Complex SpEL expressions test passed - both keywords work identically");
 
         } catch (Exception e) {
             logger.error("Complex SpEL expressions test failed", e);

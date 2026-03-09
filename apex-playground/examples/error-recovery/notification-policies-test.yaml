@@ -1,7 +1,9 @@
 metadata:
+  id: "notification-policies-test"
   name: "Notification Policies Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test error recovery with notification and alerting policies"
 
 error-recovery:
@@ -47,7 +49,7 @@ error-recovery:
 rules:
   - id: "notify-critical-001"
     condition: "#balance < 0"
-    message: "Critical: Negative balance detected"
+    message: Negative balance detected"
     severity: "CRITICAL"
 
   - id: "notify-error-001"

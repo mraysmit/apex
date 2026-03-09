@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -95,7 +95,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             stmt.close();
             conn.close();
             
-            logger.info("✓ H2 database setup completed successfully");
+            logger.info("[OK] H2 database setup completed successfully");
             
         } catch (Exception e) {
             logger.error("Failed to setup H2 database", e);
@@ -122,7 +122,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             assertNotNull(config.getEnrichments(), "Enrichments should not be null");
             assertEquals(3, config.getEnrichments().size(), "Should have exactly 3 enrichments");
             
-            logger.info("✓ Configuration loaded successfully: {}", config.getMetadata().getName());
+            logger.info("[OK] Configuration loaded successfully: {}", config.getMetadata().getName());
             logger.info("  - Version: {}", config.getMetadata().getVersion());
             logger.info("  - Enrichments: {}", config.getEnrichments().size());
             
@@ -166,7 +166,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             // Verify direct NDF mapping was applied (should keep original value)
             assertEquals("1", enrichedData.get("IS_NDF"), "IS_NDF should remain '1' for direct mapping");
             
-            logger.info("✓ Direct NDF mapping completed successfully");
+            logger.info("[OK] Direct NDF mapping completed successfully");
             logger.info("  - Buy Currency: {} (Rank: {})", enrichedData.get("BUY_CURRENCY"), enrichedData.get("BUY_CURRENCY_RANK"));
             logger.info("  - IS_NDF: {} (Direct mapping)", enrichedData.get("IS_NDF"));
             
@@ -210,7 +210,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             // Verify Y flag mapping was applied (should keep original value)
             assertEquals("Y", enrichedData.get("IS_NDF"), "IS_NDF should remain 'Y' for direct mapping");
             
-            logger.info("✓ Y flag NDF mapping completed successfully");
+            logger.info("[OK] Y flag NDF mapping completed successfully");
             logger.info("  - Buy Currency: {} (Rank: {})", enrichedData.get("BUY_CURRENCY"), enrichedData.get("BUY_CURRENCY_RANK"));
             logger.info("  - IS_NDF: {} (Y flag mapping)", enrichedData.get("IS_NDF"));
             
@@ -258,7 +258,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             // Verify translation was applied (TRUE should become YES)
             assertEquals("YES", enrichedData.get("IS_NDF"), "IS_NDF should be translated to 'YES'");
             
-            logger.info("✓ Translation mapping completed successfully");
+            logger.info("[OK] Translation mapping completed successfully");
             logger.info("  - Buy Currency: {} (Rank: {})", enrichedData.get("BUY_CURRENCY"), enrichedData.get("BUY_CURRENCY_RANK"));
             logger.info("  - Translation: {} -> {}", enrichedData.get("EXTERNAL_CODE"), enrichedData.get("IS_NDF"));
             logger.info("  - Translation Type: {}", enrichedData.get("TRANSLATION_TYPE"));
@@ -303,7 +303,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             // Verify default mapping was applied (should keep original value)
             assertEquals("UNKNOWN", enrichedData.get("IS_NDF"), "IS_NDF should remain 'UNKNOWN' for default mapping");
             
-            logger.info("✓ Default mapping completed successfully");
+            logger.info("[OK] Default mapping completed successfully");
             logger.info("  - Buy Currency: {} (Rank: {})", enrichedData.get("BUY_CURRENCY"), enrichedData.get("BUY_CURRENCY_RANK"));
             logger.info("  - IS_NDF: {} (Default mapping)", enrichedData.get("IS_NDF"));
             
@@ -322,7 +322,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
         // Verify all APEX services are properly initialized
         assertNotNull(yamlLoader, "YAML loader should be initialized");
 
-        logger.info("✓ All APEX services properly initialized for conditional mapping design v1");
+        logger.info("[OK] All APEX services properly initialized for conditional mapping design v1");
     }
 }
 

@@ -13,7 +13,6 @@
     <artifactId>apex-core</artifactId>
 
 
-
     <dependencies>
         <!-- Spring dependencies -->
         <dependency>
@@ -32,6 +31,26 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-jcl</artifactId>
         </dependency>
+
+
+        <!-- PostgreSQL driver for database operations -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <!-- HikariCP for connection pooling -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
+        <!-- Spring JDBC for database operations -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+
 
         <!-- Logging dependencies -->
         <dependency>
@@ -113,26 +132,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- PostgreSQL driver for database testing -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- HikariCP for connection pooling -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Spring JDBC for database operations -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <scope>test</scope>
-        </dependency>
 
         <!-- H2 Database for testing -->
         <dependency>
@@ -159,10 +158,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>
-                        --add-reads dev.mars.apex.core=ch.qos.logback.classic
-                        --add-opens ch.qos.logback.classic/ch.qos.logback.classic=dev.mars.apex.core
-                    </argLine>
                     <systemPropertyVariables>
                         <docker.postgres.version>${docker.postgres.version}</docker.postgres.version>
                         <docker.vault.version>${docker.vault.version}</docker.vault.version>

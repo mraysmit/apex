@@ -42,14 +42,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlaygroundServiceTest {
 
     private DataProcessingService dataProcessingService;
-    private YamlValidationService yamlValidationService;
+    private ValidationService yamlValidationService;
     private PlaygroundService playgroundService;
 
     @BeforeEach
     void setUp() {
         // Use real service implementations instead of mocks
         dataProcessingService = new DataProcessingService();
-        yamlValidationService = new YamlValidationService();
+        yamlValidationService = new ValidationService();
         playgroundService = new PlaygroundService(dataProcessingService, yamlValidationService);
     }
 

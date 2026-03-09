@@ -1,0 +1,31 @@
+metadata:
+  id: "pipeline-roundtrip-test"
+  name: "Pipeline Roundtrip Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test pipeline configuration roundtrip"
+  author: "APEX Demo Team"
+
+pipeline:
+  id: "data-processing-pipeline"
+  mode: "sequential"
+  error-handling: "continue-on-error"
+  max-retries: 5
+  retry-delay-ms: 2000
+  collect-metrics: true
+  stages:
+    - name: "extract"
+      order: 1
+      enabled: true
+    - name: "transform"
+      order: 2
+      enabled: true
+      depends-on: "extract"
+    - name: "validate"
+      order: 3
+      enabled: true
+      depends-on: "transform"
+    - name: "load"
+      order: 4
+      enabled: false
+      depends-on: "validate"

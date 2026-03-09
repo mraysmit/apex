@@ -28,7 +28,7 @@ import java.util.*;
  * Implements set-based comparison for schema columns.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-13
  */
 public class SchemaDiffService {
 

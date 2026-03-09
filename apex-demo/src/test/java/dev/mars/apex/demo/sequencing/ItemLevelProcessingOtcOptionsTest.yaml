@@ -1,7 +1,6 @@
 metadata:
   name: "Item-Level Processing - OTC Options Trade Processing"
   type: "rule-config"
-  processing-mode: "sequential"
   description: |
     Tests item-level processing with OTC options trade processing.
     Demonstrates sequential processing with data dependencies.

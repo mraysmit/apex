@@ -1,10 +1,10 @@
 package dev.mars.apex.demo.rulegroups;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +30,7 @@ public class CrossFileRuleGroupReferenceTest extends DemoTestBase {
 
     @Test
     @DisplayName("Cross-file rule-group reference: composite group references base group from another file")
-    void testCrossFileRuleGroupReference() throws YamlConfigurationException {
+    void testCrossFileRuleGroupReference() throws ConfigurationException {
         // Create rules engine from multiple files using manual merge
         YamlRuleConfiguration mergedConfig = mergeYamlConfigsForEnrichment(BASE_GROUPS_PATH, COMPOSITE_GROUPS_PATH);
         RulesEngine engine = RulesEngine.fromYamlConfig(mergedConfig);
@@ -80,7 +80,7 @@ public class CrossFileRuleGroupReferenceTest extends DemoTestBase {
 
     @Test
     @DisplayName("Verify base group works independently")
-    void testBaseGroupIndependently() throws YamlConfigurationException {
+    void testBaseGroupIndependently() throws ConfigurationException {
         // Test that the base group works on its own
         RulesEngine engine = RulesEngine.fromFile(BASE_GROUPS_PATH);
         

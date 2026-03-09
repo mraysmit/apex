@@ -3,8 +3,6 @@ metadata:
   description: "Verifies that Rule Chains can use Result-Based Routing (Switch/Case) pattern"
   version: "1.0"
   type: "rule-config"
-  processing-mode: "sequential"
-
 rule-chains:
   - id: "risk-routing-chain"
     name: "Risk Routing Chain"

@@ -1,0 +1,116 @@
+# ============================================================================
+# APEX RulesEngine Pipeline Integration Test - Full Document Order
+# ============================================================================
+#
+# PURPOSE:
+# Validates complete document-order processing: pipeline → enrichments → rules.
+# Tests that RulesEngine.evaluate() processes all sections in correct order.
+#
+# TEST COVERAGE:
+# - Document order: pipeline, then enrichments, then rules
+# - All sections execute successfully in single evaluate() call
+# - Data flows correctly between sections
+#
+# USED BY: RulesEnginePipelineIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "rules-engine-pipeline-full-test"
+  name: "RulesEngine Pipeline Integration - Full Document Order"
+  description: "Tests complete document order with pipeline, enrichments, and rules"
+  type: "rule-config"
+  version: "1.0"
+  author: "Mark A Ray-Smith Cityline Ltd"
+  tags: ["test", "pipeline", "enrichments", "rules", "document-order"]
+
+# Inline data source for pipeline
+data-sources:
+  - name: "test-full-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 in-memory database for full document order test"
+
+    connection:
+      database: "mem:full_document_order_test"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS test_data (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255)
+          );
+
+          INSERT INTO test_data (id, name) VALUES
+            (1, 'Test Record 1');
+
+    queries:
+      getAll: "SELECT id, name FROM test_data"
+
+# Pipeline executes FIRST
+pipeline:
+  name: "test-full-document-order-pipeline"
+  description: "Pipeline that executes first in document order"
+  
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "test-extract"
+      type: "extract"
+      source: "test-full-source"
+      operation: "getAll"
+      description: "Extract test data"
+
+# Enrichments execute SECOND (after pipeline)
+enrichments:
+  - id: "enrich-customer-tier"
+    name: "Enrich Customer Tier"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            tier: "GOLD"
+            discount: 0.15
+          - customerId: "CUST002"
+            tier: "SILVER"
+            discount: 0.10
+    field-mappings:
+      - source-field: "tier"
+        target-field: "customerTier"
+      - source-field: "discount"
+        target-field: "customerDiscount"
+
+# Rules execute THIRD (after enrichments)
+rules:
+  - id: "validate-customer-id"
+    name: "Validate Customer ID"
+    condition: "#customerId != null && #customerId.length() > 0"
+    message: "Customer ID is valid"
+    severity: "INFO"
+    priority: 1
+  
+  - id: "validate-customer-tier"
+    name: "Validate Customer Tier"
+    condition: "#customerTier != null"
+    message: "Customer tier is present after enrichment"
+    severity: "INFO"
+    priority: 2
+  
+  - id: "validate-discount"
+    name: "Validate Discount"
+    condition: "#customerDiscount != null && #customerDiscount > 0"
+    message: "Customer discount is valid"
+    severity: "INFO"
+    priority: 3
+

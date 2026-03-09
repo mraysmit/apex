@@ -34,11 +34,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Selenium UI tests for APEX Playground Save Functionality.
+ * Uses @TestInstance(PER_CLASS) to reuse a single browser across all test methods.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-11-28
- * @version 1.0
+ * @version 1.1
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
     "logging.level.dev.mars.apex=INFO",
@@ -54,23 +56,24 @@ class ApexPlaygroundSaveFunctionalityTest {
     @LocalServerPort
     private int port;
 
-    @BeforeEach
-    void setUp() {
-        // Setup Chrome driver with options
+    @BeforeAll
+    void setupBrowser() {
+        io.github.bonigarcia.wdm.WebDriverManager.chromedriver().setup();
+
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
-        
+
         driver = new ChromeDriver(options);
         wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         baseUrl = "http://localhost:" + port + "/playground";
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    void tearDownBrowser() {
         if (driver != null) {
             driver.quit();
         }
@@ -83,10 +86,10 @@ class ApexPlaygroundSaveFunctionalityTest {
         driver.get(baseUrl);
         
         WebElement sourceDataEditor = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("sourceDataEditor")));
-        WebElement yamlRulesEditor = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("yamlRulesEditor")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("yamlRulesEditor")));
         
         assertEquals("", sourceDataEditor.getAttribute("value"), "Source Data editor should be empty on startup");
-        assertEquals("", yamlRulesEditor.getAttribute("value"), "YAML Rules editor should be empty on startup");
+        assertEquals("", CodeMirrorTestHelper.getYamlContent(driver), "YAML Rules editor should be empty on startup");
     }
 
     @Test
@@ -107,14 +110,14 @@ class ApexPlaygroundSaveFunctionalityTest {
         exampleItem.click();
         
         // Wait for editors to be populated
-        WebElement yamlRulesEditor = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("yamlRulesEditor")));
-        wait.until(ExpectedConditions.not(ExpectedConditions.attributeToBe(yamlRulesEditor, "value", "")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("yamlRulesEditor")));
+        // Wait for CodeMirror to have content
+        wait.until(d -> !CodeMirrorTestHelper.getYamlContent(d).isEmpty());
         
         // 2. Modify the YAML content
-        String originalContent = yamlRulesEditor.getAttribute("value");
+        String originalContent = CodeMirrorTestHelper.getYamlContent(driver);
         String newContent = originalContent + "\n# Modified by Selenium Test";
-        yamlRulesEditor.clear();
-        yamlRulesEditor.sendKeys(newContent);
+        CodeMirrorTestHelper.setYamlContent(driver, newContent);
         
         // 3. Click Save YAML
         WebElement saveYamlBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("saveYamlBtn")));

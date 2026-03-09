@@ -14,7 +14,7 @@ metadata:
   id: "multi-step-pipeline-test"
   name: "Multi-Step Pipeline Test"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   description: "Test pipeline for capturing step data from multi-step operations"
 
 # Data source

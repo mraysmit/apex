@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ public class RouterPatternProcessingPathTest extends DemoTestBase {
             // Load YAML configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RouterPatternProcessingPathTest.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully");
+            logger.info("[OK] Configuration loaded successfully");
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -63,7 +63,7 @@ public class RouterPatternProcessingPathTest extends DemoTestBase {
 
             assertTrue(manualEnriched.containsKey("reviewStatus"), "Should have reviewStatus field");
             assertEquals(true, manualEnriched.get("reviewStatus"), "Review status flag should be true");
-            logger.info("✓ Scenario 1 passed: Correctly routed to MANUAL_REVIEW");
+            logger.info("[OK] Scenario 1 passed: Correctly routed to MANUAL_REVIEW");
 
 
             // Scenario 2: AUTO_APPROVE
@@ -78,7 +78,7 @@ public class RouterPatternProcessingPathTest extends DemoTestBase {
 
             assertTrue(approveEnriched.containsKey("approvalStatus"), "Should have approvalStatus field");
             assertEquals(true, approveEnriched.get("approvalStatus"), "Approval status flag should be true");
-            logger.info("✓ Scenario 2 passed: Correctly routed to AUTO_APPROVE");
+            logger.info("[OK] Scenario 2 passed: Correctly routed to AUTO_APPROVE");
 
 
             // Scenario 3: STANDARD_PROCESS
@@ -93,7 +93,7 @@ public class RouterPatternProcessingPathTest extends DemoTestBase {
 
             assertTrue(standardEnriched.containsKey("validationStatus"), "Should have validationStatus field");
             assertEquals(true, standardEnriched.get("validationStatus"), "Validation status flag should be true");
-            logger.info("✓ Scenario 3 passed: Correctly routed to STANDARD_PROCESS");
+            logger.info("[OK] Scenario 3 passed: Correctly routed to STANDARD_PROCESS");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);

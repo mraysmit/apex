@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - H2 (for testing)
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class DatabaseDataSource implements ExternalDataSource {
@@ -68,7 +68,7 @@ public class DatabaseDataSource implements ExternalDataSource {
      * @param configuration The data source configuration
      */
     public DatabaseDataSource(DataSource dataSource, DataSourceConfiguration configuration) {
-        LOGGER.info("APEX-CORE: Creating DatabaseDataSource instance for '{}'", configuration.getName());
+        LOGGER.debug("Creating DatabaseDataSource instance for '{}'", configuration.getName());
         this.dataSource = dataSource;
         this.configuration = configuration;
         this.connectionStatus = ConnectionStatus.notInitialized();
@@ -86,12 +86,12 @@ public class DatabaseDataSource implements ExternalDataSource {
             // Test the connection
             if (testConnection()) {
                 this.connectionStatus = ConnectionStatus.connected("Database connection established");
-                LOGGER.info("Database data source '{}' initialized successfully", config.getName());
+                LOGGER.debug("Database data source '{}' initialized successfully", config.getName());
 
                 // Test database connectivity with a generic query
                 try (Connection testConn = dataSource.getConnection()) {
-                    LOGGER.info("Testing database connectivity for '{}'", config.getName());
-                    LOGGER.info("Database URL: {}", testConn.getMetaData().getURL());
+                    LOGGER.debug("Testing database connectivity for '{}', URL: {}", 
+                        config.getName(), testConn.getMetaData().getURL());
 
                     // Perform a simple connectivity check without assuming specific tables
                     try (Statement stmt = testConn.createStatement();
@@ -101,9 +101,11 @@ public class DatabaseDataSource implements ExternalDataSource {
                         }
                     } catch (SQLException e) {
                         LOGGER.warn("Database connectivity check failed: {}", e.getMessage());
+                        LOGGER.debug("Full exception details for connectivity check:", e);
                     }
                 } catch (SQLException e) {
                     LOGGER.error("Failed to test database connectivity: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for connectivity test:", e);
                 }
             } else {
                 throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
@@ -141,7 +143,8 @@ public class DatabaseDataSource implements ExternalDataSource {
         try (Connection connection = dataSource.getConnection()) {
             return connection != null && !connection.isClosed();
         } catch (SQLException e) {
-            LOGGER.warn("Database connection test failed", e);
+            LOGGER.warn("Database connection test failed: {}", e.getMessage());
+            LOGGER.debug("Full exception details for connection test:", e);
             return false;
         }
     }
@@ -217,7 +220,7 @@ public class DatabaseDataSource implements ExternalDataSource {
             throw DataSourceException.configurationError("Query cannot be null");
         }
         if (parameters == null) {
-            throw new NullPointerException("Parameters cannot be null");
+            throw DataSourceException.configurationError("Parameters cannot be null");
         }
 
         long startTime = System.currentTimeMillis();
@@ -280,12 +283,14 @@ public class DatabaseDataSource implements ExternalDataSource {
             switch (errorType) {
                 case CONFIGURATION_ERROR:
                     LOGGER.error("Database configuration error in query: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for query configuration error:", e);
                     throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                                                  "Database configuration error: " + errorDescription, e,
                                                  configuration.getName(), "query", false);
 
                 case TRANSIENT_ERROR:
                     LOGGER.warn("Transient database error in query: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for transient query error:", e);
                     throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
                                                  "Transient database error: " + errorDescription, e,
                                                  configuration.getName(), "query", true); // Retryable
@@ -294,6 +299,7 @@ public class DatabaseDataSource implements ExternalDataSource {
                 case FATAL_ERROR:
                 default:
                     LOGGER.error("Database query failed: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for query failure:", e);
                     throw DataSourceException.executionError("Database query failed: " + errorDescription, e, "query");
             }
         }
@@ -373,23 +379,27 @@ public class DatabaseDataSource implements ExternalDataSource {
             switch (errorType) {
                 case CONFIGURATION_ERROR:
                     LOGGER.error("Database configuration error in batch update: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for batch update configuration error:", e);
                     throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                                                  "Database configuration error: " + errorDescription, e,
                                                  configuration.getName(), "batchUpdate", false);
 
                 case TRANSIENT_ERROR:
                     LOGGER.warn("Transient database error in batch update: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for transient batch update error:", e);
                     throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
                                                  "Transient database error: " + errorDescription, e,
                                                  configuration.getName(), "batchUpdate", true); // Retryable
 
                 case DATA_INTEGRITY_VIOLATION:
                     LOGGER.warn("Data integrity violation in batch update: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for batch update integrity violation:", e);
                     throw DataSourceException.executionError("Data integrity violation: " + errorDescription, e, "batchUpdate");
 
                 case FATAL_ERROR:
                 default:
                     LOGGER.error("Batch update failed: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for batch update failure:", e);
                     throw DataSourceException.executionError("Batch update failed: " + errorDescription, e, "batchUpdate");
             }
         }

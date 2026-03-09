@@ -3,11 +3,11 @@
 # ==================================================================================
 # This configuration demonstrates the "Decoupled Decision & Routing" pattern.
 #
-# Phase 1: The Decision (Enrichment)
+# The Decision (Enrichment)
 # Uses a conditional-mapping-enrichment to evaluate complex logic and determine
 # a "Route Code" (e.g., MANUAL_REVIEW, AUTO_APPROVE).
 #
-# Phase 2: The Execution (Router)
+# The Execution (Router)
 # Uses a result-based-routing rule chain to simply read the "Route Code"
 # and execute the corresponding rules.
 # ==================================================================================
@@ -19,7 +19,7 @@ metadata:
   author: "apex.demo.team@company.com"
   created: "2025-11-24"
 
-# Phase 1: The Decision
+# The Decision
 enrichments:
   - id: "determine-processing-path"
     type: "conditional-mapping-enrichment"
@@ -59,7 +59,7 @@ enrichments:
           type: "direct"
           expression: "'STANDARD_PROCESS'"
 
-# Phase 2: The Execution
+# The Execution
 rule-chains:
   - id: "execute-processing-path"
     name: "Execute Processing Path"

@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -16,11 +18,17 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,11 +52,11 @@ class CleanEnrichmentDemoTest {
     private static final Logger logger = LoggerFactory.getLogger(CleanEnrichmentDemoTest.class);
 
     private ScenarioStageExecutor executor;
-    private YamlConfigurationLoader configLoader;
+    private ConfigurationLoader configLoader;
 
     @BeforeEach
     void setUp() {
-        configLoader = new YamlConfigurationLoader();
+        configLoader = new ConfigurationLoader();
         executor = new ScenarioStageExecutor(configLoader, null);
     }
 
@@ -143,20 +151,20 @@ class CleanEnrichmentDemoTest {
             // Check if enrichment was applied
             if (outputs.containsKey("riskCategory")) {
                 assertEquals("HIGH_VALUE", outputs.get("riskCategory"), "Enrichment should set riskCategory");
-                logger.info("   ✓ Enrichment applied: riskCategory = {}", outputs.get("riskCategory"));
+                logger.info("   [OK] Enrichment applied: riskCategory = {}", outputs.get("riskCategory"));
             }
             if (outputs.containsKey("status")) {
                 assertEquals("APPROVED", outputs.get("status"), "Enrichment should set status");
-                logger.info("   ✓ Enrichment applied: status = {}", outputs.get("status"));
+                logger.info("   [OK] Enrichment applied: status = {}", outputs.get("status"));
             }
         }
         
         // Also check inputData for enriched fields (they get merged back)
         if (inputData.containsKey("riskCategory")) {
-            logger.info("   ✓ Enrichment merged to inputData: riskCategory = {}", inputData.get("riskCategory"));
+            logger.info("   [OK] Enrichment merged to inputData: riskCategory = {}", inputData.get("riskCategory"));
         }
         if (inputData.containsKey("status")) {
-            logger.info("   ✓ Enrichment merged to inputData: status = {}", inputData.get("status"));
+            logger.info("   [OK] Enrichment merged to inputData: status = {}", inputData.get("status"));
         }
 
         logger.info("4. SUCCESS: Data is clean - contains only business fields + enrichments, no metadata pollution!");

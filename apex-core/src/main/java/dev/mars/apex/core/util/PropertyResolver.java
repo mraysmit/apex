@@ -1,5 +1,8 @@
 package dev.mars.apex.core.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,7 +12,7 @@ import java.util.regex.Pattern;
  * 
  * This class provides a single source of truth for property placeholder resolution
  * across the APEX framework, ensuring consistent behavior in:
- * - YamlConfigurationLoader
+ * - ConfigurationLoader
  * - YamlDataSource  
  * - DataSourceResolver
  * 
@@ -24,13 +27,13 @@ import java.util.regex.Pattern;
  * 2. Environment variables (System.getenv())
  * 3. Default value (if specified)
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-01-19
  * @version 1.0.0
  */
 public final class PropertyResolver {
 
-    private static final RulesEngineLogger logger = new RulesEngineLogger(PropertyResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertyResolver.class);
 
     // Regex patterns for placeholder detection
     private static final Pattern CURLY_BRACE_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");

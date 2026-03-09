@@ -17,8 +17,14 @@ package dev.mars.apex.core.service.schema.diff.json;
 
 import dev.mars.apex.core.service.schema.diff.json.model.*;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for {@link SchemaDiffJsonSerializer}.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class SchemaDiffJsonSerializerTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SchemaDiffJsonSerializerTest.class);
@@ -59,7 +66,7 @@ class SchemaDiffJsonSerializerTest {
         assertNotNull(json);
         assertTrue(json.contains("\"$schema\""));
         assertTrue(json.contains("\"metadata\""));
-        logger.info("  ✓ JSON string serialization successful");
+        logger.info("  [OK] JSON string serialization successful");
     }
 
     @Test
@@ -76,7 +83,7 @@ class SchemaDiffJsonSerializerTest {
         
         assertNotNull(deserialized);
         assertEquals(original.getMetadata().getReportVersion(), deserialized.getMetadata().getReportVersion());
-        logger.info("  ✓ Round-trip successful - data integrity verified");
+        logger.info("  [OK] Round-trip successful - data integrity verified");
     }
 
     @Test
@@ -92,7 +99,7 @@ class SchemaDiffJsonSerializerTest {
         
         assertTrue(outputFile.exists());
         assertTrue(outputFile.length() > 0);
-        logger.info("  ✓ JSON file generation successful");
+        logger.info("  [OK] JSON file generation successful");
     }
 
     private SchemaDiffReport createMinimalReport() {

@@ -1,0 +1,22 @@
+# ============================================================================
+# Invalid Pipeline - Empty Steps Test
+# ============================================================================
+# Tests validation of pipeline with no steps.
+# Exercises validatePipeline() check for empty steps.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "invalid-empty-steps-test"
+  name: "Invalid Empty Steps Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests validation when pipeline has no steps"
+
+pipeline:
+  name: "empty-steps-pipeline"
+  description: "Pipeline with no steps (should fail)"
+
+  # Empty steps list - should fail validation
+  steps: []

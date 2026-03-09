@@ -18,15 +18,20 @@ package dev.mars.apex.core.service.data.yaml;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.config.DataSourceConfigurationService;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import org.junit.jupiter.api.*;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlDataLookupIntegrationTest {
 
     @TempDir
@@ -66,7 +72,7 @@ class YamlDataLookupIntegrationTest {
 
     private DataSourceFactory factory;
     private DataSourceConfigurationService configService;
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration yamlConfig;
     private Map<String, ExternalDataSource> testDataSources;
 
@@ -74,7 +80,7 @@ class YamlDataLookupIntegrationTest {
     void setUp() throws Exception {
         factory = DataSourceFactory.getInstance();
         configService = DataSourceConfigurationService.getInstance();
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         testDataSources = new HashMap<>();
 
         // Load YAML configuration from file

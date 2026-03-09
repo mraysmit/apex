@@ -364,7 +364,7 @@ class PlaygroundExamplesUITest {
             "Enrichment results should contain '" + expectedEnrichment + "' for " + yamlPath +
             ". Actual: " + enrichmentText.substring(0, Math.min(200, enrichmentText.length())));
 
-        logger.info("✓ {} UI test passed", yamlPath);
+        logger.info("[OK] {} UI test passed", yamlPath);
     }
 
     private String loadExampleFile(String relativePath) throws IOException {
@@ -391,11 +391,7 @@ class PlaygroundExamplesUITest {
     }
 
     private void clearAndEnterText(WebElement element, String text) {
-        element.clear();
-        // Use JavaScript to set value for large text blocks
-        jsExecutor.executeScript("arguments[0].value = arguments[1];", element, text);
-        // Trigger input event so any listeners are notified
-        jsExecutor.executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element);
+        CodeMirrorTestHelper.clearAndEnterText(driver, element, text);
     }
 }
 

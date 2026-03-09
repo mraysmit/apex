@@ -8,11 +8,40 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class for classifying SQL errors and determining appropriate handling strategies.
  * 
- * This class helps distinguish between different types of database errors:
- * - Data integrity violations (should be handled gracefully)
- * - Configuration errors (should fail fast)
- * - Transient errors (should be retried)
- * - Fatal errors (should stop processing)
+ * <p>This class helps distinguish between different types of database errors:
+ * <ul>
+ *   <li>Data integrity violations (should be handled gracefully)</li>
+ *   <li>Configuration errors (should fail fast)</li>
+ *   <li>Transient errors (should be retried)</li>
+ *   <li>Fatal errors (should stop processing)</li>
+ * </ul>
+ * 
+ * <h2>Future Improvement Suggestions</h2>
+ * 
+ * <h3>1. Message-based detection is fragile</h3>
+ * <p>Message text varies by database vendor and locale. Prefer SQL state codes when possible.
+ * Message matching should be a fallback, not primary detection mechanism.</p>
+ * 
+ * <h3>2. Missing vendor-specific error codes</h3>
+ * <p>Consider adding error codes for additional databases:</p>
+ * <ul>
+ *   <li>MySQL: 1062 (duplicate entry), 1452 (FK constraint fails)</li>
+ *   <li>Oracle: ORA-00001 (unique constraint), ORA-02291 (FK violation)</li>
+ *   <li>SQL Server: 2627 (PK violation), 547 (FK constraint)</li>
+ * </ul>
+ * 
+ * <h3>3. Overlap potential in message matching</h3>
+ * <p>Keywords like "connection" could match column names, causing false positives.
+ * Consider more specific phrase matching or regex patterns.</p>
+ * 
+ * <h3>4. No caching/memoization</h3>
+ * <p>If classifying the same exception type repeatedly, consider memoization
+ * for performance optimization in high-throughput scenarios.</p>
+ * 
+ * <h3>5. Consider externalized configuration</h3>
+ * <p>Spring's {@code SQLErrorCodeSQLExceptionTranslator} uses XML-based vendor-specific
+ * error code mappings. A similar approach would allow adding new database support
+ * without code changes.</p>
  */
 public class SqlErrorClassifier {
     

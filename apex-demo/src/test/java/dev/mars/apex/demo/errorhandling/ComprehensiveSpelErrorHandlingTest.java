@@ -1,10 +1,10 @@
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import dev.mars.apex.engine.core.RuleBuilder;
 
 /**
  * Comprehensive test suite for SpEL exception handling across all APEX components.
@@ -58,12 +59,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandlePropertyNotFound() {
         logger.info("Testing property not found error handling");
         
-        Rule rule = new Rule(
-            "missing-property-test",
-            "#nonExistentProperty != null",
-            "Property should exist",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("missing-property-test").withCondition("#nonExistentProperty != null").withMessage("Property should exist").withSeverity("ERROR").build();
         
         Map<String, Object> facts = createTestData();
         // Intentionally not adding 'nonExistentProperty'
@@ -79,7 +75,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         assertEquals("Property should exist", result.getMessage(), 
                     "Message should be the rule message");
         
-        logger.info("✓ Property not found handled gracefully");
+        logger.info("[OK] Property not found handled gracefully");
     }
     
     @Test
@@ -87,12 +83,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleNonExistentPropertyEquality() {
         logger.info("Testing non-existent property equality comparison");
         
-        Rule rule = new Rule(
-            "missing-property-equality-test",
-            "#nonExistentProperty == 'TESTVALUE'",
-            "Property should equal TESTVALUE",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("missing-property-equality-test").withCondition("#nonExistentProperty == 'TESTVALUE'").withMessage("Property should equal TESTVALUE").withSeverity("ERROR").build();
         
         Map<String, Object> facts = createTestData();
         // Intentionally not adding 'nonExistentProperty'
@@ -110,7 +101,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         assertEquals("Property should equal TESTVALUE", result.getMessage(), 
                     "Message should be the rule message");
         
-        logger.info("✓ Non-existent property equality comparison handled gracefully");
+        logger.info("[OK] Non-existent property equality comparison handled gracefully");
     }
     
     @Test
@@ -118,12 +109,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleNestedPropertyAccessOnNull() {
         logger.info("Testing nested property access on null error handling");
         
-        Rule rule = new Rule(
-            "nested-null-access-test",
-            "#nullObject.someProperty != null",
-            "Nested property should be accessible",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("nested-null-access-test").withCondition("#nullObject.someProperty != null").withMessage("Nested property should be accessible").withSeverity("ERROR").build();
         
         Map<String, Object> testData = createTestData();
         testData.put("nullObject", null);
@@ -135,7 +121,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for null property access");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Nested property access on null handled gracefully");
+        logger.info("[OK] Nested property access on null handled gracefully");
     }
     
     // ========================================================================
@@ -147,12 +133,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleMethodNotFound() {
         logger.info("Testing method not found error handling");
         
-        Rule rule = new Rule(
-            "invalid-method-test",
-            "#amount.nonExistentMethod() > 0",
-            "Method should exist",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("invalid-method-test").withCondition("#amount.nonExistentMethod() > 0").withMessage("Method should exist").withSeverity("ERROR").build();
         
         Map<String, Object> facts = createTestData();
         
@@ -163,7 +144,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for missing method");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Method not found handled gracefully");
+        logger.info("[OK] Method not found handled gracefully");
     }
     
     @Test
@@ -171,12 +152,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleMethodInvocationWithWrongParameters() {
         logger.info("Testing method invocation with wrong parameters error handling");
         
-        Rule rule = new Rule(
-            "wrong-params-test",
-            "#customerName.substring(10, 20, 30) != null",  // substring doesn't take 3 params
-            "Method parameters should be correct",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("wrong-params-test").withCondition("#customerName.substring(10, 20, 30) != null").withMessage("Method parameters should be correct").withSeverity("ERROR").build();
         
         Map<String, Object> facts = createTestData();
         
@@ -187,7 +163,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for wrong method parameters");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Method invocation with wrong parameters handled gracefully");
+        logger.info("[OK] Method invocation with wrong parameters handled gracefully");
     }
     
     // ========================================================================
@@ -199,12 +175,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleTypeConversionErrors() {
         logger.info("Testing type conversion error handling");
         
-        Rule rule = new Rule(
-            "type-conversion-test",
-            "#customerName + 100 > 0",  // String + Number will cause type error
-            "Type conversion should work",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("type-conversion-test").withCondition("#customerName + 100 > 0").withMessage("Type conversion should work").withSeverity("ERROR").build();
         
         Map<String, Object> facts = createTestData();
         
@@ -215,7 +186,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for type conversion");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Type conversion error handled gracefully");
+        logger.info("[OK] Type conversion error handled gracefully");
     }
     
     @Test
@@ -223,12 +194,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleArithmeticErrors() {
         logger.info("Testing arithmetic error handling");
 
-        Rule rule = new Rule(
-            "arithmetic-error-test",
-            "#amount.invalidArithmeticMethod() > 0",  // Invalid arithmetic method
-            "Arithmetic should work",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("arithmetic-error-test").withCondition("#amount.invalidArithmeticMethod() > 0").withMessage("Arithmetic should work").withSeverity("ERROR").build();
 
         Map<String, Object> facts = createTestData();
 
@@ -239,7 +205,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for arithmetic error");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
 
-        logger.info("✓ Arithmetic error handled gracefully");
+        logger.info("[OK] Arithmetic error handled gracefully");
     }
     
     // ========================================================================
@@ -251,12 +217,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleArrayIndexOutOfBounds() {
         logger.info("Testing array index out of bounds error handling");
         
-        Rule rule = new Rule(
-            "array-bounds-test",
-            "#tags[10] != null",  // Array only has 2 elements
-            "Array access should be valid",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("array-bounds-test").withCondition("#tags[10] != null").withMessage("Array access should be valid").withSeverity("ERROR").build();
         
         Map<String, Object> facts = createTestData();
         
@@ -267,7 +228,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for array bounds");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Array index out of bounds handled gracefully");
+        logger.info("[OK] Array index out of bounds handled gracefully");
     }
     
     // ========================================================================
@@ -279,12 +240,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleMapKeyNotFound() {
         logger.info("Testing map key not found error handling");
 
-        Rule rule = new Rule(
-            "map-key-test",
-            "#metadata['nonExistentKey'].toString().length() > 0",
-            "Map key should exist",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("map-key-test").withCondition("#metadata['nonExistentKey'].toString().length() > 0").withMessage("Map key should exist").withSeverity("ERROR").build();
 
         Map<String, Object> facts = createTestData();
 
@@ -295,7 +251,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for missing map key");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
 
-        logger.info("✓ Map key not found handled gracefully");
+        logger.info("[OK] Map key not found handled gracefully");
     }
 
     // ========================================================================
@@ -307,12 +263,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleInvalidCasting() {
         logger.info("Testing invalid casting error handling");
 
-        Rule rule = new Rule(
-            "invalid-cast-test",
-            "((java.util.Date) #customerName).getTime() > 0",  // String cannot be cast to Date
-            "Casting should work",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("invalid-cast-test").withCondition("((java.util.Date) #customerName).getTime() > 0").withMessage("Casting should work").withSeverity("ERROR").build();
 
         Map<String, Object> facts = createTestData();
 
@@ -323,7 +274,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for invalid casting");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
 
-        logger.info("✓ Invalid casting handled gracefully");
+        logger.info("[OK] Invalid casting handled gracefully");
     }
 
     // ========================================================================
@@ -335,12 +286,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
     void shouldHandleComplexNestedExpressionErrors() {
         logger.info("Testing complex nested expression error handling");
 
-        Rule rule = new Rule(
-            "complex-expression-test",
-            "#customer.address.street.substring(#nonExistent.length()).toUpperCase() != null",
-            "Complex expression should work",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("complex-expression-test").withCondition("#customer.address.street.substring(#nonExistent.length()).toUpperCase() != null").withMessage("Complex expression should work").withSeverity("ERROR").build();
 
         Map<String, Object> facts = createTestData();
 
@@ -351,7 +297,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for complex expression error");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
 
-        logger.info("✓ Complex nested expression error handled gracefully");
+        logger.info("[OK] Complex nested expression error handled gracefully");
     }
 
     // ========================================================================
@@ -364,10 +310,10 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         logger.info("Testing multiple SpEL errors in rule list");
 
         List<Rule> rules = Arrays.asList(
-            new Rule("error-rule-1", "#missing1.toString()", "Error 1", "ERROR"),
-            new Rule("success-rule", "#amount > 50", "Success rule", "INFO"),
-            new Rule("error-rule-2", "#missing2.length()", "Error 2", "ERROR"),
-            new Rule("another-success", "#customerName != null", "Another success", "INFO")
+            new RuleBuilder().withName("error-rule-1").withCondition("#missing1.toString()").withMessage("Error 1").withSeverity("ERROR").build(),
+            new RuleBuilder().withName("success-rule").withCondition("#amount > 50").withMessage("Success rule").withSeverity("INFO").build(),
+            new RuleBuilder().withName("error-rule-2").withCondition("#missing2.length()").withMessage("Error 2").withSeverity("ERROR").build(),
+            new RuleBuilder().withName("another-success").withCondition("#customerName != null").withMessage("Another success").withSeverity("INFO").build()
         );
 
         Map<String, Object> facts = createTestData();
@@ -389,7 +335,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
             }
         }
 
-        logger.info("✓ Multiple SpEL errors in rule list handled gracefully");
+        logger.info("[OK] Multiple SpEL errors in rule list handled gracefully");
     }
 
     // ========================================================================
@@ -405,20 +351,20 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         Map<String, Rule> errorRules = new HashMap<>();
 
         // Property not found errors
-        errorRules.put("property-not-found", new Rule("prop-test", "#missing != null", "Property test", "ERROR"));
-        errorRules.put("nested-property-not-found", new Rule("nested-test", "#missing.field != null", "Nested test", "ERROR"));
+        errorRules.put("property-not-found", new RuleBuilder().withName("prop-test").withCondition("#missing != null").withMessage("Property test").withSeverity("ERROR").build());
+        errorRules.put("nested-property-not-found", new RuleBuilder().withName("nested-test").withCondition("#missing.field != null").withMessage("Nested test").withSeverity("ERROR").build());
 
         // Method not found errors
-        errorRules.put("method-not-found", new Rule("method-test", "#amount.invalidMethod()", "Method test", "ERROR"));
+        errorRules.put("method-not-found", new RuleBuilder().withName("method-test").withCondition("#amount.invalidMethod()").withMessage("Method test").withSeverity("ERROR").build());
 
         // Type conversion errors
-        errorRules.put("type-conversion", new Rule("type-test", "#customerName + 100", "Type test", "ERROR"));
+        errorRules.put("type-conversion", new RuleBuilder().withName("type-test").withCondition("#customerName + 100").withMessage("Type test").withSeverity("ERROR").build());
 
         // Arithmetic errors
-        errorRules.put("arithmetic-error", new Rule("arith-test", "#amount / 0", "Arithmetic test", "ERROR"));
+        errorRules.put("arithmetic-error", new RuleBuilder().withName("arith-test").withCondition("#amount / 0").withMessage("Arithmetic test").withSeverity("ERROR").build());
 
         // Array access errors
-        errorRules.put("array-bounds", new Rule("array-test", "#tags[99]", "Array test", "ERROR"));
+        errorRules.put("array-bounds", new RuleBuilder().withName("array-test").withCondition("#tags[99]").withMessage("Array test").withSeverity("ERROR").build());
 
         Map<String, Object> facts = createTestData();
 
@@ -438,11 +384,11 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
             assertFalse(result.isTriggered(), "Error rule should not be triggered for " + errorType);
             assertNotNull(result.getMessage(), "Error message should be present for " + errorType);
 
-            logger.info("✓ {} handled gracefully", errorType);
+            logger.info("[OK] {} handled gracefully", errorType);
         }
 
-        logger.info("✓ All SpEL error types handled without stack traces");
-        logger.info("✓ Comprehensive SpEL error handling validation complete");
+        logger.info("[OK] All SpEL error types handled without stack traces");
+        logger.info("[OK] Comprehensive SpEL error handling validation complete");
     }
 
     // ========================================================================

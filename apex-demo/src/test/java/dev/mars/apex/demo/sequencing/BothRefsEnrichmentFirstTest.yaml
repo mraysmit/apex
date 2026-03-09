@@ -2,7 +2,6 @@ metadata:
   name: "Both Refs - Enrichment-Refs First Test"
   type: "rule-config"
   version: "1.0.0"
-  processing-mode: "sequential"
   description: |
     CRITICAL TEST: Verify BOTH enrichment-refs AND rule-refs in same file.
     Enrichment-refs appears FIRST, rule-refs appears SECOND.

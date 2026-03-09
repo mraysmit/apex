@@ -16,8 +16,8 @@ package dev.mars.apex.yaml.manager.service;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.YamlConfigMetadata;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
+import dev.mars.apex.yaml.manager.model.ConfigMetadata;
+import dev.mars.apex.yaml.manager.model.ContentSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +61,7 @@ public class CatalogScanService {
     private static final Logger logger = LoggerFactory.getLogger(CatalogScanService.class);
 
     @Autowired
-    private YamlContentAnalyzer contentAnalyzer;
+    private ContentAnalyzer contentAnalyzer;
 
     @Autowired
     private CatalogService catalogService;
@@ -203,7 +203,8 @@ public class CatalogScanService {
             
         } catch (Exception e) {
             String error = "Classpath scan failed: " + e.getMessage();
-            logger.error(error, e);
+            logger.error(error);
+            logger.debug("Full exception details:", e);
             result.put("success", false);
             result.put("error", error);
             result.put("errors", errors);
@@ -321,10 +322,10 @@ public class CatalogScanService {
             
             // Analyze content from input stream
             try (InputStream is = resource.getInputStream()) {
-                YamlContentSummary summary = contentAnalyzer.analyzeYamlContent(is, resourcePath);
+                ContentSummary summary = contentAnalyzer.analyzeYamlContent(is, resourcePath);
                 
                 // Create metadata from summary
-                YamlConfigMetadata metadata = createMetadataFromSummary(summary, "classpath:" + resourcePath);
+                ConfigMetadata metadata = createMetadataFromSummary(summary, "classpath:" + resourcePath);
                 
                 // Mark as classpath resource
                 metadata.setClasspathResource(true);
@@ -425,10 +426,10 @@ public class CatalogScanService {
             logger.debug("Indexing YAML file: {}", absolutePath);
             
             // Analyze content
-            YamlContentSummary summary = contentAnalyzer.analyzYamlContent(absolutePath);
+            ContentSummary summary = contentAnalyzer.analyzYamlContent(absolutePath);
 
             // Create metadata from summary
-            YamlConfigMetadata metadata = createMetadataFromSummary(summary, absolutePath);
+            ConfigMetadata metadata = createMetadataFromSummary(summary, absolutePath);
 
             // Add to catalog
             catalogService.addConfiguration(metadata);
@@ -468,14 +469,14 @@ public class CatalogScanService {
     }
 
     /**
-     * Create YamlConfigMetadata from YamlContentSummary.
+     * Create ConfigMetadata from ContentSummary.
      *
      * @param summary Content summary from analyzer
      * @param filePath Absolute file path
-     * @return YamlConfigMetadata object
+     * @return ConfigMetadata object
      */
-    private YamlConfigMetadata createMetadataFromSummary(YamlContentSummary summary, String filePath) {
-        YamlConfigMetadata metadata = new YamlConfigMetadata();
+    private ConfigMetadata createMetadataFromSummary(ContentSummary summary, String filePath) {
+        ConfigMetadata metadata = new ConfigMetadata();
 
         metadata.setId(summary.getId() != null ? summary.getId() : extractIdFromPath(filePath));
         metadata.setPath(filePath);

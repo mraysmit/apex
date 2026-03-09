@@ -21,7 +21,7 @@ import dev.mars.apex.yaml.manager.model.DependencyMetrics;
 import dev.mars.apex.yaml.manager.model.EnhancedYamlDependencyGraph;
 import dev.mars.apex.yaml.manager.model.ImpactAnalysisResult;
 import dev.mars.apex.yaml.manager.model.TreeNode;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
+import dev.mars.apex.yaml.manager.model.ContentSummary;
 import dev.mars.apex.yaml.manager.service.DependencyAnalysisService;
 import dev.mars.apex.yaml.manager.service.TreeValidationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,13 +64,13 @@ public class DependencyAnalysisController {
 
     private final DependencyAnalysisService dependencyService;
     private final TreeValidationService treeValidationService;
-    private final dev.mars.apex.yaml.manager.service.YamlContentAnalyzer contentAnalyzer;
+    private final dev.mars.apex.yaml.manager.service.ContentAnalyzer contentAnalyzer;
     private EnhancedYamlDependencyGraph currentGraph;
 
     @Autowired
     public DependencyAnalysisController(DependencyAnalysisService dependencyService,
                                         TreeValidationService treeValidationService,
-                                        dev.mars.apex.yaml.manager.service.YamlContentAnalyzer contentAnalyzer) {
+                                        dev.mars.apex.yaml.manager.service.ContentAnalyzer contentAnalyzer) {
         this.dependencyService = dependencyService;
         this.treeValidationService = treeValidationService;
         this.contentAnalyzer = contentAnalyzer;
@@ -806,7 +806,7 @@ public class DependencyAnalysisController {
             String treeRoot = this.currentGraph.getRootFile();
 
             // Validate that the root file exists and is valid YAML
-            dev.mars.apex.core.util.YamlNode rootNode = this.currentGraph.getNode(treeRoot);
+            dev.mars.apex.core.util.Node rootNode = this.currentGraph.getNode(treeRoot);
             if (rootNode == null || !rootNode.exists()) {
                 logger.error("Root file does not exist: {}", treeRoot);
                 return ResponseEntity.badRequest().body(Map.of(
@@ -947,7 +947,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to get node details", e);
+            logger.error("Failed to get node details: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -1027,7 +1028,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (IOException e) {
-            logger.error("Failed to browse files", e);
+            logger.error("Failed to browse files: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", "Failed to browse directory: " + e.getMessage()
@@ -1070,7 +1072,7 @@ public class DependencyAnalysisController {
             String content = Files.readString(path);
 
             // Analyze the file to get metadata
-            YamlContentSummary summary = contentAnalyzer.analyzYamlContent(filePath);
+            ContentSummary summary = contentAnalyzer.analyzYamlContent(filePath);
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -1095,7 +1097,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (IOException e) {
-            logger.error("Failed to read file content", e);
+            logger.error("Failed to read file content: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", "Failed to read file: " + e.getMessage()

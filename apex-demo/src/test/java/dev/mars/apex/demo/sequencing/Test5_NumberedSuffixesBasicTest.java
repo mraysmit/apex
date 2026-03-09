@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -101,13 +101,13 @@ public class Test5_NumberedSuffixesBasicTest extends DemoTestBase {
         assertEquals("batch3-item1", executionLog.get(4), "Position 4 MUST be batch3-item1");
         assertEquals("batch3-item2", executionLog.get(5), "Position 5 MUST be batch3-item2");
 
-        LOGGER.info("✓ TEST 5 PASSED: All 5 definitive assertion types verified");
-        LOGGER.info("  ✓ Exact count: 6 items");
-        LOGGER.info("  ✓ Exact order: batch1-item1, batch1-item2, batch2-item1, batch2-item2, batch3-item1, batch3-item2");
-        LOGGER.info("  ✓ What executed: All 6 items from 3 numbered sections");
-        LOGGER.info("  ✓ No double execution: Each item executes exactly once");
-        LOGGER.info("  ✓ Position verification: All items at correct positions");
-        LOGGER.info("  ✓ Numbered suffixes: Merged correctly and preserved document order");
+        LOGGER.info("[OK] TEST 5 PASSED: All 5 definitive assertion types verified");
+        LOGGER.info("  [OK] Exact count: 6 items");
+        LOGGER.info("  [OK] Exact order: batch1-item1, batch1-item2, batch2-item1, batch2-item2, batch3-item1, batch3-item2");
+        LOGGER.info("  [OK] What executed: All 6 items from 3 numbered sections");
+        LOGGER.info("  [OK] No double execution: Each item executes exactly once");
+        LOGGER.info("  [OK] Position verification: All items at correct positions");
+        LOGGER.info("  [OK] Numbered suffixes: Merged correctly and preserved document order");
     }
 }
 

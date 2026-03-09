@@ -49,7 +49,7 @@ import dev.mars.apex.core.service.error.ErrorRecoveryService;
  * }</pre>
  *
  * @author Mark A Ray-Smith
- * @since 1.0
+ * @since 2025-09-27
  * @version 1.0
  */
 public class SeverityRecoveryPolicy {

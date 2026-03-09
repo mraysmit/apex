@@ -19,9 +19,9 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -112,7 +112,7 @@ class ReadSchemaCsvTest extends SyncTestBase {
         assertNotNull(schema.getColumns(), "Schema should have columns");
         assertTrue(schema.getColumns().size() >= 3, "Should have at least 3 columns");
 
-        logger.info("✓ Successfully read CSV schema with {} columns", schema.getColumns().size());
+        logger.info("[OK] Successfully read CSV schema with {} columns", schema.getColumns().size());
     }
 
     /**

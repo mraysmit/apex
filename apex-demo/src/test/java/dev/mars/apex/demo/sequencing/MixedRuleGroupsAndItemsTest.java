@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,11 +43,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MixedRuleGroupsAndItemsTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MixedRuleGroupsAndItemsTest.class);
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     public void setUp() {
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
     }
 
     @Test
@@ -108,13 +108,13 @@ public class MixedRuleGroupsAndItemsTest {
 
         LOGGER.info("Mixed Rule Groups and Items Order Test PASSED");
         LOGGER.info("   Processing Order Verified:");
-        LOGGER.info("   1. Enrichments executed first ✓");
-        LOGGER.info("   2. R1 (from ref): validate-notional-limit ✓");
-        LOGGER.info("   3. R2 (from ref): validate-strike-price ✓");
-        LOGGER.info("   4. R3 (inline): validate-market-data-present ✓");
-        LOGGER.info("   5. RG1 (from ref): trade-validation-group ✓");
-        LOGGER.info("   6. RG2 (from ref): risk-validation-group ✓");
-        LOGGER.info("   7. RG3 (inline): compliance-validation-group ✓");
+        LOGGER.info("   1. Enrichments executed first [OK]");
+        LOGGER.info("   2. R1 (from ref): validate-notional-limit [OK]");
+        LOGGER.info("   3. R2 (from ref): validate-strike-price [OK]");
+        LOGGER.info("   4. R3 (inline): validate-market-data-present [OK]");
+        LOGGER.info("   5. RG1 (from ref): trade-validation-group [OK]");
+        LOGGER.info("   6. RG2 (from ref): risk-validation-group [OK]");
+        LOGGER.info("   7. RG3 (inline): compliance-validation-group [OK]");
         LOGGER.info("");
         LOGGER.info("   🎯 COMPLEX INTERLEAVING VERIFIED: Mixed rules and groups work correctly!");
     }
@@ -193,7 +193,7 @@ public class MixedRuleGroupsAndItemsTest {
         // When a validation rule triggers (detects a violation), it reports the issue
         // but does NOT cause the overall result to fail
         assertTrue(result1.isSuccess(), "Result should succeed even when validation rules trigger (APEX design: rules are informational)");
-        LOGGER.info("✓ Test Case 1: Excessive notional - validation rule triggered correctly (reported violation without blocking processing)");
+        LOGGER.info("[OK] Test Case 1: Excessive notional - validation rule triggered correctly (reported violation without blocking processing)");
 
         // Test Case 2: Invalid strike (should fail R2 from rule-refs)
         Map<String, Object> invalidStrike = new HashMap<>();
@@ -205,7 +205,7 @@ public class MixedRuleGroupsAndItemsTest {
 
         RuleResult result2 = engine.evaluate(invalidStrike);
         assertTrue(result2.isSuccess(), "Result should succeed even when validation rules trigger (APEX design: rules are informational)");
-        LOGGER.info("✓ Test Case 2: Invalid strike - validation rule triggered correctly (reported violation without blocking processing)");
+        LOGGER.info("[OK] Test Case 2: Invalid strike - validation rule triggered correctly (reported violation without blocking processing)");
 
         // Test Case 3: Missing market data (should fail R3 inline rule)
         Map<String, Object> missingMarketData = new HashMap<>();
@@ -217,7 +217,7 @@ public class MixedRuleGroupsAndItemsTest {
 
         RuleResult result3 = engine.evaluate(missingMarketData);
         assertTrue(result3.isSuccess(), "Result should succeed even when validation rules trigger (APEX design: rules are informational)");
-        LOGGER.info("✓ Test Case 3: Missing market data - validation rule triggered correctly (reported violation without blocking processing)");
+        LOGGER.info("[OK] Test Case 3: Missing market data - validation rule triggered correctly (reported violation without blocking processing)");
 
         // Test Case 4: Missing counterparty (should fail RG3 inline rule group)
         Map<String, Object> missingCounterparty = new HashMap<>();
@@ -229,7 +229,7 @@ public class MixedRuleGroupsAndItemsTest {
 
         RuleResult result4 = engine.evaluate(missingCounterparty);
         assertTrue(result4.isSuccess(), "Result should succeed even when validation rules trigger (APEX design: rules are informational)");
-        LOGGER.info("✓ Test Case 4: Missing counterparty - validation rule triggered correctly (reported violation without blocking processing)");
+        LOGGER.info("[OK] Test Case 4: Missing counterparty - validation rule triggered correctly (reported violation without blocking processing)");
 
         LOGGER.info("Validation Failures in Order Test PASSED");
     }

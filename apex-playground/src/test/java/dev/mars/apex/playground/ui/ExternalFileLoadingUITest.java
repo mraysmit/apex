@@ -332,7 +332,7 @@ class ExternalFileLoadingUITest {
         try { Thread.sleep(500); } catch (InterruptedException e) {}
         
         assertEquals("", sourceEditor.getDomProperty("value"), "Source editor should be cleared");
-        assertEquals("", yamlEditor.getDomProperty("value"), "YAML editor should be cleared");
+        assertEquals("", CodeMirrorTestHelper.getYamlContent(driver), "YAML editor should be cleared");
     }
 
     // Helper methods
@@ -347,8 +347,7 @@ class ExternalFileLoadingUITest {
     }
 
     private void clearAndEnterText(WebElement element, String text) {
-        element.clear();
-        element.sendKeys(text);
+        CodeMirrorTestHelper.clearAndEnterText(driver, element, text);
     }
 }
 

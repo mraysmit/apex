@@ -16,9 +16,9 @@ package dev.mars.apex.demo.metrics;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -205,23 +205,23 @@ public class RecoveryStrategyComparisonDemo extends DemoTestBase {
         logger.info("\n--- Recovery Strategy Comparison Summary ---");
         
         logger.info("\nCONTINUE_WITH_DEFAULT Strategy:");
-        logger.info("  ✓ Provides fallback values for failed rules");
-        logger.info("  ✓ Ensures processing always completes");
-        logger.info("  ✓ Good for non-critical business rules");
+        logger.info("  [OK] Provides fallback values for failed rules");
+        logger.info("  [OK] Ensures processing always completes");
+        logger.info("  [OK] Good for non-critical business rules");
         logger.info("  ⚠ May mask data quality issues");
         logger.info("  ⚠ Default values may not be business-appropriate");
         
         logger.info("\nSKIP_RULE Strategy:");
-        logger.info("  ✓ Continues processing with valid rules only");
-        logger.info("  ✓ Doesn't introduce potentially incorrect default values");
-        logger.info("  ✓ Good for optional validations");
+        logger.info("  [OK] Continues processing with valid rules only");
+        logger.info("  [OK] Doesn't introduce potentially incorrect default values");
+        logger.info("  [OK] Good for optional validations");
         logger.info("  ⚠ May result in incomplete processing");
         logger.info("  ⚠ Requires downstream systems to handle missing data");
         
         logger.info("\nFAIL_FAST Strategy:");
-        logger.info("  ✓ Immediately identifies critical failures");
-        logger.info("  ✓ Prevents processing of invalid data");
-        logger.info("  ✓ Essential for critical business rules");
+        logger.info("  [OK] Immediately identifies critical failures");
+        logger.info("  [OK] Prevents processing of invalid data");
+        logger.info("  [OK] Essential for critical business rules");
         logger.info("  ⚠ Stops all processing on first failure");
         logger.info("  ⚠ May be too strict for some use cases");
         

@@ -44,7 +44,7 @@ import java.util.*;
  * typically use a library like Jackson or Gson for more robust JSON parsing.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class JsonDataLoader implements DataLoader {
@@ -84,10 +84,12 @@ public class JsonDataLoader implements DataLoader {
             LOGGER.debug("Loaded {} objects from JSON file: {}", results.size(), filePath);
             
         } catch (IOException e) {
-            LOGGER.error("Failed to load JSON file: {}", filePath, e);
+            LOGGER.error("Failed to load JSON file: {} - {}", filePath, e.getMessage());
+            LOGGER.debug("JSON file load error stack trace:", e);
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Failed to parse JSON file: {}", filePath, e);
+            LOGGER.error("Failed to parse JSON file: {} - {}", filePath, e.getMessage());
+            LOGGER.debug("JSON parse error stack trace:", e);
             throw new IOException("JSON parsing failed", e);
         }
         

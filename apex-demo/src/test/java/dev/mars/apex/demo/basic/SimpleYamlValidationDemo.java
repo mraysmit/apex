@@ -16,11 +16,11 @@
 
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +54,7 @@ public class SimpleYamlValidationDemo {
         
         try {
             // Step 1: Load the YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(getSimpleYamlRule());
 
             assertNotNull(config, "Configuration should be loaded");
@@ -62,14 +62,14 @@ public class SimpleYamlValidationDemo {
             assertEquals("Simple Age Validation", config.getMetadata().getName());
             assertEquals(1, config.getRules().size(), "Should have exactly 1 rule");
 
-            logger.info("✓ YAML configuration loaded: {}", config.getMetadata().getName());
+            logger.info("[OK] YAML configuration loaded: {}", config.getMetadata().getName());
             logger.info("  Rules count: {}", config.getRules().size());
             
             // Step 2: Create rules engine from YAML using static factory method
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
             assertNotNull(engine, "RulesEngine should be created");
-            logger.info("✓ Rules engine created successfully");
+            logger.info("[OK] Rules engine created successfully");
             
             // Step 3: Test with valid data (age >= 18)
             logger.info("--- Test 1: Valid Age (25) ---");
@@ -128,7 +128,7 @@ public class SimpleYamlValidationDemo {
 
             logger.info("=== Demo completed successfully! ===");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Demo failed: {}", e.getMessage());
             fail("Demo failed: " + e.getMessage());
         }

@@ -241,6 +241,7 @@ public class MonitoringController {
             return ruleEvaluationService.quickCheck("#test == true", testData);
         } catch (Exception e) {
             logger.warn("Basic functionality test failed: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return false;
         }
     }

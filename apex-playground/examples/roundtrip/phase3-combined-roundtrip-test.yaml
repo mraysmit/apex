@@ -1,0 +1,36 @@
+metadata:
+  id: "combined-phase3-component"
+  name: "Phase 3 Combined Test Component"
+  version: "1.0.0"
+  type: "component"
+  description: "Tests all component ref types together"
+  business-domain: "Testing"
+  owner: "test-team"
+  created-by: "tester"
+  created-date: "2025-01-01"
+  last-modified: "2025-12-31"
+  criticality: "medium"
+  sla-ms: 300
+  tags:
+    - test
+    - phase3
+
+rule-configurations:
+  - file: "rules/rule-set-a.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+
+enrichment-refs:
+  - file: "enrichments/enrichment-a.yaml"
+    execution-order: 5
+    failure-policy: "continue-with-warnings"
+
+component-refs:
+  - file: "components/nested-component.yaml"
+    execution-order: 10
+    failure-policy: "flag-for-review"
+
+config-files:
+  - file: "configs/extra-config.yaml"
+    execution-order: 15
+    failure-policy: "terminate"

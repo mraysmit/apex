@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
@@ -32,13 +32,13 @@ class SimpleCsvToJsonTest extends DemoTestBase {
     private static final Logger logger = LoggerFactory.getLogger(SimpleCsvToJsonTest.class);
 
     private RulesEngine rulesEngine;
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     public void setUp() {
         super.setUp();
         logger.info("Setting up Simple CSV to JSON Test...");
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         try {
             // Create output directory for JSON files
@@ -49,7 +49,7 @@ class SimpleCsvToJsonTest extends DemoTestBase {
             throw new RuntimeException("Failed to setup test data", e);
         }
 
-        logger.info("✓ Simple CSV to JSON Test setup completed");
+        logger.info("[OK] Simple CSV to JSON Test setup completed");
     }
 
     @AfterEach
@@ -97,7 +97,7 @@ class SimpleCsvToJsonTest extends DemoTestBase {
         assertTrue(jsonContent.contains("Customer-1"), "Should contain first customer");
         assertTrue(jsonContent.contains("Customer-1000"), "Should contain last customer");
 
-        logger.info("✓ Pipeline completed successfully");
+        logger.info("[OK] Pipeline completed successfully");
         logger.info("  - Result type: {}", result.getResultType());
         logger.info("  - Output file: {}", outputFile.toAbsolutePath());
         logger.info("  - Execution time: {}ms", executionTime);

@@ -17,8 +17,8 @@ package dev.mars.apex.yaml.manager;
  */
 
 import dev.mars.apex.yaml.manager.model.TreeNode;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
-import dev.mars.apex.yaml.manager.service.YamlContentAnalyzer;
+import dev.mars.apex.yaml.manager.model.ContentSummary;
+import dev.mars.apex.yaml.manager.service.ContentAnalyzer;
 
 /**
  * Demo class to display tree view with YAML content summaries in console.
@@ -31,7 +31,7 @@ public class TreeWithContentDemo {
         System.out.println("APEX YAML DEPENDENCY TREE WITH CONTENT SUMMARIES - CONSOLE VIEW DEMO");
         System.out.println("=".repeat(80));
 
-        YamlContentAnalyzer analyzer = new YamlContentAnalyzer();
+        ContentAnalyzer analyzer = new ContentAnalyzer();
 
         // Build a tree structure with actual YAML files
         TreeNode root = new TreeNode("src/test/resources/apex-yaml-samples/scenario-registry.yaml", 0);
@@ -111,7 +111,7 @@ public class TreeWithContentDemo {
     /**
      * Print YAML content summary for a node with detailed formatting.
      */
-    private static void printContentSummary(YamlContentSummary summary, String prefix, boolean isLast) {
+    private static void printContentSummary(ContentSummary summary, String prefix, boolean isLast) {
         String summaryPrefix = prefix + (isLast ? "    " : "│   ");
 
         // Line 1: File type and ID

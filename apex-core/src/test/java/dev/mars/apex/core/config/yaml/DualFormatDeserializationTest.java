@@ -1,4 +1,8 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -17,8 +21,14 @@ package dev.mars.apex.core.config.yaml;
  */
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +47,12 @@ class DualFormatDeserializationTest {
     
     private static final Logger logger = LoggerFactory.getLogger(DualFormatDeserializationTest.class);
     
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
     
     @BeforeEach
     public void setUp() {
         logger.info("Setting up YAML configuration loader for dual format testing...");
-        this.loader = new YamlConfigurationLoader();
+        this.loader = new ConfigurationLoader();
     }
     
     @Test
@@ -273,7 +283,7 @@ class DualFormatDeserializationTest {
                     query: "SELECT * FROM customers WHERE email = :email"
             """;
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yaml);
         });
     }
@@ -290,7 +300,7 @@ class DualFormatDeserializationTest {
                     description: "Missing name field"
             """;
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yaml);
         });
     }
@@ -307,7 +317,7 @@ class DualFormatDeserializationTest {
                     description: "Missing query field"
             """;
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yaml);
         });
     }
@@ -324,7 +334,7 @@ class DualFormatDeserializationTest {
                   - "SELECT * FROM orders"
             """;
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yaml);
         });
     }

@@ -1,0 +1,27 @@
+# ============================================================================
+# Invalid Read-Schema Step - No Source Test
+# ============================================================================
+# Tests validation of read-schema step without source.
+# Exercises validateStep() for read-schema requirement.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "invalid-read-schema-no-source-test"
+  name: "Invalid Read-Schema No Source Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests validation when read-schema step missing source"
+
+pipeline:
+  name: "invalid-read-schema-pipeline"
+  description: "Pipeline with invalid read-schema step (no source)"
+
+  steps:
+    # Read-schema step without source - should fail validation
+    - name: "read-without-source"
+      type: "read-schema"
+      parameters:
+        table: "some_table"
+      # Missing required: source

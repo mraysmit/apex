@@ -16,9 +16,9 @@ package dev.mars.apex.core.service.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlEnrichment.LookupDataset;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.core.config.model.YamlEnrichment.LookupDataset;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ import java.util.Objects;
  * </ul>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-10-09
  * @version 1.0
  */
 public class DatasetSignature {
@@ -101,7 +101,7 @@ public class DatasetSignature {
         
         String keyField = dataset.getKeyField();
         if (keyField == null || keyField.trim().isEmpty()) {
-            logger.warn("Dataset key field is null or empty - signature may not be unique");
+            logger.error("Dataset key field is null or empty - signature may not be unique");
             keyField = "unknown";
         }
         

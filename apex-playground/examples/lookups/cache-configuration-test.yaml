@@ -1,7 +1,9 @@
 metadata:
+  id: "cache-configuration-test"
   name: "Cache Configuration Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test lookup caching strategies and configuration"
 
 enrichments:

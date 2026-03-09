@@ -1,0 +1,58 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Combined test with rule-chains, enrichments, and full metadata
+# Phase 1 comprehensive roundtrip regression test
+# ============================================================================
+
+metadata:
+  id: "combined-roundtrip-test"
+  name: "Combined Roundtrip Test"
+  version: "1.0.0"
+  description: "Tests that all Phase 1 fixes work together"
+  type: "rule-config"
+  author: "APEX Test Suite"
+  created-by: "Phase1 Tester"
+  created-date: "2025-08-01"
+  last-modified: "2025-12-15"
+  business-domain: "Risk Management"
+  effective-date: "2025-09-01"
+  expiration-date: "2026-08-31"
+  tags: ["roundtrip", "combined", "phase1"]
+  owner: "Risk Team"
+
+rules:
+  - id: "basic-check"
+    name: "Basic Check"
+    condition: "#amount > 0"
+    message: "Amount is positive"
+    severity: "INFO"
+
+rule-chains:
+  - id: "risk-chain"
+    name: "Risk Assessment Chain"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        id: "risk-trigger"
+        name: "Risk Trigger"
+        condition: "#riskScore > 75"
+        message: "High risk detected"
+        result-field: "highRisk"
+        severity: "WARNING"
+      conditional-rules:
+        on-trigger:
+          - id: "escalate-risk"
+            name: "Escalate Risk"
+            condition: "true"
+            message: "Risk escalated"
+            result-field: "riskEscalated"
+            severity: "ERROR"
+
+enrichments:
+  - id: "calculate-risk-score"
+    type: "calculation-enrichment"
+    description: "Calculate composite risk score"
+    field-mappings:
+      - target-field: "compositeRiskScore"
+        expression: "#creditRisk * 0.4 + #marketRisk * 0.3 + #operationalRisk * 0.3"

@@ -17,11 +17,16 @@ package dev.mars.apex.core.util;
  */
 
 
-import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
-import dev.mars.apex.core.config.yaml.YamlValidationResult;
-import dev.mars.apex.core.config.yaml.YamlValidationSummary;
+import dev.mars.apex.core.config.validation.MetadataValidator;
+import dev.mars.apex.core.config.validation.ValidationResult;
+import dev.mars.apex.core.config.validation.ValidationSummary;
 import org.junit.jupiter.api.Test;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,7 +53,7 @@ public class ComprehensiveYamlValidationTest {
         // Try multiple possible paths to handle different execution contexts
         String basePath = findYamlBasePath();
 
-        YamlMetadataValidator validator = new YamlMetadataValidator(basePath);
+        MetadataValidator validator = new MetadataValidator(basePath);
 
         // Discover ALL YAML files in the project
         List<String> allYamlFiles = discoverAllYamlFiles(basePath);
@@ -61,7 +66,7 @@ public class ComprehensiveYamlValidationTest {
         }
         
         // Validate all files
-        YamlValidationSummary summary = validator.validateFiles(allYamlFiles);
+        ValidationSummary summary = validator.validateFiles(allYamlFiles);
         
         // Print comprehensive results
         System.out.println("\n=== VALIDATION RESULTS ===");
@@ -73,10 +78,10 @@ public class ComprehensiveYamlValidationTest {
         
         // Show detailed results for each file
         System.out.println("\n=== DETAILED RESULTS ===");
-        for (YamlValidationResult result : summary.getResults()) {
+        for (ValidationResult result : summary.getResults()) {
             String status = result.getStatus();
             String indicator = switch (status) {
-                case "VALID" -> "✓";
+                case "VALID" -> "[OK]";
                 case "VALID_WITH_WARNINGS" -> "⚠";
                 case "INVALID" -> "✗";
                 default -> "?";
@@ -107,9 +112,9 @@ public class ComprehensiveYamlValidationTest {
         
         // Check that all files are valid
         if (!summary.isAllValid()) {
-            List<YamlValidationResult> invalidResults = summary.getInvalidResults();
+            List<ValidationResult> invalidResults = summary.getInvalidResults();
             StringBuilder errorMessage = new StringBuilder("The following YAML files are invalid:\n");
-            for (YamlValidationResult result : invalidResults) {
+            for (ValidationResult result : invalidResults) {
                 errorMessage.append("  - ").append(result.getFilePath()).append(":\n");
                 for (String error : result.getErrors()) {
                     errorMessage.append("    * ").append(error).append("\n");

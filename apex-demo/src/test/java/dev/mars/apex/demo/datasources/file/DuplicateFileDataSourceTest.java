@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.datasources.file;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.core.cache.ApexCacheManager;
 
@@ -111,11 +111,11 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
                 "Hit rate should be greater than 0% (caching is working)");
 
             logger.info("VERIFICATION SUCCESSFUL:");
-            logger.info("   ✓ Only 1 DatasetLookupService created for CSV file (not 2)");
-            logger.info("   ✓ Second enrichment reused first enrichment's dataset");
-            logger.info("   ✓ Memory duplication eliminated via caching");
-            logger.info("   ✓ 50% memory savings achieved");
-            logger.info("   ✓ CSV file dataset deduplication works same as inline and database!");
+            logger.info("   [OK] Only 1 DatasetLookupService created for CSV file (not 2)");
+            logger.info("   [OK] Second enrichment reused first enrichment's dataset");
+            logger.info("   [OK] Memory duplication eliminated via caching");
+            logger.info("   [OK] 50% memory savings achieved");
+            logger.info("   [OK] CSV file dataset deduplication works same as inline and database!");
             logger.info("=================================================================");
 
             // Verify enrichment results are still correct

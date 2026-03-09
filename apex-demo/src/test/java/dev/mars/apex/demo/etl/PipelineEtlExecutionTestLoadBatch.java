@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ class PipelineEtlExecutionTestLoadBatch extends DemoTestBase {
             throw new RuntimeException("Failed to create database directory", e);
         }
 
-        logger.info("✓ Batch Load Pipeline Test setup completed");
+        logger.info("[OK] Batch Load Pipeline Test setup completed");
     }
 
     @AfterEach
@@ -77,7 +77,7 @@ class PipelineEtlExecutionTestLoadBatch extends DemoTestBase {
         Path dbFile = Paths.get("./demo-data/database/batch_db.mv.db");
         assertTrue(Files.exists(dbFile), "Batch database file should be created");
 
-        logger.info("✓ Batch load pipeline test completed successfully");
+        logger.info("[OK] Batch load pipeline test completed successfully");
         logger.info("  - Database file: {}", dbFile.toAbsolutePath());
     }
 }

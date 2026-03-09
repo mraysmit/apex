@@ -1,13 +1,11 @@
 package dev.mars.apex.sync;
 
-import dev.mars.apex.core.config.yaml.RulesEngineService;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.HashMap;
 
 /**
@@ -39,9 +37,8 @@ public class TableSyncRunner {
         try {
             logger.info("Starting Zero-Custom APEX Sync Runner...");
 
-            // Direct delegation to APEX Core Service
-            RulesEngineService service = new RulesEngineService();
-            RulesEngine engine = service.createRulesEngineFromFile(new File(configPath));
+            // Direct delegation to APEX Core
+            RulesEngine engine = RulesEngine.fromFile(configPath);
             RuleResult result = engine.evaluate(new HashMap<>());
 
             // Display execution summary
@@ -106,7 +103,8 @@ public class TableSyncRunner {
 
             System.exit(result.isSuccess() ? 0 : 1);
         } catch (Exception e) {
-            logger.error("Runner failed", e);
+            logger.error("Runner failed: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             System.exit(2);
         }
     }

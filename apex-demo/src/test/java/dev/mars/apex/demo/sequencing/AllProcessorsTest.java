@@ -1,10 +1,11 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import dev.mars.apex.engine.core.RuleBuilder;
 
 /**
  * COMPREHENSIVE TEST: Tests ALL APEX processors with the SAME YAML file
@@ -25,23 +27,23 @@ class AllProcessorsTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllProcessorsTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private RulesEngineConfiguration rulesEngineConfiguration;
 
     @BeforeEach
     void setUp() {
         LOGGER.info("🔧 Initializing ALL APEX processors for comprehensive testing");
 
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         rulesEngineConfiguration = new RulesEngineConfiguration();
 
         LOGGER.info("All processors initialized");
     }
 
     @Test
-    @DisplayName("PROCESSOR 1: YamlEnrichmentProcessor (Rules → Enrichments)")
-    void testYamlEnrichmentProcessor() {
-        LOGGER.info("=== TESTING: YamlEnrichmentProcessor ===");
+    @DisplayName("PROCESSOR 1: EnrichmentProcessor (Rules → Enrichments)")
+    void testEnrichmentProcessor() {
+        LOGGER.info("=== TESTING: EnrichmentProcessor ===");
         LOGGER.info("Processing Order: Rules FIRST → Enrichments SECOND (hardcoded)");
         
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
@@ -67,7 +69,7 @@ class AllProcessorsTest {
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
-            LOGGER.info("YamlEnrichmentProcessor Result: {}", enrichedData);
+            LOGGER.info("EnrichmentProcessor Result: {}", enrichedData);
             
             // Check what was actually calculated
             if (enrichedData.containsKey("riskScore")) {
@@ -82,11 +84,11 @@ class AllProcessorsTest {
                 LOGGER.error("riskCategory NOT set");
             }
             
-            assertNotNull(result, "YamlEnrichmentProcessor should return result");
+            assertNotNull(result, "EnrichmentProcessor should return result");
             
         } catch (Exception e) {
-            LOGGER.error("💥 YamlEnrichmentProcessor failed: {}", e.getMessage());
-            fail("YamlEnrichmentProcessor should not fail: " + e.getMessage());
+            LOGGER.error("💥 EnrichmentProcessor failed: {}", e.getMessage());
+            fail("EnrichmentProcessor should not fail: " + e.getMessage());
         }
     }
 
@@ -142,10 +144,10 @@ class AllProcessorsTest {
     }
 
     @Test
-    @DisplayName("PROCESSOR 3: enrichmentProcessor.processEnrichments() (Delegates to YamlEnrichmentProcessor)")
+    @DisplayName("PROCESSOR 3: enrichmentProcessor.processEnrichments() (Delegates to EnrichmentProcessor)")
     void testEnrichmentService() {
         LOGGER.info("=== TESTING: enrichmentProcessor.processEnrichments() ===");
-        LOGGER.info("Processing Order: Delegates to YamlEnrichmentProcessor (Rules → Enrichments)");
+        LOGGER.info("Processing Order: Delegates to EnrichmentProcessor (Rules → Enrichments)");
         
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
         YamlRuleConfiguration config;
@@ -198,19 +200,19 @@ class AllProcessorsTest {
             RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
             
             // Create individual rules for testing
-            dev.mars.apex.core.engine.model.Rule riskScoreRule = 
-                new dev.mars.apex.core.engine.model.Rule(
-                    "risk-score-check", 
-                    "#riskScore != null && #riskScore >= 0", 
-                    "Risk score validation"
-                );
+            Rule riskScoreRule = new RuleBuilder()
+                .withName("risk-score-check")
+                .withCondition("#riskScore != null && #riskScore >= 0")
+                .withMessage("Risk score validation")
+                .withSeverity(dev.mars.apex.core.constants.SeverityConstants.INFO)
+                .build();
                 
-            dev.mars.apex.core.engine.model.Rule riskCategoryRule = 
-                new dev.mars.apex.core.engine.model.Rule(
-                    "risk-category-check", 
-                    "#riskCategory != null && (#riskCategory == 'HIGH_RISK' || #riskCategory == 'MEDIUM_RISK' || #riskCategory == 'LOW_RISK')", 
-                    "Risk category validation"
-                );
+            Rule riskCategoryRule = new RuleBuilder()
+                .withName("risk-category-check")
+                .withCondition("#riskCategory != null && (#riskCategory == 'HIGH_RISK' || #riskCategory == 'MEDIUM_RISK' || #riskCategory == 'LOW_RISK')")
+                .withMessage("Risk category validation")
+                .withSeverity(dev.mars.apex.core.constants.SeverityConstants.INFO)
+                .build();
             
             // Execute individual rules
             RuleResult riskScoreResult = engine.executeRule(riskScoreRule, testData);

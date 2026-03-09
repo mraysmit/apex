@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  * - Performance monitoring and metrics
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-01
  * @version 1.0
  */
 public class DataSourceManager implements DataSourceRegistryListener {
@@ -135,7 +135,8 @@ public class DataSourceManager implements DataSourceRegistryListener {
             notifyListeners(DataSourceManagerEvent.initialized(registry.size()));
             
         } catch (Exception e) {
-            LOGGER.error("Failed to initialize DataSourceManager", e);
+            LOGGER.error("Failed to initialize DataSourceManager: {}", e.getMessage());
+            LOGGER.debug("Stack trace for DataSourceManager initialization failure:", e);
             
             // Clean up any partially created data sources
             shutdown();
@@ -312,12 +313,14 @@ public class DataSourceManager implements DataSourceRegistryListener {
             try {
                 ExternalDataSource dataSource = registry.getDataSource(dataSourceName);
                 if (dataSource == null) {
-                    throw new RuntimeException("Data source not found: " + dataSourceName);
+                    throw new DataSourceResolutionException("Data source not found: " + dataSourceName);
                 }
                 
                 return dataSource.query(query, parameters);
+            } catch (DataSourceResolutionException e) {
+                throw e;
             } catch (Exception e) {
-                throw new RuntimeException("Async query failed", e);
+                throw new DataSourceResolutionException("Async query failed for data source '" + dataSourceName + "'", e);
             }
         }, queryExecutor);
     }
@@ -594,7 +597,8 @@ public class DataSourceManager implements DataSourceRegistryListener {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Error collecting metrics", e);
+            LOGGER.error("Error collecting metrics: {}", e.getMessage());
+            LOGGER.debug("Stack trace for metrics collection error:", e);
         }
     }
 
@@ -611,7 +615,8 @@ public class DataSourceManager implements DataSourceRegistryListener {
             try {
                 listener.onManagerEvent(event);
             } catch (Exception e) {
-                LOGGER.error("Error notifying manager listener", e);
+                LOGGER.error("Error notifying manager listener: {}", e.getMessage());
+                LOGGER.debug("Stack trace for manager listener notification error:", e);
             }
         }
     }

@@ -19,11 +19,11 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReadSchemaDatabaseEnumerationPipelineStageTestReport extends SyncTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ReadSchemaDatabaseEnumerationPipelineStageTestReport.class);
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
     private RulesEngine rulesEngine;
     private Connection testConnection;
     private String dbName;
@@ -161,8 +161,8 @@ class ReadSchemaDatabaseEnumerationPipelineStageTestReport extends SyncTestBase 
         assertTrue(reportContent.contains("ORDERS") || reportContent.contains("orders"), 
             "Report should contain ORDERS table");
 
-        logger.info("✓ HTML report generated: {}", reportPath);
-        logger.info("✓ Successfully enumerated tables with report generation");
+        logger.info("[OK] HTML report generated: {}", reportPath);
+        logger.info("[OK] Successfully enumerated tables with report generation");
     }
 
     private void setupTestDatabase() throws Exception {

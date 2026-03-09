@@ -18,11 +18,11 @@
 
 package dev.mars.apex.sync.schemas;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.sync.ColoredTestOutputExtension;
 import dev.mars.apex.sync.SyncTestBase;
 import org.junit.jupiter.api.AfterAll;
@@ -159,7 +159,7 @@ public class CustomSchemaPostgresTest extends SyncTestBase {
     @DisplayName("Should read schema from custom sales schema")
     void shouldReadSchemaFromSalesSchema() throws Exception {
         // Given: Load YAML and update connection for TestContainers
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/schemas/CustomSchemaPostgresTest_sales.yaml"
         );
@@ -182,7 +182,7 @@ public class CustomSchemaPostgresTest extends SyncTestBase {
     @DisplayName("Should read schema from custom inventory schema")
     void shouldReadSchemaFromInventorySchema() throws Exception {
         // Given: Load YAML and update connection for TestContainers
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/schemas/CustomSchemaPostgresTest_inventory.yaml"
         );
@@ -205,7 +205,7 @@ public class CustomSchemaPostgresTest extends SyncTestBase {
     @DisplayName("Should read schema from custom hr schema")
     void shouldReadSchemaFromHrSchema() throws Exception {
         // Given: Load YAML and update connection for TestContainers
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/schemas/CustomSchemaPostgresTest_hr.yaml"
         );
@@ -228,7 +228,7 @@ public class CustomSchemaPostgresTest extends SyncTestBase {
     @DisplayName("Should compare schemas across different custom schemas")
     void shouldCompareSchemasCrossSchema() throws Exception {
         // Given: Load YAML and update connections for TestContainers
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/schemas/CustomSchemaPostgresTest_cross_schema.yaml"
         );

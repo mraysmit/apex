@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.codes;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +30,7 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
         super.setUp();  // Call parent setUp to initialize APEX services
         config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/codes/EnrichmentCodesValidationSimple-enrichments.yaml");
         assertNotNull(config, "Configuration should be loaded");
-        logger.info("✓ Configuration loaded: {} enrichments", config.getEnrichments().size());
+        logger.info("[OK] Configuration loaded: {} enrichments", config.getEnrichments().size());
     }
 
     /**
@@ -73,7 +73,7 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
         logger.info("AFTER ENRICHMENT:");
         logger.info("  Dataset: {}", enrichedData);
         logger.info("");
-        logger.info("✓ Enrichment succeeded with success code");
+        logger.info("[OK] Enrichment succeeded with success code");
         logger.info("  - validated_amount: {}", enrichedData.get("validated_amount"));
         logger.info("  - success-code: AMOUNT_VALID");
     }
@@ -118,7 +118,7 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
         logger.info("AFTER ENRICHMENT:");
         logger.info("  Dataset: {}", enrichedData);
         logger.info("");
-        logger.info("✓ Enrichment failed as expected with error code");
+        logger.info("[OK] Enrichment failed as expected with error code");
         logger.info("  - validated_amount: null (enrichment not applied)");
         logger.info("  - error-code: AMOUNT_INVALID");
     }

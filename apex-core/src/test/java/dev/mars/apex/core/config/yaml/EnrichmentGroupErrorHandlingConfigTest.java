@@ -1,10 +1,20 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.EnrichmentGroup;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.EnrichmentGroup;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,14 +29,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class EnrichmentGroupErrorHandlingConfigTest {
 
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentGroupErrorHandlingConfigTest.class);
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
     }
 
     @Test

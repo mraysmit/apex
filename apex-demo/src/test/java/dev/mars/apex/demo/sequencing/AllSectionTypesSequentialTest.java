@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AllSectionTypesSequentialTest extends DemoTestBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllSectionTypesSequentialTest.class);
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     @Test
     @DisplayName("Test 1: Verify all section types loaded correctly")
@@ -119,27 +119,27 @@ class AllSectionTypesSequentialTest extends DemoTestBase {
         
         // ULTIMATE VERIFICATION: All processing in correct order
         
-        // Phase 1: Enrichments from external file (E1, E2)
+        // Enrichments from external file (E1, E2)
         assertTrue(enrichedData.containsKey("currentSpotPrice"),
             "E1 (from ref): currentSpotPrice should be enriched");
         assertTrue(enrichedData.containsKey("optionDelta"),
             "E2 (from ref): optionDelta should be enriched");
         
-        // Phase 2: Inline enrichment (E3)
+        //Inline enrichment (E3)
         assertTrue(enrichedData.containsKey("counterpartyRating"),
             "E3 (inline): counterpartyRating should be enriched");
         
-        // Phase 3: Enrichment groups from external file (EG1, EG2)
+        // Enrichment groups from external file (EG1, EG2)
         assertTrue(enrichedData.containsKey("impliedVolatility"),
             "EG1 (from ref): impliedVolatility should be enriched");
         assertTrue(enrichedData.containsKey("valueAtRisk"),
             "EG2 (from ref): valueAtRisk should be enriched");
         
-        // Phase 4: Inline enrichment group (EG3)
+        // Inline enrichment group (EG3)
         assertTrue(enrichedData.containsKey("productCategory"),
             "EG3 (inline): productCategory should be enriched");
         
-        // Phase 5: Validation should succeed
+        // Validation should succeed
         assertTrue(result.isSuccess(),
             "All validations should pass with complete data");
         

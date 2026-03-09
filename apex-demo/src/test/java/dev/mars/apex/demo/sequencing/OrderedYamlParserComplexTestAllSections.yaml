@@ -2,7 +2,6 @@ metadata:
   name: "Complete APEX Configuration"
   type: "rule-config"
   version: "2.0"
-  processing-mode: "sequential"
   description: "Comprehensive test with all YAML section types"
 
 data-sources:

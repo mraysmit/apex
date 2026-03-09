@@ -1,7 +1,16 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.RuleFactory;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
-import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.engine.model.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
@@ -55,7 +64,7 @@ public class YamlDefaultValueIntegrationTest {
                 message: "Email format check"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Verify rules are loaded with default values
@@ -76,7 +85,7 @@ public class YamlDefaultValueIntegrationTest {
     @Test
     public void testRuleCreationWithDefaultValue() throws Exception {
         // Create a rule with default value
-        YamlRuleFactory factory = new YamlRuleFactory();
+        RuleFactory factory = new RuleFactory();
 
         YamlRule yamlRule = new YamlRule();
         yamlRule.setId("test-rule");
@@ -117,7 +126,7 @@ public class YamlDefaultValueIntegrationTest {
                     target-field: "finalValue"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Verify enrichment is loaded with calculation default value
@@ -160,7 +169,7 @@ public class YamlDefaultValueIntegrationTest {
                     target-field: "result"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Verify backward compatibility - no default values
@@ -196,7 +205,7 @@ public class YamlDefaultValueIntegrationTest {
                 # No default-value specified
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Verify mixed configuration
@@ -241,7 +250,7 @@ public class YamlDefaultValueIntegrationTest {
                 default-value: 3.14
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Verify different data types are preserved

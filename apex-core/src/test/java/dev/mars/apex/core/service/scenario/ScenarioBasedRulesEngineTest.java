@@ -17,13 +17,19 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import dev.mars.apex.core.cache.ApexCacheManager;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Modern test for scenario-based validation and enrichment using the new RulesEngine API.
  * 
- * This test replaces the deprecated DataTypeScenarioService tests by using the same
+ * This test replaces the deleted DataTypeScenarioService tests by using the same
  * valid YAML configurations with the new RulesEngine architecture.
  * 
  * The YAML files contain real business logic for OTC option trade processing including:
@@ -53,13 +59,13 @@ public class ScenarioBasedRulesEngineTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenarioBasedRulesEngineTest.class);
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         ApexCacheManager.resetInstance();
-        yamlLoader = new YamlConfigurationLoader();
-        logger.info("✓ Initialized test environment with RulesEngine API");
+        yamlLoader = new ConfigurationLoader();
+        logger.info("[OK] Initialized test environment with RulesEngine API");
     }
 
     @Test
@@ -293,14 +299,14 @@ public class ScenarioBasedRulesEngineTest {
         
         if (!validationResult.isSuccess()) {
             // Validation failed - verify we got a proper failure result
-            logger.info("✓ Validation stage failed as expected (missing required fields)");
+            logger.info("[OK] Validation stage failed as expected (missing required fields)");
             logger.info("   Failure policy: terminate - enrichment stage should be skipped");
             
             // Verify the failure result contains useful information
             assertNotNull(validationResult.getSeverity(), "Failed result should have severity");
             logger.info("   Failure severity: {}", validationResult.getSeverity());
         } else {
-            logger.info("✓ Validation stage passed - proceeding to enrichment stage");
+            logger.info("[OK] Validation stage passed - proceeding to enrichment stage");
             
             // Load enrichment stage configuration
             YamlRuleConfiguration enrichmentConfig = yamlLoader.loadFromFile(
@@ -313,7 +319,7 @@ public class ScenarioBasedRulesEngineTest {
             RuleResult enrichmentResult = enrichmentEngine.evaluate(validationResult.getEnrichedData());
             
             assertNotNull(enrichmentResult, "Enrichment result should not be null");
-            logger.info("✓ Enrichment stage completed");
+            logger.info("[OK] Enrichment stage completed");
         }
         
         logger.info("Staged processing with failure policies demonstrated");

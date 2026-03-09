@@ -1,4 +1,5 @@
 metadata:
+  id: "global-settings-test"
   name: "Global Settings Test"
   version: "1.0"
   type: "rule-config"

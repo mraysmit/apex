@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -95,11 +95,11 @@ public class Test4_StandaloneEnrichmentsTest extends DemoTestBase {
         assertEquals("grouped-2", executionLog.get(3), "Position 3 MUST be grouped-2 (from group-A)");
 
         LOGGER.info("TEST 4A PASSED: All 5 definitive assertion types verified");
-        LOGGER.info("  ✓ Exact count: 4 items");
-        LOGGER.info("  ✓ Exact order: standalone-1, standalone-2, grouped-1, grouped-2");
-        LOGGER.info("  ✓ What executed: All 4 items present");
-        LOGGER.info("  ✓ No double execution: Each item executes exactly once");
-        LOGGER.info("  ✓ Position verification: All items at correct positions");
+        LOGGER.info("  [OK] Exact count: 4 items");
+        LOGGER.info("  [OK] Exact order: standalone-1, standalone-2, grouped-1, grouped-2");
+        LOGGER.info("  [OK] What executed: All 4 items present");
+        LOGGER.info("  [OK] No double execution: Each item executes exactly once");
+        LOGGER.info("  [OK] Position verification: All items at correct positions");
     }
 }
 

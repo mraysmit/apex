@@ -1,6 +1,10 @@
 metadata:
+  id: "lookup-enrichment-test"
   name: "Lookup Enrichment Test"
   version: "1.0"
+  type: "rule-config"
+  description: "Test lookup-based enrichment configuration"
+  author: "APEX Demo Team"
 
 enrichments:
   - id: "currency-lookup"

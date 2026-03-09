@@ -16,8 +16,8 @@
 
 package dev.mars.apex.demo.severity;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,10 +36,10 @@ class SeverityValidationNegativeTest {
     @DisplayName("Test negative severity validation")
     void testNegativeSeverityValidation() {
         // Load YAML configuration with invalid severity values
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
 
         // This should throw an exception due to invalid severity values
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile("src/test/java/dev/mars/apex/demo/severity/SeverityValidationNegativeTest.yaml");
         });
 

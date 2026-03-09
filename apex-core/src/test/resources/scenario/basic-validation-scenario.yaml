@@ -7,7 +7,7 @@ metadata:
   description: "Simple validation scenario for testing stream loading"
   type: "scenario"
   version: "1.0.0"
-  owner: "APEX Test Team"
+  owner: "Mark Andrew Ray-Smith Cityline Ltd "
   business-domain: "Testing"
 
 scenario:

@@ -1,4 +1,8 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -20,7 +24,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.mars.apex.core.config.datasink.DataSinkConfiguration;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +122,7 @@ public class YamlDataSinkConfigurationTest {
         assertTrue(dataSink.getOperations().containsKey("insertRecord"));
         assertTrue(dataSink.getOperations().containsKey("updateRecord"));
         
-        LOGGER.info("✓ Basic data sink YAML parsing test passed");
+        LOGGER.info("[OK] Basic data sink YAML parsing test passed");
     }
     
     @Test
@@ -181,7 +190,7 @@ public class YamlDataSinkConfigurationTest {
         assertTrue(config.getTags().contains("csv"));
         assertTrue(config.getTags().contains("output"));
         
-        LOGGER.info("✓ Data sink configuration conversion test passed");
+        LOGGER.info("[OK] Data sink configuration conversion test passed");
     }
     
     @Test
@@ -326,7 +335,7 @@ public class YamlDataSinkConfigurationTest {
         assertNotNull(fileSink.getOutputFormat());
         assertNotNull(fileSink.getBatch());
         
-        LOGGER.info("✓ Complete YAML configuration with data sinks test passed");
+        LOGGER.info("[OK] Complete YAML configuration with data sinks test passed");
     }
     
     @Test
@@ -417,6 +426,6 @@ public class YamlDataSinkConfigurationTest {
         assertEquals("id", sink.getParameterNames()[0]);
         assertEquals("timestamp", sink.getParameterNames()[3]);
         
-        LOGGER.info("✓ APEX YAML syntax conventions test passed");
+        LOGGER.info("[OK] APEX YAML syntax conventions test passed");
     }
 }

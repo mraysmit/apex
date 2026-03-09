@@ -1,4 +1,4 @@
-PeeGeeQ - Production-Ready PostgreSQL Message Queue
+APEX Rules Engine - Production-Ready Rules Evaluation Engine
 Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
 
 This product includes software developed by Mark Andrew Ray-Smith Cityline Ltd.
@@ -7,7 +7,32 @@ This product includes software developed by Mark Andrew Ray-Smith Cityline Ltd.
 
 This software contains the following third-party components:
 
-PostgreSQL JDBC Driver (org.postgresql:postgresql:42.6.0)
+Spring Framework (org.springframework:spring-expression, spring-context, spring-core, spring-jdbc, spring-jcl)
+  License: Apache License 2.0
+  Copyright (c) 2002-2024 Pivotal, Inc. and contributors
+  https://github.com/spring-projects/spring-framework
+
+Spring Boot (org.springframework.boot:spring-boot-starter-web, spring-boot-starter-actuator, spring-boot-starter-validation:3.4.0)
+  License: Apache License 2.0
+  Copyright (c) 2012-2024 Pivotal, Inc. and contributors
+  https://github.com/spring-projects/spring-boot
+
+Jackson JSON/YAML/XML Processing (com.fasterxml.jackson:jackson-core, jackson-databind, jackson-dataformat-yaml, jackson-dataformat-xml:2.18.2)
+  License: Apache License 2.0
+  Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
+  https://github.com/FasterXML/jackson
+
+SnakeYAML (org.yaml:snakeyaml:2.0)
+  License: Apache License 2.0
+  Copyright (c) 2008 Andrey Somov
+  https://github.com/snakeyaml/snakeyaml
+
+Handlebars.java (com.github.jknack:handlebars:4.3.1)
+  License: Apache License 2.0
+  Copyright (c) 2012 Edgar Espina
+  https://github.com/jknack/handlebars.java
+
+PostgreSQL JDBC Driver (org.postgresql:postgresql:42.7.7)
   License: BSD 2-Clause License
   Copyright (c) 1997, PostgreSQL Global Development Group
   https://github.com/pgjdbc/pgjdbc
@@ -17,59 +42,39 @@ HikariCP Connection Pool (com.zaxxer:HikariCP:5.0.1)
   Copyright (C) 2013 Brett Wooldridge
   https://github.com/brettwooldridge/HikariCP
 
-Jackson JSON Processing (com.fasterxml.jackson.core:jackson-databind:2.15.2)
-  License: Apache License 2.0
-  Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
-  https://github.com/FasterXML/jackson-databind
+H2 Database Engine (com.h2database:h2)
+  License: Eclipse Public License 1.0 and Mozilla Public License 2.0
+  Copyright (c) 2004-2024 H2 Group
+  https://github.com/h2database/h2database
 
-Eclipse Vert.x (io.vertx:vertx-core:4.5.11)
-  License: Apache License 2.0 and Eclipse Public License 2.0
-  Copyright (c) 2011-2023 The original author or authors
-  https://github.com/eclipse-vertx/vert.x
-
-SLF4J Logging API (org.slf4j:slf4j-api:2.0.9)
+SLF4J Logging API (org.slf4j:slf4j-api:2.0.16)
   License: MIT License
-  Copyright (c) 2004-2023 QOS.ch Sarl (Switzerland)
+  Copyright (c) 2004-2024 QOS.ch Sarl (Switzerland)
   https://github.com/qos-ch/slf4j
 
-Logback Classic (ch.qos.logback:logback-classic:1.4.11)
+Logback Classic (ch.qos.logback:logback-classic:1.5.12)
   License: Eclipse Public License 1.0 and GNU Lesser General Public License 2.1
-  Copyright (C) 1999-2023, QOS.ch
+  Copyright (C) 1999-2024, QOS.ch
   https://github.com/qos-ch/logback
 
-Micrometer Metrics (io.micrometer:micrometer-core:1.12.0)
+SpringDoc OpenAPI (org.springdoc:springdoc-openapi-ui:2.7.0)
   License: Apache License 2.0
-  Copyright 2017 VMware, Inc.
-  https://github.com/micrometer-metrics/micrometer
+  Copyright (c) 2019 springdoc contributors
+  https://github.com/springdoc/springdoc-openapi
 
-Resilience4j Circuit Breaker (io.github.resilience4j:resilience4j-circuitbreaker:2.1.0)
-  License: Apache License 2.0
-  Copyright 2017 Robert Winkler, Bohdan Storozhuk
-  https://github.com/resilience4j/resilience4j
-
-SCRAM Authentication (com.ongres.scram:common:2.1)
-  License: BSD 2-Clause License
-  Copyright (c) 2017, OnGres, Inc.
-  https://github.com/ongres/scram
-
-JUnit 5 Testing Framework (org.junit.jupiter:junit-jupiter:5.10.1)
+JUnit 5 Testing Framework (org.junit.jupiter:junit-jupiter:5.11.4)
   License: Eclipse Public License 2.0
-  Copyright 2015-2023 the original author or authors
+  Copyright 2015-2024 the original author or authors
   https://github.com/junit-team/junit5
 
-TestContainers (org.testcontainers:testcontainers:1.18.3)
+TestContainers (org.testcontainers:testcontainers:2.0.2)
   License: MIT License
-  Copyright (c) 2015-2023 Richard North and other authors
+  Copyright (c) 2015-2024 Richard North and other authors
   https://github.com/testcontainers/testcontainers-java
-
-Mockito Testing Framework (org.mockito:mockito-core:5.7.0)
-  License: MIT License
-  Copyright (c) 2007 Mockito contributors
-  https://github.com/mockito/mockito
 
 Awaitility Testing Utility (org.awaitility:awaitility:4.2.0)
   License: Apache License 2.0
-  Copyright 2010-2023 the original author or authors
+  Copyright 2010-2024 the original author or authors
   https://github.com/awaitility/awaitility
 
 ================================================================================

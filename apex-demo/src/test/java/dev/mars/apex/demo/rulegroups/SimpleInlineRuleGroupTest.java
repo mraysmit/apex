@@ -16,10 +16,10 @@ package dev.mars.apex.demo.rulegroups;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class SimpleInlineRuleGroupTest {
     private Map<String, Object> testContext;
 
     @BeforeEach
-    void setUp() throws YamlConfigurationException {
+    void setUp() throws ConfigurationException {
         LOGGER.info("Setting up Simple Inline Rule Group Test...");
 
         // Create the rules engine using static factory method

@@ -16,10 +16,10 @@ package dev.mars.apex.demo.metrics;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * ============================================================================
  *
  * REAL APEX SERVICES USED:
- * - YamlConfigurationLoader: Load recovery configuration from YAML
+ * - ConfigurationLoader: Load recovery configuration from YAML
  * - RulesEngine: Execute rules with recovery enabled/disabled
  * - RulePerformanceMetrics: Collect detailed performance and recovery metrics
  * - ErrorRecoveryService: Handle different recovery strategies

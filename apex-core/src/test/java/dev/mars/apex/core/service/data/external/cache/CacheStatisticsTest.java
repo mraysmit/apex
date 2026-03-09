@@ -18,7 +18,11 @@ package dev.mars.apex.core.service.data.external.cache;
 
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.time.LocalDateTime;
 import java.util.concurrent.*;
 
@@ -40,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class CacheStatisticsTest {
 
     private CacheStatistics statistics;

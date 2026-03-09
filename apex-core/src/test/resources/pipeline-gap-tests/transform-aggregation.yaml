@@ -1,0 +1,53 @@
+# ============================================================================
+# Transform Step - Aggregation Type Test
+# ============================================================================
+# Tests transform step with aggregation transformation type (unsupported).
+# Exercises the "aggregation" case in applyTransformation() switch.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "transform-aggregation-test"
+  name: "Transform Aggregation Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests transform step with unsupported aggregation type"
+
+data-sources:
+  - name: "validation-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:validation_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, customer_name, status FROM validation_source"
+
+pipeline:
+  name: "transform-aggregation-pipeline"
+  description: "Pipeline with aggregation transform"
+
+  execution:
+    mode: "sequential"
+    max-retries: 0
+
+  steps:
+    - name: "extract-for-aggregation"
+      type: "extract"
+      source: "validation-source"
+      operation: "getAllRecords"
+      description: "Extract records"
+
+    - name: "aggregate-records"
+      type: "transform"
+      description: "Test unsupported aggregation type"
+      depends-on: ["extract-for-aggregation"]
+      transformations:
+        - name: "sum-values"
+          type: "aggregation"
+          field: "total_count"

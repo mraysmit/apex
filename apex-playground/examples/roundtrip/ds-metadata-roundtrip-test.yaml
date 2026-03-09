@@ -1,0 +1,33 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Test data-source-config metadata fields survive import roundtrip
+# Phase 1 regression test for data-source metadata import fix
+# ============================================================================
+
+metadata:
+  id: "ds-metadata-roundtrip-test"
+  name: "Data Source Metadata Roundtrip Test"
+  type: "external-data-config"
+  version: "1.0.0"
+  description: "Data source config with all metadata fields"
+  author: "APEX Test Suite"
+  created-by: "Jane Doe"
+  created-date: "2025-03-10"
+  last-modified: "2025-07-15"
+  business-domain: "Market Data"
+  effective-date: "2025-04-01"
+  expiration-date: "2027-03-31"
+  tags: ["roundtrip", "data-source", "phase1"]
+  owner: "Data Engineering"
+
+data-sources:
+  - id: "test-database"
+    type: "database"
+    description: "Test database source"
+    connection:
+      url: "jdbc:postgresql://localhost:5432/test"
+      driver: "org.postgresql.Driver"
+    queries:
+      - id: "getCustomer"
+        sql: "SELECT * FROM customers WHERE id = :customerId"

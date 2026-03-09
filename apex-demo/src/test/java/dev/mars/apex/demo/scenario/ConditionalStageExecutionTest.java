@@ -4,7 +4,7 @@
  */
 package dev.mars.apex.demo.scenario;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +90,7 @@ public class ConditionalStageExecutionTest extends DemoTestBase {
             String registryPath = "src/test/java/dev/mars/apex/demo/scenario/ConditionalStageExecutionTest.yaml";
             rulesEngine = RulesEngine.fromScenarioRegistry(registryPath);
 
-            logger.info("✓ Loaded scenario registry with conditional processing stages");
+            logger.info("[OK] Loaded scenario registry with conditional processing stages");
         } catch (Exception e) {
             logger.error("Failed to load scenario registry", e);
             throw new RuntimeException("Failed to load scenario registry", e);
@@ -136,7 +136,7 @@ public class ConditionalStageExecutionTest extends DemoTestBase {
         assertFalse(result.isStageSuccessful("high-value-validation"), 
             "High-value stage should be skipped for $5M trade");
         
-        logger.info("✓ US region conditional execution validated successfully");
+        logger.info("[OK] US region conditional execution validated successfully");
         logger.info("  - Executed stages: base-validation, us-compliance");
         logger.info("  - Skipped stages: emea-compliance, high-value-validation");
     }
@@ -178,7 +178,7 @@ public class ConditionalStageExecutionTest extends DemoTestBase {
         assertFalse(result.isStageSuccessful("high-value-validation"),
             "High-value stage should be skipped for $3M trade");
 
-        logger.info("✓ EMEA region conditional execution validated successfully");
+        logger.info("[OK] EMEA region conditional execution validated successfully");
         logger.info("  - Executed stages: base-validation, emea-compliance");
         logger.info("  - Skipped stages: us-compliance, high-value-validation");
     }
@@ -225,7 +225,7 @@ public class ConditionalStageExecutionTest extends DemoTestBase {
         assertFalse(result.isStageSuccessful("emea-compliance"),
             "EMEA compliance stage should be skipped for US region");
 
-        logger.info("✓ US high-value conditional execution validated successfully");
+        logger.info("[OK] US high-value conditional execution validated successfully");
         logger.info("  - Executed stages: base-validation, us-compliance, high-value-validation");
         logger.info("  - Skipped stages: emea-compliance");
     }
@@ -272,7 +272,7 @@ public class ConditionalStageExecutionTest extends DemoTestBase {
         assertFalse(result.isStageSuccessful("us-compliance"),
             "US compliance stage should be skipped for EMEA region");
 
-        logger.info("✓ EMEA high-value conditional execution validated successfully");
+        logger.info("[OK] EMEA high-value conditional execution validated successfully");
         logger.info("  - Executed stages: base-validation, emea-compliance, high-value-validation");
         logger.info("  - Skipped stages: us-compliance");
     }
@@ -313,7 +313,7 @@ public class ConditionalStageExecutionTest extends DemoTestBase {
         assertEquals(3, result.getSkippedStages().size(),
             "Should have 3 skipped stages (US, EMEA, high-value)");
 
-        logger.info("✓ APAC region conditional execution validated successfully");
+        logger.info("[OK] APAC region conditional execution validated successfully");
         logger.info("  - Executed stages: base-validation");
         logger.info("  - Skipped stages: us-compliance, emea-compliance, high-value-validation");
     }

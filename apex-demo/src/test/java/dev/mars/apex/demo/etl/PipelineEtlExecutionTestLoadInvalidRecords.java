@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +44,7 @@ class PipelineEtlExecutionTestLoadInvalidRecords extends DemoTestBase {
             throw new RuntimeException("Failed to setup test data", e);
         }
 
-        logger.info("✓ Invalid Records Load Pipeline Test setup completed");
+        logger.info("[OK] Invalid Records Load Pipeline Test setup completed");
     }
 
     @AfterEach
@@ -75,14 +75,14 @@ class PipelineEtlExecutionTestLoadInvalidRecords extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully even with invalid records");
 
-        logger.info("✓ Invalid records load pipeline test completed successfully");
+        logger.info("[OK] Invalid records load pipeline test completed successfully");
     }
 
     private void createInvalidRecordsTestData() throws IOException {
         // CSV file already exists in demo-data/csv/invalid-customers.csv
         Path invalidCsvFile = Paths.get("./demo-data/csv/invalid-customers.csv");
         if (Files.exists(invalidCsvFile)) {
-            logger.info("✓ Invalid records dataset already exists in demo-data");
+            logger.info("[OK] Invalid records dataset already exists in demo-data");
         } else {
             logger.warn("Invalid records dataset not found at: {}", invalidCsvFile);
         }

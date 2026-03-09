@@ -1,7 +1,9 @@
 metadata:
+  id: "execution-options-test"
   name: "Execution Options Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test various execution and performance options"
 
 execution-options:

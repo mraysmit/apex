@@ -1,0 +1,49 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Test error-recovery section import → blocks → YAML roundtrip
+# Phase 2 regression test for error-recovery import fix
+# ============================================================================
+
+metadata:
+  id: "error-recovery-roundtrip-test"
+  name: "Error Recovery Roundtrip Test"
+  version: "1.0.0"
+  description: "Verifies error-recovery section is imported and preserved"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+
+  severity-policies:
+    CRITICAL:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+      max-retries: 0
+      retry-delay: 0
+    ERROR:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+      max-retries: 0
+      retry-delay: 0
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 1
+      retry-delay: 100
+    INFO:
+      recovery-enabled: true
+      strategy: "SKIP_RULE"
+      max-retries: 2
+      retry-delay: 200
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder Rule"
+    condition: "#amount > 0"
+    message: "Amount is positive"
+    severity: "INFO"

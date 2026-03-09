@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ public class DecoupledRoutingTest extends DemoTestBase {
             // Load YAML configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/DecoupledRoutingTest.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully");
+            logger.info("[OK] Configuration loaded successfully");
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -71,7 +71,7 @@ public class DecoupledRoutingTest extends DemoTestBase {
             assertEquals("MANUAL_REVIEW", highRiskEnriched.get("processingPath"), "Should be routed to MANUAL_REVIEW");
             assertTrue(highRiskEnriched.containsKey("reviewRequired"), "Should have reviewRequired flag");
             assertTrue(highRiskEnriched.containsKey("supervisorNotified"), "Should have supervisorNotified flag");
-            logger.info("✓ Scenario 1 passed");
+            logger.info("[OK] Scenario 1 passed");
 
 
             // Scenario 2: Auto Approve (Condition A) -> AUTO_APPROVE
@@ -91,7 +91,7 @@ public class DecoupledRoutingTest extends DemoTestBase {
 
             assertEquals("AUTO_APPROVE", autoApproveEnriched.get("processingPath"), "Should be routed to AUTO_APPROVE");
             assertTrue(autoApproveEnriched.containsKey("loanApproved"), "Should have loanApproved flag");
-            logger.info("✓ Scenario 2 passed");
+            logger.info("[OK] Scenario 2 passed");
 
 
             // Scenario 3: Auto Approve (Condition B) -> AUTO_APPROVE
@@ -111,7 +111,7 @@ public class DecoupledRoutingTest extends DemoTestBase {
 
             assertEquals("AUTO_APPROVE", vipEnriched.get("processingPath"), "Should be routed to AUTO_APPROVE");
             assertTrue(vipEnriched.containsKey("loanApproved"), "Should have loanApproved flag");
-            logger.info("✓ Scenario 3 passed");
+            logger.info("[OK] Scenario 3 passed");
 
 
             // Scenario 4: Standard Process -> STANDARD_PROCESS
@@ -131,7 +131,7 @@ public class DecoupledRoutingTest extends DemoTestBase {
 
             assertEquals("STANDARD_PROCESS", standardEnriched.get("processingPath"), "Should be routed to STANDARD_PROCESS");
             assertTrue(standardEnriched.containsKey("standardValidationComplete"), "Should have standardValidationComplete flag");
-            logger.info("✓ Scenario 4 passed");
+            logger.info("[OK] Scenario 4 passed");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);

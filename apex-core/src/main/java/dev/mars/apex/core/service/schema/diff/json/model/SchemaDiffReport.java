@@ -29,7 +29,7 @@ import java.util.List;
  * This is the canonical serialization format for schema comparison results.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-18
  */
 @JsonPropertyOrder({"$schema", "metadata", "source", "target", "summary", "columns", "compatibility", "recommendations"})
 public class SchemaDiffReport {

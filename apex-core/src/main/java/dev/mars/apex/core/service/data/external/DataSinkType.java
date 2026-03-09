@@ -23,7 +23,7 @@ package dev.mars.apex.core.service.data.external;
  * characteristics and implementation requirements for writing data.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public enum DataSinkType {

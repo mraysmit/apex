@@ -1,17 +1,25 @@
 package dev.mars.apex.core.util;
 
 import org.junit.jupiter.api.AfterEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Nested;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for the PropertyResolver utility class.
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-01-19
  */
 @DisplayName("PropertyResolver Tests")

@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -260,7 +260,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
                 assertEquals(expectedCountry, enrichedData.get("currencyCountry"), 
                     "Should retrieve correct currency country for " + currency);
 
-                logger.info("✓ Currency {} lookup: {} ({}, {})", currency, expectedName, expectedSymbol, expectedCountry);
+                logger.info("[OK] Currency {} lookup: {} ({}, {})", currency, expectedName, expectedSymbol, expectedCountry);
             }
 
             logger.info("Multiple currency lookups completed successfully");

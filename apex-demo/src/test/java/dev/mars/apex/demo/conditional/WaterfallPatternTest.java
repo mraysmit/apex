@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ public class WaterfallPatternTest extends DemoTestBase {
             // Load YAML configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/WaterfallPatternTest.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully");
+            logger.info("[OK] Configuration loaded successfully");
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -76,7 +76,7 @@ public class WaterfallPatternTest extends DemoTestBase {
             assertEquals(false, rejectEnriched.getOrDefault("level2Passed", false), "Should NOT have passed Level 2");
             assertEquals(false, rejectEnriched.getOrDefault("isApproved", false), "Should NOT be approved");
             
-            logger.info("✓ Scenario 1 passed: Stopped at Level 1");
+            logger.info("[OK] Scenario 1 passed: Stopped at Level 1");
 
 
             // Scenario 2: REFER_INCOME (Level 2 Failure: Income <= 50000)
@@ -101,7 +101,7 @@ public class WaterfallPatternTest extends DemoTestBase {
             assertTrue(referIncomeEnriched.containsKey("referralReason"), "Should have referralReason");
             assertEquals(true, referIncomeEnriched.get("referralReason"), "Referral reason flag should be true");
 
-            logger.info("✓ Scenario 2 passed: Passed Level 1, Stopped at Level 2");
+            logger.info("[OK] Scenario 2 passed: Passed Level 1, Stopped at Level 2");
 
 
             // Scenario 3: REFER_DEBT (Level 3 Failure: DTI >= 0.40)
@@ -126,7 +126,7 @@ public class WaterfallPatternTest extends DemoTestBase {
             assertTrue(referDebtEnriched.containsKey("referralReason"), "Should have referralReason");
             assertEquals(true, referDebtEnriched.get("referralReason"), "Referral reason flag should be true");
 
-            logger.info("✓ Scenario 3 passed: Passed Level 1 & 2, Stopped at Level 3");
+            logger.info("[OK] Scenario 3 passed: Passed Level 1 & 2, Stopped at Level 3");
 
 
             // Scenario 4: APPROVE (All Levels Pass)
@@ -150,7 +150,7 @@ public class WaterfallPatternTest extends DemoTestBase {
             assertTrue(approveEnriched.containsKey("loanStatus"), "Should have loanStatus");
             assertEquals(true, approveEnriched.get("loanStatus"), "Loan status flag should be true");
 
-            logger.info("✓ Scenario 4 passed: Passed all levels");
+            logger.info("[OK] Scenario 4 passed: Passed all levels");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);

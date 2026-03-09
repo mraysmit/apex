@@ -1,0 +1,37 @@
+# ============================================================================
+# Read Schema with Full Path Report Test
+# ============================================================================
+# Tests that report path with full path is preserved.
+# This exercises the normalizeReportPath() method edge case.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "read-schema-full-path-test"
+  name: "Read Schema Full Path Report Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests report path with full directory path"
+
+data-sources:
+  - name: "csv-source"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    connection:
+      base-path: "src/test/resources/test-data"
+
+pipeline:
+  name: "read-schema-full-path-pipeline"
+  description: "Pipeline with read-schema step and full path report"
+  execution:
+    mode: "sequential"
+  steps:
+    - name: "read-csv-schema-full-path"
+      type: "read-schema"
+      source: "csv-source"
+      parameters:
+        file: "src/test/resources/test-data/customers.csv"
+        # Full path - should be preserved as-is
+        report-output: "target/test-reports/full-path-schema-report.html"

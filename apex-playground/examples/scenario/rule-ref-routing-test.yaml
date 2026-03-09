@@ -1,7 +1,9 @@
 metadata:
+  id: "rule-ref-routing-test"
   name: "Scenario Rule Reference Routing Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test scenario-based routing using external rule file references"
 
 scenario:

@@ -16,13 +16,14 @@
 
 package dev.mars.apex.demo.severity;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRuleFactory;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.RuleFactory;
+import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import dev.mars.apex.engine.core.RuleBuilder;
 
 /**
  * Test to validate that severity attribute is properly handled throughout the APEX system.
@@ -47,16 +49,16 @@ public class SeverityValidationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SeverityValidationTest.class);
 
-    private YamlConfigurationLoader configLoader;
-    private YamlRuleFactory ruleFactory;
+    private ConfigurationLoader configLoader;
+    private RuleFactory ruleFactory;
     private RulesEngine engine;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for severity validation test...");
         
-        configLoader = new YamlConfigurationLoader();
-        ruleFactory = new YamlRuleFactory();
+        configLoader = new ConfigurationLoader();
+        ruleFactory = new RuleFactory();
         
         logger.info("APEX services initialized successfully");
     }
@@ -91,14 +93,14 @@ public class SeverityValidationTest {
         logger.info("=== Testing Rule Constructors with Severity ===");
 
         // Test 4-parameter constructor with severity
-        Rule severityRule = new Rule("severity-rule", "#value > 0", "Test message", "ERROR");
+        Rule severityRule = new RuleBuilder().withName("severity-rule").withCondition("#value > 0").withMessage("Test message").withSeverity("ERROR").build();
         assertEquals("ERROR", severityRule.getSeverity(), "ERROR severity should be preserved");
         logger.info("4-parameter constructor with ERROR severity works");
 
-        // Test default severity (backward compatibility)
-        Rule defaultRule = new Rule("default-rule", "#value > 0", "Default message");
+        // Test explicit INFO severity
+        Rule defaultRule = new RuleBuilder().withName("default-rule").withCondition("#value > 0").withMessage("Default message").withSeverity(SeverityConstants.INFO).build();
         assertEquals("INFO", defaultRule.getSeverity(), "Default severity should be INFO");
-        logger.info("3-parameter constructor defaults to INFO severity");
+        logger.info("4-parameter constructor with INFO severity works");
 
         logger.info("🎉 Rule constructor severity test PASSED");
     }
@@ -130,7 +132,7 @@ public class SeverityValidationTest {
         logger.info("=== Testing REST API Service Severity Access ===");
 
         // Create a rule with ERROR severity
-        Rule errorRule = new Rule("api-test-rule", "#value > 100", "API test message", "ERROR");
+        Rule errorRule = new RuleBuilder().withName("api-test-rule").withCondition("#value > 100").withMessage("API test message").withSeverity("ERROR").build();
         
         // Verify the getSeverity() method works (this was the broken code in RuleEvaluationService)
         String severity = errorRule.getSeverity() != null ? errorRule.getSeverity() : "ERROR";
@@ -183,7 +185,7 @@ public class SeverityValidationTest {
     @Test
     @DisplayName("Should demonstrate Phase 3 completion - API layer severity support")
     void testPhase3Completion() throws Exception {
-        logger.info("=== Testing Phase 3: API Layer Severity Support Completion ===");
+        logger.info("=== Testing API Layer Severity Support Completion ===");
 
         // Test 1: Verify RuleResult factory methods support severity
         RuleResult errorResult = RuleResult.match("test-rule", "test-message", "ERROR", null);
@@ -195,13 +197,13 @@ public class SeverityValidationTest {
         assertEquals("INFO", infoResult.getSeverity(), "RuleResult.match should support INFO severity");
         logger.info("RuleResult factory methods support all severity levels");
 
-        // Test 2: Verify RuleResult constructors support severity
-        RuleResult constructedResult = new RuleResult("test-rule", "test-message", "ERROR", true, RuleResult.ResultType.MATCH);
-        assertEquals("ERROR", constructedResult.getSeverity(), "RuleResult constructor should support severity");
-        logger.info("RuleResult constructors support severity");
+        // Test 2: Verify RuleResult builder supports severity
+        RuleResult constructedResult = RuleResult.builder().ruleName("test-rule").message("test-message").severity("ERROR").triggered(true).resultType(RuleResult.ResultType.MATCH).build();
+        assertEquals("ERROR", constructedResult.getSeverity(), "RuleResult builder should support severity");
+        logger.info("RuleResult builder supports severity");
 
         // Test 3: Verify Rule objects support severity (already tested in Phase 1)
-        Rule errorRule = new Rule("critical-check", "#amount > 10000", "Critical amount detected", "ERROR");
+        Rule errorRule = new RuleBuilder().withName("critical-check").withCondition("#amount > 10000").withMessage("Critical amount detected").withSeverity("ERROR").build();
         assertEquals("ERROR", errorRule.getSeverity(), "Rule objects should support severity");
         logger.info("Rule objects support severity");
 

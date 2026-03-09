@@ -15,10 +15,10 @@
  */
 package dev.mars.apex.demo.database;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -99,13 +99,13 @@ class PostgreSQLPasswordInjectionTest {
             .withUsername("testuser")
             .withPassword("testpass");
 
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up PostgreSQL Password Injection Test with Testcontainers");
 
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
 
         // Extract database connection details from running PostgreSQL container
         String jdbcUrl = postgres.getJdbcUrl();
@@ -214,11 +214,11 @@ class PostgreSQLPasswordInjectionTest {
                    "Should contain resolved username");
         
         logger.info("PostgreSQL password injection test completed successfully");
-        logger.info("  ✓ PostgreSQL container started and accessible");
-        logger.info("  ✓ System properties injected into YAML configuration");
-        logger.info("  ✓ Database connection established using injected credentials");
-        logger.info("  ✓ SQL query executed successfully");
-        logger.info("  ✓ Expected data retrieved and mapped correctly");
+        logger.info("  [OK] PostgreSQL container started and accessible");
+        logger.info("  [OK] System properties injected into YAML configuration");
+        logger.info("  [OK] Database connection established using injected credentials");
+        logger.info("  [OK] SQL query executed successfully");
+        logger.info("  [OK] Expected data retrieved and mapped correctly");
         logger.info("=================================================================");
     }
 
@@ -250,8 +250,8 @@ class PostgreSQLPasswordInjectionTest {
                 """);
             
             logger.info("Test data setup completed:");
-            logger.info("  ✓ Created users table");
-            logger.info("  ✓ Inserted test users: John Doe, Jane Smith");
+            logger.info("  [OK] Created users table");
+            logger.info("  [OK] Inserted test users: John Doe, Jane Smith");
         }
     }
 }

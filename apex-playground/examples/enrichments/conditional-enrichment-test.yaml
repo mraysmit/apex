@@ -1,7 +1,9 @@
 metadata:
+  id: "conditional-enrichment-test"
   name: "Conditional Enrichment Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test conditional enrichment execution based on runtime conditions"
 
 enrichments:

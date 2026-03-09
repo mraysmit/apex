@@ -17,13 +17,20 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static dev.mars.apex.engine.scenario.ScenarioRegistryManager.matchesClassificationRule;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -77,7 +84,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("field", "value");
 
         // Then: Should not match (gracefully handle syntax error)
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for invalid SpEL syntax");
     }
 
@@ -94,7 +101,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("field", "value");
 
         // Then: Should not match (gracefully handle syntax error)
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for invalid SpEL syntax");
     }
 
@@ -111,7 +118,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("field", "value");
 
         // Then: Should not match (gracefully handle syntax error)
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for unclosed string literal");
     }
 
@@ -132,7 +139,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("field", "value");
 
         // Then: Should not match (gracefully handle invalid operator)
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for invalid operator");
     }
 
@@ -150,7 +157,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("b", "y");
 
         // Then: Should not match (gracefully handle malformed operator)
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for malformed AND operator");
     }
 
@@ -171,7 +178,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("amount", 1000);
 
         // Then: Should not match (gracefully handle type mismatch)
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for type mismatch");
     }
 
@@ -188,7 +195,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("items", Arrays.asList("a", "b", "c"));
 
         // Then: Should not match (gracefully handle type mismatch)
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for incompatible type comparison");
     }
 
@@ -207,7 +214,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("tradeType", "OTCOption");
 
         // Then: Should match
-        assertTrue(scenario.matchesClassificationRule(data),
+        assertTrue(matchesClassificationRule(scenario, data),
             "Valid SpEL should still work correctly");
     }
 
@@ -225,7 +232,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("region", "US");
 
         // Then: Should match
-        assertTrue(scenario.matchesClassificationRule(data),
+        assertTrue(matchesClassificationRule(scenario, data),
             "Complex valid SpEL should work correctly");
     }
 
@@ -246,7 +253,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("field", "value");
 
         // Then: Should not match
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for empty SpEL expression");
     }
 
@@ -263,7 +270,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("field", "value");
 
         // Then: Should not match
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for null SpEL expression");
     }
 
@@ -280,7 +287,7 @@ class ScenarioConfigurationSpelValidationTest {
         data.put("field", "value");
 
         // Then: Should not match
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false for whitespace-only SpEL expression");
     }
 }

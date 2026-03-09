@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class PipelineEtlExecutionTestLoadFilesystem extends DemoTestBase {
             throw new RuntimeException("Failed to create output directory", e);
         }
 
-        logger.info("✓ Filesystem Load Pipeline Test setup completed");
+        logger.info("[OK] Filesystem Load Pipeline Test setup completed");
     }
 
     @AfterEach
@@ -77,7 +77,7 @@ class PipelineEtlExecutionTestLoadFilesystem extends DemoTestBase {
         assertTrue(Files.exists(outputFile), "Output JSON file should be created");
         assertTrue(Files.size(outputFile) > 0, "Output file should not be empty");
 
-        logger.info("✓ Filesystem load pipeline test completed successfully");
+        logger.info("[OK] Filesystem load pipeline test completed successfully");
         logger.info("  - Output file: {}", outputFile.toAbsolutePath());
     }
 }

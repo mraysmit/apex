@@ -1,0 +1,49 @@
+metadata:
+  id: "test-schema-diff-html-report"
+  name: "Schema Diff with HTML Report"
+  type: "pipeline-config"
+  author: "Mark Andrew Ray-Smith Cityline Ltd "
+  description: "Test schema-diff with HTML report generation"
+  version: "2.1"
+
+data-sources:
+  - name: "csv-source"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    connection:
+      base-path: "target/test-classes/test-data"
+
+  - name: "csv-target"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    connection:
+      base-path: "target/test-classes/test-data"
+
+pipeline:
+  name: "schema-diff-with-report"
+  description: "Compare schemas and generate HTML report"
+  execution:
+    mode: "sequential"
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "csv-source"
+      parameters:
+        file: "target/test-classes/test-data/customers.csv"
+
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "csv-target"
+      parameters:
+        file: "target/test-classes/test-data/customers_with_phone.csv"
+
+    - name: "compare-schemas"
+      type: "schema-diff"
+      description: "Compare source and target schemas with HTML report"
+      parameters:
+        source-step: "read-source-schema"
+        target-step: "read-target-schema"
+        case-insensitive-names: true
+        report-output: "target/reports/schema-diff-test-report.html"

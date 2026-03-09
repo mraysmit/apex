@@ -17,13 +17,19 @@ package dev.mars.apex.core.service.validation;
  */
 
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.util.TestAwareLogger;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -40,11 +46,29 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ValidationServiceTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(ValidationServiceTest.class);
     private LookupServiceRegistry registry;
     private RulesEngine rulesEngine;
     private ValidationService validationService;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(ValidationServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ValidationServiceTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(ValidationServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: validation failures, type checking errors, null handling");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(ValidationServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ValidationServiceTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {
@@ -118,15 +142,18 @@ class ValidationServiceTest {
     @Test
     @DisplayName("Should return false for non-existent validator")
     void testValidateWithNonExistentValidator() {
+        System.out.println("========== START OF INTENTIONAL ERROR TEST ==========");
         System.out.println("TEST: Triggering intentional error - testing validation with non-existent validator");
         
         boolean result = validationService.validate("nonExistentValidator", "test");
         assertFalse(result, "Validation with non-existent validator should return false");
+        System.out.println("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 
     @Test
     @DisplayName("Should handle type mismatch gracefully")
     void testValidateWithTypeMismatch() {
+        System.out.println("========== START OF INTENTIONAL ERROR TEST ==========");
         System.out.println("TEST: Triggering intentional error - testing validation with type mismatch");
         
         // Register a string validator
@@ -136,6 +163,7 @@ class ValidationServiceTest {
         // Try to validate an integer with string validator
         boolean result = validationService.validate("stringValidator", 123);
         assertFalse(result, "Type mismatch should result in validation failure");
+        System.out.println("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 
     @Test

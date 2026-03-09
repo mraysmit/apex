@@ -30,7 +30,7 @@ import java.nio.file.Paths;
  * Generates Markdown reports from JSON schema diff data.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-18
  */
 public class JsonBasedMarkdownReportGenerator {
 
@@ -70,7 +70,7 @@ public class JsonBasedMarkdownReportGenerator {
         
         // Compatibility
         if (report.getCompatibility().isCompatible()) {
-            md.append("> ✓ **Compatible Migration:** Target schema is backward compatible with source schema.\n\n");
+            md.append("> [OK] **Compatible Migration:** Target schema is backward compatible with source schema.\n\n");
         } else {
             md.append("> ⚠️ **Incompatible Migration:** Breaking changes detected that may cause data loss or runtime errors.\n\n");
         }

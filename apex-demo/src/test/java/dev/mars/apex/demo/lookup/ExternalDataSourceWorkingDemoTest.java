@@ -16,10 +16,10 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 
@@ -63,16 +63,16 @@ public class ExternalDataSourceWorkingDemoTest {
     // Unique database name for this test class to avoid file locking conflicts
     private static final String DB_NAME = "external_datasource_working_test";
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for ExternalDataSourceWorkingDemoTest...");
 
         // Initialize APEX services using modern pattern
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
-        logger.info("✓ APEX services initialized successfully");
+        logger.info("[OK] APEX services initialized successfully");
     }
 
     /**
@@ -109,7 +109,7 @@ public class ExternalDataSourceWorkingDemoTest {
                 ('CUST001', 'Test Customer Corp', 'CORPORATE', 'GOLD', 'NA', 'ACTIVE')
                 """);
 
-            logger.info("✓ H2 database setup completed successfully");
+            logger.info("[OK] H2 database setup completed successfully");
 
         } catch (Exception e) {
             logger.error("Failed to setup H2 database: " + e.getMessage(), e);
@@ -333,7 +333,7 @@ public class ExternalDataSourceWorkingDemoTest {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }

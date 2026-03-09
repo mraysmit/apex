@@ -1,25 +1,31 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlEnrichment;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.DisplayName;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for Phase 2: Conditional Mappings functionality.
- * Tests the new conditional-mappings syntax in YamlEnrichmentProcessor.
+ * Test class forConditional Mappings functionality.
+ * Tests the new conditional-mappings syntax in EnrichmentProcessor.
  */
 public class ConditionalMappingsTest {
 
-    private static final Logger logger = Logger.getLogger(ConditionalMappingsTest.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ConditionalMappingsTest.class);
 
     @Test
     @DisplayName("Should create conditional-mappings structure from YAML")
@@ -53,7 +59,7 @@ public class ConditionalMappingsTest {
                             expression: "'OR_MATCHED'"
                 """;
 
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
             // Verify the structure was created correctly
@@ -83,10 +89,10 @@ public class ConditionalMappingsTest {
             assertEquals("result", fieldMapping.getTargetField(), "Target field should match");
             assertEquals("'OR_MATCHED'", fieldMapping.getExpression(), "Expression should match");
 
-            logger.info("✓ Conditional mappings structure creation successful");
+            logger.info("[OK] Conditional mappings structure creation successful");
 
         } catch (Exception e) {
-            logger.severe("Failed to create conditional mappings structure: " + e.getMessage());
+            logger.error("Failed to create conditional mappings structure: " + e.getMessage());
             fail("Should be able to create conditional mappings structure: " + e.getMessage());
         }
     }
@@ -127,7 +133,7 @@ public class ConditionalMappingsTest {
                             expression: "'OR_MATCHED'"
                 """;
 
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
             // Process enrichment using RulesEngine
@@ -139,10 +145,10 @@ public class ConditionalMappingsTest {
             assertNotNull(enrichedData, "Result should not be null");
             assertEquals("OR_MATCHED", enrichedData.get("result"), "Result should be 'OR_MATCHED'");
 
-            logger.info("✓ OR conditions processing successful");
+            logger.info("[OK] OR conditions processing successful");
 
         } catch (Exception e) {
-            logger.severe("Failed to process OR conditions: " + e.getMessage());
+            logger.error("Failed to process OR conditions: " + e.getMessage());
             fail("Should be able to process OR conditions: " + e.getMessage());
         }
     }
@@ -187,7 +193,7 @@ public class ConditionalMappingsTest {
                             expression: "#systemCode"
                 """;
 
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
             // Process enrichment using RulesEngine
@@ -200,10 +206,10 @@ public class ConditionalMappingsTest {
             assertEquals("AND_MATCHED", enrichedData.get("result"), "Result should be 'AND_MATCHED'");
             assertEquals("TEST", enrichedData.get("system"), "System should be 'TEST'");
 
-            logger.info("✓ AND conditions processing successful");
+            logger.info("[OK] AND conditions processing successful");
 
         } catch (Exception e) {
-            logger.severe("Failed to process AND conditions: " + e.getMessage());
+            logger.error("Failed to process AND conditions: " + e.getMessage());
             fail("Should be able to process AND conditions: " + e.getMessage());
         }
     }
@@ -244,7 +250,7 @@ public class ConditionalMappingsTest {
                             expression: "'OR_MATCHED'"
                 """;
 
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
             // Process enrichment using RulesEngine
@@ -256,12 +262,13 @@ public class ConditionalMappingsTest {
             assertNotNull(enrichedData, "Result should not be null");
             assertNull(enrichedData.get("result"), "Result should be null when no conditions match");
 
-            logger.info("✓ Failed conditions handling successful");
+            logger.info("[OK] Failed conditions handling successful");
 
         } catch (Exception e) {
-            logger.severe("Failed to handle failed conditions: " + e.getMessage());
+            logger.error("Failed to handle failed conditions: " + e.getMessage());
             fail("Should be able to handle failed conditions: " + e.getMessage());
         }
     }
 
 }
+

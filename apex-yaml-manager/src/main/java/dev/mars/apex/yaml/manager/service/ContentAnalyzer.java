@@ -1,0 +1,416 @@
+package dev.mars.apex.yaml.manager.service;
+
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import dev.mars.apex.yaml.manager.model.ContentSummary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Service for analyzing YAML file contents and generating summaries.
+ */
+@Service
+public class ContentAnalyzer {
+    private static final Logger logger = LoggerFactory.getLogger(ContentAnalyzer.class);
+    private final Yaml yaml = new Yaml();
+
+    /**
+     * Analyze a YAML file and generate a content summary.
+     */
+    public ContentSummary analyzYamlContent(String filePath) {
+        logger.debug("=== ANALYZING YAML CONTENT ===");
+        logger.debug("File path: {}", filePath);
+
+        ContentSummary summary = new ContentSummary(filePath);
+
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                logger.warn("YAML file not found: {}", filePath);
+                return summary;
+            }
+
+            logger.debug("File exists, size: {} bytes", file.length());
+
+            // Read raw content first
+            String rawContent = java.nio.file.Files.readString(file.toPath(), java.nio.charset.StandardCharsets.UTF_8);
+            summary.setRawContent(rawContent);
+            logger.debug("Raw content read, length: {} characters", rawContent.length());
+
+            try (FileInputStream fis = new FileInputStream(file)) {
+                Map<String, Object> data = yaml.load(fis);
+                if (data == null) {
+                    logger.warn("YAML data is null for file: {}", filePath);
+                    return summary;
+                }
+
+                logger.debug("YAML loaded successfully, top-level keys: {}", data.keySet());
+
+                // Extract metadata
+                extractMetadata(summary, data);
+                logger.debug("Metadata extracted: id={}, type={}", summary.getId(), summary.getFileType());
+
+                // Analyze content
+                analyzeContent(summary, data);
+                logger.debug("Content analyzed: rules={}, enrichments={}, groups={}",
+                    summary.getRuleCount(), summary.getEnrichmentCount(), summary.getRuleGroupCount());
+
+                // Determine file type
+                determineFileType(summary, data);
+                logger.debug("Final file type determined: {}", summary.getFileType());
+            }
+        } catch (IOException e) {
+            logger.error("Error reading YAML file: {}", filePath);
+            logger.debug("Full exception details:", e);
+        }
+
+        logger.debug("=== CONTENT ANALYSIS COMPLETE ===");
+        logger.debug("Summary: {}", summary);
+        return summary;
+    }
+
+    /**
+     * Analyze YAML content from an InputStream and generate a content summary.
+     * 
+     * <p>This method enables analyzing classpath resources and other stream-based
+     * content sources without requiring file system access.</p>
+     *
+     * @param inputStream The InputStream containing YAML content
+     * @param resourcePath The resource path for identification (e.g., "classpath:config/rules.yaml")
+     * @return ContentSummary containing analysis results
+     * @throws java.io.IOException if an error occurs reading the stream
+     */
+    public ContentSummary analyzeYamlContent(java.io.InputStream inputStream, String resourcePath) 
+            throws java.io.IOException {
+        logger.debug("=== ANALYZING YAML CONTENT FROM STREAM ===");
+        logger.debug("Resource path: {}", resourcePath);
+
+        ContentSummary summary = new ContentSummary(resourcePath);
+
+        try {
+            // Read raw content from stream
+            String rawContent = new String(inputStream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            summary.setRawContent(rawContent);
+            logger.debug("Raw content read, length: {} characters", rawContent.length());
+
+            // Parse YAML from the string content
+            Map<String, Object> data = yaml.load(rawContent);
+            if (data == null) {
+                logger.warn("YAML data is null for resource: {}", resourcePath);
+                return summary;
+            }
+
+            logger.debug("YAML loaded successfully, top-level keys: {}", data.keySet());
+
+            // Extract metadata
+            extractMetadata(summary, data);
+            logger.debug("Metadata extracted: id={}, type={}", summary.getId(), summary.getFileType());
+
+            // Analyze content
+            analyzeContent(summary, data);
+            logger.debug("Content analyzed: rules={}, enrichments={}, groups={}",
+                summary.getRuleCount(), summary.getEnrichmentCount(), summary.getRuleGroupCount());
+
+            // Determine file type
+            determineFileType(summary, data);
+            logger.debug("Final file type determined: {}", summary.getFileType());
+
+        } catch (Exception e) {
+            logger.error("Error analyzing YAML from stream: {}", resourcePath);
+            logger.debug("Full exception details:", e);
+            throw new java.io.IOException("Failed to analyze YAML content from: " + resourcePath, e);
+        }
+
+        logger.debug("=== CONTENT ANALYSIS COMPLETE ===");
+        logger.debug("Summary: {}", summary);
+        return summary;
+    }
+
+    /**
+     * Extract metadata from YAML.
+     */
+    @SuppressWarnings("unchecked")
+    private void extractMetadata(ContentSummary summary, Map<String, Object> data) {
+        if (data.containsKey("metadata")) {
+            Map<String, Object> metadata = (Map<String, Object>) data.get("metadata");
+            if (metadata != null) {
+                summary.setId((String) metadata.get("id"));
+                summary.setName((String) metadata.get("name"));
+                summary.setDescription((String) metadata.get("description"));
+                summary.setVersion((String) metadata.get("version"));
+                summary.setAuthor((String) metadata.get("author"));
+
+                // Extract date fields
+                Object createdDate = metadata.get("created-date");
+                if (createdDate != null) {
+                    summary.setCreatedDate(createdDate.toString());
+                }
+
+                Object lastModifiedDate = metadata.get("last-modified-date");
+                if (lastModifiedDate != null) {
+                    summary.setLastModifiedDate(lastModifiedDate.toString());
+                }
+
+                // Extract tags (can be a list or comma-separated string)
+                Object tagsObj = metadata.get("tags");
+                if (tagsObj instanceof List) {
+                    summary.setTags((List<String>) tagsObj);
+                } else if (tagsObj instanceof String) {
+                    // Handle comma-separated tags
+                    String[] tagArray = ((String) tagsObj).split(",");
+                    List<String> tagList = new ArrayList<>();
+                    for (String tag : tagArray) {
+                        tagList.add(tag.trim());
+                    }
+                    summary.setTags(tagList);
+                }
+
+                // Extract business-domain
+                if (metadata.containsKey("business-domain")) {
+                    summary.setBusinessDomain((String) metadata.get("business-domain"));
+                }
+
+                // Extract owner
+                if (metadata.containsKey("owner")) {
+                    summary.setOwner((String) metadata.get("owner"));
+                }
+            }
+        }
+    }
+
+    /**
+     * Analyze content and count items.
+     */
+    @SuppressWarnings("unchecked")
+    private void analyzeContent(ContentSummary summary, Map<String, Object> data) {
+        // Extract dependencies from various sources
+        List<String> dependencies = new ArrayList<>();
+
+        // rule-configurations
+        if (data.containsKey("rule-configurations")) {
+            Object ruleConfigs = data.get("rule-configurations");
+            if (ruleConfigs instanceof List) {
+                dependencies.addAll((List<String>) ruleConfigs);
+            }
+        }
+
+        // config-files
+        if (data.containsKey("config-files")) {
+            Object configFiles = data.get("config-files");
+            if (configFiles instanceof List) {
+                dependencies.addAll((List<String>) configFiles);
+            }
+        }
+
+        // enrichment-refs
+        if (data.containsKey("enrichment-refs")) {
+            Object enrichmentRefs = data.get("enrichment-refs");
+            if (enrichmentRefs instanceof List) {
+                dependencies.addAll((List<String>) enrichmentRefs);
+            }
+        }
+
+        // rule-refs
+        if (data.containsKey("rule-refs")) {
+            Object ruleRefs = data.get("rule-refs");
+            if (ruleRefs instanceof List) {
+                dependencies.addAll((List<String>) ruleRefs);
+            }
+        }
+
+        // dataset-refs
+        if (data.containsKey("dataset-refs")) {
+            Object datasetRefs = data.get("dataset-refs");
+            if (datasetRefs instanceof List) {
+                dependencies.addAll((List<String>) datasetRefs);
+            }
+        }
+
+        // Extract dependencies from processing stages (scenario files)
+        if (data.containsKey("scenario")) {
+            Map<String, Object> scenario = (Map<String, Object>) data.get("scenario");
+            if (scenario != null && scenario.containsKey("processing-stages")) {
+                List<Map<String, Object>> stages = (List<Map<String, Object>>) scenario.get("processing-stages");
+                if (stages != null) {
+                    for (Map<String, Object> stage : stages) {
+                        if (stage.containsKey("config-file")) {
+                            String configFile = (String) stage.get("config-file");
+                            if (configFile != null && !dependencies.contains(configFile)) {
+                                dependencies.add(configFile);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!dependencies.isEmpty()) {
+            summary.setDependencies(dependencies);
+        }
+        // Count direct rules (rules section)
+        if (data.containsKey("rules")) {
+            List<Map<String, Object>> rules = (List<Map<String, Object>>) data.get("rules");
+            if (rules != null) {
+                summary.setRuleCount(rules.size());
+            }
+        }
+
+        // Count rule groups and rules within them
+        if (data.containsKey("rule-groups")) {
+            List<Map<String, Object>> ruleGroups = (List<Map<String, Object>>) data.get("rule-groups");
+            if (ruleGroups != null) {
+                summary.setRuleGroupCount(ruleGroups.size());
+
+                // Count rules within groups (if no direct rules counted)
+                if (summary.getRuleCount() == 0) {
+                    int totalRules = 0;
+                    for (Map<String, Object> group : ruleGroups) {
+                        // Support both "rules" and "rule-ids" patterns
+                        if (group.containsKey("rules")) {
+                            List<String> rules = (List<String>) group.get("rules");
+                            if (rules != null) {
+                                totalRules += rules.size();
+                            }
+                        } else if (group.containsKey("rule-ids")) {
+                            List<String> ruleIds = (List<String>) group.get("rule-ids");
+                            if (ruleIds != null) {
+                                totalRules += ruleIds.size();
+                            }
+                        }
+                    }
+                    summary.setRuleCount(totalRules);
+                }
+            }
+        }
+
+        // Count enrichments (plural - list)
+        if (data.containsKey("enrichments")) {
+            List<Map<String, Object>> enrichments = (List<Map<String, Object>>) data.get("enrichments");
+            if (enrichments != null) {
+                summary.setEnrichmentCount(enrichments.size());
+            }
+        }
+
+        // Count enrichment (singular - single object with steps)
+        if (data.containsKey("enrichment")) {
+            Map<String, Object> enrichment = (Map<String, Object>) data.get("enrichment");
+            if (enrichment != null) {
+                summary.setEnrichmentCount(1);
+                // Count steps within enrichment
+                if (enrichment.containsKey("steps")) {
+                    List<Map<String, Object>> steps = (List<Map<String, Object>>) enrichment.get("steps");
+                    if (steps != null) {
+                        summary.addContentCount("enrichment-steps", steps.size());
+                    }
+                }
+            }
+        }
+
+        // Extract and count categories
+        if (data.containsKey("categories")) {
+            List<Map<String, Object>> categories = (List<Map<String, Object>>) data.get("categories");
+            if (categories != null) {
+                summary.setCategoryCount(categories.size());
+                List<String> categoryNames = new ArrayList<>();
+                for (Map<String, Object> category : categories) {
+                    String categoryName = (String) category.get("name");
+                    if (categoryName != null) {
+                        categoryNames.add(categoryName);
+                    }
+                }
+                summary.setCategories(categoryNames);
+            }
+        }
+
+        // Count config files (rule-configurations, config-files)
+        int configCount = 0;
+        if (data.containsKey("rule-configurations")) {
+            List<String> configFiles = (List<String>) data.get("rule-configurations");
+            if (configFiles != null) {
+                configCount += configFiles.size();
+            }
+        }
+        if (data.containsKey("config-files")) {
+            List<String> configFiles = (List<String>) data.get("config-files");
+            if (configFiles != null) {
+                configCount += configFiles.size();
+            }
+        }
+        summary.setConfigFileCount(configCount);
+
+        // Count references
+        int refCount = 0;
+        if (data.containsKey("enrichment-refs")) {
+            List<String> refs = (List<String>) data.get("enrichment-refs");
+            if (refs != null) {
+                refCount += refs.size();
+            }
+        }
+        if (data.containsKey("rule-refs")) {
+            List<String> refs = (List<String>) data.get("rule-refs");
+            if (refs != null) {
+                refCount += refs.size();
+            }
+        }
+        summary.setReferenceCount(refCount);
+    }
+
+    /**
+     * Determine the type of YAML file based on content.
+     */
+    private void determineFileType(ContentSummary summary, Map<String, Object> data) {
+        // Check metadata type first (most reliable)
+        if (data.containsKey("metadata")) {
+            Map<String, Object> metadata = (Map<String, Object>) data.get("metadata");
+            if (metadata != null && metadata.containsKey("type")) {
+                String metadataType = (String) metadata.get("type");
+                if (metadataType != null) {
+                    summary.setFileType(metadataType);
+                    return;
+                }
+            }
+        }
+
+        // Fallback to content-based detection
+        // Prioritize rule-groups over direct rules for backward compatibility
+        if (data.containsKey("rule-groups")) {
+            summary.setFileType("rules");
+        } else if (data.containsKey("rules")) {
+            summary.setFileType("rule-config");
+        } else if (data.containsKey("enrichments")) {
+            summary.setFileType("enrichments");
+        } else if (data.containsKey("enrichment")) {
+            summary.setFileType("enrichment");
+        } else if (data.containsKey("scenarios")) {
+            summary.setFileType("scenario-registry");
+        } else if (data.containsKey("config") || data.containsKey("data-sources")) {
+            summary.setFileType("config");
+        } else {
+            summary.setFileType("unknown");
+        }
+    }
+}
+

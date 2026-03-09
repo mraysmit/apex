@@ -58,7 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * LRU eviction, statistics tracking, and thread-safe operations.</p>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-10-09
  * @version 1.0
  */
 public class ApexCacheManager {
@@ -86,7 +86,8 @@ public class ApexCacheManager {
         // Initialize all cache scopes
         initializeCaches();
 
-        LOGGER.info("ApexCacheManager initialized with {} cache scopes", cacheManagers.size());
+        LOGGER.info("ApexCacheManager initialized with {} cache scopes: {}", 
+            cacheManagers.size(), String.join(", ", cacheManagers.keySet()));
     }
     
     /**
@@ -298,7 +299,7 @@ public class ApexCacheManager {
         CacheManager cache = cacheManagers.get(scope);
         if (cache != null) {
             cache.clear();
-            LOGGER.info("Cleared cache scope: {}", scope);
+            LOGGER.debug("Cleared cache scope: {}", scope);
         } else {
             LOGGER.warn("Unknown cache scope: {}", scope);
         }
@@ -311,7 +312,7 @@ public class ApexCacheManager {
         for (Map.Entry<String, CacheManager> entry : cacheManagers.entrySet()) {
             entry.getValue().clear();
         }
-        LOGGER.info("Cleared all cache scopes");
+        LOGGER.debug("Cleared all {} cache scopes", cacheManagers.size());
     }
     
     // ========================================
@@ -367,16 +368,34 @@ public class ApexCacheManager {
      * Shutdown all cache managers and release resources.
      */
     public void shutdown() {
+        if (cacheManagers.isEmpty()) {
+            return; // Already shut down
+        }
+        
+        // Collect stats before shutdown
+        long totalHits = 0, totalMisses = 0;
+        for (CacheManager cm : cacheManagers.values()) {
+            CacheStatistics stats = cm.getStatistics();
+            totalHits += stats.getHits();
+            totalMisses += stats.getMisses();
+        }
+        
         for (Map.Entry<String, CacheManager> entry : cacheManagers.entrySet()) {
             try {
                 entry.getValue().shutdown();
-                LOGGER.info("Shutdown cache scope: {}", entry.getKey());
             } catch (Exception e) {
-                LOGGER.error("Error shutting down cache scope: {}", entry.getKey(), e);
+                LOGGER.error("Error shutting down cache '{}': {}", entry.getKey(), e.getMessage());
+                LOGGER.debug("Full exception details:", e);
             }
         }
+        
+        int scopeCount = cacheManagers.size();
         cacheManagers.clear();
-        LOGGER.info("ApexCacheManager shutdown complete");
+        
+        double hitRate = (totalHits + totalMisses) > 0 
+            ? (totalHits * 100.0) / (totalHits + totalMisses) : 0;
+        LOGGER.info("ApexCacheManager shutdown: {} scopes, {} hits, {} misses, {}% hit rate", 
+            scopeCount, totalHits, totalMisses, String.format("%.1f", hitRate));
     }
 }
 

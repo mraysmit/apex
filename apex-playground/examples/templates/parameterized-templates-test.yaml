@@ -1,7 +1,9 @@
 metadata:
+  id: "parameterized-templates-test"
   name: "Parameterized Templates Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test parameterized templates with type safety and validation"
 
 templates:

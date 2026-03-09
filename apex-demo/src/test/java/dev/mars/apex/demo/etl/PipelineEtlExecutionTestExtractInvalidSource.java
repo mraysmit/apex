@@ -1,8 +1,7 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.pipeline.DataPipelineException;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,11 +48,11 @@ class PipelineEtlExecutionTestExtractInvalidSource extends DemoTestBase {
             RuleResult result = rulesEngine.evaluate(inputData);
 
             // Pipeline may return ERROR result instead of throwing exception
-            logger.info("✓ Invalid source extract pipeline test completed");
+            logger.info("[OK] Invalid source extract pipeline test completed");
             logger.info("  - Result type: {}", result.getResultType());
         } catch (Exception e) {
             // Or it may throw an exception
-            logger.info("✓ Invalid source extract pipeline test completed with exception");
+            logger.info("[OK] Invalid source extract pipeline test completed with exception");
             logger.info("  - Exception: {}", e.getMessage());
         }
     }

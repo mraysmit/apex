@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class PipelineEtlExecutionTestLoadDatabase extends DemoTestBase {
             throw new RuntimeException("Failed to create database directory", e);
         }
 
-        logger.info("✓ Database Load Pipeline Test setup completed");
+        logger.info("[OK] Database Load Pipeline Test setup completed");
     }
 
     @AfterEach
@@ -72,6 +72,6 @@ class PipelineEtlExecutionTestLoadDatabase extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Database load pipeline test completed successfully");
+        logger.info("[OK] Database load pipeline test completed successfully");
     }
 }

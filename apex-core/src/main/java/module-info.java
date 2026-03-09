@@ -28,6 +28,10 @@ module dev.mars.apex.core {
     requires transitive spring.expression;
     requires spring.context;
     requires spring.core;
+    requires spring.jdbc;
+    
+    // Connection pooling
+    requires com.zaxxer.hikari;
 
     // Logging dependencies
     requires transitive org.slf4j;
@@ -35,7 +39,7 @@ module dev.mars.apex.core {
 
     // YAML and XML processing dependencies
     requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
+    requires transitive com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires com.fasterxml.jackson.dataformat.xml;
     
@@ -48,20 +52,37 @@ module dev.mars.apex.core {
 
     // Existing exports
     exports dev.mars.apex.core.service.validation;
-    exports dev.mars.apex.core.service.common;
+    exports dev.mars.apex.core.service;
     exports dev.mars.apex.core.service.lookup;
-    exports dev.mars.apex.core.engine.model;
-    exports dev.mars.apex.core.engine.model.metadata;
-    exports dev.mars.apex.core.engine.config;
+    exports dev.mars.apex.engine.model;
+    exports dev.mars.apex.engine.model.metadata;
+    exports dev.mars.apex.engine.core;
+    exports dev.mars.apex.engine.execution;
+    exports dev.mars.apex.engine.scenario;
+    exports dev.mars.apex.engine.util;
 
     // New exports for enhanced error handling
     exports dev.mars.apex.core.exception;
     exports dev.mars.apex.core.service.error;
     exports dev.mars.apex.core.api;
+    exports dev.mars.apex.core.constants;
 
     // YAML configuration exports
-    exports dev.mars.apex.core.config.yaml;
-    opens dev.mars.apex.core.config.yaml to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config;
+    opens dev.mars.apex.core.config to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.model;
+    opens dev.mars.apex.core.config.model to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.loader;
+    opens dev.mars.apex.core.config.loader to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.service;
+    opens dev.mars.apex.core.config.service to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.exception;
+    exports dev.mars.apex.core.config.deserializer;
+    opens dev.mars.apex.core.config.deserializer to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.sequential;
+    opens dev.mars.apex.core.config.sequential to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.validation;
+    opens dev.mars.apex.core.config.validation to com.fasterxml.jackson.databind;
     exports dev.mars.apex.core.service.yaml;
 
     // New exports for performance monitoring
@@ -71,8 +92,6 @@ module dev.mars.apex.core {
     // Note: dev.mars.apex.core.api is already exported above
 
     // Export other existing services
-    exports dev.mars.apex.core.service.engine;
-    exports dev.mars.apex.core.service.data;
     exports dev.mars.apex.core.service.transform;
     exports dev.mars.apex.core.service.enrichment;
     exports dev.mars.apex.core.service.scenario;
@@ -96,14 +115,8 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.service.data.external.database;
 
     // Pipeline engine exports
-    exports dev.mars.apex.core.engine.pipeline;
+    exports dev.mars.apex.engine.pipeline;
 
     // Pipeline configuration exports
     exports dev.mars.apex.core.config.pipeline;
-
-    // Phase 1.2 exports - Input Data Classification System
-    exports dev.mars.apex.core.service.classification;
-
-    // Transformation service exports
-    exports dev.mars.apex.core.service.transformation;
 }

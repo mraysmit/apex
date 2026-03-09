@@ -8,7 +8,7 @@ metadata:
   version: "1.0.0"
   description: Tests that child component is resolved from same classpath base
   business-domain: testing
-  owner: APEX Test Team
+  owner: Mark Andrew Ray-Smith Cityline Ltd 
   criticality: low
   sla-ms: 100
   enabled: true

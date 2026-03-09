@@ -1,11 +1,15 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +47,7 @@ public class CalculationFieldMappingTest {
             """;
 
         // Load configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data
@@ -72,7 +76,7 @@ public class CalculationFieldMappingTest {
         // This assertion will FAIL because field mappings don't work for calculation-enrichment
         if (enrichedMap.containsKey("status")) {
             assertEquals("VALID", enrichedMap.get("status"), "Field mapping should create 'status' field");
-            System.out.println("✓ Field mapping works for calculation enrichment!");
+            System.out.println("[OK] Field mapping works for calculation enrichment!");
         } else {
             System.out.println("✗ BUG CONFIRMED: Field mapping does NOT work for calculation enrichment");
             System.out.println("  - Expected field 'status' with value 'VALID'");

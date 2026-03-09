@@ -75,6 +75,7 @@ public class DataSourceService {
             }
         } catch (Exception e) {
             logger.warn("Connection test failed for {}: {}", connection.getName(), e.getMessage());
+            logger.debug("Full exception details:", e);
             return false;
         } finally {
             if (testDataSource != null) {
@@ -167,6 +168,7 @@ public class DataSourceService {
             
         } catch (SQLException e) {
             logger.error("Query execution failed for connection {}: {}", connectionId, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Query failed: " + e.getMessage(), e);
         }
     }
@@ -234,6 +236,7 @@ public class DataSourceService {
 
         } catch (SQLException e) {
             logger.error("Schema introspection failed for connection {}: {}", connectionId, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Failed to get schema: " + e.getMessage(), e);
         }
     }
@@ -276,6 +279,7 @@ public class DataSourceService {
 
         } catch (SQLException e) {
             logger.error("Schema listing failed for connection {}: {}", connectionId, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Failed to list schemas: " + e.getMessage(), e);
         }
     }
@@ -319,6 +323,7 @@ public class DataSourceService {
 
         } catch (SQLException e) {
             logger.error("Schema listing failed for test connection: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Failed to list schemas: " + e.getMessage(), e);
         }
     }

@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.datasources.filesystem.csv;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 
@@ -72,7 +72,7 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         assertEquals("ACTIVE", enrichedData.get("customerStatus"));
         assertEquals("E123", enrichedData.get("employeeId"));
 
-        logger.info("✓ Unified CSV data source enrichment successful");
+        logger.info("[OK] Unified CSV data source enrichment successful");
     }
 
     @Test
@@ -109,7 +109,7 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         assertNull(enrichedData.get("customerEmail"));
         assertNull(enrichedData.get("customerStatus"));
 
-        logger.info("✓ Unknown customer ID handled correctly with unified approach");
+        logger.info("[OK] Unknown customer ID handled correctly with unified approach");
     }
 
     @Test
@@ -144,7 +144,7 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         assertNull(enrichedData.get("customerEmail"));
         assertNull(enrichedData.get("customerStatus"));
 
-        logger.info("✓ Missing customer ID handled correctly with unified approach");
+        logger.info("[OK] Missing customer ID handled correctly with unified approach");
     }
 }
 

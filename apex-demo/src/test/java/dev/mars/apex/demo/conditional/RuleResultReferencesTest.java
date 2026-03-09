@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for Phase 1: Rule Result References functionality.
+ * Test class for Rule Result References functionality.
  *
  * Tests the ability to reference individual rule results and rule group results
  * in field mappings for conditional processing.
@@ -54,7 +54,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             // Load YAML configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RuleResultReferencesTest.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully: " + config.getMetadata().getName());
+            logger.info("[OK] Configuration loaded successfully: " + config.getMetadata().getName());
 
             // Create test data that triggers high-value-rule
             Map<String, Object> inputData = new HashMap<>();
@@ -76,7 +76,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             Double processedAmount = (Double) enrichedData.get("processedAmount");
             assertEquals(15750.0, processedAmount, 0.01, "Processed amount should be 15000 * 1.05 = 15750");
 
-            logger.info("✓ Basic rule result reference working: processedAmount = " + processedAmount);
+            logger.info("[OK] Basic rule result reference working: processedAmount = " + processedAmount);
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -93,7 +93,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             // Load configuration from classpath
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RuleResultReferencesTest.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully");
+            logger.info("[OK] Configuration loaded successfully");
 
             // Create test data that should trigger the high-value-rule
             Map<String, Object> inputData = new HashMap<>();
@@ -135,8 +135,8 @@ public class RuleResultReferencesTest extends DemoTestBase {
             assertTrue(enrichedData.containsKey("notificationLevel"), "Should contain notificationLevel field");
             assertEquals("LOW", enrichedData.get("notificationLevel"), "Notification level should be LOW");
 
-            logger.info("✓ All rule result references working correctly!");
-            logger.info("✓ Final enriched data: " + enrichedData);
+            logger.info("[OK] All rule result references working correctly!");
+            logger.info("[OK] Final enriched data: " + enrichedData);
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -170,7 +170,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             assertEquals("PREMIUM", enrichedData.get("serviceLevel"),
                         "Premium customer should get PREMIUM service level");
 
-            logger.info("✓ Premium customer scenario working correctly!");
+            logger.info("[OK] Premium customer scenario working correctly!");
 
         } catch (Exception e) {
             logger.error("Premium customer test failed: " + e.getMessage(), e);
@@ -208,16 +208,16 @@ public class RuleResultReferencesTest extends DemoTestBase {
 
             // Verify the feature is now implemented
             // The passedRules and failedRules lists are now available in rule group results
-            // They are populated by YamlEnrichmentProcessor when processing rule groups
+            // They are populated by EnrichmentProcessor when processing rule groups
 
             assertTrue(enrichedData.containsKey("validationStatus"),
                       "Should have validation status from rule group 'passed' boolean");
             assertEquals("VALIDATED", enrichedData.get("validationStatus"),
                       "Validation status should be VALIDATED when group passes");
 
-            logger.info("✓ Rule group results are accessible via #ruleGroupResults");
-            logger.info("✓ passedRules and failedRules lists are now available");
-            logger.info("✓ Feature successfully implemented!");
+            logger.info("[OK] Rule group results are accessible via #ruleGroupResults");
+            logger.info("[OK] passedRules and failedRules lists are now available");
+            logger.info("[OK] Feature successfully implemented!");
 
         } catch (Exception e) {
             logger.error("Passed rules list test failed: " + e.getMessage(), e);
@@ -258,7 +258,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
                         "High-value transaction should get HIGH processing priority");
             Double fee1 = (Double) enriched1.get("processingFee");
             assertEquals(500.0, fee1, 0.01, "High-value premium should pay 2% fee: 25000 * 0.02 = 500");
-            logger.info("✓ Scenario 1 passed: serviceLevel=" + enriched1.get("serviceLevel") +
+            logger.info("[OK] Scenario 1 passed: serviceLevel=" + enriched1.get("serviceLevel") +
                        ", processingPriority=" + enriched1.get("processingPriority") +
                        ", processingFee=" + fee1);
 
@@ -279,7 +279,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
                         "Normal priority should get STANDARD processing priority");
             Double fee2 = (Double) enriched2.get("processingFee");
             assertEquals(250.0, fee2, 0.01, "Standard customer pays 5% fee: 5000 * 0.05 = 250");
-            logger.info("✓ Scenario 2 passed: serviceLevel=" + enriched2.get("serviceLevel") +
+            logger.info("[OK] Scenario 2 passed: serviceLevel=" + enriched2.get("serviceLevel") +
                        ", processingPriority=" + enriched2.get("processingPriority") +
                        ", processingFee=" + fee2);
 
@@ -300,13 +300,13 @@ public class RuleResultReferencesTest extends DemoTestBase {
                         "Urgent processing should get IMMEDIATE priority");
             assertEquals("IMMEDIATE", enriched3.get("notificationLevel"),
                         "Urgent premium customer should get IMMEDIATE notification");
-            logger.info("✓ Scenario 3 passed: serviceLevel=" + enriched3.get("serviceLevel") +
+            logger.info("[OK] Scenario 3 passed: serviceLevel=" + enriched3.get("serviceLevel") +
                        ", processingPriority=" + enriched3.get("processingPriority") +
                        ", notificationLevel=" + enriched3.get("notificationLevel"));
 
-            logger.info("\n✓ Conditional enrichment chaining working correctly!");
-            logger.info("✓ Enrichments properly depend on rule evaluation results");
-            logger.info("✓ Multiple scenarios validated successfully");
+            logger.info("\n[OK] Conditional enrichment chaining working correctly!");
+            logger.info("[OK] Enrichments properly depend on rule evaluation results");
+            logger.info("[OK] Multiple scenarios validated successfully");
 
         } catch (Exception e) {
             logger.error("Conditional enrichment chaining test failed: " + e.getMessage(), e);

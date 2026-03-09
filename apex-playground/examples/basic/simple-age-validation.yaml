@@ -33,6 +33,7 @@ rules:
     description: "Validates that age field is present"
     condition: "#age != null"
     message: "Age field is present: {{#age}}"
+    no-match-message: "Age field is not present"
     severity: "ERROR"
     priority: 1
     enabled: true
@@ -42,6 +43,7 @@ rules:
     description: "Identifies when age is below minimum"
     condition: "#age != null && #age < 18"
     message: "Age {{#age}} is below minimum required age of 18"
+    no-match-message: "Age {{#age}} is above minimum required age of 18"
     severity: "WARNING"
     priority: 2
-    enabled: true
+    enabled: false

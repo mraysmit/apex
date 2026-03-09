@@ -19,9 +19,9 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -116,7 +116,7 @@ class ReadSchemaCsvPipelineStageTestLarge extends SyncTestBase {
         schema.getColumns().forEach(col -> 
             logger.info("  Column: {} ({})", col.getName(), col.getDataType()));
 
-        logger.info("✓ Successfully read large CSV schema with {} columns", schema.getColumns().size());
+        logger.info("[OK] Successfully read large CSV schema with {} columns", schema.getColumns().size());
     }
 
     /**

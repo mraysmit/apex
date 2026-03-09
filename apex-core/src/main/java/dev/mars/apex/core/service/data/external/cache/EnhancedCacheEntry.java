@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * consistent caching behavior and advanced cache management features.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-22
  * @version 1.0
  */
 public class EnhancedCacheEntry {

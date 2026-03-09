@@ -16,10 +16,10 @@
 
 package dev.mars.apex.demo.logging;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,20 +56,20 @@ class CriticalEnrichmentConditionLoggingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CriticalEnrichmentConditionLoggingTest.class);
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("🔧 Initializing APEX services for critical enrichment condition logging test");
 
         // Initialize YAML loader
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         logger.info("All services initialized for critical enrichment condition logging test");
     }
 
     @Test
-    @DisplayName("CRITICAL: Enrichment condition evaluation failures must log as SEVERE")
+    @DisplayName("Enrichment condition evaluation failures must log as SEVERE")
     void testCriticalEnrichmentConditionFailureLogging() throws Exception {
         logger.info("=== CRITICAL ENRICHMENT CONDITION LOGGING TEST ===");
         logger.info("🎯 PURPOSE: Verify that enrichment condition evaluation failures are logged as SEVERE");
@@ -153,10 +153,10 @@ class CriticalEnrichmentConditionLoggingTest {
     void testDocumentLoggingSeverityImprovements() {
         logger.info("=== LOGGING SEVERITY IMPROVEMENTS DOCUMENTATION ===");
         logger.info("🎯 CRITICAL IMPROVEMENTS IMPLEMENTED:");
-        logger.info("   YamlEnrichmentProcessor:251 - Enrichment condition evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:557 - OR condition evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:576 - AND condition evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:607 - General condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:251 - Enrichment condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:557 - OR condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:576 - AND condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:607 - General condition evaluation failure → SEVERE");
         logger.info("   Enhanced error messages with 'CRITICAL:' and 'ERROR:' prefixes");
         logger.info("   Full context provided (enrichment ID, condition, error details)");
         logger.info("   Stack traces preserved for debugging");

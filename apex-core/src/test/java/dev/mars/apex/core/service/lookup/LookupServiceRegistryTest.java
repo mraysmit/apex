@@ -17,10 +17,14 @@ package dev.mars.apex.core.service.lookup;
  */
 
 
-import dev.mars.apex.core.service.common.NamedService;
+import dev.mars.apex.core.service.NamedService;
 import dev.mars.apex.core.service.validation.Validator;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class LookupServiceRegistryTest {
 
     private LookupServiceRegistry registry;

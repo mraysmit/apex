@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -100,14 +100,14 @@ public class Test6A_NumberedSuffixesWithGroupsTest extends DemoTestBase {
         assertEquals("grouped-1", executionLog.get(2), "Position 2 MUST be grouped-1");
         assertEquals("grouped-2", executionLog.get(3), "Position 3 MUST be grouped-2");
 
-        LOGGER.info("✓ TEST 6A PASSED: All 5 definitive assertion types verified");
-        LOGGER.info("  ✓ Exact count: 4 items");
-        LOGGER.info("  ✓ Exact order: standalone-1, standalone-2, grouped-1, grouped-2");
-        LOGGER.info("  ✓ What executed: 2 standalone + 2 grouped");
-        LOGGER.info("  ✓ No double execution: Each item executes exactly once");
-        LOGGER.info("  ✓ Position verification: All items at correct positions");
-        LOGGER.info("  ✓ Groups-only logic: Works correctly with numbered suffixes");
-        LOGGER.info("  ✓ Numbered suffixes: Merged correctly before groups-only logic applied");
+        LOGGER.info("[OK] TEST 6A PASSED: All 5 definitive assertion types verified");
+        LOGGER.info("  [OK] Exact count: 4 items");
+        LOGGER.info("  [OK] Exact order: standalone-1, standalone-2, grouped-1, grouped-2");
+        LOGGER.info("  [OK] What executed: 2 standalone + 2 grouped");
+        LOGGER.info("  [OK] No double execution: Each item executes exactly once");
+        LOGGER.info("  [OK] Position verification: All items at correct positions");
+        LOGGER.info("  [OK] Groups-only logic: Works correctly with numbered suffixes");
+        LOGGER.info("  [OK] Numbered suffixes: Merged correctly before groups-only logic applied");
     }
 }
 

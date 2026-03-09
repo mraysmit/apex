@@ -2,7 +2,6 @@ metadata:
   name: "Rule-Refs BEFORE Inline Rules Test"
   type: "rule-config"
   version: "1.0.0"
-  processing-mode: "sequential"
   description: |
     CRITICAL TEST: Verify rule-refs can appear BEFORE inline rules.
 

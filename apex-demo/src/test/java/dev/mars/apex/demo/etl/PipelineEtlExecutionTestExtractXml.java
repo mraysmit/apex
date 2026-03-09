@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,7 +56,7 @@ public class PipelineEtlExecutionTestExtractXml extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ XML OTC trades extraction executed successfully");
+        logger.info("[OK] XML OTC trades extraction executed successfully");
     }
 
     @Test
@@ -75,7 +75,7 @@ public class PipelineEtlExecutionTestExtractXml extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Deeply nested structures validated successfully");
+        logger.info("[OK] Deeply nested structures validated successfully");
     }
 }
 

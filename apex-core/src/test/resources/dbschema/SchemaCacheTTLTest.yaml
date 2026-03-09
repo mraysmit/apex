@@ -72,6 +72,7 @@ enrichments:
       lookup-dataset:
         type: "database"
         data-source-ref: "sales-db-short-ttl"
+        key-field: "key"
         query: |
           SELECT name, department, schema_name 
           FROM customers 
@@ -91,6 +92,7 @@ enrichments:
       lookup-dataset:
         type: "database"
         data-source-ref: "marketing-db-medium-ttl"
+        key-field: "key"
         query: |
           SELECT name, department, schema_name 
           FROM customers 
@@ -110,6 +112,7 @@ enrichments:
       lookup-dataset:
         type: "database"
         data-source-ref: "finance-db-long-ttl"
+        key-field: "key"
         query: |
           SELECT name, department, schema_name 
           FROM customers 

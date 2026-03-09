@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.test;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import dev.mars.apex.engine.core.RuleBuilder;
 
 /**
  * Common SpEL Error Scenarios for YAML Developers.
@@ -63,12 +64,7 @@ class CommonSpelErrorScenariosTest {
         logger.info("RIGHT: #region == 'US'");
         
         // This is what was breaking ConditionalStageExecutionTest
-        Rule wrongRule = new Rule(
-            "wrong-syntax",
-            "#'region'] == 'US'",  // WRONG: Mixing quotes and brackets
-            "Invalid syntax",
-            "ERROR"
-        );
+        Rule wrongRule = new RuleBuilder().withName("wrong-syntax").withCondition("#'region'] == 'US'").withMessage("Invalid syntax").withSeverity("ERROR").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("region", "US");
@@ -81,7 +77,7 @@ class CommonSpelErrorScenariosTest {
                    result.getMessage().contains("evaluation failed"),
             "Error should mention syntax problem");
         
-        logger.info("✓ Error detected: Malformed quote-bracket syntax");
+        logger.info("[OK] Error detected: Malformed quote-bracket syntax");
         logger.info("💡 TIP: Use #variableName without quotes or brackets");
     }
 
@@ -90,12 +86,7 @@ class CommonSpelErrorScenariosTest {
     void testCorrectVariableReferenceSyntax() {
         logger.info("=== Correct Syntax: Simple Variable Reference ===");
         
-        Rule correctRule = new Rule(
-            "correct-syntax",
-            "#region == 'US'",  // CORRECT: Simple hash prefix
-            "Valid syntax",
-            "INFO"
-        );
+        Rule correctRule = new RuleBuilder().withName("correct-syntax").withCondition("#region == 'US'").withMessage("Valid syntax").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("region", "US");
@@ -105,7 +96,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with correct syntax");
         
-        logger.info("✓ Rule matched successfully with correct syntax");
+        logger.info("[OK] Rule matched successfully with correct syntax");
     }
 
     // ========================================
@@ -119,12 +110,7 @@ class CommonSpelErrorScenariosTest {
         logger.info("WRONG: #customer.address.city (when address is null)");
         logger.info("RIGHT: #customer != null && #customer.address != null && #customer.address.city == 'NYC'");
         
-        Rule unsafeRule = new Rule(
-            "nested-access",
-            "#customer.address.city == 'NYC'",  // WRONG: No null checks
-            "City is NYC",
-            "INFO"
-        );
+        Rule unsafeRule = new RuleBuilder().withName("nested-access").withCondition("#customer.address.city == 'NYC'").withMessage("City is NYC").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         Map<String, Object> customer = new HashMap<>();
@@ -137,7 +123,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Error recovery returns NO_MATCH for null property access");
         
-        logger.info("✓ Error detected: Null pointer in nested property access");
+        logger.info("[OK] Error detected: Null pointer in nested property access");
         logger.info("💡 TIP: Always check for null before accessing nested properties");
     }
 
@@ -146,12 +132,7 @@ class CommonSpelErrorScenariosTest {
     void testSafeNestedPropertyAccess() {
         logger.info("=== Correct Syntax: Safe Nested Property Access ===");
         
-        Rule safeRule = new Rule(
-            "safe-nested-access",
-            "#customer != null && #customer['address'] != null && #customer['address']['city'] == 'NYC'",
-            "City is NYC",
-            "INFO"
-        );
+        Rule safeRule = new RuleBuilder().withName("safe-nested-access").withCondition("#customer != null && #customer['address'] != null && #customer['address']['city'] == 'NYC'").withMessage("City is NYC").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         Map<String, Object> customer = new HashMap<>();
@@ -166,7 +147,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with safe null checks");
         
-        logger.info("✓ Safe nested access works correctly");
+        logger.info("[OK] Safe nested access works correctly");
     }
 
     // ========================================
@@ -180,12 +161,7 @@ class CommonSpelErrorScenariosTest {
         logger.info("WRONG: #description.length() > 0 (when description is null)");
         logger.info("RIGHT: #description != null && #description.length() > 0");
         
-        Rule unsafeRule = new Rule(
-            "null-method-call",
-            "#description.length() > 0",  // WRONG: No null check
-            "Has description",
-            "INFO"
-        );
+        Rule unsafeRule = new RuleBuilder().withName("null-method-call").withCondition("#description.length() > 0").withMessage("Has description").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("description", null);  // ⚠️ null value!
@@ -195,7 +171,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Error recovery returns NO_MATCH when calling method on null");
         
-        logger.info("✓ Error detected: Method call on null object");
+        logger.info("[OK] Error detected: Method call on null object");
         logger.info("💡 TIP: Check for null before calling methods");
     }
 
@@ -204,12 +180,7 @@ class CommonSpelErrorScenariosTest {
     void testSafeMethodCalls() {
         logger.info("=== Correct Syntax: Safe Method Calls ===");
         
-        Rule safeRule = new Rule(
-            "safe-method-call",
-            "#description != null && #description.length() > 0",  // CORRECT: Null check first
-            "Has description",
-            "INFO"
-        );
+        Rule safeRule = new RuleBuilder().withName("safe-method-call").withCondition("#description != null && #description.length() > 0").withMessage("Has description").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("description", "Valid description");
@@ -219,7 +190,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with safe null check");
         
-        logger.info("✓ Safe method call works correctly");
+        logger.info("[OK] Safe method call works correctly");
     }
 
     // ========================================
@@ -233,12 +204,7 @@ class CommonSpelErrorScenariosTest {
         logger.info("WRONG: #amount > 1000 (when amount is a String)");
         logger.info("RIGHT: T(Double).parseDouble(#amount) > 1000");
         
-        Rule unsafeRule = new Rule(
-            "type-mismatch",
-            "#amount > 1000",  // WRONG: Comparing String to Number
-            "High amount",
-            "INFO"
-        );
+        Rule unsafeRule = new RuleBuilder().withName("type-mismatch").withCondition("#amount > 1000").withMessage("High amount").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("amount", "5000");  // ⚠️ String instead of number!
@@ -255,12 +221,7 @@ class CommonSpelErrorScenariosTest {
     void testExplicitTypeConversion() {
         logger.info("=== Correct Syntax: Explicit Type Conversion ===");
         
-        Rule safeRule = new Rule(
-            "safe-conversion",
-            "#amount instanceof T(String) ? T(Double).parseDouble(#amount) > 1000 : #amount > 1000",
-            "High amount",
-            "INFO"
-        );
+        Rule safeRule = new RuleBuilder().withName("safe-conversion").withCondition("#amount instanceof T(String) ? T(Double).parseDouble(#amount) > 1000 : #amount > 1000").withMessage("High amount").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("amount", "5000");
@@ -270,7 +231,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with proper type conversion");
         
-        logger.info("✓ Type-safe comparison works correctly");
+        logger.info("[OK] Type-safe comparison works correctly");
     }
 
     // ========================================
@@ -284,12 +245,7 @@ class CommonSpelErrorScenariosTest {
         logger.info("WRONG: #items[5] (when list has only 2 elements)");
         logger.info("RIGHT: #items.size() > 5 && #items[5] == 'value'");
         
-        Rule unsafeRule = new Rule(
-            "array-access",
-            "#items[5] == 'target'",  // WRONG: No bounds check
-            "Target found",
-            "INFO"
-        );
+        Rule unsafeRule = new RuleBuilder().withName("array-access").withCondition("#items[5] == 'target'").withMessage("Target found").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("items", Arrays.asList("a", "b"));  // ⚠️ Only 2 elements!
@@ -299,7 +255,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Error recovery returns NO_MATCH for index out of bounds");
         
-        logger.info("✓ Error detected: Array index out of bounds");
+        logger.info("[OK] Error detected: Array index out of bounds");
         logger.info("💡 TIP: Check array/list size before accessing by index");
     }
 
@@ -308,12 +264,7 @@ class CommonSpelErrorScenariosTest {
     void testSafeArrayAccess() {
         logger.info("=== Correct Syntax: Safe Array Access ===");
         
-        Rule safeRule = new Rule(
-            "safe-array-access",
-            "#items != null && #items.size() > 5 && #items[5] == 'target'",  // CORRECT: Size check
-            "Target found",
-            "INFO"
-        );
+        Rule safeRule = new RuleBuilder().withName("safe-array-access").withCondition("#items != null && #items.size() > 5 && #items[5] == 'target'").withMessage("Target found").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("items", Arrays.asList("a", "b", "c", "d", "e", "target", "g"));
@@ -323,7 +274,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with safe bounds check");
         
-        logger.info("✓ Safe array access works correctly");
+        logger.info("[OK] Safe array access works correctly");
     }
 
     // ========================================
@@ -337,12 +288,7 @@ class CommonSpelErrorScenariosTest {
         logger.info("WRONG: #total / #count (when count is 0)");
         logger.info("RIGHT: #count != 0 ? (#total / #count) : 0");
         
-        Rule unsafeRule = new Rule(
-            "division",
-            "#total / #count > 100",  // WRONG: No zero check
-            "Average is high",
-            "INFO"
-        );
+        Rule unsafeRule = new RuleBuilder().withName("division").withCondition("#total / #count > 100").withMessage("Average is high").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("total", 1000);
@@ -353,7 +299,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Error recovery returns NO_MATCH for division by zero");
         
-        logger.info("✓ Error detected: Division by zero");
+        logger.info("[OK] Error detected: Division by zero");
         logger.info("💡 TIP: Always check divisor is not zero");
     }
 
@@ -362,12 +308,7 @@ class CommonSpelErrorScenariosTest {
     void testSafeDivision() {
         logger.info("=== Correct Syntax: Safe Division ===");
         
-        Rule safeRule = new Rule(
-            "safe-division",
-            "#count != null && #count != 0 && (#total / #count) > 100",  // CORRECT: Zero check
-            "Average is high",
-            "INFO"
-        );
+        Rule safeRule = new RuleBuilder().withName("safe-division").withCondition("#count != null && #count != 0 && (#total / #count) > 100").withMessage("Average is high").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("total", 1000);
@@ -378,7 +319,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with safe division");
         
-        logger.info("✓ Safe division works correctly");
+        logger.info("[OK] Safe division works correctly");
     }
 
     // ========================================
@@ -392,12 +333,7 @@ class CommonSpelErrorScenariosTest {
         logger.info("WORKS (surprisingly): #text.substring('5') - SpEL auto-converts String to int!");
         logger.info("BETTER: #text.substring(5) - explicit int for clarity");
         
-        Rule unsafeRule = new Rule(
-            "invalid-args",
-            "#text.substring('5').length() > 0",  // ⚠️ Surprising: String '5' becomes int 5
-            "Has substring",
-            "INFO"
-        );
+        Rule unsafeRule = new RuleBuilder().withName("invalid-args").withCondition("#text.substring('5').length() > 0").withMessage("Has substring").withSeverity("INFO").build();
         
         Map<String, Object> data = new HashMap<>();
         data.put("text", "Hello World");
@@ -422,12 +358,7 @@ class CommonSpelErrorScenariosTest {
         logger.info("GOOD: #value ?: 0");
         logger.info("BETTER THAN: #value != null ? #value : 0");
         
-        Rule elvisRule = new Rule(
-            "elvis-operator",
-            "(#quantity ?: 0) > 100",  // BEST: Elvis operator provides default
-            "High quantity",
-            "INFO"
-        );
+        Rule elvisRule = new RuleBuilder().withName("elvis-operator").withCondition("(#quantity ?: 0) > 100").withMessage("High quantity").withSeverity("INFO").build();
         
         // Test with null value
         Map<String, Object> nullData = new HashMap<>();
@@ -445,7 +376,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, valueResult.getResultType(),
             "Should match when value > 100");
         
-        logger.info("✓ Elvis operator provides safe default values");
+        logger.info("[OK] Elvis operator provides safe default values");
         logger.info("💡 TIP: Use ?: for concise null handling");
     }
 
@@ -460,12 +391,7 @@ class CommonSpelErrorScenariosTest {
         logger.info("GOOD: #customer?.address?.city");
         logger.info("BETTER THAN: #customer != null && #customer.address != null && #customer.address.city");
         
-        Rule safeNavRule = new Rule(
-            "safe-navigation",
-            "#customer?.address?.city == 'NYC'",  // BEST: Safe navigation
-            "NYC customer",
-            "INFO"
-        );
+        Rule safeNavRule = new RuleBuilder().withName("safe-navigation").withCondition("#customer?.address?.city == 'NYC'").withMessage("NYC customer").withSeverity("INFO").build();
         
         // Test with null intermediate value
         Map<String, Object> data = new HashMap<>();
@@ -480,7 +406,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Should not match but also not error");
         
-        logger.info("✓ Safe navigation handles null gracefully");
+        logger.info("[OK] Safe navigation handles null gracefully");
         logger.info("💡 TIP: Use ?. for null-safe property chains");
     }
 }

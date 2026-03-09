@@ -1,12 +1,22 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.RuleFactory;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
-import dev.mars.apex.core.engine.model.Enrichment;
-import dev.mars.apex.core.engine.model.EnrichmentGroup;
-import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
+import dev.mars.apex.engine.model.Enrichment;
+import dev.mars.apex.engine.model.EnrichmentGroup;
+import dev.mars.apex.core.config.EnrichmentGroupFactory;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,15 +31,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Enrichment Category Inheritance Integration Tests")
 class EnrichmentCategoryInheritanceIntegrationTest {
 
-    private static final Logger LOGGER = Logger.getLogger(EnrichmentCategoryInheritanceIntegrationTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnrichmentCategoryInheritanceIntegrationTest.class);
 
-    private YamlConfigurationLoader loader;
-    private YamlRuleFactory factory;
+    private ConfigurationLoader loader;
+    private RuleFactory factory;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
-        factory = new YamlRuleFactory();
+        loader = new ConfigurationLoader();
+        factory = new RuleFactory();
     }
 
     @AfterEach
@@ -342,3 +352,4 @@ class EnrichmentCategoryInheritanceIntegrationTest {
                 .orElse(null);
     }
 }
+

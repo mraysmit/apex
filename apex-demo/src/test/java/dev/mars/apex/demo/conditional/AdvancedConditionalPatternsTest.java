@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,8 +84,8 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
             assertEquals("COMPLIANCE_REVIEW_QUEUE", enrichedData.get("processingQueue"),
                       "High-risk customer should route to compliance queue");
 
-            logger.info("✓ Multi-stage processing working correctly!");
-            logger.info("✓ Enriched data: " + enrichedData);
+            logger.info("[OK] Multi-stage processing working correctly!");
+            logger.info("[OK] Enriched data: " + enrichedData);
 
         } catch (Exception e) {
             logger.error("Multi-stage processing test failed: " + e.getMessage(), e);
@@ -119,8 +119,8 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
             assertEquals("SENIOR_APPROVAL_QUEUE", enrichedData.get("processingQueue"),
                       "High-value transaction should route to senior approval queue");
 
-            logger.info("✓ Cascading conditions working correctly!");
-            logger.info("✓ Routing decision: " + enrichedData.get("processingQueue"));
+            logger.info("[OK] Cascading conditions working correctly!");
+            logger.info("[OK] Routing decision: " + enrichedData.get("processingQueue"));
 
         } catch (Exception e) {
             logger.error("Cascading conditions test failed: " + e.getMessage(), e);
@@ -159,8 +159,8 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
                        Boolean.TRUE.equals(enrichedData.get("requiresManualReview")),
                       "Standard transaction should not require manual review");
 
-            logger.info("✓ Standard processing path working correctly!");
-            logger.info("✓ Routing decision: " + enrichedData.get("processingQueue"));
+            logger.info("[OK] Standard processing path working correctly!");
+            logger.info("[OK] Routing decision: " + enrichedData.get("processingQueue"));
 
         } catch (Exception e) {
             logger.error("Standard processing test failed: " + e.getMessage(), e);
@@ -198,8 +198,8 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
             assertEquals(true, enrichedData.get("requiresManualReview"),
                       "Combined scenario should require manual review");
 
-            logger.info("✓ Combined scenario routing working correctly!");
-            logger.info("✓ Routing decision: " + enrichedData.get("processingQueue"));
+            logger.info("[OK] Combined scenario routing working correctly!");
+            logger.info("[OK] Routing decision: " + enrichedData.get("processingQueue"));
 
         } catch (Exception e) {
             logger.error("Combined scenario test failed: " + e.getMessage(), e);

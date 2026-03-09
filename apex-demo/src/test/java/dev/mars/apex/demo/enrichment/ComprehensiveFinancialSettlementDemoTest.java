@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * REAL APEX SERVICES TESTED:
  * - EnrichmentService: Real APEX enrichment processor for settlement processing
- * - YamlConfigurationLoader: Real YAML configuration loading and validation
+ * - ConfigurationLoader: Real YAML configuration loading and validation
  * - ExpressionEvaluatorService: Real SpEL expression evaluation for business rules
  * - LookupServiceRegistry: Real lookup service management for market conventions
  *

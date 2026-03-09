@@ -1,11 +1,11 @@
 package dev.mars.apex.demo.codes;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRuleFactory;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.RuleFactory;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -25,18 +25,18 @@ public class SuccessErrorCodesValidation {
 
     private static final Logger logger = LoggerFactory.getLogger(SuccessErrorCodesValidation.class);
     private UnifiedRuleEvaluator evaluator;
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration config;
-    private YamlRuleFactory ruleFactory;
+    private RuleFactory ruleFactory;
 
     @BeforeEach
     public void setUp() throws Exception {
         evaluator = new UnifiedRuleEvaluator();
-        yamlLoader = new YamlConfigurationLoader();
-        ruleFactory = new YamlRuleFactory();
+        yamlLoader = new ConfigurationLoader();
+        ruleFactory = new RuleFactory();
         config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/codes/SuccessErrorCodesValidation-rules.yaml");
         assertNotNull(config, "Configuration should be loaded");
-        logger.info("✓ Configuration loaded: {} rules", config.getRules().size());
+        logger.info("[OK] Configuration loaded: {} rules", config.getRules().size());
     }
 
     /**
@@ -77,11 +77,11 @@ public class SuccessErrorCodesValidation {
         logger.info("Rule evaluation completed");
 
         assertTrue(result.isTriggered(), "Rule should match");
-        logger.info("✓ Rule triggered: true");
+        logger.info("[OK] Rule triggered: true");
         assertEquals("SUCCESS_AMOUNT_VALID", result.getSuccessCode(), "Success code should be set");
-        logger.info("✓ Success code: {}", result.getSuccessCode());
+        logger.info("[OK] Success code: {}", result.getSuccessCode());
         assertNull(result.getErrorCode(), "Error code should be null");
-        logger.info("✓ Error code: null (not applicable when rule matches)");
+        logger.info("[OK] Error code: null (not applicable when rule matches)");
     }
 
     /**
@@ -108,11 +108,11 @@ public class SuccessErrorCodesValidation {
         logger.info("Rule evaluation completed");
 
         assertFalse(result.isTriggered(), "Rule should not match");
-        logger.info("✓ Rule triggered: false");
+        logger.info("[OK] Rule triggered: false");
         assertNull(result.getSuccessCode(), "Success code should be null");
-        logger.info("✓ Success code: null (not applicable when rule fails)");
+        logger.info("[OK] Success code: null (not applicable when rule fails)");
         assertEquals("ERROR_AMOUNT_INVALID", result.getErrorCode(), "Error code should be set");
-        logger.info("✓ Error code: {}", result.getErrorCode());
+        logger.info("[OK] Error code: {}", result.getErrorCode());
     }
 
     /**
@@ -139,9 +139,9 @@ public class SuccessErrorCodesValidation {
         logger.info("Rule evaluation completed");
 
         assertTrue(result.isTriggered(), "Rule should match");
-        logger.info("✓ Rule triggered: true");
+        logger.info("[OK] Rule triggered: true");
         assertEquals("HIGH_VALUE", result.getSuccessCode(), "Success code should be HIGH_VALUE");
-        logger.info("✓ Success code: {} (1500 > 1000)", result.getSuccessCode());
+        logger.info("[OK] Success code: {} (1500 > 1000)", result.getSuccessCode());
     }
 
     /**
@@ -169,11 +169,11 @@ public class SuccessErrorCodesValidation {
         logger.info("Rule evaluation completed");
 
         assertTrue(result.isTriggered(), "Rule should match");
-        logger.info("✓ Rule triggered: true");
+        logger.info("[OK] Rule triggered: true");
         assertNull(result.getSuccessCode(), "Success code should be null");
-        logger.info("✓ Success code: null (not specified)");
+        logger.info("[OK] Success code: null (not specified)");
         assertNull(result.getErrorCode(), "Error code should be null");
-        logger.info("✓ Error code: null (not specified)");
+        logger.info("[OK] Error code: null (not specified)");
     }
 
     /**
@@ -200,10 +200,10 @@ public class SuccessErrorCodesValidation {
         logger.info("Rule evaluation completed");
 
         assertTrue(result.isTriggered(), "Rule should match");
-        logger.info("✓ Rule triggered: true");
+        logger.info("[OK] Rule triggered: true");
         assertNull(result.getSuccessCode(), "Success code should be null due to invalid SpEL");
-        logger.info("✓ Success code: null (invalid SpEL expression handled gracefully)");
-        logger.info("✓ Error handling: Invalid SpEL expressions are caught and ignored");
+        logger.info("[OK] Success code: null (invalid SpEL expression handled gracefully)");
+        logger.info("[OK] Error handling: Invalid SpEL expressions are caught and ignored");
     }
 }
 

@@ -16,10 +16,15 @@ package dev.mars.apex.core.service.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlEnrichment.LookupDataset;
-import dev.mars.apex.core.config.yaml.YamlEnrichment.LookupDataset.ParameterMapping;
+import dev.mars.apex.core.config.model.YamlEnrichment.LookupDataset;
+import dev.mars.apex.core.config.model.YamlEnrichment.LookupDataset.ParameterMapping;
 import org.junit.jupiter.api.DisplayName;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.*;
 
@@ -38,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class DatasetSignatureTest {
 
     @Test

@@ -1,11 +1,15 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,7 +53,7 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "trade_amount"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data with nested structure (exactly as in the issue)
@@ -77,9 +81,9 @@ public class SpelFieldMappingIntegrationTest {
                     "Should extract nested amount field using SpEL");
         
         System.out.println();
-        System.out.println("✓ Original issue SOLVED!");
-        System.out.println("✓ Field mappings now support SpEL expressions for nested field access");
-        System.out.println("✓ Consistent with conditions, transformations, and lookup-keys");
+        System.out.println("[OK] Original issue SOLVED!");
+        System.out.println("[OK] Field mappings now support SpEL expressions for nested field access");
+        System.out.println("[OK] Consistent with conditions, transformations, and lookup-keys");
     }
 
     @Test
@@ -121,7 +125,7 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "bid_price"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         Map<String, Object> inputData = new HashMap<>();
@@ -144,7 +148,7 @@ public class SpelFieldMappingIntegrationTest {
         assertEquals(150.25, enrichedMap.get("bid_price"), 
                     "Should extract nested bid price from lookup result");
         
-        System.out.println("✓ Lookup enrichment with nested results test passed!");
+        System.out.println("[OK] Lookup enrichment with nested results test passed!");
     }
 
     @Test
@@ -184,7 +188,7 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "currency_code"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create nested input data - pass trade directly at root level
@@ -215,8 +219,8 @@ public class SpelFieldMappingIntegrationTest {
                     "Complex SpEL expression in source-field should work");
         
         System.out.println();
-        System.out.println("✓ Consistency test passed!");
-        System.out.println("✓ SpEL now works consistently across all APEX features");
+        System.out.println("[OK] Consistency test passed!");
+        System.out.println("[OK] SpEL now works consistently across all APEX features");
     }
 
     @Test
@@ -249,7 +253,7 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "nested_value"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data with both simple and nested fields
@@ -276,8 +280,8 @@ public class SpelFieldMappingIntegrationTest {
                     "New style (with #) should work");
         
         System.out.println();
-        System.out.println("✓ Backward compatibility preserved!");
-        System.out.println("✓ Existing configurations continue to work unchanged");
+        System.out.println("[OK] Backward compatibility preserved!");
+        System.out.println("[OK] Existing configurations continue to work unchanged");
     }
 }
 

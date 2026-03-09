@@ -32,7 +32,7 @@ param(
 # Configuration
 $AUTHOR_NAME = "Mark Andrew Ray-Smith Cityline Ltd"
 $COPYRIGHT_YEAR = (Get-Date).Year
-$PROJECT_NAME = "PeeGeeQ"
+$PROJECT_NAME = "APEX Rules Engine"
 
 # Function to determine the type of Java file (class, interface, enum, annotation)
 function Get-JavaFileType {

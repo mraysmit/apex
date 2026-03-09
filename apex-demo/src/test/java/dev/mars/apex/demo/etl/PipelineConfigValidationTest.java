@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,7 +62,7 @@ public class PipelineConfigValidationTest extends DemoTestBase {
         try {
             Files.createDirectories(testDataDir);
             Files.createDirectories(testOutputDir);
-            LOGGER.info("✓ Test directories created: data={}, output={}", testDataDir, testOutputDir);
+            LOGGER.info("[OK] Test directories created: data={}, output={}", testDataDir, testOutputDir);
         } catch (IOException e) {
             LOGGER.error("Failed to create test directories", e);
         }
@@ -118,7 +118,7 @@ public class PipelineConfigValidationTest extends DemoTestBase {
             assertNotNull(riskCategory, "Risk category should be calculated");
             assertNotNull(creditWorthiness, "Credit worthiness should be calculated");
 
-            LOGGER.info("✓ Customer enriched with riskScore={}, riskCategory={}, creditWorthiness={}",
+            LOGGER.info("[OK] Customer enriched with riskScore={}, riskCategory={}, creditWorthiness={}",
                 riskScore, riskCategory, creditWorthiness);
         }
 
@@ -166,7 +166,7 @@ public class PipelineConfigValidationTest extends DemoTestBase {
             assertEquals(1250.0, fxAmount, 0.01, "FX amount should be baseAmount * fxRate");
             assertEquals(20.0, fees, 0.01, "Fees should be baseAmount * feePercentage");
 
-            LOGGER.info("✓ Transaction calculations: totalValue={}, fxAmount={}, fees={}",
+            LOGGER.info("[OK] Transaction calculations: totalValue={}, fxAmount={}, fees={}",
                 totalValue, fxAmount, fees);
         }
 
@@ -226,9 +226,9 @@ public class PipelineConfigValidationTest extends DemoTestBase {
             assertTrue(result1.containsKey("complianceCheck"), "High-value transaction should have compliance check");
             assertTrue(result2.containsKey("basicValidation"), "Low-value transaction should have basic validation");
 
-            LOGGER.info("✓ Conditional processing: high-value={}ms, low-value={}ms", duration1, duration2);
-            LOGGER.info("✓ High-value enrichments: {}", result1.keySet());
-            LOGGER.info("✓ Low-value enrichments: {}", result2.keySet());
+            LOGGER.info("[OK] Conditional processing: high-value={}ms, low-value={}ms", duration1, duration2);
+            LOGGER.info("[OK] High-value enrichments: {}", result1.keySet());
+            LOGGER.info("[OK] Low-value enrichments: {}", result2.keySet());
         }
     }
 

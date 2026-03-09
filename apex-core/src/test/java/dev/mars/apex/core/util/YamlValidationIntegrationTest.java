@@ -17,11 +17,15 @@ package dev.mars.apex.core.util;
  */
 
 
-import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
-import dev.mars.apex.core.config.yaml.YamlValidationResult;
-import dev.mars.apex.core.config.yaml.YamlValidationSummary;
+import dev.mars.apex.core.config.validation.MetadataValidator;
+import dev.mars.apex.core.config.validation.ValidationResult;
+import dev.mars.apex.core.config.validation.ValidationSummary;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,12 +39,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-08-28
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlValidationIntegrationTest {
     
     @Test
     void testValidateActualProjectFiles() {
         // Use actual existing test files
-        YamlMetadataValidator validator = new YamlMetadataValidator(
+        MetadataValidator validator = new MetadataValidator(
             "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
         // Test files that actually exist in the project and are known to be valid
@@ -55,7 +60,7 @@ class YamlValidationIntegrationTest {
         System.out.println("=== YAML Validation Integration Test ===");
         System.out.println("Testing actual project files for proper metadata...\n");
         
-        YamlValidationSummary summary = validator.validateFiles(filesToTest);
+        ValidationSummary summary = validator.validateFiles(filesToTest);
         
         // Print results
         System.out.println("Validation Results:");
@@ -68,10 +73,10 @@ class YamlValidationIntegrationTest {
         
         // Show detailed results
         System.out.println("\nDetailed Results:");
-        for (YamlValidationResult result : summary.getResults()) {
+        for (ValidationResult result : summary.getResults()) {
             String status = result.getStatus();
             String indicator = switch (status) {
-                case "VALID" -> "✓";
+                case "VALID" -> "[OK]";
                 case "VALID_WITH_WARNINGS" -> "⚠";
                 case "INVALID" -> "✗";
                 default -> "?";
@@ -109,7 +114,7 @@ class YamlValidationIntegrationTest {
     @Test
     void testValidateSpecificScenarioFiles() {
         // Use actual existing test files, not non-existent production files
-        YamlMetadataValidator validator = new YamlMetadataValidator(
+        MetadataValidator validator = new MetadataValidator(
             "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
         // Test actual scenario files that exist and are valid
@@ -127,10 +132,10 @@ class YamlValidationIntegrationTest {
         for (String scenarioFile : scenarioFiles) {
             System.out.println("Validating: " + scenarioFile);
             
-            YamlValidationResult result = validator.validateFile(scenarioFile);
+            ValidationResult result = validator.validateFile(scenarioFile);
             
             if (result.isValid()) {
-                System.out.println("  ✓ VALID");
+                System.out.println("  [OK] VALID");
                 validCount++;
             } else {
                 System.out.println("  ✗ INVALID");

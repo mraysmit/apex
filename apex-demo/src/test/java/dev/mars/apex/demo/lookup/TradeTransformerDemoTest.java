@@ -16,12 +16,12 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -71,13 +71,13 @@ public class TradeTransformerDemoTest {
     
     private static final Logger logger = LoggerFactory.getLogger(TradeTransformerDemoTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration config;
 
     @BeforeEach
     void setUp() {
         // Initialize APEX services following established patterns
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         
         try {
             // Load trade transformation configuration
@@ -87,7 +87,7 @@ public class TradeTransformerDemoTest {
             logger.info("  - Configuration loaded: {}", config.getMetadata().getName());
             logger.info("  - Trade enrichments: {}", config.getEnrichments().size());
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -97,7 +97,7 @@ public class TradeTransformerDemoTest {
      * Create RulesEngine with EnrichmentService for trade processing
      * Following the established pattern from previous tests
      */
-    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws YamlConfigurationException {
+    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws ConfigurationException {
         // Create basic configuration from YAML using the static factory method
         RulesEngine baseEngine = RulesEngine.fromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();
@@ -131,7 +131,7 @@ public class TradeTransformerDemoTest {
             assertNotNull(result, "Equity trade result should not be null");
             
             Map<String, Object> enrichedData = result.getEnrichedData();
-            logger.info("✓ Equity trade transformation successful:");
+            logger.info("[OK] Equity trade transformation successful:");
             logger.info("  - Instrument Category: {}", enrichedData.get("instrumentCategory"));
             logger.info("  - Priority Category: {}", enrichedData.get("priorityCategory"));
             logger.info("  - Value Category: {}", enrichedData.get("valueCategory"));
@@ -170,7 +170,7 @@ public class TradeTransformerDemoTest {
             assertNotNull(result, "Bond trade result should not be null");
             
             Map<String, Object> enrichedData = result.getEnrichedData();
-            logger.info("✓ Bond trade transformation successful:");
+            logger.info("[OK] Bond trade transformation successful:");
             logger.info("  - Instrument Category: {}", enrichedData.get("instrumentCategory"));
             logger.info("  - Priority Category: {}", enrichedData.get("priorityCategory"));
             logger.info("  - Value Category: {}", enrichedData.get("valueCategory"));
@@ -209,7 +209,7 @@ public class TradeTransformerDemoTest {
             assertNotNull(result, "Small trade result should not be null");
             
             Map<String, Object> enrichedData = result.getEnrichedData();
-            logger.info("✓ Small trade transformation successful:");
+            logger.info("[OK] Small trade transformation successful:");
             logger.info("  - Instrument Category: {}", enrichedData.get("instrumentCategory"));
             logger.info("  - Priority Category: {}", enrichedData.get("priorityCategory"));
             logger.info("  - Value Category: {}", enrichedData.get("valueCategory"));
@@ -249,7 +249,7 @@ public class TradeTransformerDemoTest {
             
             Map<String, Object> enrichedData = result.getEnrichedData();
             
-            logger.info("✓ Complete trade portfolio transformation processed successfully");
+            logger.info("[OK] Complete trade portfolio transformation processed successfully");
             logger.info("  - Trade Details: {} {} trade valued at ${}", 
                 enrichedData.get("priorityCategory"), 
                 enrichedData.get("instrumentCategory"), 
@@ -291,7 +291,7 @@ public class TradeTransformerDemoTest {
             assertNotNull(result, "Partial trade result should not be null");
             
             Map<String, Object> enrichedData = result.getEnrichedData();
-            logger.info("✓ Partial trade data transformation handled gracefully");
+            logger.info("[OK] Partial trade data transformation handled gracefully");
             logger.info("  - Enriched data size: {}", enrichedData.size());
             logger.info("  - Available data: {}", enrichedData.keySet());
 

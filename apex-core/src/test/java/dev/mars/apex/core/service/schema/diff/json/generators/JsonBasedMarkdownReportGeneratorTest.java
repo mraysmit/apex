@@ -17,8 +17,14 @@ package dev.mars.apex.core.service.schema.diff.json.generators;
 
 import dev.mars.apex.core.service.schema.diff.json.model.*;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for {@link JsonBasedMarkdownReportGenerator}.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class JsonBasedMarkdownReportGeneratorTest {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonBasedMarkdownReportGeneratorTest.class);
@@ -68,7 +75,7 @@ class JsonBasedMarkdownReportGeneratorTest {
         assertTrue(markdown.contains("# Schema Diff Report"));
         assertTrue(markdown.contains("## 📈 Comparison Summary"));
         assertTrue(markdown.contains("test-source"));
-        logger.info("  ✓ Markdown generation successful - contains expected sections");
+        logger.info("  [OK] Markdown generation successful - contains expected sections");
     }
 
     @Test
@@ -86,7 +93,7 @@ class JsonBasedMarkdownReportGeneratorTest {
         String markdown = Files.readString(Path.of(path));
         assertTrue(markdown.contains("| Matching | 10 |"));
         assertTrue(markdown.contains("| ➕ Added | 5 |"));
-        logger.info("  ✓ Statistics correctly formatted in Markdown table");
+        logger.info("  [OK] Statistics correctly formatted in Markdown table");
     }
 
     @Test
@@ -101,8 +108,8 @@ class JsonBasedMarkdownReportGeneratorTest {
         logger.info("  → Generated Markdown: {}", path);
         
         String markdown = Files.readString(Path.of(path));
-        assertTrue(markdown.contains("✓ **Compatible Migration:**"));
-        logger.info("  ✓ Compatible migration message correctly rendered");
+        assertTrue(markdown.contains("[OK] **Compatible Migration:**"));
+        logger.info("  [OK] Compatible migration message correctly rendered");
     }
 
     private SchemaDiffReport createTestReport() {

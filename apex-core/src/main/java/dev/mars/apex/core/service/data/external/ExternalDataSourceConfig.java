@@ -37,7 +37,7 @@ import java.util.Map;
  *       ttlSeconds: 300
  * </pre>
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-08-28
  * @version 2.0.0
  */

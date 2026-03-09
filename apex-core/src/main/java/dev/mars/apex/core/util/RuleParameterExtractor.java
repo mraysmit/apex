@@ -1,7 +1,7 @@
 package dev.mars.apex.core.util;
 
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

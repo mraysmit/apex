@@ -16,8 +16,8 @@
 
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,7 +64,7 @@ public class FocusedEtlTest extends DemoTestBase {
         createTestDirectories();
         createTestDataFiles();
 
-        logger.info("✓ Focused ETL Test setup completed");
+        logger.info("[OK] Focused ETL Test setup completed");
     }
 
     @org.junit.jupiter.api.AfterEach
@@ -101,7 +101,7 @@ public class FocusedEtlTest extends DemoTestBase {
         assertTrue(Files.exists(outputFile), "Output JSON file should be created");
         assertTrue(Files.size(outputFile) > 0, "Output file should not be empty");
 
-        logger.info("✓ CSV to JSON file load test completed successfully");
+        logger.info("[OK] CSV to JSON file load test completed successfully");
         logger.info("  - Result type: {}", result.getResultType());
         logger.info("  - Output file: {}", outputFile.toAbsolutePath());
     }
@@ -121,12 +121,12 @@ public class FocusedEtlTest extends DemoTestBase {
         assertNotNull(result, "Pipeline execution result should not be null");
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
-        logger.info("✓ Pipeline executed successfully");
+        logger.info("[OK] Pipeline executed successfully");
 
         // Validate data was actually loaded into database
         validateDatabaseContents();
 
-        logger.info("✓ CSV to H2 database load test completed successfully");
+        logger.info("[OK] CSV to H2 database load test completed successfully");
     }
 
     @Test
@@ -145,7 +145,7 @@ public class FocusedEtlTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ CSV extract only test completed successfully");
+        logger.info("[OK] CSV extract only test completed successfully");
         logger.info("  - Result type: {}", result.getResultType());
     }
 
@@ -168,7 +168,7 @@ public class FocusedEtlTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should handle empty data gracefully");
 
-        logger.info("✓ Empty CSV file handling test completed successfully");
+        logger.info("[OK] Empty CSV file handling test completed successfully");
     }
 
     // Helper methods
@@ -243,14 +243,14 @@ public class FocusedEtlTest extends DemoTestBase {
             // Verify table exists
             ResultSet tables = conn.getMetaData().getTables(null, null, "CUSTOMER_OUTPUT", null);
             assertTrue(tables.next(), "Table 'customer_output' should exist in database");
-            logger.info("✓ Table 'customer_output' exists");
+            logger.info("[OK] Table 'customer_output' exists");
 
             // Verify record count
             ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM customer_output");
             assertTrue(countRs.next(), "Should have count result");
             int recordCount = countRs.getInt("cnt");
             assertEquals(3, recordCount, "Should have loaded 3 customer records");
-            logger.info("✓ Database contains {} records", recordCount);
+            logger.info("[OK] Database contains {} records", recordCount);
 
             // Verify specific data values
             ResultSet dataRs = stmt.executeQuery(
@@ -273,7 +273,7 @@ public class FocusedEtlTest extends DemoTestBase {
             assertEquals(3, dataRs.getInt("id"), "Third record ID should be 3");
             assertEquals("Bob Johnson", dataRs.getString("name"), "Third record name should match");
 
-            logger.info("✓ All {} records verified successfully", recordCount);
+            logger.info("[OK] All {} records verified successfully", recordCount);
         }
     }
 }

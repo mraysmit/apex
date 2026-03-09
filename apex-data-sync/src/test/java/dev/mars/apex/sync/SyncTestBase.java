@@ -19,11 +19,11 @@
 package dev.mars.apex.sync;
 
 import dev.mars.apex.core.cache.ApexCacheManager;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.core.service.data.external.database.JdbcTemplateFactory;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +65,7 @@ public abstract class SyncTestBase {
     protected static final Logger logger = LoggerFactory.getLogger(SyncTestBase.class);
 
     // Real APEX services for testing
-    protected YamlConfigurationLoader yamlLoader;
+    protected ConfigurationLoader yamlLoader;
     protected LookupServiceRegistry serviceRegistry;
     protected ExpressionEvaluatorService expressionEvaluator;
     protected RulesEngineConfiguration rulesEngineConfiguration;
@@ -104,12 +104,12 @@ public abstract class SyncTestBase {
         }
 
         // Initialize real APEX services
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.rulesEngineConfiguration = new RulesEngineConfiguration();
 
-        logger.info("✓ APEX services initialized successfully");
+        logger.info("[OK] APEX services initialized successfully");
     }
 
     /**
@@ -160,7 +160,7 @@ public abstract class SyncTestBase {
         ApexCacheManager.resetInstance();
         logger.info("Cache manager singleton reset for test isolation");
 
-        logger.info("✓ APEX services cleanup completed");
+        logger.info("[OK] APEX services cleanup completed");
     }
 
     /**
@@ -207,7 +207,7 @@ public abstract class SyncTestBase {
                 "Execution rate failure for %s: Expected %d steps, executed %d steps (%.1f%%)",
                 context, expectedSteps, actualSteps, (actualSteps * 100.0 / expectedSteps)));
         }
-        logger.info("✓ 100%% execution rate verified: {} - Processed {} out of {} steps",
+        logger.info("[OK] 100%% execution rate verified: {} - Processed {} out of {} steps",
             context, actualSteps, expectedSteps);
     }
 }

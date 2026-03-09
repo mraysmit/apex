@@ -17,8 +17,8 @@ package dev.mars.apex.rest.controller;
  */
 
 
-import dev.mars.apex.core.service.expression.ExpressionEvaluationService;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.rest.service.ExpressionEvaluationService;
+import dev.mars.apex.engine.model.RuleResult;
 import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.media.Content;
@@ -112,7 +112,8 @@ public class ExpressionController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error evaluating expression: {}", e.getMessage(), e);
+            logger.error("Error evaluating expression: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Expression evaluation failed");
@@ -141,9 +142,9 @@ public class ExpressionController {
             // Evaluate with detailed result
             RuleResult result = expressionEvaluationService.evaluateWithResult(request.getExpression(), request.getContext());
 
-            // Check for business logic failures (ResultType.ERROR)
-            if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                logger.error("CRITICAL: Expression evaluation failed with ERROR result type");
+            // Check for business logic failures (ResultType.ERROR or ENRICHMENT_FAILURE)
+            if (result.isError()) {
+                logger.error("Expression evaluation failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("error", "Expression evaluation failed");
@@ -178,7 +179,8 @@ public class ExpressionController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during detailed expression evaluation: {}", e.getMessage(), e);
+            logger.error("Error during detailed expression evaluation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Detailed expression evaluation failed");
@@ -221,6 +223,7 @@ public class ExpressionController {
 
                 } catch (Exception e) {
                     logger.warn("Error evaluating expression '{}': {}", expressionItem.getName(), e.getMessage());
+                    logger.debug("Full exception details:", e);
                     expressionResult.put("success", false);
                     expressionResult.put("error", e.getMessage());
                 }
@@ -242,7 +245,8 @@ public class ExpressionController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during batch expression evaluation: {}", e.getMessage(), e);
+            logger.error("Error during batch expression evaluation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Batch expression evaluation failed");
@@ -296,7 +300,8 @@ public class ExpressionController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error validating expression: {}", e.getMessage(), e);
+            logger.error("Error validating expression: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("expression", request.getExpression());

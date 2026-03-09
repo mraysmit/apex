@@ -1,0 +1,57 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Test data-sinks section import → blocks → YAML roundtrip
+# Phase 2 regression test for data-sinks import fix
+# ============================================================================
+
+metadata:
+  id: "data-sinks-roundtrip-test"
+  name: "Data Sinks Roundtrip Test"
+  version: "1.0.0"
+  description: "Verifies data-sinks section is imported with all 4 sink types"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+data-sinks:
+  - id: "db-output"
+    type: "database"
+    description: "PostgreSQL output sink"
+    enabled: true
+    database: "jdbc:postgresql://localhost:5432/output_db"
+    username: "writer"
+    table-name: "processed_results"
+    operation: "INSERT"
+
+  - id: "file-output"
+    type: "file-system"
+    description: "JSON file output"
+    enabled: true
+    base-path: "./output/results"
+    file-pattern: "result_{timestamp}.json"
+    encoding: "UTF-8"
+    format: "json"
+
+  - id: "api-output"
+    type: "rest-api"
+    description: "REST API notification"
+    enabled: true
+    base-url: "https://api.example.com"
+    endpoint: "/results"
+    method: "POST"
+    content-type: "application/json"
+
+  - id: "queue-output"
+    type: "message-queue"
+    description: "Kafka event stream"
+    enabled: true
+    queue-type: "kafka"
+    queue-name: "processed-events"
+    connection-string: "localhost:9092"
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder Rule"
+    condition: "#amount > 0"
+    message: "Amount is positive"
+    severity: "INFO"

@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * EnrichmentServiceRequirementTest - Tests for enrichment functionality
  *
  * This test suite validates enrichment processing with inline datasets.
- * Modern APEX automatically handles enrichments via YamlEnrichmentProcessor,
+ * Modern APEX automatically handles enrichments via EnrichmentProcessor,
  * no external service registration required for inline datasets.
  *
  * TESTS:

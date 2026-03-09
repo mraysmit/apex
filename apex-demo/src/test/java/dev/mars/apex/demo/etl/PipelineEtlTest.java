@@ -16,8 +16,8 @@ package dev.mars.apex.demo.etl;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +73,7 @@ public class PipelineEtlTest extends DemoTestBase {
             // Create test CSV data THIRD
             createTestCsvData();
 
-            logger.info("✓ Pipeline ETL Test setup completed successfully");
+            logger.info("[OK] Pipeline ETL Test setup completed successfully");
 
         } catch (Exception e) {
             logger.error("✗ Failed to set up Pipeline ETL Test: {}", e.getMessage());
@@ -110,7 +110,7 @@ public class PipelineEtlTest extends DemoTestBase {
             assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
                 "Pipeline execution should be successful");
 
-            logger.info("✓ Complete ETL pipeline workflow executed successfully");
+            logger.info("[OK] Complete ETL pipeline workflow executed successfully");
 
         } catch (Exception e) {
             logger.error("✗ Pipeline execution failed: {}", e.getMessage());
@@ -135,7 +135,7 @@ public class PipelineEtlTest extends DemoTestBase {
             assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
                 "Pipeline should execute successfully");
 
-            logger.info("✓ Pipeline configuration structure validated successfully");
+            logger.info("[OK] Pipeline configuration structure validated successfully");
         } catch (Exception e) {
             logger.error("✗ Pipeline configuration test failed: {}", e.getMessage());
             fail("Pipeline configuration test failed: " + e.getMessage());
@@ -159,7 +159,7 @@ public class PipelineEtlTest extends DemoTestBase {
             assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
                 "Pipeline should execute successfully");
 
-            logger.info("✓ Pipeline monitoring validated successfully");
+            logger.info("[OK] Pipeline monitoring validated successfully");
 
         } catch (Exception e) {
             logger.error("✗ Pipeline monitoring test failed: {}", e.getMessage());

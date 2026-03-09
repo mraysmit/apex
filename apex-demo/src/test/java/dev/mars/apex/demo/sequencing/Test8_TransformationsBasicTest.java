@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p>Expected execution order: transform-1, transform-2, transform-3
  *
- * <p>NOTE: Disabled until transformations section is fully implemented in SequentialYamlProcessor
+ * <p>NOTE: Disabled until transformations section is fully implemented in SequentialProcessor
  */
 @DisplayName("Test 8: Transformations Basic Test")
 public class Test8_TransformationsBasicTest extends DemoTestBase {

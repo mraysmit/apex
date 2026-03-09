@@ -16,12 +16,12 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -74,13 +74,13 @@ public class CalculationMathematicalTest {
     
     private static final Logger logger = LoggerFactory.getLogger(CalculationMathematicalTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration config;
 
     @BeforeEach
     void setUp() {
         // Initialize APEX services following established patterns
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         
         try {
             // Load mathematical operations configuration
@@ -90,7 +90,7 @@ public class CalculationMathematicalTest {
             logger.info("  - Configuration loaded: {}", config.getMetadata().getName());
             logger.info("  - Mathematical enrichments: {}", config.getEnrichments().size());
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -100,7 +100,7 @@ public class CalculationMathematicalTest {
      * Create RulesEngine with EnrichmentService for mathematical processing
      * Following the established pattern from BasicUsageExamplesTest
      */
-    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws YamlConfigurationException {
+    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws ConfigurationException {
         // Create basic configuration from YAML using the static factory method
         RulesEngine baseEngine = RulesEngine.fromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();
@@ -132,7 +132,7 @@ public class CalculationMathematicalTest {
             assertNotNull(squareRootResult, "Square root result should not be null");
             
             Object squareRoot = squareRootResult.getEnrichedData().get("squareRoot");
-            logger.info("✓ Square root calculation: sqrt(16) = {}", squareRoot);
+            logger.info("[OK] Square root calculation: sqrt(16) = {}", squareRoot);
             assertEquals(4.0, squareRoot, "Square root of 16 should be 4.0");
 
             // Test power calculation: pow(2, 3) = 8.0
@@ -145,7 +145,7 @@ public class CalculationMathematicalTest {
             assertNotNull(powerResult, "Power result should not be null");
             
             Object powerValue = powerResult.getEnrichedData().get("powerResult");
-            logger.info("✓ Power calculation: pow(2, 3) = {}", powerValue);
+            logger.info("[OK] Power calculation: pow(2, 3) = {}", powerValue);
             assertEquals(8.0, powerValue, "2 to the power of 3 should be 8.0");
 
         } catch (Exception e) {
@@ -172,7 +172,7 @@ public class CalculationMathematicalTest {
             assertNotNull(trigResult, "Trigonometric result should not be null");
             
             Object sineValue = trigResult.getEnrichedData().get("sineValue");
-            logger.info("✓ Trigonometric calculation: sin(30°) = {}", sineValue);
+            logger.info("[OK] Trigonometric calculation: sin(30°) = {}", sineValue);
             
             // sin(30°) = 0.5 (approximately)
             assertEquals(0.5, (Double) sineValue, 0.0001, "sin(30°) should be approximately 0.5");
@@ -201,7 +201,7 @@ public class CalculationMathematicalTest {
             assertNotNull(logResult, "Logarithmic result should not be null");
             
             Object logValue = logResult.getEnrichedData().get("logarithm");
-            logger.info("✓ Logarithmic calculation: log(e) = {}", logValue);
+            logger.info("[OK] Logarithmic calculation: log(e) = {}", logValue);
             
             // log(e) = 1.0
             assertEquals(1.0, (Double) logValue, 0.0001, "log(e) should be approximately 1.0");
@@ -230,7 +230,7 @@ public class CalculationMathematicalTest {
             assertNotNull(roundResult, "Rounding result should not be null");
             
             Object roundedValue = roundResult.getEnrichedData().get("roundedValue");
-            logger.info("✓ Rounding operation: round(3.7) = {}", roundedValue);
+            logger.info("[OK] Rounding operation: round(3.7) = {}", roundedValue);
             assertEquals(4L, roundedValue, "round(3.7) should be 4");
 
             // Test ceiling: ceil(3.1) = 4.0
@@ -242,7 +242,7 @@ public class CalculationMathematicalTest {
             assertNotNull(ceilResult, "Ceiling result should not be null");
             
             Object ceilingValue = ceilResult.getEnrichedData().get("ceilingValue");
-            logger.info("✓ Ceiling operation: ceil(3.1) = {}", ceilingValue);
+            logger.info("[OK] Ceiling operation: ceil(3.1) = {}", ceilingValue);
             assertEquals(4.0, ceilingValue, "ceil(3.1) should be 4.0");
 
         } catch (Exception e) {
@@ -275,7 +275,7 @@ public class CalculationMathematicalTest {
             // Validate all mathematical operations
             Map<String, Object> enrichedData = mathResult.getEnrichedData();
             
-            logger.info("✓ Complete mathematical workflow processed successfully");
+            logger.info("[OK] Complete mathematical workflow processed successfully");
             logger.info("  - Square Root: sqrt(25) = {}", enrichedData.get("squareRoot"));
             logger.info("  - Power: pow(3, 2) = {}", enrichedData.get("powerResult"));
             logger.info("  - Trigonometry: sin(90°) = {}", enrichedData.get("sineValue"));

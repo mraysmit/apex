@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,7 @@ class PipelineEtlExecutionTestExtractDatabase extends DemoTestBase {
             throw new RuntimeException("Failed to create database directory", e);
         }
 
-        logger.info("✓ Database Extract Pipeline Test setup completed");
+        logger.info("[OK] Database Extract Pipeline Test setup completed");
     }
 
     @AfterEach
@@ -97,7 +97,7 @@ class PipelineEtlExecutionTestExtractDatabase extends DemoTestBase {
                 (3, 'Bob Johnson', 'bob.johnson@example.com', 'INACTIVE')
                 """);
 
-            logger.info("✓ H2 database setup completed successfully with 3 customer records");
+            logger.info("[OK] H2 database setup completed successfully with 3 customer records");
 
         } catch (Exception e) {
             logger.error("Failed to setup H2 database: " + e.getMessage(), e);
@@ -121,6 +121,6 @@ class PipelineEtlExecutionTestExtractDatabase extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Database extract pipeline test completed successfully");
+        logger.info("[OK] Database extract pipeline test completed successfully");
     }
 }

@@ -1,7 +1,6 @@
 metadata:
   name: "complex-dependency-test"
   type: "rule-config"
-  processing-mode: "sequential"
   description: "Test complex dependency resolution with forward references"
 
 enrichments:

@@ -16,10 +16,10 @@
 
 package dev.mars.apex.demo.logging;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,14 +59,14 @@ class ProductionMonitoringLoggingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductionMonitoringLoggingTest.class);
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("🔧 Initializing APEX services for production monitoring logging test");
 
         // Initialize YAML loader
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         logger.info("All services initialized for production monitoring logging test");
     }
@@ -156,7 +156,7 @@ class ProductionMonitoringLoggingTest {
             logger.info("Structured error message generation completed");
             logger.info("MONITORING PARSER RESULTS:");
             logger.info("   Error type extracted: Enrichment condition evaluation failure");
-            logger.info("   Component identified: YamlEnrichmentProcessor");
+            logger.info("   Component identified: EnrichmentProcessor");
             logger.info("   Enrichment ID captured: [specific enrichment ID]");
             logger.info("   Error context preserved: Full condition and error details");
             logger.info("   Alert severity determined: CRITICAL (requires immediate attention)");

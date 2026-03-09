@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- Timestamp for unique log file names -->
+    <timestamp key="testRunTimestamp" datePattern="yyyy-MM-dd_HH-mm-ss"/>
+
     <!-- Console appender for test output -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %X{testContext}%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File appender for timestamped test audit trail -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>target/test-logs/apex-core-tests_${testRunTimestamp}.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %X{testContext}%msg%n</pattern>
         </encoder>
     </appender>
 
@@ -13,9 +25,9 @@
     </contextListener>
 
     <!-- Reduce noise from YAML validation during tests -->
-    <logger name="dev.mars.apex.core.config.yaml.YamlConfigurationLoader" level="ERROR"/>
-    <logger name="dev.mars.apex.core.util.YamlDependencyAnalyzer" level="INFO"/>
-    <logger name="dev.mars.apex.core.util.YamlMetadataValidator" level="INFO"/>
+    <logger name="dev.mars.apex.core.config.loader.ConfigurationLoader" level="ERROR"/>
+    <logger name="dev.mars.apex.core.util.DependencyAnalyzer" level="INFO"/>
+    <logger name="dev.mars.apex.core.util.MetadataValidator" level="INFO"/>
     
     <!-- 
         Suppress HikariCP connection pool ERROR logging during tests.
@@ -58,5 +70,6 @@
     <!-- Root logger -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>

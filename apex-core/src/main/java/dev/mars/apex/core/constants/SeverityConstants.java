@@ -104,7 +104,7 @@ public final class SeverityConstants {
      *   <li>INFO = 1 (lowest priority)</li>
      * </ul>
      *
-     * <p>This mapping is used by {@link dev.mars.apex.core.engine.model.RuleGroupSeverityAggregator}
+     * <p>This mapping is used by {@link dev.mars.apex.engine.model.RuleGroupSeverityAggregator}
      * to determine the most severe result when aggregating multiple rule results.
      */
     public static final Map<String, Integer> SEVERITY_PRIORITY = Map.of(

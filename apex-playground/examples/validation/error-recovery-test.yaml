@@ -1,6 +1,10 @@
 metadata:
+  id: "error-recovery-test"
   name: "Error Recovery Test"
   version: "1.0"
+  type: "rule-config"
+  description: "Test error recovery configuration"
+  author: "APEX Demo Team"
 
 error-recovery:
   default-action: "CONTINUE"

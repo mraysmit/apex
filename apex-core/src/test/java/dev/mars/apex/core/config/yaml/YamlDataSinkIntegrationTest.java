@@ -1,4 +1,8 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -23,7 +27,12 @@ import dev.mars.apex.core.service.data.external.factory.DataSinkFactory;
 import dev.mars.apex.core.service.data.external.DataSink;
 import dev.mars.apex.core.service.data.external.DataSinkType;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +146,7 @@ public class YamlDataSinkIntegrationTest {
         assertNotNull(yamlConfig.getDataSinks());
         assertEquals(2, yamlConfig.getDataSinks().size());
         
-        LOGGER.info("✓ YAML parsing successful");
+        LOGGER.info("[OK] YAML parsing successful");
         
         // Step 2: Convert YAML data sinks to DataSinkConfiguration objects
         YamlDataSink yamlDbSink = yamlConfig.getDataSinks().get(0);
@@ -162,7 +171,7 @@ public class YamlDataSinkIntegrationTest {
         assertEquals(DataSinkType.FILE_SYSTEM, fileSinkConfig.getSinkType());
         assertTrue(fileSinkConfig.isEnabled());
         
-        LOGGER.info("✓ DataSinkConfiguration conversion successful");
+        LOGGER.info("[OK] DataSinkConfiguration conversion successful");
         
         // Step 3: Create actual DataSink instances using the factory
         // Note: We create without initialization to avoid database/file system dependencies in unit tests
@@ -179,7 +188,7 @@ public class YamlDataSinkIntegrationTest {
         assertEquals(DataSinkType.FILE_SYSTEM, fileSink.getSinkType());
         assertEquals("test-file-system-sink", fileSink.getName());
         
-        LOGGER.info("✓ DataSink instantiation successful");
+        LOGGER.info("[OK] DataSink instantiation successful");
         
         // Step 4: Verify supported operations
         assertTrue(dbSink.supportsOperation("insert"));
@@ -190,7 +199,7 @@ public class YamlDataSinkIntegrationTest {
         assertTrue(fileSink.supportsOperation("append"));
         assertTrue(fileSink.supportsOperation("overwrite"));
         
-        LOGGER.info("✓ Operation support verification successful");
+        LOGGER.info("[OK] Operation support verification successful");
         
         // Step 5: Verify configuration properties are accessible
         assertEquals(dbSinkConfig, dbSink.getConfiguration());
@@ -205,9 +214,9 @@ public class YamlDataSinkIntegrationTest {
         assertTrue(fileSinkConfig.getOperations().containsKey("writeJsonRecord"));
         assertTrue(fileSinkConfig.getOperations().containsKey("appendJsonRecord"));
         
-        LOGGER.info("✓ Configuration property verification successful");
+        LOGGER.info("[OK] Configuration property verification successful");
         
-        LOGGER.info("✓ Complete YAML to DataSink integration test passed");
+        LOGGER.info("[OK] Complete YAML to DataSink integration test passed");
     }
     
     @Test
@@ -307,7 +316,7 @@ public class YamlDataSinkIntegrationTest {
         assertEquals("database", sinkConfig.getType());
         assertEquals("postgresql", sinkConfig.getSourceType());
         
-        LOGGER.info("✓ YAML data sink syntax validation test passed");
+        LOGGER.info("[OK] YAML data sink syntax validation test passed");
     }
     
     @Test
@@ -336,6 +345,6 @@ public class YamlDataSinkIntegrationTest {
         assertEquals(DataSinkType.DATABASE, dbSink.getSinkType());
         assertEquals(DataSinkType.FILE_SYSTEM, fileSink.getSinkType());
         
-        LOGGER.info("✓ DataSink factory integration test passed");
+        LOGGER.info("[OK] DataSink factory integration test passed");
     }
 }

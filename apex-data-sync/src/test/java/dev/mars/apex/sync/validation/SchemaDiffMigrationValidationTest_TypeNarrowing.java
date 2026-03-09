@@ -17,8 +17,8 @@
  */
 package dev.mars.apex.sync.validation;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.diff.SchemaComparisonResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,8 +104,8 @@ class SchemaDiffMigrationValidationTest_TypeNarrowing {
         assertTrue(reportContent.contains("Changed Columns") || reportContent.contains("changed"),
             "Report should have changed columns section");
         
-        logger.info("✓ Incompatible type narrowing detected");
-        logger.info("✓ VARCHAR narrowing can cause data truncation - migration requires data validation");
+        logger.info("[OK] Incompatible type narrowing detected");
+        logger.info("[OK] VARCHAR narrowing can cause data truncation - migration requires data validation");
     }
 
     private SchemaComparisonResult extractComparisonResult(RuleResult result) {

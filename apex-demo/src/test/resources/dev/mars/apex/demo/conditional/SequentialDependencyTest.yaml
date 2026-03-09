@@ -1,0 +1,59 @@
+# ==================================================================================
+# SEQUENTIAL DEPENDENCY PATTERN TEST CONFIGURATION
+# ==================================================================================
+# This configuration demonstrates the "Sequential Dependency" rule chain pattern.
+#
+# The pattern processes stages in strict order where each stage evaluates a rule
+# and stores the result in an output-variable. Subsequent stages can reference
+# output variables from earlier stages in their conditions.
+#
+# Business Scenario: Trade Settlement Eligibility Pipeline
+# --------------------------------------------------------
+# A trade must pass through 3 sequential stages before it can settle:
+#   Stage 1: Trade Validation   — Is the trade data complete and valid?
+#   Stage 2: Counterparty Check — Is the counterparty active and approved?
+#   Stage 3: Settlement Ready   — Are margin and funding requirements met?
+#
+# If any stage fails, subsequent stages do not execute.
+# ==================================================================================
+metadata:
+  name: "Sequential Dependency Pattern Test"
+  description: "Verifies the sequential-dependency rule chain pattern with staged processing"
+  version: "1.0"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created: "2026-03-05"
+
+# Rules referenced by the sequential-dependency chain stages
+rules:
+  - id: "validate-trade"
+    name: "Validate Trade Data"
+    condition: "#tradeId != null && #notional > 0 && #currency != null"
+    message: "Trade data is valid"
+    severity: "INFO"
+
+  - id: "check-counterparty"
+    name: "Check Counterparty Status"
+    condition: "#tradeValidated == true && #counterpartyStatus == 'ACTIVE'"
+    message: "Counterparty is active and approved"
+    severity: "INFO"
+
+  - id: "check-settlement-ready"
+    name: "Check Settlement Readiness"
+    condition: "#counterpartyApproved == true && #marginPosted == true && #fundingConfirmed == true"
+    message: "Trade is ready for settlement"
+    severity: "INFO"
+
+rule-chains:
+  - id: "settlement-eligibility-pipeline"
+    name: "Settlement Eligibility Pipeline"
+    description: "Sequential validation stages for trade settlement"
+    pattern: "sequential-dependency"
+    configuration:
+      stages:
+        - rule: "validate-trade"
+          output-variable: "tradeValidated"
+        - rule: "check-counterparty"
+          output-variable: "counterpartyApproved"
+        - rule: "check-settlement-ready"
+          output-variable: "settlementReady"

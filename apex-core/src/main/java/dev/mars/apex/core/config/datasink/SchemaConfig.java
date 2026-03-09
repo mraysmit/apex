@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * validation should be handled for data sink operations.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public class SchemaConfig {

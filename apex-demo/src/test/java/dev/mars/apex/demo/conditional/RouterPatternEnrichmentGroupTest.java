@@ -16,16 +16,16 @@
 
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.sequential.ProcessingItem;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,14 +50,15 @@ public class RouterPatternEnrichmentGroupTest extends DemoTestBase {
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RouterPatternEnrichmentGroupTest.yaml");
             assertNotNull(config, "Configuration should not be null");
             
-            // CRITICAL: Override section order to ONLY execute rule-chains.
-            // This prevents the enrichment-groups from being executed globally by the engine,
-            // ensuring that they are only executed if the Router triggers them.
-            config.setSectionOrder(List.of("rule-chains"));
-            // ALSO CRITICAL: Clear itemOrder to force section-level processing
-            config.setItemOrder(null);
+            // CRITICAL: Filter itemOrder to ONLY include rule-chains items.
+            // This prevents enrichments and enrichment-groups from being executed globally
+            // by the engine, ensuring they are only executed if the Router triggers them.
+            List<ProcessingItem> ruleChainsOnly = config.getItemOrder().stream()
+                    .filter(item -> "rule-chains".equals(item.getSectionType()))
+                    .toList();
+            config.setItemOrder(ruleChainsOnly);
             
-            logger.info("✓ Configuration loaded successfully");
+            logger.info("[OK] Configuration loaded successfully");
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -78,7 +79,7 @@ public class RouterPatternEnrichmentGroupTest extends DemoTestBase {
             // Verify that AUTO_APPROVE enrichments did NOT run
             assertFalse(manualEnriched.containsKey("approvalStatus"), "Should NOT have approvalStatus field");
             
-            logger.info("✓ Scenario 1 passed: Correctly routed to MANUAL_REVIEW");
+            logger.info("[OK] Scenario 1 passed: Correctly routed to MANUAL_REVIEW");
 
 
             // Scenario 2: AUTO_APPROVE
@@ -98,7 +99,7 @@ public class RouterPatternEnrichmentGroupTest extends DemoTestBase {
             // Verify that MANUAL_REVIEW enrichments did NOT run
             assertFalse(approveEnriched.containsKey("reviewStatus"), "Should NOT have reviewStatus field");
             
-            logger.info("✓ Scenario 2 passed: Correctly routed to AUTO_APPROVE");
+            logger.info("[OK] Scenario 2 passed: Correctly routed to AUTO_APPROVE");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);

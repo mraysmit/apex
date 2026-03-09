@@ -1,16 +1,23 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRuleFactory;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.RuleFactory;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleGroup;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,16 +35,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Single-File Rule Reference Integration Tests")
 class SingleFileRuleReferenceIntegrationTest {
 
-    private YamlConfigurationLoader configLoader;
-    private YamlRuleFactory ruleFactory;
+    private ConfigurationLoader configLoader;
+    private RuleFactory ruleFactory;
 
     @TempDir
     Path tempDir;
 
     @BeforeEach
     void setUp() {
-        configLoader = new YamlConfigurationLoader();
-        ruleFactory = new YamlRuleFactory();
+        configLoader = new ConfigurationLoader();
+        ruleFactory = new RuleFactory();
     }
 
     @Test

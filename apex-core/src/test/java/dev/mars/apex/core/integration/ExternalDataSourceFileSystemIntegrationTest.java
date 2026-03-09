@@ -1,13 +1,26 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.ConfigurationMerger;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.RuleFactory;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.junit.jupiter.api.Disabled;
+
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,11 +42,13 @@ public class ExternalDataSourceFileSystemIntegrationTest {
     @TempDir
     Path tempDir;
 
-    private YamlRulesEngineService rulesEngineService;
+    private ConfigurationLoader configLoader;
+    private RuleFactory ruleFactory;
 
     @BeforeEach
     void setUp() {
-        this.rulesEngineService = new YamlRulesEngineService();
+        this.configLoader = new ConfigurationLoader();
+        this.ruleFactory = new RuleFactory();
     }
 
     @Test
@@ -101,10 +116,10 @@ public class ExternalDataSourceFileSystemIntegrationTest {
 
         Files.writeString(mainConfigFile, mainConfig);
 
-        // Test: Load using createRulesEngineFromMultipleFiles (this was the failing scenario)
-        RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
-            mainConfigFile.toString()
-        );
+        // Test: Load configuration and create engine (non-deprecated pattern)
+        YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(mainConfigFile.toString());
+        RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
+        RulesEngine engine = new RulesEngine(config);
 
         // Verify the engine was created successfully
         assertNotNull(engine, "Rules engine should be created successfully");
@@ -191,11 +206,21 @@ public class ExternalDataSourceFileSystemIntegrationTest {
         Files.writeString(rulesConfigFile, rulesFile);
         Files.writeString(ruleGroupsConfigFile, ruleGroupsFile);
 
-        // Load multiple files - this should resolve external data source references correctly
-        RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
-            rulesConfigFile.toString(),
-            ruleGroupsConfigFile.toString()
-        );
+        // Load multiple files - merge manually then create engine
+        YamlRuleConfiguration rulesConfig = configLoader.loadFromFileWithoutValidation(rulesConfigFile.toString());
+        YamlRuleConfiguration groupsConfig = configLoader.loadFromFileWithoutValidation(ruleGroupsConfigFile.toString());
+        
+        // Merge YAML configurations using ConfigurationMerger
+        YamlRuleConfiguration merged = new YamlRuleConfiguration();
+        ConfigurationMerger.merge(merged, rulesConfig);
+        ConfigurationMerger.merge(merged, groupsConfig);
+        
+        // Process references and validate the merged configuration
+        configLoader.processReferencesAndValidate(merged);
+        
+        // Create engine from merged configuration
+        RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(merged);
+        RulesEngine engine = new RulesEngine(config);
 
         // Verify successful loading and execution
         assertNotNull(engine, "Rules engine should be created successfully");

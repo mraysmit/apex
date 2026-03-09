@@ -16,9 +16,9 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
     @DisplayName("Should perform USD currency lookup with real inline data")
     void testUSDCurrencyLookup() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 1: USD Currency Lookup");
+        logger.info("USD Currency Lookup");
         logger.info("=".repeat(80));
 
         try {
@@ -119,7 +119,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
     @DisplayName("Should perform EUR currency lookup with different currency")
     void testEURCurrencyLookup() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 2: EUR Currency Lookup");
+        logger.info("EUR Currency Lookup");
         logger.info("=".repeat(80));
 
         try {
@@ -183,7 +183,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
     @DisplayName("Should test multiple currency lookups")
     void testMultipleCurrencyLookups() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 3: Multiple Currency Lookups Testing");
+        logger.info("Multiple Currency Lookups Testing");
         logger.info("=".repeat(80));
 
         try {
@@ -238,7 +238,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
     @DisplayName("Should handle non-existent currency gracefully")
     void testNonExistentCurrencyHandling() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 4: Non-Existent Currency Handling");
+        logger.info("Non-Existent Currency Handling");
         logger.info("=".repeat(80));
 
         try {
@@ -286,7 +286,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
     @DisplayName("Should validate enrichment conditions")
     void testEnrichmentConditionValidation() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 5: Enrichment Condition Validation");
+        logger.info("Enrichment Condition Validation");
         logger.info("=".repeat(80));
 
         try {
@@ -344,7 +344,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
     @DisplayName("Should validate APEX services infrastructure")
     void testInfrastructureValidation() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 6: Infrastructure Validation");
+        logger.info("Infrastructure Validation");
         logger.info("=".repeat(80));
 
         // Validate that all APEX services are properly initialized

@@ -4,13 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title}">APEX Playground</title>
+    <link rel="icon" type="image/svg+xml" href="/playground/favicon.svg">
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- CodeMirror CSS for syntax highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/theme/monokai.min.css">
+    <!-- CodeMirror 5 CSS for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/theme/eclipse.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/hint/show-hint.min.css">
+    
+    <!-- Shared Example Modal CSS -->
+    <link rel="stylesheet" href="/css/example-modal.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/apex_playground.css(v=${#dates.createNow().getTime()})}">
@@ -27,6 +33,9 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="/playground">Playground</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/playground/apex_editor_main.html" target="_blank">Editor</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/playground/examples">Examples</a>
@@ -82,6 +91,14 @@
                         </button>
                         <button type="button" class="btn btn-outline-success" id="saveYamlBtn">
                             <i class="fas fa-file-download"></i> Save YAML
+                        </button>
+                    </div>
+                    <div class="ms-auto d-flex gap-1">
+                        <button type="button" class="btn btn-outline-secondary" id="themeToggleBtn" title="Toggle Dark/Light Mode" onclick="toggleEditorTheme()">
+                            <i class="fas fa-moon" id="themeToggleIcon"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="settingsBtn" title="Settings">
+                            <i class="fas fa-cog"></i>
                         </button>
                     </div>
                 </div>
@@ -143,140 +160,301 @@
             </div>
         </div>
 
-        <!-- 4-Panel Layout -->
-        <div class="playground-grid">
-            <!-- Top Left: YAML Rules -->
-            <div class="playground-panel">
-                <div class="card h-100">
-                    <div class="card-header p-2">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <h6 class="mb-0">YAML Rules Configuration</h6>
-                            <span class="badge bg-secondary" id="yamlStatus">Not Validated</span>
+        <!-- Load Example Modal (Visual Rule Editor design) -->
+        <div class="modal fade" id="loadExampleModal" tabindex="-1" aria-labelledby="loadExampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title" id="loadExampleModalLabel">Load Example</h5>
+                        <div class="d-flex align-items-center gap-2 ms-3 flex-grow-1">
+                            <input type="text" id="exampleSearchInput" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Search examples..." style="max-width: 300px;" oninput="ExampleModal.filterExamples()">
                         </div>
-                        <div class="d-flex align-items-center">
-                            <small class="text-muted me-2">
-                                <i class="fas fa-file-code me-1"></i>
-                                <span id="yamlRulesFileName">No file loaded</span>
-                            </small>
-                            <small class="text-muted" id="yamlRulesFileSize"></small>
-                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="card-body p-0 position-relative">
-                        <div id="yamlDropZone" class="drop-zone position-absolute w-100 h-100 d-none">
-                            <div class="drop-zone-content">
-                                <i class="fas fa-file-code fa-3x text-success mb-3"></i>
-                                <h5>Drop your YAML file here</h5>
-                                <p class="text-muted">Supports YAML and YML files</p>
+                    <div class="modal-body p-0">
+                        <div id="exampleLoadingSpinner" class="text-center p-5" style="display:none;">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Loading examples...</p>
+                        </div>
+                        <div id="exampleLoadError" class="alert alert-danger m-3" style="display:none;"></div>
+                        <div class="example-modal-body" id="exampleModalBody">
+                            <div class="example-categories" id="exampleBrowser">
+                                <div class="example-category-list" id="exampleCategoryList"></div>
+                                <div class="example-item-list" id="exampleItemList">
+                                    <p class="text-muted fst-italic p-3">Select a category to browse examples</p>
+                                </div>
+                            </div>
+                            <div class="example-resizer" id="exampleResizer" title="Drag to resize" style="display:none;"></div>
+                            <div class="example-preview" id="examplePreview" style="display:none;">
+                                <div class="d-flex gap-2 mb-2">
+                                    <div class="flex-grow-1">
+                                        <strong class="text-light" id="previewName"></strong>
+                                        <span class="text-muted ms-2" id="previewCategory"></span>
+                                    </div>
+                                    <div class="d-flex gap-1 align-items-center">
+                                        <span class="badge bg-success" id="previewHasYaml" style="display:none;">YAML</span>
+                                        <span class="badge bg-info" id="previewHasData" style="display:none;">JSON Data</span>
+                                        <div class="btn-group btn-group-sm ms-2" id="previewTabGroup" style="display:none;">
+                                            <button class="btn btn-outline-light btn-sm active" id="previewTabYaml" onclick="ExampleModal.switchPreviewTab('yaml')">YAML</button>
+                                            <button class="btn btn-outline-light btn-sm" id="previewTabJson" onclick="ExampleModal.switchPreviewTab('json')">JSON</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <pre id="previewContent"></pre>
+                                <pre id="previewContentJson" style="display:none;"></pre>
                             </div>
                         </div>
-                        <textarea id="yamlRulesEditor" class="form-control h-100"
-                                  placeholder="Enter your YAML rules configuration here or drag and drop a YAML file..."></textarea>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <div class="d-flex gap-2 me-auto">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="loadExampleYaml" checked>
+                                <label class="form-check-label text-light" for="loadExampleYaml">Load YAML</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="loadExampleData" checked>
+                                <label class="form-check-label text-light" for="loadExampleData">Load JSON data</label>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="loadSelectedExampleBtn" onclick="ExampleModal.loadSelected()" disabled>Load Example</button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Top Right: Source Data -->
-            <div class="playground-panel">
-                <div class="card h-100">
-                    <div class="card-header p-2">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <h6 class="mb-0">Source Data</h6>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <input type="radio" class="btn-check" name="dataFormat" id="jsonFormat" value="JSON" checked>
-                                <label class="btn btn-outline-secondary py-0 px-2" for="jsonFormat">JSON</label>
-                                <input type="radio" class="btn-check" name="dataFormat" id="xmlFormat" value="XML">
-                                <label class="btn btn-outline-secondary py-0 px-2" for="xmlFormat">XML</label>
-                                <input type="radio" class="btn-check" name="dataFormat" id="csvFormat" value="CSV">
-                                <label class="btn btn-outline-secondary py-0 px-2" for="csvFormat">CSV</label>
+        <!-- Settings Modal -->
+        <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="settingsModalLabel"><i class="fas fa-cog me-2"></i>Settings</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="examplesDirInput" class="form-label fw-bold">Examples Folder</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="examplesDirInput" placeholder="examples">
+                                <button class="btn btn-outline-secondary" type="button" id="resetExamplesDirBtn" title="Reset to default">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            </div>
+                            <div class="form-text" id="resolvedPathText">
+                                <i class="fas fa-folder-open me-1"></i>Resolved path: <span id="resolvedPathValue">--</span>
+                            </div>
+                            <div id="dirStatusBadge" class="mt-1" style="display: none;">
+                                <span class="badge" id="dirExistsBadge"></span>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <small class="text-muted me-2">
-                                <i class="fas fa-file me-1"></i>
-                                <span id="sourceDataFileName">No file loaded</span>
-                            </small>
-                            <small class="text-muted" id="sourceDataFileSize"></small>
-                        </div>
                     </div>
-                    <div class="card-body p-0 position-relative">
-                        <div id="dataDropZone" class="drop-zone position-absolute w-100 h-100 d-none">
-                            <div class="drop-zone-content">
-                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
-                                <h5>Drop your data file here</h5>
-                                <p class="text-muted">Supports JSON, XML, CSV, and TXT files</p>
-                            </div>
-                        </div>
-                        <textarea id="sourceDataEditor" class="form-control h-100"
-                                  placeholder="Enter your source data here (JSON, XML, or CSV) or drag and drop a file..."></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bottom Left: Validation Results -->
-            <div class="playground-panel" id="bottomLeftPanel">
-                <div class="card h-100">
-                    <div class="card-header d-flex align-items-center p-2">
-                        <button class="collapse-toggle-btn" id="collapseBottomLeftBtn" onclick="toggleBottomLeftPanel()" title="Collapse/Expand panel">
-                            <i class="fas fa-chevron-down"></i>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveSettingsBtn">
+                            <i class="fas fa-save me-1"></i>Save
                         </button>
-                        <h6 class="mb-0 py-1 ms-2">Validation Results</h6>
-                    </div>
-                    <div class="card-body">
-                        <div id="validationResults" class="results-panel">
-                            <p class="text-muted">Click "Process" to see validation results...</p>
-                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Bottom Right: Enrichment Results & Trace -->
-            <div class="playground-panel" id="bottomRightPanel">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center p-2">
-                        <div class="d-flex align-items-center">
-                            <button class="collapse-toggle-btn" id="collapseBottomRightBtn" onclick="toggleBottomRightPanel()" title="Collapse/Expand panel">
+        <!-- 2-Column Layout with Independent Flex Columns -->
+        <div class="playground-grid">
+            <!-- Left Column: YAML Rules + Validation Results -->
+            <div class="playground-column">
+                <!-- Top Left: YAML Rules -->
+                <div class="playground-panel">
+                    <div class="card h-100">
+                        <div class="card-header p-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="mb-0">YAML Rules Configuration</h6>
+                                <div class="d-flex align-items-center gap-1">
+                                    <button class="btn btn-outline-secondary btn-sm yaml-zoom-btn" style="min-width: 24px; padding: 0 4px; line-height: 1.4;" onclick="zoomYamlEditor(-1)" title="Zoom out">-</button>
+                                    <span id="yamlZoomLevel" class="small text-muted" style="min-width: 32px; text-align: center;">14px</span>
+                                    <button class="btn btn-outline-secondary btn-sm yaml-zoom-btn" style="min-width: 24px; padding: 0 4px; line-height: 1.4;" onclick="zoomYamlEditor(1)" title="Zoom in">+</button>
+                                    <button class="btn btn-outline-secondary btn-sm ms-1" style="padding: 0 6px; line-height: 1.4;" onclick="copyYamlToClipboard()" title="Copy YAML to clipboard"><i class="fas fa-copy"></i></button>
+                                    <span class="badge bg-secondary ms-1" id="yamlStatus">Not Validated</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted me-2">
+                                    <i class="fas fa-file-code me-1"></i>
+                                    <span id="yamlRulesFileName">No file loaded</span>
+                                </small>
+                                <small class="text-muted" id="yamlRulesFileSize"></small>
+                            </div>
+                        </div>
+                        <div class="card-body p-0 position-relative">
+                            <div id="yamlDropZone" class="drop-zone position-absolute w-100 h-100 d-none">
+                                <div class="drop-zone-content">
+                                    <i class="fas fa-file-code fa-3x text-success mb-3"></i>
+                                    <h5>Drop your YAML file here</h5>
+                                    <p class="text-muted">Supports YAML and YML files</p>
+                                </div>
+                            </div>
+                            <textarea id="yamlRulesEditor" class="form-control h-100"
+                                      placeholder="Enter your YAML rules configuration here or drag and drop a YAML file..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Left: Validation Results -->
+                <div class="playground-panel" id="bottomLeftPanel">
+                    <div class="card h-100">
+                        <div class="card-header d-flex align-items-center p-2">
+                            <button class="collapse-toggle-btn" id="collapseBottomLeftBtn" onclick="toggleBottomLeftPanel()" title="Collapse/Expand panel">
                                 <i class="fas fa-chevron-down"></i>
                             </button>
-                            <ul class="nav nav-underline ms-2" id="resultsTab" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active py-0 px-2" id="enrichment-tab" data-bs-toggle="tab" data-bs-target="#enrichment-content" type="button" role="tab" aria-controls="enrichment-content" aria-selected="true">Enrichment</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link py-0 px-2" id="trace-tab" data-bs-toggle="tab" data-bs-target="#trace-content" type="button" role="tab" aria-controls="trace-content" aria-selected="false">Trace</button>
-                                </li>
-                            </ul>
+                            <h6 class="mb-0 py-1 ms-2">Validation Results</h6>
                         </div>
-                        <small class="text-muted" id="processingTime">Processing time: --</small>
+                        <div class="card-body">
+                            <div id="validationResults" class="results-panel">
+                                <p class="text-muted">Click "Process" to see validation results...</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="tab-content h-100" id="resultsTabContent">
-                            <div class="tab-pane fade show active h-100 p-0" id="enrichment-content" role="tabpanel" aria-labelledby="enrichment-tab" style="overflow-y: auto;">
-                                <div id="enrichmentResults" class="results-panel h-100" style="border-radius: 0;">
-                                    <p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>
+                </div>
+            </div><!-- end left column -->
+
+            <!-- Right Column: Source Data + Enrichment Results -->
+            <div class="playground-column">
+                <!-- Top Right: Source Data -->
+                <div class="playground-panel">
+                    <div class="card h-100">
+                        <div class="card-header p-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="mb-0">Source Data</h6>
+                                <div class="d-flex gap-1 align-items-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <input type="radio" class="btn-check" name="dataFormat" id="jsonFormat" value="JSON" checked>
+                                        <label class="btn btn-outline-secondary py-0 px-2" for="jsonFormat">JSON</label>
+                                        <input type="radio" class="btn-check" name="dataFormat" id="xmlFormat" value="XML">
+                                        <label class="btn btn-outline-secondary py-0 px-2" for="xmlFormat">XML</label>
+                                        <input type="radio" class="btn-check" name="dataFormat" id="csvFormat" value="CSV">
+                                        <label class="btn btn-outline-secondary py-0 px-2" for="csvFormat">CSV</label>
+                                    </div>
+                                    <button class="btn btn-outline-secondary btn-sm py-0 px-2" onclick="formatSourceJson()" title="Format JSON">Format</button>
+                                    <button class="btn btn-outline-secondary btn-sm py-0 px-2" onclick="clearSourceData()" title="Clear all data">Clear</button>
                                 </div>
                             </div>
-                            <div class="tab-pane fade h-100 p-0" id="trace-content" role="tabpanel" aria-labelledby="trace-tab" style="overflow-y: auto;">
-                                <div id="traceResults" class="results-panel h-100" style="border-radius: 0;">
-                                    <p class="text-muted">Click "Process" to see execution trace...</p>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted me-2">
+                                    <i class="fas fa-file me-1"></i>
+                                    <span id="sourceDataFileName">No file loaded</span>
+                                </small>
+                                <small class="text-muted" id="sourceDataFileSize"></small>
+                            </div>
+                        </div>
+                        <div class="card-body p-0 d-flex flex-column">
+                            <div id="sourceDataOutput">
+                                <!-- Tabs -->
+                                <ul class="nav nav-tabs nav-tabs-sm px-2 pt-1" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" onclick="switchSourceDataTab('editor')">Editor</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" onclick="switchSourceDataTab('tree')">Tree View</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" onclick="switchSourceDataTab('files')">Files</button>
+                                    </li>
+                                </ul>
+
+                                <!-- Editor Panel -->
+                                <div id="sourceEditorPanel" class="source-data-panel active">
+                                    <div class="position-relative flex-grow-1 d-flex flex-column">
+                                        <div id="dataDropZone" class="drop-zone position-absolute w-100 h-100 d-none" style="z-index: 10;">
+                                            <div class="drop-zone-content">
+                                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                                <h5>Drop your data file here</h5>
+                                                <p class="text-muted">Supports JSON, XML, CSV, and TXT files</p>
+                                            </div>
+                                        </div>
+                                        <textarea id="sourceDataEditor" class="form-control flex-grow-1"
+                                                  placeholder="Enter your source data here (JSON, XML, or CSV) or drag and drop a file..."></textarea>
+                                        <div id="sourceJsonError" class="alert alert-danger m-2 small py-1 px-2" style="display: none;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Tree View Panel -->
+                                <div id="sourceTreePanel" class="source-data-panel">
+                                    <div class="source-tree-container" id="sourceTreeContainer">
+                                        <p class="text-muted fst-italic p-3">Enter JSON in the Editor tab to see a tree view</p>
+                                    </div>
+                                </div>
+
+                                <!-- Files Panel -->
+                                <div id="sourceFilesPanel" class="source-data-panel">
+                                    <div class="source-file-drop" id="sourceFileDrop">
+                                        <p class="mb-1"><i class="fas fa-cloud-upload-alt text-primary"></i> Drag and drop data files here</p>
+                                        <p class="small text-muted mb-2">JSON, XML, CSV supported</p>
+                                        <input type="file" id="sourceFileInput" accept=".json,.xml,.csv,.txt" multiple style="display: none;">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="document.getElementById('sourceFileInput').click()">Browse Files</button>
+                                    </div>
+                                    <div class="source-file-list" id="sourceFileList"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <!-- Bottom Right: Enrichment Results & Trace -->
+                <div class="playground-panel" id="bottomRightPanel">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center p-2">
+                            <div class="d-flex align-items-center">
+                                <button class="collapse-toggle-btn" id="collapseBottomRightBtn" onclick="toggleBottomRightPanel()" title="Collapse/Expand panel">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <ul class="nav nav-underline ms-2" id="resultsTab" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active py-0 px-2" id="enrichment-tab" data-bs-toggle="tab" data-bs-target="#enrichment-content" type="button" role="tab" aria-controls="enrichment-content" aria-selected="true">Enrichment</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link py-0 px-2" id="trace-tab" data-bs-toggle="tab" data-bs-target="#trace-content" type="button" role="tab" aria-controls="trace-content" aria-selected="false">Trace</button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <small class="text-muted" id="processingTime">Processing time: --</small>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="tab-content h-100" id="resultsTabContent">
+                                <div class="tab-pane fade show active h-100 p-0" id="enrichment-content" role="tabpanel" aria-labelledby="enrichment-tab" style="overflow-y: auto;">
+                                    <div id="enrichmentResults" class="results-panel h-100" style="border-radius: 0;">
+                                        <p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade h-100 p-0" id="trace-content" role="tabpanel" aria-labelledby="trace-tab" style="overflow-y: auto;">
+                                    <div id="traceResults" class="results-panel h-100" style="border-radius: 0;">
+                                        <p class="text-muted">Click "Process" to see execution trace...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- end right column -->
         </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- CodeMirror JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/mode/javascript/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/mode/yaml/yaml.min.js"></script>
+    <!-- CodeMirror 5 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/mode/yaml/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/mode/overlay.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/display/placeholder.min.js"></script>
     
     <!-- Font Awesome for icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    
+    <!-- Shared Example Modal JS -->
+    <script src="/js/example-modal.js"></script>
     
     <!-- Custom JavaScript -->
     <script th:src="@{/js/apex_playground.js(v=${#dates.createNow().getTime()})}"></script>

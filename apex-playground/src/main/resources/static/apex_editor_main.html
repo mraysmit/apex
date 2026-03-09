@@ -19,6 +19,9 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
 
+        <!-- Shared Example Modal CSS -->
+        <link rel="stylesheet" href="/css/example-modal.css">
+
         <style>
             body {
                 margin: 0;
@@ -754,6 +757,36 @@
                 background: rgba(231, 76, 60, 0.2);
                 color: #e74c3c;
             }
+
+            /* Example Modal styles are in shared /css/example-modal.css */
+
+            /* Global Drag-and-Drop Overlay */
+            #dropOverlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(90, 141, 238, 0.15);
+                border: 3px dashed #5a8dee;
+                z-index: 9999;
+                pointer-events: none;
+                align-items: center;
+                justify-content: center;
+            }
+            #dropOverlay.active {
+                display: flex;
+            }
+            #dropOverlay .drop-message {
+                background: rgba(0, 0, 0, 0.85);
+                color: #fff;
+                padding: 24px 40px;
+                border-radius: 12px;
+                font-size: 1.2rem;
+                text-align: center;
+            }
+            #dropOverlay .drop-message .drop-icon {
+                font-size: 2.5rem;
+                margin-bottom: 8px;
+            }
         </style>
     </head>
 
@@ -778,6 +811,7 @@
                         </li>
                     </ul>
                     <div class="d-flex gap-2">
+                        <button class="btn btn-warning btn-sm" onclick="ExampleModal.open()">Load Example</button>
                         <button class="btn btn-success btn-sm" onclick="openInPlayground()">Open in Playground</button>
                         <button id="quickSaveBtn" class="btn btn-primary btn-sm" onclick="quickSaveTemplate()" disabled title="Load a template first">Save</button>
                         <button class="btn btn-outline-light btn-sm" onclick="openSaveTemplateModal()">Save Template</button>
@@ -898,6 +932,75 @@
             </div>
         </div>
 
+        <!-- Load Example Modal -->
+        <div class="modal fade" id="loadExampleModal" tabindex="-1" aria-labelledby="loadExampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title" id="loadExampleModalLabel">Load Example</h5>
+                        <div class="d-flex align-items-center gap-2 ms-3 flex-grow-1">
+                            <input type="text" id="exampleSearchInput" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Search examples..." style="max-width: 300px;" oninput="ExampleModal.filterExamples()">
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div id="exampleLoadingSpinner" class="text-center p-5" style="display:none;"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Loading examples...</p></div>
+                        <div id="exampleLoadError" class="alert alert-danger m-3" style="display:none;"></div>
+                        <div class="example-modal-body" id="exampleModalBody">
+                            <div class="example-categories" id="exampleBrowser">
+                                <div class="example-category-list" id="exampleCategoryList"></div>
+                                <div class="example-item-list" id="exampleItemList">
+                                    <p class="text-muted fst-italic p-3">Select a category to browse examples</p>
+                                </div>
+                            </div>
+                            <div class="example-resizer" id="exampleResizer" title="Drag to resize" style="display:none;"></div>
+                            <div class="example-preview" id="examplePreview" style="display:none;">
+                                <div class="d-flex gap-2 mb-2">
+                                    <div class="flex-grow-1">
+                                        <strong class="text-light" id="previewName"></strong>
+                                        <span class="text-muted ms-2" id="previewCategory"></span>
+                                    </div>
+                                    <div class="d-flex gap-1 align-items-center">
+                                        <span class="badge bg-success" id="previewHasYaml" style="display:none;">YAML</span>
+                                        <span class="badge bg-info" id="previewHasData" style="display:none;">JSON Data</span>
+                                        <div class="btn-group btn-group-sm ms-2" id="previewTabGroup" style="display:none;">
+                                            <button class="btn btn-outline-light btn-sm active" id="previewTabYaml" onclick="ExampleModal.switchPreviewTab('yaml')">YAML</button>
+                                            <button class="btn btn-outline-light btn-sm" id="previewTabJson" onclick="ExampleModal.switchPreviewTab('json')">JSON</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <pre id="previewContent"></pre>
+                                <pre id="previewContentJson" style="display:none;"></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <div class="d-flex gap-2 me-auto">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="loadExampleYaml" checked>
+                                <label class="form-check-label text-light" for="loadExampleYaml">Load YAML into workspace</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="loadExampleData" checked>
+                                <label class="form-check-label text-light" for="loadExampleData">Load JSON into eval data</label>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="loadExampleBtn" onclick="ExampleModal.loadSelected()" disabled>Load Example</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Drag-and-Drop Overlay -->
+        <div id="dropOverlay">
+            <div class="drop-message">
+                <div class="drop-icon">&#128230;</div>
+                <div>Drop <strong>.yaml</strong> or <strong>.json</strong> files to load</div>
+                <div class="small text-muted mt-1">YAML → workspace &nbsp;|&nbsp; JSON → eval data</div>
+            </div>
+        </div>
+
         <!-- Manage Templates Modal -->
         <div class="modal fade" id="manageTemplatesModal" tabindex="-1" aria-labelledby="manageTemplatesModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -943,6 +1046,9 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" onclick="switchYamlTab('config')">Configuration Context</button>
                                 </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" onclick="switchYamlTab('files')">Files</button>
+                                </li>
                             </ul>
 
                             <!-- Generated YAML Panel -->
@@ -975,6 +1081,17 @@
                                         <div id="configContextBlocks" style="max-height: 400px; overflow-y: auto; border: 1px solid #3a3a3a; border-radius: 4px; padding: 8px;"></div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- YAML Files Panel -->
+                            <div id="yamlFilesPanel" class="yaml-panel">
+                                <div class="eval-file-drop" id="yamlFileDrop">
+                                    <p>Drag and drop YAML files here</p>
+                                    <p class="small text-muted">or</p>
+                                    <input type="file" id="yamlFileInput" accept=".yaml,.yml" multiple style="display: none;">
+                                    <button class="btn btn-outline-primary" onclick="document.getElementById('yamlFileInput').click()">Browse Files</button>
+                                </div>
+                                <div class="eval-file-list" id="yamlFileList"></div>
                             </div>
                         </div>
                     </div>
@@ -1065,6 +1182,9 @@
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" onclick="switchDataSourceTab('connections')">Connections</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" onclick="switchDataSourceTab('files')">Files</button>
                                 </li>
                             </ul>
 
@@ -1166,6 +1286,17 @@
                                 <div class="connection-list" id="connectionList">
                                     <div class="text-muted text-center py-4">No connections configured. Click "Create Connection" to add one.</div>
                                 </div>
+                            </div>
+
+                            <!-- SQL Files Panel -->
+                            <div id="sqlFilesPanel" class="datasource-panel">
+                                <div class="eval-file-drop" id="sqlFileDrop">
+                                    <p>Drag and drop SQL files here</p>
+                                    <p class="small text-muted">or</p>
+                                    <input type="file" id="sqlFileInput" accept=".sql" multiple style="display: none;">
+                                    <button class="btn btn-outline-primary" onclick="document.getElementById('sqlFileInput').click()">Browse Files</button>
+                                </div>
+                                <div class="eval-file-list" id="sqlFileList"></div>
                             </div>
                         </div>
                     </div>
@@ -1275,6 +1406,12 @@
             <sep></sep>
             <category name="Templates" colour="#E67E22" custom="TEMPLATES"></category>
         </xml>
+
+        <!-- Bootstrap JS (must load before example-modal.js which uses bootstrap.Modal) -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Shared Example Modal JS (must load before inline script that calls ExampleModal.init) -->
+        <script src="/js/example-modal.js"></script>
 
         <script>
             // --- Toast Notification System ---
@@ -3331,6 +3468,9 @@
                 let transformations = [];
                 let dataSourceRefs = [];
                 let errorRecovery = null;
+                let ruleChains = [];
+                let categories = [];
+                let dataSinks = [];
 
                 if (sectionsCode) {
                     const sections = JSON.parse(`[${sectionsCode.replace(/,\s*$/, '')}]`);
@@ -3342,6 +3482,9 @@
                         if (section.type === 'transformations') transformations = section.content;
                         if (section.type === 'data-source-refs') dataSourceRefs = section.content;
                         if (section.type === 'error-recovery') errorRecovery = section.content;
+                        if (section.type === 'rule-chains') ruleChains = section.content;
+                        if (section.type === 'categories') categories = section.content;
+                        if (section.type === 'data-sinks') dataSinks = section.content;
                     });
                 }
 
@@ -3380,6 +3523,9 @@
                 if (enrichments.length > 0) config.enrichments = enrichments;
                 if (enrichmentGroups.length > 0) config["enrichment-groups"] = enrichmentGroups;
                 if (transformations.length > 0) config.transformations = transformations;
+                if (ruleChains.length > 0) config["rule-chains"] = ruleChains;
+                if (categories.length > 0) config.categories = categories;
+                if (dataSinks.length > 0) config["data-sinks"] = dataSinks;
 
                 return JSON.stringify(config, null, 2);
             };
@@ -4692,8 +4838,12 @@
                 // Process stages
                 const stagesCode = generator.statementToCode(block, 'STAGES');
                 if (stagesCode) {
-                    const stagesArray = stagesCode.split(',').filter(s => s.trim()).map(s => JSON.parse(s));
-                    pipelineObj.pipeline.stages = stagesArray;
+                    try {
+                        const stagesArray = JSON.parse(`[${stagesCode.replace(/,\s*$/, '')}]`);
+                        pipelineObj.pipeline.stages = stagesArray;
+                    } catch (e) {
+                        console.error("Error parsing pipeline stages", e);
+                    }
                 }
 
                 return JSON.stringify(pipelineObj);
@@ -5080,7 +5230,8 @@
                 'apex_data_source_config',
                 'apex_scenario_config',
                 'apex_scenario_registry',
-                'apex_component_config'
+                'apex_component_config',
+                'apex_pipeline_config'
             ];
 
             function updateYaml() {
@@ -5296,6 +5447,8 @@
                     document.getElementById('dataContextPanel').classList.add('active');
                 } else if (tabName === 'config') {
                     document.getElementById('configContextPanel').classList.add('active');
+                } else if (tabName === 'files') {
+                    document.getElementById('yamlFilesPanel').classList.add('active');
                 }
             }
 
@@ -5355,6 +5508,8 @@
                 } else if (tabName === 'connections') {
                     document.getElementById('connectionsPanel').classList.add('active');
                     refreshConnections();
+                } else if (tabName === 'files') {
+                    document.getElementById('sqlFilesPanel').classList.add('active');
                 }
             }
 
@@ -6649,8 +6804,298 @@
                 }
             }
 
+            // --- YAML File Management ---
+            let yamlFiles = [];
+
+            function initYamlFileHandlers() {
+                const dropZone = document.getElementById('yamlFileDrop');
+                const fileInput = document.getElementById('yamlFileInput');
+                if (!dropZone || !fileInput) return;
+
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    handleYamlFiles(e.dataTransfer.files);
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    handleYamlFiles(e.target.files);
+                    e.target.value = '';
+                });
+            }
+
+            function handleYamlFiles(files) {
+                Array.from(files).forEach(file => {
+                    if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+                        const existingIndex = yamlFiles.findIndex(f => f.name === file.name);
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const content = e.target.result;
+                            const fileData = {
+                                name: file.name,
+                                size: file.size,
+                                content: content
+                            };
+
+                            if (existingIndex >= 0) {
+                                yamlFiles[existingIndex] = fileData;
+                            } else {
+                                yamlFiles.push(fileData);
+                            }
+                            renderYamlFileList();
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        showToast('Only .yaml and .yml files are supported: ' + file.name, 'error');
+                    }
+                });
+            }
+
+            function renderYamlFileList() {
+                const list = document.getElementById('yamlFileList');
+
+                if (yamlFiles.length === 0) {
+                    list.innerHTML = '';
+                    return;
+                }
+
+                let html = '';
+                yamlFiles.forEach((file, idx) => {
+                    const sizeStr = file.size < 1024 ? file.size + ' B' :
+                                   file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' :
+                                   (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+
+                    html += '<div class="eval-file-item">';
+                    html += '<div>';
+                    html += '<span class="eval-file-name">' + escapeHtml(file.name) + '</span>';
+                    html += '<span class="eval-file-size">' + sizeStr + '</span>';
+                    html += '</div>';
+                    html += '<div style="display: flex; gap: 0.25rem;">';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #198754; color: #fff;" onclick="loadYamlFileToEditor(' + idx + ')">Open</button>';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #c0392b; color: #fff;" onclick="removeYamlFile(' + idx + ')">X</button>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+
+                list.innerHTML = html;
+            }
+
+            /**
+             * Extract SpEL #variable references from a parsed YAML config object.
+             * Scans all string values recursively for patterns like #fieldName, #trade.amount, etc.
+             * Excludes system references like #ruleResults and #ruleGroupResults.
+             * Returns unique variable paths (without the # prefix) suitable for loadedFieldPaths.
+             */
+            function extractVariableRefsFromConfig(obj) {
+                const refs = new Set();
+                const systemRefs = ['ruleResults', 'ruleGroupResults', 'root', 'this'];
+
+                function scanValue(val) {
+                    if (typeof val === 'string') {
+                        // Match #variableName or #variable.path patterns in SpEL expressions
+                        const regex = /#([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)/g;
+                        let match;
+                        while ((match = regex.exec(val)) !== null) {
+                            const varPath = match[1];
+                            // Get the root variable name (before first dot)
+                            const rootVar = varPath.split('.')[0];
+                            if (!systemRefs.includes(rootVar)) {
+                                refs.add(varPath);
+                            }
+                        }
+                    } else if (Array.isArray(val)) {
+                        val.forEach(item => scanValue(item));
+                    } else if (val && typeof val === 'object') {
+                        Object.values(val).forEach(v => scanValue(v));
+                    }
+                }
+
+                scanValue(obj);
+                return Array.from(refs).sort();
+            }
+
+            function loadYamlFileToEditor(idx) {
+                if (yamlFiles[idx]) {
+                    const yamlText = yamlFiles[idx].content;
+
+                    try {
+                        const config = jsyaml.load(yamlText);
+
+                        // Support pipeline configs which may not have metadata
+                        if (!config || (!config.metadata && !config.pipeline)) {
+                            showToast('Invalid APEX YAML: missing metadata section in ' + yamlFiles[idx].name, 'error');
+                            return;
+                        }
+
+                        // Extract #variable references and load into data context
+                        const varRefs = extractVariableRefsFromConfig(config);
+                        if (varRefs.length > 0) {
+                            varRefs.forEach(path => {
+                                if (!loadedFieldPaths.includes(path)) {
+                                    loadedFieldPaths.push(path);
+                                }
+                            });
+                            loadedFieldPaths.sort();
+                            updateDataContextDisplay();
+                        }
+
+                        // Clear existing blocks and rebuild from YAML
+                        workspace.clear();
+
+                        if (config.pipeline) {
+                            createPipelineConfigBlock(config);
+                        } else {
+                            const configType = config.metadata.type || 'rule-config';
+                            if (configType === 'data-source-config') {
+                                createDataSourceConfigBlock(config);
+                            } else if (configType === 'scenario') {
+                                createScenarioConfigBlock(config);
+                            } else if (configType === 'scenario-registry') {
+                                createScenarioRegistryBlock(config);
+                            } else if (configType === 'component') {
+                                createComponentConfigBlock(config);
+                            } else {
+                                createRuleConfigBlock(config);
+                            }
+                        }
+
+                        // Regenerate YAML output with proper highlighting
+                        updateYaml();
+
+                    } catch (e) {
+                        console.error('YAML File Load Error:', e);
+                        showToast('Error parsing YAML file: ' + e.message, 'error');
+                        // Still show content in YAML panel even if block import fails
+                        currentYamlText = yamlText;
+                        renderYamlWithPrism(yamlText);
+                    }
+
+                    // Switch to Generated YAML tab
+                    document.querySelectorAll('#yamlOutputContainer .nav-link').forEach(tab => tab.classList.remove('active'));
+                    document.querySelector('#yamlOutputContainer .nav-link').classList.add('active');
+                    document.querySelectorAll('.yaml-panel').forEach(panel => panel.classList.remove('active'));
+                    document.getElementById('yamlPanel').classList.add('active');
+                }
+            }
+
+            function removeYamlFile(idx) {
+                yamlFiles.splice(idx, 1);
+                renderYamlFileList();
+            }
+
+            // --- SQL File Management ---
+            let sqlFiles = [];
+
+            function initSqlFileHandlers() {
+                const dropZone = document.getElementById('sqlFileDrop');
+                const fileInput = document.getElementById('sqlFileInput');
+                if (!dropZone || !fileInput) return;
+
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    handleSqlFiles(e.dataTransfer.files);
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    handleSqlFiles(e.target.files);
+                    e.target.value = '';
+                });
+            }
+
+            function handleSqlFiles(files) {
+                Array.from(files).forEach(file => {
+                    if (file.name.endsWith('.sql')) {
+                        const existingIndex = sqlFiles.findIndex(f => f.name === file.name);
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const content = e.target.result;
+                            const fileData = {
+                                name: file.name,
+                                size: file.size,
+                                content: content
+                            };
+
+                            if (existingIndex >= 0) {
+                                sqlFiles[existingIndex] = fileData;
+                            } else {
+                                sqlFiles.push(fileData);
+                            }
+                            renderSqlFileList();
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        showToast('Only .sql files are supported: ' + file.name, 'error');
+                    }
+                });
+            }
+
+            function renderSqlFileList() {
+                const list = document.getElementById('sqlFileList');
+
+                if (sqlFiles.length === 0) {
+                    list.innerHTML = '';
+                    return;
+                }
+
+                let html = '';
+                sqlFiles.forEach((file, idx) => {
+                    const sizeStr = file.size < 1024 ? file.size + ' B' :
+                                   file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' :
+                                   (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+
+                    html += '<div class="eval-file-item">';
+                    html += '<div>';
+                    html += '<span class="eval-file-name">' + escapeHtml(file.name) + '</span>';
+                    html += '<span class="eval-file-size">' + sizeStr + '</span>';
+                    html += '</div>';
+                    html += '<div style="display: flex; gap: 0.25rem;">';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #198754; color: #fff;" onclick="loadSqlFileToEditor(' + idx + ')">Open</button>';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #c0392b; color: #fff;" onclick="removeSqlFile(' + idx + ')">X</button>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+
+                list.innerHTML = html;
+            }
+
+            function loadSqlFileToEditor(idx) {
+                if (sqlFiles[idx]) {
+                    document.getElementById('sqlEditor').value = sqlFiles[idx].content;
+                    // Switch to SQL Editor tab
+                    switchDataSourceTab('sql');
+                }
+            }
+
+            function removeSqlFile(idx) {
+                sqlFiles.splice(idx, 1);
+                renderSqlFileList();
+            }
+
             // Initialize file handlers when DOM is ready
             document.addEventListener('DOMContentLoaded', initFileHandlers);
+            document.addEventListener('DOMContentLoaded', initYamlFileHandlers);
+            document.addEventListener('DOMContentLoaded', initSqlFileHandlers);
 
             // Also add input event listener for live validation
             setTimeout(() => {
@@ -6659,6 +7104,8 @@
                     editor.addEventListener('input', validateAndParseJson);
                 }
                 initFileHandlers();
+                initYamlFileHandlers();
+                initSqlFileHandlers();
             }, 100);
 
             // --- 5c. YAML Import Functions ---
@@ -6985,21 +7432,44 @@
 
                 try {
                     const config = jsyaml.load(yamlText);
-                    if (!config || !config.metadata) {
+
+                    // Support pipeline configs which may not have metadata
+                    if (!config || (!config.metadata && !config.pipeline)) {
                         showToast('Invalid APEX YAML: missing metadata section.', 'error');
                         return;
+                    }
+
+                    // Extract #variable references and load into data context
+                    const varRefs = extractVariableRefsFromConfig(config);
+                    if (varRefs.length > 0) {
+                        varRefs.forEach(path => {
+                            if (!loadedFieldPaths.includes(path)) {
+                                loadedFieldPaths.push(path);
+                            }
+                        });
+                        loadedFieldPaths.sort();
+                        updateDataContextDisplay();
                     }
 
                     // Clear existing blocks
                     workspace.clear();
 
                     // Determine config type and create root block
-                    const configType = config.metadata.type || 'rule-config';
-
-                    if (configType === 'data-source-config') {
-                        createDataSourceConfigBlock(config);
+                    if (config.pipeline) {
+                        createPipelineConfigBlock(config);
                     } else {
-                        createRuleConfigBlock(config);
+                        const configType = config.metadata.type || 'rule-config';
+                        if (configType === 'data-source-config') {
+                            createDataSourceConfigBlock(config);
+                        } else if (configType === 'scenario') {
+                            createScenarioConfigBlock(config);
+                        } else if (configType === 'scenario-registry') {
+                            createScenarioRegistryBlock(config);
+                        } else if (configType === 'component') {
+                            createComponentConfigBlock(config);
+                        } else {
+                            createRuleConfigBlock(config);
+                        }
                     }
 
                     closeYamlImportModal();
@@ -7020,6 +7490,9 @@
                 block.setFieldValue(meta.version || '1.0.0', 'VERSION');
                 block.setFieldValue(meta.description || '', 'DESCRIPTION');
                 block.setFieldValue(meta.author || '', 'AUTHOR');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
                 block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
                 block.setFieldValue(meta['effective-date'] || '', 'EFFECTIVE_DATE');
                 block.setFieldValue(meta['expiration-date'] || '', 'EXPIRATION_DATE');
@@ -7134,7 +7607,148 @@
                     });
                 }
 
+                // Create Error Recovery Section
+                if (config['error-recovery']) {
+                    const er = config['error-recovery'];
+                    const sectionBlock = createSectionBlock('apex_error_recovery', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    sectionBlock.setFieldValue(er.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    sectionBlock.setFieldValue(er['log-recovery-attempts'] !== false ? 'TRUE' : 'FALSE', 'LOG_RECOVERY');
+                    sectionBlock.setFieldValue(er['metrics-enabled'] === true ? 'TRUE' : 'FALSE', 'METRICS_ENABLED');
+                    if (er['default-strategy']) {
+                        sectionBlock.setFieldValue(er['default-strategy'], 'DEFAULT_STRATEGY');
+                    }
+
+                    // Create severity policy blocks
+                    if (er['severity-policies']) {
+                        let lastPolicyBlock = null;
+                        Object.entries(er['severity-policies']).forEach(([severity, policy]) => {
+                            const policyBlock = workspace.newBlock('apex_severity_policy');
+                            policyBlock.setFieldValue(severity, 'SEVERITY');
+                            policyBlock.setFieldValue(policy['recovery-enabled'] === true ? 'TRUE' : 'FALSE', 'RECOVERY_ENABLED');
+                            if (policy.strategy) {
+                                policyBlock.setFieldValue(policy.strategy, 'STRATEGY');
+                            }
+                            policyBlock.setFieldValue(policy['max-retries'] || 0, 'MAX_RETRIES');
+                            policyBlock.setFieldValue(policy['retry-delay'] || 100, 'RETRY_DELAY');
+                            policyBlock.initSvg();
+                            policyBlock.render();
+                            connectToStatement(sectionBlock, 'SEVERITY_POLICIES', policyBlock, lastPolicyBlock);
+                            lastPolicyBlock = policyBlock;
+                        });
+                    }
+                }
+
+                // Create Categories Section
+                if (config.categories && config.categories.length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_categories', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastCatBlock = null;
+                    config.categories.forEach(cat => {
+                        const catBlock = workspace.newBlock('apex_category');
+                        catBlock.setFieldValue(cat.name || '', 'NAME');
+                        catBlock.setFieldValue(cat.description || '', 'DESCRIPTION');
+                        catBlock.setFieldValue(cat.priority || '', 'PRIORITY');
+                        catBlock.setFieldValue(cat['business-domain'] || '', 'BUSINESS_DOMAIN');
+                        catBlock.setFieldValue(cat['business-owner'] || '', 'BUSINESS_OWNER');
+                        catBlock.setFieldValue(cat['created-by'] || '', 'CREATED_BY');
+                        catBlock.setFieldValue(cat.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                        catBlock.initSvg();
+                        catBlock.render();
+                        connectToStatement(sectionBlock, 'CATEGORIES', catBlock, lastCatBlock);
+                        lastCatBlock = catBlock;
+                    });
+                }
+
+                // Create Data Sinks Section
+                if (config['data-sinks'] && config['data-sinks'].length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_data_sinks', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastSinkBlock = null;
+                    config['data-sinks'].forEach(sink => {
+                        const sinkBlock = createDataSinkBlock(sink);
+                        if (sinkBlock) {
+                            connectToStatement(sectionBlock, 'DATA_SINKS', sinkBlock, lastSinkBlock);
+                            lastSinkBlock = sinkBlock;
+                        }
+                    });
+                }
+
                 return block;
+            }
+
+            function createDataSinkBlock(sink) {
+                const sinkType = sink.type || '';
+
+                if (sinkType === 'database-sink' || sinkType === 'database') {
+                    const block = workspace.newBlock('apex_data_sink_database');
+                    block.setFieldValue(sink.id || sink.name || '', 'NAME');
+                    block.setFieldValue(sink.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(sink.description || '', 'DESCRIPTION');
+                    block.setFieldValue(sink.database || sink['data-source-ref'] || sink.url || '', 'DATABASE');
+                    block.setFieldValue(sink.username || '', 'USERNAME');
+                    block.setFieldValue(sink.password || '', 'PASSWORD');
+                    block.setFieldValue(sink['table-name'] || sink.table || '', 'TABLE_NAME');
+                    block.setFieldValue(sink.operation || 'INSERT', 'OPERATION');
+                    if (sink['source-type']) {
+                        block.setFieldValue(sink['source-type'], 'SOURCE_TYPE');
+                    }
+                    block.initSvg();
+                    block.render();
+                    return block;
+                } else if (sinkType === 'file-sink' || sinkType === 'file-system') {
+                    const block = workspace.newBlock('apex_data_sink_file');
+                    block.setFieldValue(sink.id || sink.name || '', 'NAME');
+                    block.setFieldValue(sink.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(sink.description || '', 'DESCRIPTION');
+                    block.setFieldValue(sink['base-path'] || sink.path || '', 'BASE_PATH');
+                    block.setFieldValue(sink['file-pattern'] || '', 'FILE_PATTERN');
+                    block.setFieldValue(sink.encoding || 'UTF-8', 'ENCODING');
+                    if (sink.format) {
+                        block.setFieldValue(sink.format, 'FORMAT');
+                    }
+                    if (sink['source-type']) {
+                        block.setFieldValue(sink['source-type'], 'SOURCE_TYPE');
+                    }
+                    block.initSvg();
+                    block.render();
+                    return block;
+                } else if (sinkType === 'rest-sink' || sinkType === 'rest-api') {
+                    const block = workspace.newBlock('apex_data_sink_rest');
+                    block.setFieldValue(sink.id || sink.name || '', 'NAME');
+                    block.setFieldValue(sink.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(sink.description || '', 'DESCRIPTION');
+                    block.setFieldValue(sink['base-url'] || sink.url || '', 'BASE_URL');
+                    block.setFieldValue(sink.endpoint || '', 'ENDPOINT');
+                    if (sink.method) {
+                        block.setFieldValue(sink.method, 'METHOD');
+                    }
+                    if (sink['content-type']) {
+                        block.setFieldValue(sink['content-type'], 'CONTENT_TYPE');
+                    }
+                    block.initSvg();
+                    block.render();
+                    return block;
+                } else if (sinkType === 'queue-sink' || sinkType === 'message-queue') {
+                    const block = workspace.newBlock('apex_data_sink_queue');
+                    block.setFieldValue(sink.id || sink.name || '', 'NAME');
+                    block.setFieldValue(sink.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(sink.description || '', 'DESCRIPTION');
+                    if (sink['queue-type']) {
+                        block.setFieldValue(sink['queue-type'], 'QUEUE_TYPE');
+                    }
+                    block.setFieldValue(sink['queue-name'] || '', 'QUEUE_NAME');
+                    block.setFieldValue(sink['connection-string'] || sink.connection || '', 'CONNECTION_STRING');
+                    block.initSvg();
+                    block.render();
+                    return block;
+                }
+
+                console.warn('Unknown data sink type:', sinkType);
+                return null;
             }
 
             function createDataSourceConfigBlock(config) {
@@ -7145,6 +7759,9 @@
                 block.setFieldValue(meta.version || '1.0.0', 'VERSION');
                 block.setFieldValue(meta.description || '', 'DESCRIPTION');
                 block.setFieldValue(meta.author || '', 'AUTHOR');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
                 block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
                 block.setFieldValue(meta['effective-date'] || '', 'EFFECTIVE_DATE');
                 block.setFieldValue(meta['expiration-date'] || '', 'EXPIRATION_DATE');
@@ -7164,6 +7781,220 @@
                             connectToStatement(block, 'DATA_SOURCES', dsBlock, lastDsBlock);
                             lastDsBlock = dsBlock;
                         }
+                    });
+                }
+
+                return block;
+            }
+
+            // --- Phase 3: Scenario Config Import ---
+            function createScenarioConfigBlock(config) {
+                const block = workspace.newBlock('apex_scenario_config');
+                const meta = config.metadata || {};
+
+                block.setFieldValue(meta.id || 'imported-scenario', 'ID');
+                block.setFieldValue(meta.name || '', 'NAME');
+                block.setFieldValue(meta.version || '1.0.0', 'VERSION');
+                block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
+                block.setFieldValue(meta.description || '', 'DESCRIPTION');
+                block.setFieldValue(meta.author || '', 'AUTHOR');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
+                block.setFieldValue(meta.owner || '', 'OWNER');
+                block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                // Create scenario section if present
+                if (config.scenario) {
+                    const scenario = config.scenario;
+                    const scenarioBlock = workspace.newBlock('apex_section_scenario');
+                    scenarioBlock.setFieldValue(scenario['scenario-id'] || '', 'SCENARIO_ID');
+                    scenarioBlock.setFieldValue(scenario.description || '', 'DESCRIPTION');
+                    scenarioBlock.setFieldValue((scenario['data-types'] || []).join(', '), 'DATA_TYPES');
+                    scenarioBlock.initSvg();
+                    scenarioBlock.render();
+
+                    // Connect to SCENARIO statement input
+                    const scenarioInput = block.getInput('SCENARIO');
+                    if (scenarioInput && scenarioInput.connection) {
+                        scenarioInput.connection.connect(scenarioBlock.previousConnection);
+                    }
+
+                    // Create classification rule if present
+                    if (scenario['classification-rule']) {
+                        const cr = scenario['classification-rule'];
+                        const crBlock = workspace.newBlock('apex_classification_rule');
+                        crBlock.setFieldValue(cr.description || '', 'DESCRIPTION');
+                        crBlock.initSvg();
+                        crBlock.render();
+
+                        // Create condition value block
+                        if (cr.condition) {
+                            const condBlock = createConditionBlock(cr.condition);
+                            if (condBlock) {
+                                const condInput = crBlock.getInput('CONDITION');
+                                if (condInput && condInput.connection) {
+                                    condInput.connection.connect(condBlock.outputConnection);
+                                }
+                            }
+                        }
+
+                        // Connect classification rule to value input
+                        const crInput = scenarioBlock.getInput('CLASSIFICATION_RULE');
+                        if (crInput && crInput.connection) {
+                            crInput.connection.connect(crBlock.outputConnection);
+                        }
+                    }
+
+                    // Create processing stages
+                    if (scenario['processing-stages'] && scenario['processing-stages'].length > 0) {
+                        let lastStageBlock = null;
+                        scenario['processing-stages'].forEach(stage => {
+                            const stageBlock = workspace.newBlock('apex_processing_stage');
+                            stageBlock.setFieldValue(stage['stage-name'] || '', 'STAGE_NAME');
+                            stageBlock.setFieldValue(stage.description || '', 'DESCRIPTION');
+                            stageBlock.setFieldValue(stage['config-file'] || '', 'CONFIG_FILE');
+                            stageBlock.setFieldValue(stage['execution-order'] !== undefined ? String(stage['execution-order']) : '1', 'EXECUTION_ORDER');
+                            stageBlock.setFieldValue(stage['failure-policy'] || 'terminate', 'FAILURE_POLICY');
+                            stageBlock.setFieldValue(stage.required !== false ? 'TRUE' : 'FALSE', 'REQUIRED');
+                            stageBlock.setFieldValue(
+                                Array.isArray(stage['depends-on']) ? stage['depends-on'].join(', ') : (stage['depends-on'] || ''),
+                                'DEPENDS_ON'
+                            );
+                            stageBlock.initSvg();
+                            stageBlock.render();
+
+                            connectToStatement(scenarioBlock, 'PROCESSING_STAGES', stageBlock, lastStageBlock);
+                            lastStageBlock = stageBlock;
+                        });
+                    }
+                }
+
+                return block;
+            }
+
+            // --- Phase 3: Scenario Registry Import ---
+            function createScenarioRegistryBlock(config) {
+                const block = workspace.newBlock('apex_scenario_registry');
+                const meta = config.metadata || {};
+
+                block.setFieldValue(meta.id || 'imported-registry', 'ID');
+                block.setFieldValue(meta.name || '', 'NAME');
+                block.setFieldValue(meta.version || '1.0.0', 'VERSION');
+                block.setFieldValue(meta.description || '', 'DESCRIPTION');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
+                block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+
+                // Routing configuration
+                const routing = config.routing || {};
+                block.setFieldValue(routing.strategy || 'type-based', 'ROUTING_STRATEGY');
+                block.setFieldValue(routing['default-scenario'] || '', 'DEFAULT_SCENARIO');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                // Create scenario references
+                if (config.scenarios && config.scenarios.length > 0) {
+                    let lastRefBlock = null;
+                    config.scenarios.forEach(scenRef => {
+                        const refBlock = workspace.newBlock('apex_scenario_ref');
+                        refBlock.setFieldValue(scenRef['scenario-id'] || '', 'SCENARIO_ID');
+                        refBlock.setFieldValue(scenRef['config-file'] || '', 'CONFIG_FILE');
+                        refBlock.setFieldValue(scenRef['business-domain'] || '', 'BUSINESS_DOMAIN');
+                        refBlock.initSvg();
+                        refBlock.render();
+
+                        connectToStatement(block, 'SCENARIOS', refBlock, lastRefBlock);
+                        lastRefBlock = refBlock;
+                    });
+                }
+
+                return block;
+            }
+
+            // --- Phase 3: Component Config Import ---
+            function createComponentConfigBlock(config) {
+                const block = workspace.newBlock('apex_component_config');
+                const meta = config.metadata || {};
+
+                block.setFieldValue(meta.id || 'imported-component', 'ID');
+                block.setFieldValue(meta.name || '', 'NAME');
+                block.setFieldValue(meta.version || '1.0.0', 'VERSION');
+                block.setFieldValue(meta.description || '', 'DESCRIPTION');
+                block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
+                block.setFieldValue(meta.owner || '', 'OWNER');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
+                block.setFieldValue(meta.criticality || 'medium', 'CRITICALITY');
+                block.setFieldValue(meta['sla-ms'] !== undefined ? String(meta['sla-ms']) : '200', 'SLA_MS');
+                block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                // Create file references from grouped sections
+                const refTypes = ['rule-configurations', 'enrichment-refs', 'component-refs', 'config-files'];
+                let lastRefBlock = null;
+
+                refTypes.forEach(refType => {
+                    if (config[refType] && config[refType].length > 0) {
+                        config[refType].forEach(ref => {
+                            const refBlock = workspace.newBlock('apex_file_reference');
+                            refBlock.setFieldValue(refType, 'REF_TYPE');
+                            refBlock.setFieldValue(ref.file || '', 'FILE');
+                            refBlock.setFieldValue(ref['execution-order'] !== undefined ? String(ref['execution-order']) : '1', 'EXECUTION_ORDER');
+                            refBlock.setFieldValue(ref['failure-policy'] || 'terminate', 'FAILURE_POLICY');
+                            refBlock.initSvg();
+                            refBlock.render();
+
+                            connectToStatement(block, 'FILE_REFS', refBlock, lastRefBlock);
+                            lastRefBlock = refBlock;
+                        });
+                    }
+                });
+
+                return block;
+            }
+
+            // --- Phase 3: Pipeline Config Import ---
+            function createPipelineConfigBlock(config) {
+                const pipeline = config.pipeline || {};
+                const block = workspace.newBlock('apex_pipeline_config');
+
+                block.setFieldValue(pipeline.id || 'imported-pipeline', 'ID');
+                block.setFieldValue(pipeline.mode || 'sequential', 'MODE');
+                block.setFieldValue(pipeline['error-handling'] || 'fail-fast', 'ERROR_HANDLING');
+                block.setFieldValue(pipeline['max-retries'] !== undefined ? String(pipeline['max-retries']) : '3', 'MAX_RETRIES');
+                block.setFieldValue(pipeline['retry-delay-ms'] !== undefined ? String(pipeline['retry-delay-ms']) : '1000', 'RETRY_DELAY_MS');
+                block.setFieldValue(pipeline['collect-metrics'] !== false ? 'TRUE' : 'FALSE', 'COLLECT_METRICS');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                // Create pipeline stages
+                if (pipeline.stages && pipeline.stages.length > 0) {
+                    let lastStageBlock = null;
+                    pipeline.stages.forEach(stage => {
+                        const stageBlock = workspace.newBlock('apex_pipeline_stage');
+                        stageBlock.setFieldValue(stage.name || '', 'NAME');
+                        stageBlock.setFieldValue(stage.order !== undefined ? String(stage.order) : '1', 'ORDER');
+                        stageBlock.setFieldValue(stage.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                        stageBlock.setFieldValue(stage['depends-on'] || '', 'DEPENDS_ON');
+                        stageBlock.initSvg();
+                        stageBlock.render();
+
+                        connectToStatement(block, 'STAGES', stageBlock, lastStageBlock);
+                        lastStageBlock = stageBlock;
                     });
                 }
 
@@ -7548,7 +8379,7 @@
                 } else if (type === 'database') {
                     const block = workspace.newBlock('apex_lookup_dataset_database');
                     block.setFieldValue(dataset['data-source-ref'] || '', 'DS_REF');
-                    block.setFieldValue(dataset.query || '', 'QUERY');
+                    block.setFieldValue(dataset.query || dataset['query-ref'] || '', 'QUERY');
                     block.initSvg();
                     block.render();
 
@@ -8269,10 +9100,209 @@
                 showToast("Schema loading logic not yet implemented", "info");
             }
 
+            // ================================================================
+            // LOAD EXAMPLE — Adapter for shared ExampleModal module
+            // ================================================================
+            ExampleModal.init({
+                apiBaseUrl: '/playground/api',
+                loadBtnId: 'loadExampleBtn',
+                escapeHtml: escapeHtml,
+                formatFileSize: function(bytes) { return (bytes / 1024).toFixed(1) + ' KB'; },
+                onLoad: function(detail, options) {
+                    let loaded = [];
+
+                    // Load JSON into eval data editor FIRST (before YAML)
+                    // so field paths are available when blocks generate expressions
+                    if (options.loadData && detail.sampleData) {
+                        try {
+                            const jsonStr = typeof detail.sampleData === 'string'
+                                ? detail.sampleData
+                                : JSON.stringify(detail.sampleData, null, 2);
+                            setEvalJsonInEditor(jsonStr);
+                            loadFieldsIntoEditor();
+                            const evalSection = document.getElementById('evalDataSection');
+                            if (!evalSection.classList.contains('expanded')) {
+                                toggleAccordion('evalDataSection');
+                            }
+                            loaded.push('eval data');
+                        } catch (e) {
+                            showToast('Error loading eval data: ' + e.message, 'error');
+                        }
+                    }
+
+                    // Load YAML into workspace (after JSON context is ready)
+                    if (options.loadYaml && detail.yaml) {
+                        // Confirm if workspace has blocks
+                        if (workspace.getAllBlocks(false).length > 0) {
+                            if (!confirm('Loading YAML will replace all current blocks. Continue?')) {
+                                return;
+                            }
+                        }
+                        try {
+                            const config = jsyaml.load(detail.yaml);
+                            if (config && (config.metadata || config.pipeline)) {
+                                workspace.clear();
+                                if (config.pipeline) {
+                                    createPipelineConfigBlock(config);
+                                } else {
+                                    const configType = config.metadata.type || 'rule-config';
+                                    if (configType === 'data-source-config') createDataSourceConfigBlock(config);
+                                    else if (configType === 'scenario') createScenarioConfigBlock(config);
+                                    else if (configType === 'scenario-registry') createScenarioRegistryBlock(config);
+                                    else if (configType === 'component') createComponentConfigBlock(config);
+                                    else createRuleConfigBlock(config);
+                                }
+                                updateYaml();
+                                loaded.push('YAML rules');
+                            }
+                        } catch (e) {
+                            showToast('Error loading YAML: ' + e.message, 'error');
+                        }
+                    }
+
+                    if (loaded.length > 0) {
+                        showToast('Loaded: ' + loaded.join(' + '), 'success');
+                    } else {
+                        showToast('Nothing was loaded (no content available).', 'warning');
+                    }
+                },
+                onToast: function(message, type) {
+                    showToast(message, type);
+                }
+            });
+
+            // ================================================================
+            // GLOBAL DRAG-AND-DROP (Option E)
+            // ================================================================
+            (function initGlobalDragDrop() {
+                let dragCounter = 0;
+                const overlay = document.getElementById('dropOverlay');
+
+                // Prevent default on all drag events to enable drop
+                document.addEventListener('dragenter', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dragCounter++;
+                    if (hasFileItems(e)) {
+                        overlay.classList.add('active');
+                    }
+                });
+
+                document.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dragCounter--;
+                    if (dragCounter <= 0) {
+                        dragCounter = 0;
+                        overlay.classList.remove('active');
+                    }
+                });
+
+                document.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                document.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dragCounter = 0;
+                    overlay.classList.remove('active');
+
+                    // Don't intercept drops on existing drop zones (eval file drop area)
+                    if (e.target.closest && e.target.closest('#evalFileDrop')) return;
+
+                    const files = Array.from(e.dataTransfer.files);
+                    if (files.length === 0) return;
+
+                    const yamlFiles = files.filter(f => f.name.endsWith('.yaml') || f.name.endsWith('.yml'));
+                    const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+                    const otherFiles = files.filter(f => !f.name.endsWith('.yaml') && !f.name.endsWith('.yml') && !f.name.endsWith('.json'));
+
+                    if (otherFiles.length > 0 && yamlFiles.length === 0 && jsonFiles.length === 0) {
+                        showToast('Unsupported file type. Drop .yaml or .json files.', 'warning');
+                        return;
+                    }
+
+                    let loaded = [];
+
+                    // Process YAML files (use the first one for workspace)
+                    if (yamlFiles.length > 0) {
+                        const yamlFile = yamlFiles[0];
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            try {
+                                const yamlText = evt.target.result;
+                                const config = jsyaml.load(yamlText);
+                                if (!config || (!config.metadata && !config.pipeline)) {
+                                    showToast('Invalid APEX YAML: missing metadata section.', 'error');
+                                    return;
+                                }
+                                if (workspace.getAllBlocks(false).length > 0) {
+                                    if (!confirm('Dropping YAML will replace all current blocks. Continue?')) return;
+                                }
+                                workspace.clear();
+                                if (config.pipeline) {
+                                    createPipelineConfigBlock(config);
+                                } else {
+                                    const configType = config.metadata.type || 'rule-config';
+                                    if (configType === 'data-source-config') createDataSourceConfigBlock(config);
+                                    else if (configType === 'scenario') createScenarioConfigBlock(config);
+                                    else if (configType === 'scenario-registry') createScenarioRegistryBlock(config);
+                                    else if (configType === 'component') createComponentConfigBlock(config);
+                                    else createRuleConfigBlock(config);
+                                }
+                                updateYaml();
+                                showToast('Loaded YAML: ' + yamlFile.name, 'success');
+                            } catch (err) {
+                                showToast('Error parsing YAML: ' + err.message, 'error');
+                            }
+                        };
+                        reader.readAsText(yamlFile);
+                        loaded.push(yamlFile.name);
+                    }
+
+                    // Process JSON files (use the first one for eval data)
+                    if (jsonFiles.length > 0) {
+                        const jsonFile = jsonFiles[0];
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            try {
+                                const jsonText = evt.target.result;
+                                JSON.parse(jsonText); // Validate
+                                setEvalJsonInEditor(jsonText);
+                                loadFieldsIntoEditor();
+                                // Open the eval data accordion
+                                const evalSection = document.getElementById('evalDataSection');
+                                if (!evalSection.classList.contains('expanded')) {
+                                    toggleAccordion('evalDataSection');
+                                }
+                                showToast('Loaded JSON: ' + jsonFile.name, 'success');
+                            } catch (err) {
+                                showToast('Error parsing JSON: ' + err.message, 'error');
+                            }
+                        };
+                        reader.readAsText(jsonFile);
+                    }
+
+                    if (yamlFiles.length > 1) {
+                        showToast('Multiple YAML files dropped — only the first was loaded.', 'info');
+                    }
+                    if (jsonFiles.length > 1) {
+                        showToast('Multiple JSON files dropped — only the first was loaded.', 'info');
+                    }
+                });
+
+                function hasFileItems(e) {
+                    if (e.dataTransfer && e.dataTransfer.types) {
+                        return e.dataTransfer.types.indexOf('Files') !== -1;
+                    }
+                    return false;
+                }
+            })();
+
         </script>
 
-        <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 
 </html>

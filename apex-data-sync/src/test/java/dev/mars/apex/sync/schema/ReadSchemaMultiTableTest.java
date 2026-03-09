@@ -19,9 +19,9 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -165,7 +165,7 @@ public class ReadSchemaMultiTableTest extends SyncTestBase {
         verifyTableSchema(readSchemaSteps, "inventory", 4);
         verifyTableSchema(readSchemaSteps, "transactions", 8);
 
-        logger.info("✓ Successfully validated schemas from 5 database tables");
+        logger.info("[OK] Successfully validated schemas from 5 database tables");
         
         // Validate execution rate (5 steps, all should succeed)
         validateExecutionRate(5, 5, "Multi-table schema reading");

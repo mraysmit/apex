@@ -42,7 +42,7 @@ import java.util.*;
  * - Skip lines functionality
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class TextDataLoader implements DataLoader {
@@ -77,7 +77,8 @@ public class TextDataLoader implements DataLoader {
             LOGGER.debug("Loaded {} objects from text file: {}", results.size(), filePath);
             
         } catch (IOException e) {
-            LOGGER.error("Failed to load text file: {}", filePath, e);
+            LOGGER.error("Failed to load text file '{}': {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw e;
         }
         
@@ -133,6 +134,7 @@ public class TextDataLoader implements DataLoader {
                 }
             } catch (Exception e) {
                 LOGGER.warn("Failed to parse fixed-width line {} in file: {}", lineNumber, e.getMessage());
+                LOGGER.debug("Full exception details:", e);
                 // Continue processing other lines
             }
         }
@@ -270,6 +272,7 @@ public class TextDataLoader implements DataLoader {
             }
         } catch (Exception e) {
             LOGGER.warn("Failed to convert value '{}' to type '{}': {}", value, fieldType, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return value; // Return as string if conversion fails
         }
     }

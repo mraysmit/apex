@@ -1,5 +1,5 @@
 # APEX Error Recovery Configuration Example
-# This demonstrates the new optional error-recovery section introduced in Phase 2
+# This demonstrates the new optional error-recovery section
 
 metadata:
   id: "error-recovery-example"
@@ -9,7 +9,7 @@ metadata:
   type: "example"
   author: "APEX Rules Engine"
 
-# Optional error-recovery section - NEW in Phase 2
+# Optional error-recovery section
 # When not present, the system uses backward-compatible defaults
 error-recovery:
   # Global error recovery settings

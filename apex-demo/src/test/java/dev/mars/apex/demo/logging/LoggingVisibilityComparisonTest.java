@@ -16,10 +16,10 @@
 
 package dev.mars.apex.demo.logging;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,14 +59,14 @@ class LoggingVisibilityComparisonTest {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingVisibilityComparisonTest.class);
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("🔧 Initializing APEX services for logging visibility comparison test");
 
         // Initialize YAML loader
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         logger.info("All services initialized for logging visibility comparison test");
     }
@@ -183,7 +183,7 @@ class LoggingVisibilityComparisonTest {
         logger.info("=== COMPLETE LOGGING TRANSFORMATION DOCUMENTATION ===");
         
         logger.info("🎯 TRANSFORMATION SUMMARY:");
-        logger.info("   SCOPE: 8+ critical logging locations updated in YamlEnrichmentProcessor");
+        logger.info("   SCOPE: 8+ critical logging locations updated in EnrichmentProcessor");
         logger.info("   🔄 CHANGE: WARNING → SEVERE for business logic failures");
         logger.info("   📝 ENHANCEMENT: Generic messages → Detailed context with prefixes");
         logger.info("   🎯 IMPACT: Silent failures → Visible critical errors");

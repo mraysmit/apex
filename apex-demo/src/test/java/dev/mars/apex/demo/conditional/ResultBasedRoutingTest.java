@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ public class ResultBasedRoutingTest extends DemoTestBase {
             // Load YAML configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ResultBasedRoutingTest.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully");
+            logger.info("[OK] Configuration loaded successfully");
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -75,7 +75,7 @@ public class ResultBasedRoutingTest extends DemoTestBase {
             assertFalse(highEnriched.containsKey("manualReviewRequired"), "MEDIUM path should not execute");
             assertFalse(highEnriched.containsKey("autoApproved"), "LOW path should not execute");
             
-            logger.info("✓ Scenario 1 passed: Routed to HIGH path");
+            logger.info("[OK] Scenario 1 passed: Routed to HIGH path");
 
 
             // Scenario 2: MEDIUM Risk (51-80)
@@ -99,7 +99,7 @@ public class ResultBasedRoutingTest extends DemoTestBase {
             assertFalse(mediumEnriched.containsKey("transactionRejected"), "HIGH path should not execute");
             assertFalse(mediumEnriched.containsKey("autoApproved"), "LOW path should not execute");
 
-            logger.info("✓ Scenario 2 passed: Routed to MEDIUM path");
+            logger.info("[OK] Scenario 2 passed: Routed to MEDIUM path");
 
 
             // Scenario 3: LOW Risk (<= 50)
@@ -123,7 +123,7 @@ public class ResultBasedRoutingTest extends DemoTestBase {
             assertFalse(lowEnriched.containsKey("transactionRejected"), "HIGH path should not execute");
             assertFalse(lowEnriched.containsKey("manualReviewRequired"), "MEDIUM path should not execute");
 
-            logger.info("✓ Scenario 3 passed: Routed to LOW path");
+            logger.info("[OK] Scenario 3 passed: Routed to LOW path");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);

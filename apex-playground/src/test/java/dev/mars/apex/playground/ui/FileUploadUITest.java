@@ -152,7 +152,7 @@ class FileUploadUITest {
 
         // Then
         WebElement yamlEditor = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("yamlRulesEditor")));
-        String editorContent = yamlEditor.getDomProperty("value");
+        String editorContent = CodeMirrorTestHelper.getYamlContent(driver);
         
         assertTrue(editorContent.contains("metadata:"), "Editor should contain uploaded YAML metadata");
         assertTrue(editorContent.contains("Test Configuration"), "Editor should contain YAML name");

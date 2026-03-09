@@ -4,7 +4,7 @@
  */
 package dev.mars.apex.demo.scenario;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.StageExecutionResult;
 import dev.mars.apex.demo.DemoTestBase;
@@ -81,7 +81,7 @@ public class ValidationFailureScenarioTest extends DemoTestBase {
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up validation failure scenario test environment");
-        logger.info("✓ Test environment initialized with RulesEngine");
+        logger.info("[OK] Test environment initialized with RulesEngine");
         logger.info("** All APEX services properly initialized for negative validation testing");
     }
 
@@ -106,19 +106,19 @@ public class ValidationFailureScenarioTest extends DemoTestBase {
 
         // 1. Create trade data that will trigger multiple validation rules
         Map<String, Object> tradeData = createTradeDataWithViolations();
-        logger.info("✓ STEP 1: Created trade data with intentional business rule violations");
+        logger.info("[OK] STEP 1: Created trade data with intentional business rule violations");
         logger.info("  - Trade data: {}", tradeData);
         logger.info("  - Expected violations: currency not exotic, amount too high, invalid instrument type");
 
         // 2. Load scenario configuration with strict validation rules
         String registryPath = "src/test/java/dev/mars/apex/demo/scenario/" + getClass().getSimpleName() + ".yaml";
-        logger.info("✓ STEP 2: Loading validation failure scenario configuration from: {}", registryPath);
+        logger.info("[OK] STEP 2: Loading validation failure scenario configuration from: {}", registryPath);
         RulesEngine engine = RulesEngine.fromScenarioRegistry(registryPath);
         logger.info("  - Validation failure scenario configuration loaded successfully");
         logger.info("  - Target scenario: validation-failure-scenario");
 
         // 3. Execute scenario - validation rules should trigger but processing continues
-        logger.info("✓ STEP 3: Executing scenario with validation rules designed to trigger");
+        logger.info("[OK] STEP 3: Executing scenario with validation rules designed to trigger");
         long startTime = System.currentTimeMillis();
         ScenarioExecutionResult result = engine.evaluateScenario("validation-failure-scenario", tradeData);
         long executionTime = System.currentTimeMillis() - startTime;
@@ -131,7 +131,7 @@ public class ValidationFailureScenarioTest extends DemoTestBase {
                    result.isSuccessful(), result.hasWarnings(), result.requiresReview());
 
         // 4. Validate that validation rules were triggered and reported properly
-        logger.info("✓ STEP 4: Validating that validation rules triggered correctly");
+        logger.info("[OK] STEP 4: Validating that validation rules triggered correctly");
         validateValidationRuleTriggering(result);
 
         logger.info("=== Validation Rule Triggering Test COMPLETED SUCCESSFULLY ===");
@@ -216,7 +216,7 @@ public class ValidationFailureScenarioTest extends DemoTestBase {
         logger.info("Overall scenario success: {}", result.isSuccessful());
         logger.info("Stages executed: {}", stageResults.size());
 
-        logger.info("✓ Validation rule triggering validation completed");
+        logger.info("[OK] Validation rule triggering validation completed");
         logger.info("  - Validation rules successfully detected business rule violations");
         logger.info("  - Rules triggered and reported violations without blocking processing");
         logger.info("  - This demonstrates APEX's design for informational validation");

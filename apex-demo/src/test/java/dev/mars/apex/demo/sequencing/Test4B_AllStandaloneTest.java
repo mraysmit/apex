@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,12 +94,12 @@ public class Test4B_AllStandaloneTest extends DemoTestBase {
         assertEquals("standalone-3", executionLog.get(2), "Position 2 MUST be standalone-3");
         assertEquals("standalone-4", executionLog.get(3), "Position 3 MUST be standalone-4");
 
-        LOGGER.info("✓ TEST 4B PASSED: All 5 definitive assertion types verified");
-        LOGGER.info("  ✓ Exact count: 4 items");
-        LOGGER.info("  ✓ Exact order: standalone-1, standalone-2, standalone-3, standalone-4");
-        LOGGER.info("  ✓ What executed: All 4 standalone enrichments");
-        LOGGER.info("  ✓ No double execution: Each item executes exactly once");
-        LOGGER.info("  ✓ Position verification: All items at correct positions");
+        LOGGER.info("[OK] TEST 4B PASSED: All 5 definitive assertion types verified");
+        LOGGER.info("  [OK] Exact count: 4 items");
+        LOGGER.info("  [OK] Exact order: standalone-1, standalone-2, standalone-3, standalone-4");
+        LOGGER.info("  [OK] What executed: All 4 standalone enrichments");
+        LOGGER.info("  [OK] No double execution: Each item executes exactly once");
+        LOGGER.info("  [OK] Position verification: All items at correct positions");
     }
 }
 

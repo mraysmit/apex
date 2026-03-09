@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,12 +94,12 @@ public class Test4C_AllGroupedTest extends DemoTestBase {
         assertEquals("grouped-3", executionLog.get(2), "Position 2 MUST be grouped-3 (from group-B)");
         assertEquals("grouped-4", executionLog.get(3), "Position 3 MUST be grouped-4 (from group-B)");
 
-        LOGGER.info("✓ TEST 4C PASSED: All 5 definitive assertion types verified");
-        LOGGER.info("  ✓ Exact count: 4 items");
-        LOGGER.info("  ✓ Exact order: grouped-1, grouped-2, grouped-3, grouped-4");
-        LOGGER.info("  ✓ What executed: All 4 grouped enrichments via groups");
-        LOGGER.info("  ✓ No double execution: Each item executes exactly once");
-        LOGGER.info("  ✓ Position verification: All items at correct positions");
+        LOGGER.info("[OK] TEST 4C PASSED: All 5 definitive assertion types verified");
+        LOGGER.info("  [OK] Exact count: 4 items");
+        LOGGER.info("  [OK] Exact order: grouped-1, grouped-2, grouped-3, grouped-4");
+        LOGGER.info("  [OK] What executed: All 4 grouped enrichments via groups");
+        LOGGER.info("  [OK] No double execution: Each item executes exactly once");
+        LOGGER.info("  [OK] Position verification: All items at correct positions");
     }
 }
 

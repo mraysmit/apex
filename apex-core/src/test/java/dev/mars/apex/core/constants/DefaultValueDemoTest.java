@@ -1,11 +1,15 @@
 package dev.mars.apex.core.constants;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRule;
-import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRule;
+import dev.mars.apex.core.config.model.YamlEnrichment;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -19,12 +23,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-09-27
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class DefaultValueDemoTest {
 
     @Test
     void testDefaultValueEnhancementDemo() throws Exception {
         // Load the demo configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromClasspath("error-handling/demo-default-value.yaml");
         
         assertNotNull(config);
@@ -93,7 +98,7 @@ class DefaultValueDemoTest {
                 # Note: no default-value specified
             """;
         
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
         
         assertNotNull(config);

@@ -15,12 +15,14 @@
  */
 
 package dev.mars.apex.core.config.yaml;
-
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.Category;
-import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
+import dev.mars.apex.core.config.RuleFactory;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.metadata.RuleMetadata;
 
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +39,14 @@ public class CategoryMetadataInheritanceIntegrationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryMetadataInheritanceIntegrationTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
-    private YamlRuleFactory ruleFactory;
+    private ConfigurationLoader yamlLoader;
+    private RuleFactory ruleFactory;
 
     @BeforeEach
     public void setUp() {
         logger.info("Setting up Category Metadata Inheritance Integration Test...");
-        yamlLoader = new YamlConfigurationLoader();
-        ruleFactory = new YamlRuleFactory();
+        yamlLoader = new ConfigurationLoader();
+        ruleFactory = new RuleFactory();
     }
 
     @Test
@@ -77,7 +79,7 @@ public class CategoryMetadataInheritanceIntegrationTest {
                 rule.getId(), rule.getCategory(), rule.getBusinessDomain(), rule.getBusinessOwner(), rule.getCreatedBy());
         });
 
-        // Create rules using YamlRuleFactory
+        // Create rules using RuleFactory
         List<Rule> rules = ruleFactory.createRules(config);
 
         // Verify rules were created

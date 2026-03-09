@@ -1,8 +1,18 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,23 +37,23 @@ import static org.junit.jupiter.api.Assertions.*;
 class CircularReferenceDetectionTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CircularReferenceDetectionTest.class);
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     @Test
     @DisplayName("EDGE CASE: circular references should be detected and reported as duplicate ID error")
     void testCircularReferenceDetection() {
         // Load file A which references file B which references file A (circular)
-        // This should throw a YamlConfigurationException due to duplicate IDs
+        // This should throw a ConfigurationException due to duplicate IDs
 
         logger.info("=== CIRCULAR REFERENCE DETECTION TEST ===");
 
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> loader.loadFromClasspath("config/circular-a.yaml"),
             "Circular reference should cause duplicate ID validation error"
         );

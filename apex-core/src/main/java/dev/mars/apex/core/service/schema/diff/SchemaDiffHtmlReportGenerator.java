@@ -37,7 +37,7 @@ import java.util.List;
  * Follows the same format as SchemaHtmlReportGenerator for consistency.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1
+ * @since 2026-01-13
  */
 public class SchemaDiffHtmlReportGenerator {
     private static final Logger logger = LoggerFactory.getLogger(SchemaDiffHtmlReportGenerator.class);
@@ -438,7 +438,7 @@ public class SchemaDiffHtmlReportGenerator {
         // Compatibility status
         if (result.isCompatible()) {
             html.append("<div class=\"alert alert-success\" style=\"margin-top: 20px;\">\n");
-            html.append("<strong>✓ Compatible Migration:</strong> Target schema is backward compatible with source schema.\n");
+            html.append("<strong>[OK] Compatible Migration:</strong> Target schema is backward compatible with source schema.\n");
             html.append("</div>\n");
         } else {
             html.append("<div class=\"alert alert-danger\" style=\"margin-top: 20px;\">\n");
@@ -642,7 +642,7 @@ public class SchemaDiffHtmlReportGenerator {
         
         // Added columns
         if (!result.getAddedColumns().isEmpty()) {
-            html.append("<h3 style=\"color: #27ae60;\">✓ Added Columns (").append(result.getAddedColumns().size()).append(")</h3>\n");
+            html.append("<h3 style=\"color: #27ae60;\">[OK] Added Columns (").append(result.getAddedColumns().size()).append(")</h3>\n");
             html.append("<table>\n");
             html.append("<thead><tr><th>Column</th><th>Type</th><th>Impact</th></tr></thead>\n");
             html.append("<tbody>\n");

@@ -48,7 +48,7 @@ import java.util.concurrent.ConcurrentMap;
  * - H2 (for testing)
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class JdbcTemplateFactory {
@@ -213,7 +213,8 @@ public class JdbcTemplateFactory {
         try {
             return new SimpleDataSource(config);
         } catch (Exception e) {
-            LOGGER.error("Failed to create SimpleDataSource for '{}': {}", config.getName(), e.getMessage(), e);
+            LOGGER.error("Failed to create SimpleDataSource for '{}': {}", config.getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw e;
         }
     }

@@ -1,11 +1,16 @@
 package dev.mars.apex.core.dbschema;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.core.service.data.external.registry.DataSourceRegistry;
 import dev.mars.apex.core.test.TestContainerImages;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -115,7 +120,7 @@ class PostgreSQLSchemaConfigurationTest {
             .withExposedPorts(5432)
             .waitingFor(Wait.forListeningPort());
 
-    private YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     private String jdbcUrl() {
         return "jdbc:postgresql://" + postgres.getHost() + ":" 
@@ -124,6 +129,9 @@ class PostgreSQLSchemaConfigurationTest {
 
     @BeforeEach
     void setupDatabase() throws Exception {
+        // Clear stale JDBC pools from previous test classes (critical for Testcontainers)
+        DataSourceRegistry.getInstance().clear();
+        
         if (!postgres.isRunning()) {
             return;
         }
@@ -200,7 +208,7 @@ class PostgreSQLSchemaConfigurationTest {
         assertEquals(CUSTOM_SCHEMA, configuredSchema, 
                 "Schema should be 'trading' from YAML configuration");
 
-        logger.info("✓ Schema parameter correctly configured: {}", configuredSchema);
+        logger.info("[OK] Schema parameter correctly configured: {}", configuredSchema);
     }
 
     @Test
@@ -229,7 +237,7 @@ class PostgreSQLSchemaConfigurationTest {
         assertEquals("Apple Inc.", enrichedData.get("product_name"),
                 "Should retrieve product from trading schema");
 
-        logger.info("✓ Query executed successfully against custom schema");
+        logger.info("[OK] Query executed successfully against custom schema");
         logger.info("  Enriched data: product_name={}", enrichedData.get("product_name"));
     }
 
@@ -283,7 +291,7 @@ class PostgreSQLSchemaConfigurationTest {
         assertEquals("Microsoft Corporation", enrichedData.get("product_name"));
         assertEquals("Acme Corporation", enrichedData.get("customer_name"));
 
-        logger.info("✓ Multiple schemas accessed successfully");
+        logger.info("[OK] Multiple schemas accessed successfully");
         logger.info("  Trading schema: product_name={}", enrichedData.get("product_name"));
         logger.info("  Sales schema: customer_name={}", enrichedData.get("customer_name"));
     }
@@ -333,7 +341,7 @@ class PostgreSQLSchemaConfigurationTest {
         assertNotEquals("WRONG_DATA_FROM_PUBLIC_SCHEMA", enrichedData.get("product_name"),
                 "Should NOT retrieve from public schema");
 
-        logger.info("✓ Schema parameter correctly overrides default 'public' schema");
+        logger.info("[OK] Schema parameter correctly overrides default 'public' schema");
     }
 
     /**

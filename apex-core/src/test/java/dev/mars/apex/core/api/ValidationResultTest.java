@@ -1,9 +1,16 @@
 package dev.mars.apex.core.api;
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.List;
 import java.util.Map;
@@ -21,9 +28,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Validation statistics and metrics
  * - Integration with ValidationBuilder
  * 
- * @author APEX Test Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ValidationResultTest {
 
     private ValidationResult validationResult;

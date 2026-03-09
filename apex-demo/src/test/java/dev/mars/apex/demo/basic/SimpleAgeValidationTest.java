@@ -16,11 +16,11 @@
 
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,7 +63,7 @@ public class SimpleAgeValidationTest {
         
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             assertEquals("Simple Age Validation", config.getMetadata().getName());
@@ -94,10 +94,14 @@ public class SimpleAgeValidationTest {
             assertTrue(result.isTriggered(), "Age check rule should be triggered for age 25");
             assertTrue(result.isSuccess(), "Age validation should succeed for age 25");
             assertNotNull(result.getMessage(), "Result should have a message");
+            assertTrue(result.getMessage().contains("25"), 
+                      "Message should contain the resolved age value '25', got: " + result.getMessage());
+            assertFalse(result.getMessage().contains("{{#"), 
+                      "Message should not contain unresolved {{#}} placeholders, got: " + result.getMessage());
             
-            logger.info("✓ Valid age scenario test passed");
+            logger.info("[OK] Valid age scenario test passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -109,7 +113,7 @@ public class SimpleAgeValidationTest {
         
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             
@@ -138,10 +142,14 @@ public class SimpleAgeValidationTest {
             assertTrue(result.isTriggered(), "Age too young rule should be triggered for age 16");
             assertTrue(result.isSuccess(), "Rule execution should succeed");
             assertNotNull(result.getMessage(), "Result should have a message");
+            assertTrue(result.getMessage().contains("16"), 
+                      "Message should contain the resolved age value '16', got: " + result.getMessage());
+            assertFalse(result.getMessage().contains("{{#"), 
+                      "Message should not contain unresolved {{#}} placeholders, got: " + result.getMessage());
             
-            logger.info("✓ Invalid age scenario test passed");
+            logger.info("[OK] Invalid age scenario test passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -153,7 +161,7 @@ public class SimpleAgeValidationTest {
         
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             
@@ -183,14 +191,92 @@ public class SimpleAgeValidationTest {
             assertFalse(result.isTriggered(), "Age required rule should not be triggered when age is missing");
             assertFalse(result.isSuccess(), "Rule execution should fail due to missing parameters");
             assertNotNull(result.getMessage(), "Result should have a message");
-            // Message will show the template with the placeholder
-            assertTrue(result.getMessage().contains("Age field") || result.getMessage().contains("#age"), 
-                      "Message should reference age field");
+            // When age is missing, the error message comes from the error recovery system
+            // (not the rule's template message), so check for error-related content
+            assertTrue(result.getMessage().contains("Age") || result.getMessage().contains("evaluation failed"), 
+                      "Message should reference age field or evaluation failure");
             
-            logger.info("✓ Missing age scenario test passed");
+            logger.info("[OK] Missing age scenario test passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
+            fail("Failed to load configuration: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testNoMatchMessageScenario() {
+        logger.info("=== Testing No-Match-Message Scenario (age = 16, age-check rule) ===");
+        
+        try {
+            // Load YAML configuration
+            ConfigurationLoader loader = new ConfigurationLoader();
+            YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
+            assertNotNull(config, "Configuration should be loaded");
+            
+            // Create RulesEngine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            assertNotNull(engine, "RulesEngine should be created");
+            
+            // Get the age-check rule (has both message and no-match-message)
+            var ageCheckRule = engine.getConfiguration().getRuleById("age-check");
+            assertNotNull(ageCheckRule, "Age check rule should be found in configuration");
+
+            // Test data: Age 16 does NOT meet condition (#age >= 18) → should use no-match-message
+            Map<String, Object> underageData = Map.of("age", 16);
+
+            // Execute rule and validate results
+            RuleResult result = engine.executeRule(ageCheckRule, underageData);
+            assertNotNull(result, "RuleResult should not be null");
+
+            logger.info("RuleResult.isTriggered(): {}", result.isTriggered());
+            logger.info("RuleResult.getMessage(): {}", result.getMessage());
+
+            // Rule condition (#age >= 18) is FALSE for age=16 → NO_MATCH
+            assertFalse(result.isTriggered(), "Age check rule should NOT match for age 16");
+            
+            // The no-match-message should be used with resolved {{#age}} placeholder
+            assertEquals("Age 16 does not meet minimum requirement of 18", result.getMessage(),
+                        "NO_MATCH should use no-match-message with resolved {{#age}} placeholder");
+            assertFalse(result.getMessage().contains("{{#"), 
+                      "Message should not contain unresolved {{#}} placeholders");
+            
+            logger.info("[OK] No-match-message scenario test passed");
+            
+        } catch (ConfigurationException e) {
+            logger.error("X Failed to load configuration: {}", e.getMessage());
+            fail("Failed to load configuration: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testMatchMessageStillWorksWithNoMatchMessage() {
+        logger.info("=== Testing Match Message with no-match-message configured (age = 25) ===");
+        
+        try {
+            // Load YAML configuration
+            ConfigurationLoader loader = new ConfigurationLoader();
+            YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
+            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            var ageCheckRule = engine.getConfiguration().getRuleById("age-check");
+            assertNotNull(ageCheckRule, "Age check rule should be found");
+
+            // Test data: Age 25 MEETS condition → should use standard message (not no-match-message)
+            Map<String, Object> validData = Map.of("age", 25);
+            RuleResult result = engine.executeRule(ageCheckRule, validData);
+
+            logger.info("RuleResult.isTriggered(): {}", result.isTriggered());
+            logger.info("RuleResult.getMessage(): {}", result.getMessage());
+
+            // MATCH path should use the standard message
+            assertTrue(result.isTriggered(), "Age check rule should match for age 25");
+            assertEquals("Age 25 is valid (18 or older)", result.getMessage(),
+                        "MATCH should use standard message even when no-match-message is configured");
+            
+            logger.info("[OK] Match message with no-match-message configured test passed");
+            
+        } catch (ConfigurationException e) {
             fail("Failed to load configuration: " + e.getMessage());
         }
     }

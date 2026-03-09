@@ -1,11 +1,16 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class SpelFieldMappingTest {
 
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     @Test
@@ -73,7 +78,7 @@ public class SpelFieldMappingTest {
         assertEquals("USD", enrichedMap.get("buy_currency"), "Should extract nested currency field");
         assertEquals(1000, enrichedMap.get("trade_amount"), "Should extract nested amount field");
 
-        System.out.println("✓ SpEL nested field access test passed!");
+        System.out.println("[OK] SpEL nested field access test passed!");
     }
 
     @Test
@@ -124,7 +129,7 @@ public class SpelFieldMappingTest {
         assertEquals(5000000, enrichedMap.get("trade_amount"),
                     "Should extract multi-level nested amount");
 
-        System.out.println("✓ SpEL multi-level nesting test passed!");
+        System.out.println("[OK] SpEL multi-level nesting test passed!");
     }
 
     @Test
@@ -169,7 +174,7 @@ public class SpelFieldMappingTest {
         assertNull(enrichedMap.get("currency_code"), "Safe navigation should return null for missing field");
         assertNull(enrichedMap.get("trade_amount"), "Safe navigation should return null for missing nested field");
 
-        System.out.println("✓ SpEL safe navigation test passed!");
+        System.out.println("[OK] SpEL safe navigation test passed!");
     }
 
     @Test
@@ -220,7 +225,7 @@ public class SpelFieldMappingTest {
         assertEquals(100, enrichedMap.get("first_item_price"), "Should extract first item price");
         assertEquals(200, enrichedMap.get("second_item_price"), "Should extract second item price");
 
-        System.out.println("✓ SpEL array indexing test passed!");
+        System.out.println("[OK] SpEL array indexing test passed!");
     }
 
     @Test
@@ -266,7 +271,7 @@ public class SpelFieldMappingTest {
         assertEquals("EUR", enrichedMap.get("currency_code"), "Simple field names should still work");
         assertEquals(2500, enrichedMap.get("trade_amount"), "Simple field names should still work");
 
-        System.out.println("✓ Backward compatibility test passed!");
+        System.out.println("[OK] Backward compatibility test passed!");
     }
 
     @Test
@@ -320,7 +325,7 @@ public class SpelFieldMappingTest {
         assertEquals("GBP", enrichedMap.get("buy_currency"), "SpEL field should work");
         assertEquals(7500, enrichedMap.get("trade_amount"), "SpEL field should work");
 
-        System.out.println("✓ Mixed simple and SpEL fields test passed!");
+        System.out.println("[OK] Mixed simple and SpEL fields test passed!");
     }
 
     @Test
@@ -365,7 +370,7 @@ public class SpelFieldMappingTest {
         assertEquals(100, enrichedMap.get("current_price"),
                     "Complex expression should evaluate to activePrice");
 
-        System.out.println("✓ SpEL complex expression test passed!");
+        System.out.println("[OK] SpEL complex expression test passed!");
     }
 
     @Test
@@ -408,7 +413,7 @@ public class SpelFieldMappingTest {
         assertEquals("USD", enrichedMap.get("currency_code"),
                     "Method call should convert to uppercase");
 
-        System.out.println("✓ SpEL method call test passed!");
+        System.out.println("[OK] SpEL method call test passed!");
     }
 
     @Test
@@ -452,7 +457,7 @@ public class SpelFieldMappingTest {
         assertEquals(1100.0, enrichedMap.get("adjusted_amount"),
                     "Should extract nested field and apply expression");
 
-        System.out.println("✓ SpEL with expression test passed!");
+        System.out.println("[OK] SpEL with expression test passed!");
     }
 
     @Test
@@ -495,7 +500,7 @@ public class SpelFieldMappingTest {
         assertNull(enrichedMap.get("result"),
                   "Invalid SpEL expression should return null and log warning");
 
-        System.out.println("✓ SpEL invalid expression error handling test passed!");
+        System.out.println("[OK] SpEL invalid expression error handling test passed!");
     }
 
     @Test
@@ -541,7 +546,7 @@ public class SpelFieldMappingTest {
         assertNull(enrichedMap.get("currency_code"), "Should handle null gracefully");
         assertNull(enrichedMap.get("trade_amount"), "Should handle null gracefully");
 
-        System.out.println("✓ SpEL null handling test passed!");
+        System.out.println("[OK] SpEL null handling test passed!");
     }
 }
 

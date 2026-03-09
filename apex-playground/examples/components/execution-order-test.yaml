@@ -1,7 +1,9 @@
 metadata:
+  id: "execution-order-test"
   name: "Component Execution Order Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test explicit component execution ordering and dependencies"
 
 components:

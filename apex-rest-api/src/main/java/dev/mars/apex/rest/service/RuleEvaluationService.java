@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import dev.mars.apex.rest.util.TestAwareLogger;
-
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,9 +51,6 @@ public class RuleEvaluationService {
 
     @Autowired
     private RulesService rulesService;
-
-    @Autowired
-    private TestAwareLogger testAwareLogger;
     
     /**
      * Validates data against multiple validation rules.
@@ -70,11 +65,7 @@ public class RuleEvaluationService {
         ValidationResponse response = new ValidationResponse();
         
         if (request.getValidationRules() == null || request.getValidationRules().isEmpty()) {
-            if (testAwareLogger != null) {
-                testAwareLogger.warn(logger, "No validation rules provided");
-            } else {
-                logger.warn("No validation rules provided");
-            }
+            logger.warn("No validation rules provided");
             response.setValid(true);
             response.setTotalRules(0);
             response.setPassedRules(0);
@@ -130,7 +121,8 @@ public class RuleEvaluationService {
                     }
                     
                 } catch (Exception e) {
-                    logger.error("Error evaluating rule '{}': {}", rule.getName(), e.getMessage(), e);
+                    logger.error("Error evaluating rule '{}': {}", rule.getName(), e.getMessage());
+                    logger.debug("Full exception details:", e);
                     failedRules++;
                     
                     if (request.isIncludeDetails()) {
@@ -171,7 +163,8 @@ public class RuleEvaluationService {
             return response;
             
         } catch (Exception e) {
-            logger.error("Error during validation: {}", e.getMessage(), e);
+            logger.error("Error during validation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             
             // Create error response
             ValidationResponse errorResponse = new ValidationResponse();
@@ -226,7 +219,8 @@ public class RuleEvaluationService {
             return response;
             
         } catch (Exception e) {
-            logger.error("Error evaluating rule: {}", e.getMessage(), e);
+            logger.error("Error evaluating rule: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             
             RuleEvaluationResponse errorResponse = RuleEvaluationResponse.error(
                 "Rule evaluation failed", e.getMessage()
@@ -274,6 +268,7 @@ public class RuleEvaluationService {
             return rulesService.check(condition, data);
         } catch (Exception e) {
             logger.warn("Quick check failed for condition '{}': {}", condition, e.getMessage());
+            logger.debug("Full exception details:", e);
             return false;
         }
     }

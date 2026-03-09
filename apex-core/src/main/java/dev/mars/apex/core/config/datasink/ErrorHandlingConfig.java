@@ -16,6 +16,8 @@ package dev.mars.apex.core.config.datasink;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.constants.SeverityConstants;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,7 @@ import java.util.Map;
  * including retry strategies, dead letter handling, and error reporting.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public class ErrorHandlingConfig {
@@ -89,7 +91,7 @@ public class ErrorHandlingConfig {
     
     // Error logging configuration
     private Boolean logErrors = true;
-    private String logLevel = "ERROR";
+    private String logLevel = SeverityConstants.ERROR;
     private Boolean includeStackTrace = true;
     private Boolean includeData = false; // For security reasons
     private Integer maxLoggedErrors = 100;

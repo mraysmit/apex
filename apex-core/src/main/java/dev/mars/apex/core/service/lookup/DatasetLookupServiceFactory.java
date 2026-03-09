@@ -1,6 +1,8 @@
 package dev.mars.apex.core.service.lookup;
 
-import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.service.data.external.DataSourceException;
+import dev.mars.apex.core.service.data.external.registry.DataSourceRegistry;
 import dev.mars.apex.core.service.enrichment.EnrichmentException;
 import dev.mars.apex.core.service.data.external.file.CsvDataLoader;
 import dev.mars.apex.core.service.data.external.file.JsonDataLoader;
@@ -70,7 +72,7 @@ public class DatasetLookupServiceFactory {
      */
     public static DatasetLookupService createDatasetLookupService(String serviceName,
                                                                   YamlEnrichment.LookupDataset dataset,
-                                                                  dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+                                                                  dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
         return createDatasetLookupService(serviceName, dataset, configuration, null);
     }
 
@@ -87,7 +89,7 @@ public class DatasetLookupServiceFactory {
      */
     public static DatasetLookupService createDatasetLookupService(String serviceName,
                                                                   YamlEnrichment.LookupDataset dataset,
-                                                                  dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration,
+                                                                  dev.mars.apex.core.config.model.YamlRuleConfiguration configuration,
                                                                   Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry) {
         if (dataset == null) {
             throw new EnrichmentException("Dataset configuration cannot be null");
@@ -215,7 +217,7 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createDatabaseDatasetService(String serviceName,
                                                                      YamlEnrichment.LookupDataset dataset,
-                                                                     dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+                                                                     dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
         return createDatabaseDatasetService(serviceName, dataset, configuration, null);
     }
 
@@ -230,7 +232,7 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createDatabaseDatasetService(String serviceName,
                                                                      YamlEnrichment.LookupDataset dataset,
-                                                                     dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration,
+                                                                     dev.mars.apex.core.config.model.YamlRuleConfiguration configuration,
                                                                      Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry) {
         logger.debug("Creating database dataset service: " + serviceName);
 
@@ -265,9 +267,9 @@ public class DatasetLookupServiceFactory {
         }
 
         // Find the data source configuration using the resolved connection name
-        dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
+        dev.mars.apex.core.config.model.YamlDataSource dataSourceConfig = null;
         if (configuration.getDataSources() != null) {
-            for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
+            for (dev.mars.apex.core.config.model.YamlDataSource ds : configuration.getDataSources()) {
                 if (connectionName.equals(ds.getName())) {
                     dataSourceConfig = ds;
                     break;
@@ -281,19 +283,16 @@ public class DatasetLookupServiceFactory {
         }
 
         try {
-            // Check if data source already exists in registry (prevents duplicate creation)
-            dev.mars.apex.core.service.data.external.ExternalDataSource dataSource = null;
+            // Use the unified DataSourceRegistry as the single source of truth
+            // This handles caching, deduplication, and connection pool sharing automatically
+            DataSourceRegistry registry = DataSourceRegistry.getInstance();
+            dev.mars.apex.core.service.data.external.ExternalDataSource dataSource = 
+                registry.getOrCreate(connectionName, dataSourceConfig.toDataSourceConfiguration());
+            logger.info("Obtained data source '{}' from DataSourceRegistry", connectionName);
             
-            if (dataSourceRegistry != null && dataSourceRegistry.containsKey(connectionName)) {
-                dataSource = dataSourceRegistry.get(connectionName);
-                logger.info("REUSING existing data source '{}' from RulesEngine registry (prevents duplicate creation)", connectionName);
-            } else {
-                // Create new database data source using existing infrastructure
-                logger.info("Creating NEW data source '{}' (not found in registry)", connectionName);
-                dev.mars.apex.core.service.data.external.factory.DataSourceFactory factory =
-                    dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance();
-
-                dataSource = factory.createDataSource(dataSourceConfig.toDataSourceConfiguration());
+            // Also update the local registry if provided (for backward compatibility)
+            if (dataSourceRegistry != null && !dataSourceRegistry.containsKey(connectionName)) {
+                dataSourceRegistry.put(connectionName, dataSource);
             }
 
             // Extract parameter field names from dataset configuration
@@ -324,13 +323,13 @@ public class DatasetLookupServiceFactory {
     /**
      * Get available data source names for error messages.
      */
-    private static String getAvailableDataSourceNames(dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+    private static String getAvailableDataSourceNames(dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
         if (configuration.getDataSources() == null || configuration.getDataSources().isEmpty()) {
             return "none";
         }
 
         return configuration.getDataSources().stream()
-            .map(dev.mars.apex.core.config.yaml.YamlDataSource::getName)
+            .map(dev.mars.apex.core.config.model.YamlDataSource::getName)
             .collect(java.util.stream.Collectors.joining(", "));
     }
 
@@ -370,7 +369,8 @@ public class DatasetLookupServiceFactory {
                 fileDataset.setData(Collections.emptyList());
 
             } catch (Exception e) {
-                logger.warn("Failed to read YAML file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+                logger.warn("Failed to read YAML file: {}. Error: {}", dataset.getFilePath(), e.getMessage());
+                logger.debug("Full exception details for YAML file read '{}':", dataset.getFilePath(), e);
                 fileDataset.setData(Collections.emptyList());
             }
 
@@ -378,6 +378,7 @@ public class DatasetLookupServiceFactory {
 
         } catch (Exception e) {
             logger.error("Failed to load YAML dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+            logger.debug("Full stack trace for YAML dataset load failure:", e);
 
             // Return dataset with empty data on error
             YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();
@@ -442,6 +443,7 @@ public class DatasetLookupServiceFactory {
 
         } catch (Exception e) {
             logger.error("Failed to load CSV dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+            logger.debug("Full stack trace for CSV dataset load failure:", e);
 
             // Return dataset with empty data on error
             YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();
@@ -528,6 +530,7 @@ public class DatasetLookupServiceFactory {
 
         } catch (Exception e) {
             logger.error("Failed to load file-system dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+            logger.debug("Full stack trace for file-system dataset load failure:", e);
 
             // Return dataset with empty data on error
             YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();
@@ -568,7 +571,8 @@ public class DatasetLookupServiceFactory {
             return mapData;
 
         } catch (Exception e) {
-            logger.warn("JsonDataLoader failed, falling back to simple JSON parsing: " + e.getMessage());
+            logger.warn("JsonDataLoader failed, falling back to simple JSON parsing: {}", e.getMessage());
+            logger.debug("Full exception details for JsonDataLoader fallback:", e);
             return loadJsonFileSimple(filePath);
         }
     }
@@ -618,7 +622,8 @@ public class DatasetLookupServiceFactory {
             return mapData;
 
         } catch (Exception e) {
-            logger.warn("XmlDataLoader failed, falling back to simple XML parsing: " + e.getMessage());
+            logger.warn("XmlDataLoader failed, falling back to simple XML parsing: {}", e.getMessage());
+            logger.debug("Full exception details for XmlDataLoader fallback:", e);
             return loadXmlFileSimple(filePath);
         }
     }
@@ -671,7 +676,8 @@ public class DatasetLookupServiceFactory {
             return mapData;
 
         } catch (Exception e) {
-            logger.warn("CsvDataLoader failed: " + e.getMessage());
+            logger.warn("CsvDataLoader failed: {}", e.getMessage());
+            logger.debug("Full exception details for CsvDataLoader failure:", e);
             throw e;
         }
     }
@@ -758,13 +764,13 @@ public class DatasetLookupServiceFactory {
      * @throws EnrichmentException if the named query cannot be resolved
      */
     private static String resolveNamedQuery(String connectionName, String queryRef,
-                                          dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+                                          dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
         logger.debug("Resolving named query '" + queryRef + "' from data-source '" + connectionName + "'");
 
         // Find the data source configuration
-        dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
+        dev.mars.apex.core.config.model.YamlDataSource dataSourceConfig = null;
         if (configuration.getDataSources() != null) {
-            for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
+            for (dev.mars.apex.core.config.model.YamlDataSource ds : configuration.getDataSources()) {
                 if (connectionName.equals(ds.getName())) {
                     dataSourceConfig = ds;
                     break;
@@ -805,7 +811,7 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createRestApiDatasetService(String serviceName,
                                                                    YamlEnrichment.LookupDataset dataset,
-                                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+                                                                   dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
         logger.debug("Creating REST API dataset service: " + serviceName);
 
         // Validate REST API-specific configuration
@@ -836,9 +842,9 @@ public class DatasetLookupServiceFactory {
         String endpointIdentifier = operationRef != null && !operationRef.trim().isEmpty() ? operationRef : endpoint;
 
         // Find the data source configuration using the resolved connection name
-        dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
+        dev.mars.apex.core.config.model.YamlDataSource dataSourceConfig = null;
         if (configuration.getDataSources() != null) {
-            for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
+            for (dev.mars.apex.core.config.model.YamlDataSource ds : configuration.getDataSources()) {
                 if (connectionName.equals(ds.getName())) {
                     dataSourceConfig = ds;
                     break;
@@ -852,12 +858,11 @@ public class DatasetLookupServiceFactory {
         }
 
         try {
-            // Create REST API data source using existing infrastructure
-            dev.mars.apex.core.service.data.external.factory.DataSourceFactory factory =
-                dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance();
-
+            // Use the unified DataSourceRegistry as the single source of truth
+            DataSourceRegistry registry = DataSourceRegistry.getInstance();
             dev.mars.apex.core.service.data.external.ExternalDataSource dataSource =
-                factory.createDataSource(dataSourceConfig.toDataSourceConfiguration());
+                registry.getOrCreate(connectionName, dataSourceConfig.toDataSourceConfiguration());
+            logger.info("Obtained REST API data source '{}' from DataSourceRegistry", connectionName);
 
             // Extract parameter field names from dataset configuration
             java.util.List<String> parameterFields = new java.util.ArrayList<>();
@@ -915,6 +920,12 @@ public class DatasetLookupServiceFactory {
         }
 
         @Override
+        public java.util.List<java.util.Map<String, Object>> transformAll(Object key) {
+            // Delegate multi-row lookup to the database service
+            return databaseService.transformAll(key);
+        }
+
+        @Override
         public java.util.Map<String, java.util.Map<String, Object>> getAllRecords() {
             // Database services don't preload all records
             return java.util.Collections.emptyMap();
@@ -961,6 +972,12 @@ public class DatasetLookupServiceFactory {
             System.out.println("DEBUG: RestApiDatasetLookupService.transform returning: " + result);
             System.out.println("DEBUG: RestApiDatasetLookupService.transform result type: " + (result != null ? result.getClass().getName() : "null"));
             return result;
+        }
+
+        @Override
+        public java.util.List<java.util.Map<String, Object>> transformAll(Object key) {
+            // Delegate multi-row lookup to the REST API service
+            return restApiService.transformAll(key);
         }
 
         @Override

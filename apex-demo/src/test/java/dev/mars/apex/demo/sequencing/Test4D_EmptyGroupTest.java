@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,13 +86,13 @@ public class Test4D_EmptyGroupTest extends DemoTestBase {
         assertEquals("standalone-1", executionLog.get(0), "Position 0 MUST be standalone-1");
         assertEquals("grouped-1", executionLog.get(1), "Position 1 MUST be grouped-1 (from group-A)");
 
-        LOGGER.info("✓ TEST 4D PASSED: All 5 definitive assertion types verified");
-        LOGGER.info("  ✓ Exact count: 2 items");
-        LOGGER.info("  ✓ Exact order: standalone-1, grouped-1");
-        LOGGER.info("  ✓ What executed: standalone-1 and grouped-1");
-        LOGGER.info("  ✓ No double execution: Each item executes exactly once");
-        LOGGER.info("  ✓ Position verification: All items at correct positions");
-        LOGGER.info("  ✓ Edge case: Empty group handled gracefully");
+        LOGGER.info("[OK] TEST 4D PASSED: All 5 definitive assertion types verified");
+        LOGGER.info("  [OK] Exact count: 2 items");
+        LOGGER.info("  [OK] Exact order: standalone-1, grouped-1");
+        LOGGER.info("  [OK] What executed: standalone-1 and grouped-1");
+        LOGGER.info("  [OK] No double execution: Each item executes exactly once");
+        LOGGER.info("  [OK] Position verification: All items at correct positions");
+        LOGGER.info("  [OK] Edge case: Empty group handled gracefully");
     }
 }
 

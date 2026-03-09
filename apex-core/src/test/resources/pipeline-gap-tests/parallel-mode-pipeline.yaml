@@ -1,0 +1,50 @@
+# ============================================================================
+# Parallel Mode Pipeline Test
+# ============================================================================
+# Tests that parallel mode flag is handled (currently falls back to sequential).
+# This exercises the executeStepsInParallel() method in PipelineExecutor.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "parallel-mode-test"
+  name: "Parallel Mode Pipeline Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests parallel execution mode flag"
+
+data-sources:
+  - name: "parallel-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:parallel_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, data FROM parallel_records"
+
+pipeline:
+  name: "parallel-mode-pipeline"
+  description: "Pipeline with parallel execution mode"
+
+  # Enable parallel mode (will fall back to sequential)
+  execution:
+    mode: "parallel"
+
+  steps:
+    - name: "extract-parallel-1"
+      type: "extract"
+      source: "parallel-source"
+      operation: "getAllRecords"
+      description: "First parallel extract"
+
+    - name: "extract-parallel-2"
+      type: "extract"
+      source: "parallel-source"
+      operation: "getAllRecords"
+      description: "Second parallel extract"

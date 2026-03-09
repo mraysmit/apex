@@ -45,7 +45,7 @@ import java.util.concurrent.*;
  * - Health monitoring and metrics
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-08-10
  * @version 1.0
  */
 public class MessageQueueDataSource implements ExternalDataSource {
@@ -167,7 +167,8 @@ public class MessageQueueDataSource implements ExternalDataSource {
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from message queue", e);
+            LOGGER.error("Failed to get data from message queue: {}", e.getMessage());
+            LOGGER.debug("Stack trace for message queue data retrieval failure:", e);
             return null;
         }
     }

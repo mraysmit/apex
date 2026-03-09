@@ -18,12 +18,12 @@ package dev.mars.apex.rest.controller;
 
 
 import dev.mars.apex.core.service.transform.GenericTransformerService;
-import dev.mars.apex.core.engine.model.TransformerRule;
+import dev.mars.apex.engine.model.TransformerRule;
 import dev.mars.apex.core.service.transform.FieldTransformerAction;
 import dev.mars.apex.core.service.transform.FieldTransformerActionBuilder;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.config.RuleBuilder;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.core.RuleBuilder;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.rest.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -88,7 +88,8 @@ public class TransformationController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error retrieving transformers: {}", e.getMessage(), e);
+            logger.error("Error retrieving transformers: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Transformer retrieval failed");
@@ -159,7 +160,8 @@ public class TransformationController {
                     .withAdditionalInfo("transformerName", transformerName));
 
         } catch (Exception e) {
-            logger.error("Error during transformation: {}", e.getMessage(), e);
+            logger.error("Error during transformation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.<Map<String, Object>>error("Transformation failed", e.getMessage())
                     .withAdditionalInfo("transformerName", transformerName));
@@ -198,7 +200,7 @@ public class TransformationController {
                 "message", result.getMessage(),
                 "result", result.getMessage(),
                 "executionTime", result.hasPerformanceMetrics() ? result.getPerformanceMetrics().getEvaluationTimeMillis() : 0,
-                "error", result.getResultType() == RuleResult.ResultType.ERROR ? result.getMessage() : null
+                "error", result.isError() ? result.getMessage() : null
             ));
             response.put("timestamp", Instant.now());
 
@@ -206,7 +208,8 @@ public class TransformationController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during detailed transformation: {}", e.getMessage(), e);
+            logger.error("Error during detailed transformation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Detailed transformation failed");
@@ -283,7 +286,8 @@ public class TransformationController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during dynamic transformation: {}", e.getMessage(), e);
+            logger.error("Error during dynamic transformation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Dynamic transformation failed");

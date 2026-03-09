@@ -37,7 +37,7 @@ import java.util.Map;
  * including CSV, JSON, XML, and plain text.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public class FileSystemDataSink implements DataSink {
@@ -169,7 +169,8 @@ public class FileSystemDataSink implements DataSink {
             LOGGER.info("File system sink shutdown completed: {}", getName());
             
         } catch (Exception e) {
-            LOGGER.error("Error during file system sink shutdown", e);
+            LOGGER.error("Error during file system sink shutdown: {}", e.getMessage());
+            LOGGER.debug("Stack trace for file system sink shutdown error:", e);
         }
     }
     
@@ -481,7 +482,8 @@ public class FileSystemDataSink implements DataSink {
             lastFlushTime = System.currentTimeMillis();
 
         } catch (Exception e) {
-            LOGGER.error("Failed to flush buffer to file: {}", e.getMessage(), e);
+            LOGGER.error("Failed to flush buffer to file: {}", e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new IOException("Failed to write data to file: " + e.getMessage(), e);
         }
     }

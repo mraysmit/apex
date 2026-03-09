@@ -28,6 +28,7 @@ enrichments:
       lookup-dataset:
         type: "database"
         data-source-ref: "database"
+        key-field: "key"
         query: |
           SELECT product_name, environment
           FROM products

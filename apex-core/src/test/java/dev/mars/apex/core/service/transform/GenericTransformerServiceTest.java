@@ -17,15 +17,25 @@ package dev.mars.apex.core.service.transform;
  */
 
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.TransformerRule;
+import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RuleBuilder;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.core.RuleBuilder;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.TransformerRule;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,11 +54,29 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class GenericTransformerServiceTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(GenericTransformerServiceTest.class);
     private LookupServiceRegistry registry;
     private RulesEngine rulesEngine;
     private GenericTransformerService transformerService;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(GenericTransformerServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] GenericTransformerServiceTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(GenericTransformerServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: transformation errors, rule-based transform failures, type mismatches");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(GenericTransformerServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] GenericTransformerServiceTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {
@@ -184,12 +212,14 @@ class GenericTransformerServiceTest {
     @Test
     @DisplayName("Should return original value for non-existent transformer")
     void testTransformWithNonExistentTransformer() {
+        System.out.println("========== START OF INTENTIONAL ERROR TEST ==========");
         System.out.println("TEST: Triggering intentional error - testing transformation with non-existent transformer");
         
         String original = "test";
         String result = transformerService.transform("nonExistent", original);
         
         assertEquals(original, result, "Non-existent transformer should return original value");
+        System.out.println("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 
     @Test
@@ -300,7 +330,7 @@ class GenericTransformerServiceTest {
         List<TransformerRule<String>> rules = new ArrayList<>();
 
         // Create a simple rule
-        Rule rule = new Rule("testRule", "true", "Test transformation rule");
+        Rule rule = new RuleBuilder().withName("testRule").withCondition("true").withMessage("Test transformation rule").withSeverity(SeverityConstants.INFO).build();
 
         // Create field transformer actions
         List<FieldTransformerAction<String>> positiveActions = new ArrayList<>();
@@ -325,7 +355,7 @@ class GenericTransformerServiceTest {
         List<TransformerRule<TestComplexObject>> rules = new ArrayList<>();
 
         // Create a simple rule
-        Rule rule = new Rule("complexRule", "true", "Test complex object transformation rule");
+        Rule rule = new RuleBuilder().withName("complexRule").withCondition("true").withMessage("Test complex object transformation rule").withSeverity(SeverityConstants.INFO).build();
 
         // Create field transformer actions
         List<FieldTransformerAction<TestComplexObject>> positiveActions = new ArrayList<>();

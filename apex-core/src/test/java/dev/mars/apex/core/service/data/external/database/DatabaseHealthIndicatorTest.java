@@ -22,8 +22,13 @@ import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.datasource.HealthCheckConfig;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -51,11 +56,29 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class DatabaseHealthIndicatorTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseHealthIndicatorTest.class);
     private DataSource dataSource;
     private DatabaseHealthIndicator healthIndicator;
     private DataSourceConfiguration configuration;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(DatabaseHealthIndicatorTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] DatabaseHealthIndicatorTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(DatabaseHealthIndicatorTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: health check failures, connection errors, timeout scenarios");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(DatabaseHealthIndicatorTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] DatabaseHealthIndicatorTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() throws DataSourceException, SQLException {
@@ -114,6 +137,7 @@ class DatabaseHealthIndicatorTest {
     @Test
     @DisplayName("Should handle health check failure with invalid query")
     void testHealthCheckFailureInvalidQuery() throws DataSourceException {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         // Create fresh configuration with invalid query
         DataSourceConfiguration failConfig = createTestConfiguration();
         failConfig.getHealthCheck().setEnabled(true);
@@ -123,6 +147,7 @@ class DatabaseHealthIndicatorTest {
         DatabaseHealthIndicator failHealthIndicator = new DatabaseHealthIndicator(failDataSource, failConfig);
 
         boolean healthy = failHealthIndicator.performHealthCheck();
+        logger.info("========== END OF INTENTIONAL ERROR TEST ===========");
 
         assertFalse(healthy);
 
@@ -154,6 +179,7 @@ class DatabaseHealthIndicatorTest {
     @Test
     @DisplayName("Should track consecutive failures")
     void testConsecutiveFailures() throws DataSourceException {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         // Create fresh configuration with invalid query
         DataSourceConfiguration failConfig = createTestConfiguration();
         failConfig.getHealthCheck().setEnabled(true);
@@ -166,6 +192,7 @@ class DatabaseHealthIndicatorTest {
         failHealthIndicator.performHealthCheck();
         failHealthIndicator.performHealthCheck();
         failHealthIndicator.performHealthCheck();
+        logger.info("========== END OF INTENTIONAL ERROR TEST ===========");
 
         DatabaseHealthIndicator.HealthStatus status = failHealthIndicator.getHealthStatus();
         // The health indicator performs an initial check when created, so we expect 4 failures (1 initial + 3 manual)
@@ -242,14 +269,9 @@ class DatabaseHealthIndicatorTest {
         DataSource failDataSource = JdbcTemplateFactory.createDataSource(failConfig);
         DatabaseHealthIndicator failHealthIndicator = new DatabaseHealthIndicator(failDataSource, failConfig);
 
-        // Wait a moment for the initial background check to complete
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        // Perform manual health checks to reach the failure threshold
+        // Perform manual health checks to deterministically reach the failure threshold
+        // (don't rely on background check timing - that causes flaky tests)
+        failHealthIndicator.performHealthCheck();
         failHealthIndicator.performHealthCheck();
 
         // Check status after reaching threshold

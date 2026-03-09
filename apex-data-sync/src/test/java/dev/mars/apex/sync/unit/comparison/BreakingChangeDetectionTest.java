@@ -19,9 +19,9 @@
 package dev.mars.apex.sync.unit.comparison;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.ExecutionStep;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.ExecutionStep;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -121,7 +121,7 @@ public class BreakingChangeDetectionTest extends SyncTestBase {
             .anyMatch(col -> "AGE".equalsIgnoreCase(col.getName()));
         assertFalse(hasAge, "AGE column should be removed (breaking change)");
 
-        logger.info("✓ Breaking changes detected: 2 columns removed");
+        logger.info("[OK] Breaking changes detected: 2 columns removed");
         validateExecutionRate(2, 2, "Breaking change detection");
     }
 
@@ -141,7 +141,7 @@ public class BreakingChangeDetectionTest extends SyncTestBase {
         int columnsRemoved = originalSchema.getColumns().size() - evolvedSchema.getColumns().size();
         assertEquals(2, columnsRemoved);
         
-        logger.info("✓ Quantified: {} columns removed", columnsRemoved);
+        logger.info("[OK] Quantified: {} columns removed", columnsRemoved);
         validateExecutionRate(2, 2, "Column removal quantification");
     }
 }

@@ -17,8 +17,8 @@ package dev.mars.apex.yaml.manager;
  */
 
 import dev.mars.apex.yaml.manager.model.TreeNode;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
-import dev.mars.apex.yaml.manager.service.YamlContentAnalyzer;
+import dev.mars.apex.yaml.manager.model.ContentSummary;
+import dev.mars.apex.yaml.manager.service.ContentAnalyzer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -34,7 +34,7 @@ class NestedDependencyTreeConsoleTest {
     @Test
     @DisplayName("Should display nested dependency tree with content summaries in console")
     void testNestedDependencyTreeConsoleOutput() {
-        YamlContentAnalyzer analyzer = new YamlContentAnalyzer();
+        ContentAnalyzer analyzer = new ContentAnalyzer();
 
         System.out.println("\n" + "=".repeat(100));
         System.out.println("NESTED DEPENDENCY TREE - NAVIGATING SUBDIRECTORIES WITH CONTENT SUMMARIES");
@@ -69,33 +69,33 @@ class NestedDependencyTreeConsoleTest {
 
         System.out.println("Analyzing: root-scenario.yaml");
         root.setContentSummary(analyzer.analyzYamlContent(root.getName()));
-        System.out.println("  ✓ Found: scenario with 3 references");
+        System.out.println("  [OK] Found: scenario with 3 references");
 
         System.out.println("Analyzing: trading/validation/trade-validation-rules.yaml");
         validation.setContentSummary(analyzer.analyzYamlContent(validation.getName()));
-        System.out.println("  ✓ Found: " + validation.getContentSummary().getRuleGroupCount() + " rule groups, " + 
+        System.out.println("  [OK] Found: " + validation.getContentSummary().getRuleGroupCount() + " rule groups, " + 
                           validation.getContentSummary().getRuleCount() + " rules");
 
         System.out.println("Analyzing: trading/enrichment/trade-enrichment-rules.yaml");
         enrichment.setContentSummary(analyzer.analyzYamlContent(enrichment.getName()));
-        System.out.println("  ✓ Found: " + enrichment.getContentSummary().getEnrichmentCount() + " enrichments");
+        System.out.println("  [OK] Found: " + enrichment.getContentSummary().getEnrichmentCount() + " enrichments");
 
         System.out.println("Analyzing: compliance/compliance-rules.yaml");
         compliance.setContentSummary(analyzer.analyzYamlContent(compliance.getName()));
-        System.out.println("  ✓ Found: " + compliance.getContentSummary().getRuleGroupCount() + " rule groups, " + 
+        System.out.println("  [OK] Found: " + compliance.getContentSummary().getRuleGroupCount() + " rule groups, " + 
                           compliance.getContentSummary().getRuleCount() + " rules");
 
         System.out.println("Analyzing: shared/trade-config.yaml");
         tradeConfig.setContentSummary(analyzer.analyzYamlContent(tradeConfig.getName()));
-        System.out.println("  ✓ Found: config file");
+        System.out.println("  [OK] Found: config file");
 
         System.out.println("Analyzing: shared/enrichment-config.yaml");
         enrichmentConfig.setContentSummary(analyzer.analyzYamlContent(enrichmentConfig.getName()));
-        System.out.println("  ✓ Found: config file");
+        System.out.println("  [OK] Found: config file");
 
         System.out.println("Analyzing: shared/compliance-config.yaml");
         complianceConfig.setContentSummary(analyzer.analyzYamlContent(complianceConfig.getName()));
-        System.out.println("  ✓ Found: config file");
+        System.out.println("  [OK] Found: config file");
 
         // Build tree
         root.addChild(validation);
@@ -170,7 +170,7 @@ class NestedDependencyTreeConsoleTest {
         }
     }
 
-    private static void printContentSummary(YamlContentSummary summary, String prefix, boolean isLast) {
+    private static void printContentSummary(ContentSummary summary, String prefix, boolean isLast) {
         String summaryPrefix = prefix + (isLast ? "    " : "│   ");
         
         StringBuilder sb = new StringBuilder();
@@ -223,7 +223,7 @@ class NestedDependencyTreeConsoleTest {
         }
     }
 
-    private static void printDetailedSummary(String name, YamlContentSummary summary) {
+    private static void printDetailedSummary(String name, ContentSummary summary) {
         System.out.println("\n" + name + ":");
         System.out.println("  File Type: " + summary.getFileType());
         System.out.println("  ID: " + summary.getId());

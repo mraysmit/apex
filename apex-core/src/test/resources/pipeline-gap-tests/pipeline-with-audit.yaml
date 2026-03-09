@@ -1,0 +1,56 @@
+# ============================================================================
+# Pipeline with Audit Step Test
+# ============================================================================
+# Tests audit step execution.
+# Exercises executeAuditStep() method.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "pipeline-audit-test"
+  name: "Pipeline Audit Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests pipeline with audit step"
+
+data-sources:
+  - name: "audit-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:parallel_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, data FROM parallel_records"
+
+data-sinks:
+  - name: "audit-sink"
+    type: "file-system"
+    source-type: "json"
+    enabled: true
+    connection:
+      base-path: "target/test-audit"
+
+pipeline:
+  name: "pipeline-with-audit"
+  description: "Pipeline with audit step"
+
+  steps:
+    - name: "extract-for-audit"
+      type: "extract"
+      source: "audit-source"
+      operation: "getAllRecords"
+      description: "Extract records"
+
+    - name: "audit-records"
+      type: "audit"
+      description: "Audit the extracted records"
+      depends-on: ["extract-for-audit"]
+      sink: "audit-sink"
+      operation: "writeAudit"
+      optional: true

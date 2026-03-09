@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -17,9 +19,16 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Nested;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +125,7 @@ class ScenarioConcurrentAccessTest {
                 assertEquals(expectedTotal, totalSuccess,
                     "All concurrent executions should succeed");
                 
-                logger.info("✓ Multi-threaded execution passed: {} threads, {} executions each, {} total success",
+                logger.info("[OK] Multi-threaded execution passed: {} threads, {} executions each, {} total success",
                     threadCount, executionsPerThread, totalSuccess);
                 
             } catch (Exception e) {
@@ -171,7 +180,7 @@ class ScenarioConcurrentAccessTest {
                     }
                 }
                 
-                logger.info("✓ Race condition prevention verified: {} concurrent executions",
+                logger.info("[OK] Race condition prevention verified: {} concurrent executions",
                     concurrentExecutions);
                 
             } catch (Exception e) {
@@ -227,7 +236,7 @@ class ScenarioConcurrentAccessTest {
                         "Thread " + i + " execution should succeed");
                 }
                 
-                logger.info("✓ Result isolation verified: {} threads with isolated results",
+                logger.info("[OK] Result isolation verified: {} threads with isolated results",
                     threadCount);
                 
             } catch (Exception e) {
@@ -303,7 +312,7 @@ class ScenarioConcurrentAccessTest {
                 assertEquals(expectedTotal, successCount.get(),
                     "All concurrent cache accesses should succeed");
                 
-                logger.info("✓ Concurrent cache access verified: {} threads, {} executions each",
+                logger.info("[OK] Concurrent cache access verified: {} threads, {} executions each",
                     threadCount, executionsPerThread);
                 
             } catch (Exception e) {

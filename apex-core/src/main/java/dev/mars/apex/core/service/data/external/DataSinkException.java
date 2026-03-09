@@ -23,7 +23,7 @@ package dev.mars.apex.core.service.data.external;
  * context information, and support for error recovery scenarios.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public class DataSinkException extends Exception {

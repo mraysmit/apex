@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -81,7 +81,7 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         // Verify the validation result - now using the mapped field name
         assertEquals("VALID", enrichedData.get("status"), "Valid amount should pass");
         
-        logger.info("✓ Valid data processed successfully");
+        logger.info("[OK] Valid data processed successfully");
         logger.info("Valid data test completed");
     }
 
@@ -112,7 +112,7 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         Map<String, Object> enrichedData = (Map<String, Object>) result;
         assertEquals("INVALID", enrichedData.get("status"), "Invalid amount should fail");
         
-        logger.info("✓ Invalid data handled gracefully");
+        logger.info("[OK] Invalid data handled gracefully");
         logger.info("Invalid data test completed");
     }
 
@@ -143,7 +143,7 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         Map<String, Object> enrichedData = (Map<String, Object>) result;
         assertEquals("INVALID", enrichedData.get("status"), "Null amount should fail");
         
-        logger.info("✓ Null data handled gracefully");
+        logger.info("[OK] Null data handled gracefully");
         logger.info("Null data test completed");
     }
 }

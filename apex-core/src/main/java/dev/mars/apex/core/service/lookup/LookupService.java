@@ -30,7 +30,7 @@ import java.util.function.Function;
  * @since 2025-07-27
  * @version 1.0
  */
-public class LookupService implements IDataLookup {
+public class LookupService implements DataLookup {
     private List<String> lookupValues;
     private String name;
     private Map<String, Object> enrichmentData;
@@ -65,6 +65,34 @@ public class LookupService implements IDataLookup {
         }
         // Then apply transformation function
         return transformationFunction.apply(enrichedValue);
+    }
+
+    /**
+     * Perform lookup and return ALL matching rows as a List.
+     * Default implementation wraps the single transform() result in a list.
+     * Subclasses override to provide real multi-row behavior.
+     *
+     * @param key The lookup key
+     * @return List of matching records, or empty list if no matches
+     */
+    public List<Map<String, Object>> transformAll(Object key) {
+        Object single = transform(key);
+        if (single == null) {
+            return new java.util.ArrayList<>();
+        }
+        if (single instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> record = (Map<String, Object>) single;
+            List<Map<String, Object>> result = new java.util.ArrayList<>();
+            result.add(record);
+            return result;
+        }
+        // Wrap non-map result
+        Map<String, Object> wrapper = new HashMap<>();
+        wrapper.put("value", single);
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        result.add(wrapper);
+        return result;
     }
 
     @Override

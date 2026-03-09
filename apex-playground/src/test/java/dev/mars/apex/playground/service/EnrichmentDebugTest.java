@@ -17,7 +17,7 @@ package dev.mars.apex.playground.service;
  */
 
 
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -54,7 +54,7 @@ class EnrichmentDebugTest {
         // Create evaluation context like the enrichment processor does
         StandardEvaluationContext context = new StandardEvaluationContext(data);
 
-        // Add map entries as variables (like YamlEnrichmentProcessor does)
+        // Add map entries as variables (like EnrichmentProcessor does)
         for (Map.Entry<String, Object> entry : data.entrySet()) {
             context.setVariable(entry.getKey(), entry.getValue());
         }

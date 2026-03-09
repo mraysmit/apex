@@ -1,9 +1,20 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.RuleFactory;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
-import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleGroup;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.List;
 
@@ -16,13 +27,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Rule Group Category Inheritance Integration Tests")
 class RuleGroupCategoryInheritanceIntegrationTest {
 
-    private YamlConfigurationLoader loader;
-    private YamlRuleFactory factory;
+    private ConfigurationLoader loader;
+    private RuleFactory factory;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
-        factory = new YamlRuleFactory();
+        loader = new ConfigurationLoader();
+        factory = new RuleFactory();
     }
 
     @Test

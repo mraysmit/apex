@@ -1,12 +1,67 @@
-![APEX System Logo](APEX%20System%20logo.png)
+<img src="APEX%20System%20logo.png" alt="APEX System Logo" width="200">
 
 # APEX - Complete User Guide
 
-**Version:** 1.0
-**Date:** 2025-08-23
+**Version:** 2.4  
+**Date:** 2026-03-05  
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-## Overview
+---
+
+## Contents
+
+#### Getting Started
+- [1. Overview](#1-overview)
+- [2. Quick Start](#2-quick-start)
+- [3. YAML Configuration Reference](#3-yaml-configuration-reference)
+
+#### Core YAML Features
+- [4. Understanding Rule Conditions](#4-understanding-rule-conditions)
+- [5. Enrichment Patterns and Expressions](#5-enrichment-patterns-and-expressions)
+- [6. Advanced YAML Patterns](#6-advanced-yaml-patterns)
+- [7. Choosing Your Approach](#7-choosing-your-approach)
+
+#### Processing and Scenarios
+- [8. Scenario-Based Processing](#8-scenario-based-processing)
+- [9. Core Concepts](#9-core-concepts)
+- [10. Using Parameters in APEX Rules](#10-using-parameters-in-apex-rules)
+
+#### Configuration Reference
+- [11. Advanced Architecture Features](#11-advanced-architecture-features)
+
+#### Data and Lookups
+- [12. Dataset Enrichment](#12-dataset-enrichment)
+- [13. Lookup Configuration](#13-lookup-configuration)
+- [14. Scenario Configuration Management](#14-scenario-configuration-management)
+
+#### External Integration
+- [15. External Data Source Integration](#15-external-data-source-integration)
+- [16. Data Management Overview](#16-data-management-overview)
+
+#### Programmatic API
+- [17. Rule Groups](#17-rule-groups)
+- [18. Data Service Configuration](#18-data-service-configuration)
+- [19. Migration from External Services](#19-migration-from-external-services)
+
+#### Best Practices and Patterns
+- [20. Best Practices](#20-best-practices)
+- [21. Advanced Rule Patterns](#21-advanced-rule-patterns)
+- [22. Configuration Standards and Validation](#22-configuration-standards-and-validation)
+
+#### Scenario Implementation (Java)
+- [23. Scenario-Based Processing Implementation Patterns](#23-scenario-based-processing-implementation-patterns)
+- [24. Scenario-Based Processing Best Practices](#24-scenario-based-processing-best-practices)
+- [25. Getting Help](#25-getting-help)
+- [26. Scenario-Based Processing Integration Examples](#26-scenario-based-processing-integration-examples)
+- [27. Monitoring and Observability](#27-monitoring-and-observability)
+
+#### Appendices
+- [Appendix A: APEX Comprehensive Demos Guide](#appendix-a-apex-comprehensive-demos-guide)
+- [Appendix B: System Architecture](#appendix-b-system-architecture)
+
+---
+
+## 1. Overview
 
 APEX (Advanced Processing Engine for eXpressions) is a comprehensive rule evaluation system built on expression evaluation technologies with enterprise-grade external data source integration and scenario-based configuration management. It provides a progressive API design that scales from simple rule evaluation to complex business rule management systems with integrated data access capabilities.
 
@@ -30,693 +85,648 @@ APEX's scenario-based processing system provides a sophisticated architecture fo
 - **Type-Safe Routing**: Automatic data type detection with flexible mapping and fallback handling
 - **Centralized Registry**: Single point of discovery for all available scenarios with metadata management
 
-```mermaid
-graph TB
-    subgraph "Input Layer"
-        A[Business Data]
-        B[YAML Configuration]
-        C[Rule Definitions]
-    end
+### How APEX Works
 
-    subgraph "Rules Engine Core"
-        D[Expression Evaluator]
-        E[Rule Engine Service]
-        F[Rule Chain Executor]
-        G[Context Manager]
-    end
-
-    subgraph "Pattern Executors"
-        H[Conditional Chaining]
-        I[Sequential Dependency]
-        J[Result-Based Routing]
-        K[Accumulative Chaining]
-        L[Complex Workflow]
-        M[Fluent Builder]
-    end
-
-    subgraph "External Data Sources"
-        N[Database Sources]
-        O[REST API Sources]
-        P[File System Sources]
-        Q[Cache Sources]
-    end
-
-    subgraph "Data Enrichment"
-        R[YAML Datasets]
-        S[Lookup Service]
-        T[Transformation Engine]
-    end
-
-    subgraph "Pipeline Orchestration"
-        U[Pipeline Executor]
-        V[Data Sinks]
-        W[Step Dependencies]
-        X[Error Handling]
-    end
-
-    subgraph "Output Layer"
-        Y[Rule Results]
-        Z[Execution Metrics]
-        AA[Audit Trail]
-        BB[Performance Data]
-    end
-
-    A --> D
-    B --> E
-    C --> E
-
-    D --> E
-    E --> F
-    F --> G
-
-    F --> H
-    F --> I
-    F --> J
-    F --> K
-    F --> L
-    F --> M
-
-    E --> N
-    N --> O
-    O --> P
-    P --> Q
-
-    H --> R
-    I --> R
-    J --> R
-    K --> R
-    L --> R
-    M --> R
-
-    U --> Y
-    V --> Z
-    W --> AA
-    X --> BB
-
-    G --> R
-    G --> S
-    G --> T
-
-    style A fill:#e1f5fe
-    style B fill:#e1f5fe
-    style C fill:#e1f5fe
-    style D fill:#fff3e0
-    style E fill:#fff3e0
-    style F fill:#fff3e0
-    style G fill:#fff3e0
-    style R fill:#e8f5e8
-    style S fill:#e8f5e8
-    style T fill:#e8f5e8
-    style Y fill:#f3e5f5
-    style Z fill:#f3e5f5
-    style AA fill:#f3e5f5
-    style BB fill:#f3e5f5
-```
-
-## Scenario-Based Processing Architecture
-
-APEX's scenario-based processing uses a sophisticated three-layer architecture that separates concerns and provides maximum flexibility for enterprise-scale rule management.
-
-### Three-Layer Architecture
+**Simple Flow** — You provide YAML config and data, APEX evaluates rules and returns results:
 
 ```mermaid
-graph TD
-    subgraph "Layer 1: Discovery"
-        Registry["Scenario Registry<br/>config/data-type-scenarios.yaml<br/>• Central catalog<br/>• Metadata management<br/>• Discovery API"]
-    end
-
-    subgraph "Layer 2: Routing"
-        ScenarioFiles["Scenario Files<br/>scenarios/*.yaml<br/>• Data type mappings<br/>• Rule file references<br/>• Lightweight routing"]
-    end
-
-    subgraph "Layer 3: Configuration"
-        ConfigFiles["Configuration Files<br/>config/*.yaml<br/>• Reusable rule sets<br/>• Business logic<br/>• Validation chains"]
-        BootstrapFiles["Bootstrap Files<br/>bootstrap/*.yaml<br/>• Complete demos<br/>• Self-contained scenarios"]
-    end
-
-    Registry -->|"loads & validates"| ScenarioFiles
-    ScenarioFiles -->|"references"| ConfigFiles
-    ScenarioFiles -->|"references"| BootstrapFiles
+graph LR
+    A["📄 YAML Config<br/>(rules + enrichments)"] --> C["🔧 RulesEngine"]
+    B["📊 Your Data<br/>(Map or Object)"] --> C
+    C --> D["✅ RuleResult<br/>• Pass/Fail status<br/>• Enriched data<br/>• Messages"]
 ```
 
-### Architecture Benefits
+**Scenario Flow** — Your data flows through a Scenario Registry, which uses classification rules (e.g. `trade-type = "OTC"`) to select the right configuration automatically:
 
-#### Centralized Management
-- **Single Registry**: One place to discover all available scenarios
-- **Metadata Management**: Rich metadata for governance and compliance
-- **Version Control**: Complete change tracking and rollback capabilities
-- **Discovery API**: Programmatic access to scenario information
-
-#### Type-Safe Routing
-- **Automatic Detection**: Intelligent data type detection based on object structure
-- **Flexible Mapping**: Support for multiple scenarios per data type
-- **Fallback Handling**: Graceful degradation for unknown data types
-- **Performance Optimization**: Efficient routing with minimal overhead
-
-#### Lightweight Configuration
-- **Separation of Concerns**: Routing logic separate from business logic
-- **Reusable Components**: Rule configurations can be shared across scenarios
-- **Easy Maintenance**: Simple scenario files that are easy to understand and modify
-- **Scalable Architecture**: Supports large numbers of scenarios and data types
-
-### Core Capabilities
-
-**Rule Evaluation**
-- **Three-Layer API Design**: Simple one-liner evaluation → Structured rule sets → Advanced rule chains
-- **SpEL Expression Support**: Full Spring Expression Language capabilities with custom functions
-- **Multiple Data Types**: Support for primitives, objects, collections, and complex nested structures
-- **Context Management**: Rich evaluation context with variable propagation and result tracking
-
-**Configuration Management**
-- **YAML Configuration**: External rule and dataset management with hot-reloading support
-- **Rule Groups**: Organize related rules with execution control and priority management
-- **Rule Chains**: Advanced patterns for nested rules and complex business logic workflows
-- **Data Service Configuration**: Programmatic setup of data sources for rule evaluation
-- **Metadata Support**: Enterprise metadata including business ownership, effective dates, and custom properties
-
-**Data Enrichment**
-- **YAML Dataset Enrichment**: Embed lookup datasets directly in configuration files
-- **Multiple Enrichment Types**: Lookup enrichment, transformation enrichment, and custom processors
-- **Caching Support**: High-performance in-memory caching with configurable strategies
-- **External Integration**: Support for database lookups, REST API calls, and custom data sources
-
-**Enterprise Features**
-- **Performance Monitoring**: Execution time tracking, rule performance analytics, and bottleneck identification
-- **Error Handling**: Comprehensive error management with detailed logging and graceful degradation
-- **Audit Trail**: Complete execution history with rule results and context tracking
-- **Security**: Input validation, expression sandboxing, and access control integration
-
-**Financial Services Support**
-- **OTC Derivatives Validation**: Specialized rules for financial instrument validation
-- **Regulatory Compliance**: Support for MiFID II, EMIR, and Dodd-Frank requirements
-- **Risk Assessment**: Multi-criteria risk scoring with weighted components
-- **Trade Processing**: Complex workflow patterns for trade lifecycle management
-- **Bootstrap Demos**: Complete end-to-end financial scenarios with database setup and infrastructure
-- **Asian Markets Support**: Specialized patterns for Asian regulatory regimes and market conventions
-
-**Advanced Rule Patterns**
-- **Conditional Chaining**: Execute expensive rules only when conditions are met
-- **Sequential Dependency**: Build processing pipelines where each stage uses previous results
-- **Result-Based Routing**: Route to different rule sets based on intermediate results
-- **Accumulative Chaining**: Build up scores across multiple criteria with weighted components
-- **Complex Financial Workflow**: Multi-stage processing with dependencies and conditional execution
-- **Fluent Rule Builder**: Complex decision trees with conditional branching logic
-
-### Architecture Benefits
-
-**Developer Experience**
-- **Progressive Complexity**: Start simple and add complexity as needed
-- **Type Safety**: Strong typing support with compile-time validation
-- **Testing Support**: Comprehensive testing utilities and mock frameworks
-
-**Operations**
-- **Hot Configuration Reload**: Update rules without application restart
-- **Performance Monitoring**: Built-in metrics and monitoring capabilities
-- **Scalability**: Designed for high-throughput, low-latency environments
-
-**Business User Friendly**
-- **YAML Configuration**: Human-readable configuration format
-- **Business Metadata**: Rich metadata support for business context
-- **Version Control**: Configuration stored in Git with full change history
-- **Documentation**: Self-documenting rules with descriptions and examples
-
-## Quick Start (5 Minutes)
-
-Welcome to APEX! This section will get you up and running quickly with three progressively more powerful approaches. Don't worry if some concepts seem unfamiliar at first - we'll explain everything step by step.
-
-### Understanding the Basics
-
-Before we dive in, let's understand what APEX does: it evaluates business rules against your data. Think of it as asking questions like "Is this customer old enough?" or "Does this transaction meet our requirements?" APEX uses expressions (written in Spring Expression Language or SpEL) to define these questions.
-
-The `#` symbol in expressions refers to data you provide. For example, `#age >= 18` means "check if the age value is 18 or greater."
-
-### 1. One-Liner Rule Evaluation (Simplest Approach)
-
-This is the easiest way to get started. You can evaluate a single rule with just one line of code:
-
-```java
-import dev.mars.apex.core.api.Rules;
-
-// Check if someone is an adult (age 18 or older)
-boolean isAdult = Rules.check("#age >= 18", Map.of("age", 25)); // returns true
-
-// Check if account has sufficient balance
-boolean hasBalance = Rules.check("#balance > 1000", Map.of("balance", 500)); // returns false
-
-// Working with objects instead of simple values
-Customer customer = new Customer("John", 25, "john@example.com");
-boolean valid = Rules.check("#age >= 18 && #email != null", customer); // returns true
+```mermaid
+graph LR
+    B["📊 Your Data"] --> E["📋 Scenario Registry"]
+    E --> F["🔀 Classification Rules<br/>(e.g. trade-type = OTC)"]
+    F --> G["📄 Scenario selects Your Rules"]
+    G --> C["🔧 RulesEngine"]
+    C --> D["✅ RuleResult<br/>• Pass/Fail status<br/>• Enriched data<br/>• Messages"]
 ```
 
-**What's happening here:**
-- `Rules.check()` is a static method that evaluates one rule
-- The first parameter is your rule expression (the question you're asking)
-- The second parameter is your data (either a Map or an object)
-- It returns true/false based on whether the rule passes
+For detailed system architecture including all internal components, see [Appendix B: System Architecture](#appendix-b-system-architecture).
 
-### 2. Template-Based Rules (Structured Approach)
+---
 
-When you need multiple related rules, templates provide a cleaner approach:
+## 2. Quick Start
 
-```java
-import dev.mars.apex.core.api.RuleSet;
+This section walks you through APEX step by step, starting with the absolute basics and building up gradually. By the end, you'll understand how to write business rules and enrich data using YAML configuration.
 
-// Create a set of validation rules using pre-built templates
-RulesEngine validation = RuleSet.validation()
-    .ageCheck(18)           // Must be 18 or older
-    .emailRequired()        // Must have an email address
-    .balanceMinimum(1000)   // Must have at least $1000 balance
-    .build();
+### What Does APEX Do?
 
-// Validate your customer data against all rules at once
-ValidationResult result = validation.validate(customer);
+At its simplest, APEX answers questions about your data. You write questions like:
+- "Is this customer old enough?"
+- "Does this transaction exceed our limit?"
+- "Is this email address valid?"
 
-// Check the results
-if (result.isValid()) {
-    System.out.println("Customer passed all validations!");
-} else {
-    System.out.println("Validation failed: " + result.getFailureMessages());
-}
-```
+You write these questions in YAML files. APEX reads the questions, checks them against your data, and tells you which ones passed and which failed.
 
-**What's happening here:**
-- `RuleSet.validation()` creates a builder for common validation scenarios
-- Each method (like `ageCheck()`) adds a pre-configured rule
-- `build()` creates the final rules engine
-- `validate()` runs all rules and gives you a comprehensive result
+### Step 1: Your Very First Rule
 
-### 3. YAML Configuration (Most Flexible Approach)
-
-For complex scenarios or when non-developers need to modify rules, YAML configuration is ideal. This approach separates your business logic from your code and provides the most flexibility.
-
-YAML configuration introduces two powerful concepts that work together:
-- **Rules**: Define your business logic and validation requirements
-- **Enrichments**: Automatically add related data during rule evaluation
-
-Let's explore each concept separately, then see how they work together.
-
-#### 3.1 Rules: Defining Your Business Logic
-
-Rules are the heart of APEX - they define the questions you want to ask about your data. Each rule is like a business requirement written in a way the computer can understand.
-
-**Start with a simple rules-only configuration:**
+Let's start with the simplest possible example — a single rule:
 
 ```yaml
-# Required metadata for all YAML files
+# my-first-rule.yaml
 metadata:
-  name: "Customer Validation Rules"
-  version: "1.0.0"
-  description: "Basic validation rules for customer data"
+  name: "My First Rule"
   type: "rule-config"
-  author: "validation.team@company.com"
 
-# Define your business rules here
 rules:
-  - id: "age-check"                                    # Unique identifier
-    name: "Age Validation"                             # Human-readable name
-    condition: "#age >= 18"                       # The actual rule logic
-    message: "Customer must be at least 18 years old"  # Error message if rule fails
-    severity: "ERROR"                                  # How serious is a failure?
+  - id: "age-check"
+    condition: "#age >= 18"
+    message: "Customer must be at least 18 years old"
+    severity: "ERROR"
+```
+
+That's it. Let's break down every line:
+
+| Line | What It Does |
+|------|-------------|
+| `metadata:` | Required header section — every APEX YAML file needs this |
+| `name: "My First Rule"` | A human-readable name for this configuration |
+| `type: "rule-config"` | Tells APEX this file contains rules |
+| `rules:` | The start of your rule definitions |
+| `- id: "age-check"` | A unique name for this rule (used for tracking and logging) |
+| `condition: "#age >= 18"` | The question: "Is age 18 or older?" The `#` refers to a field in your data |
+| `message: "Customer must be..."` | What to show if the rule fails |
+| `severity: "ERROR"` | How serious a failure is |
+
+### Step 2: Adding More Rules
+
+You can add as many rules as you need. Let's add two more:
+
+```yaml
+# customer-validation.yaml
+metadata:
+  name: "Customer Validation"
+  type: "rule-config"
+
+rules:
+  # Rule 1: Age must be 18 or older
+  - id: "age-check"
+    condition: "#age >= 18"
+    message: "Customer must be at least 18 years old"
+    severity: "ERROR"
+
+  # Rule 2: Email is required
+  - id: "email-check"
+    condition: "#email != null"
+    message: "Email address is required"
+    severity: "ERROR"
+
+  # Rule 3: Balance recommendation (just a warning, not a hard failure)
+  - id: "balance-check"
+    condition: "#balance >= 1000"
+    message: "Recommended minimum balance is $1,000"
+    severity: "WARNING"
+```
+
+Notice the three **severity levels**:
+- **ERROR**: A hard failure — something that must be fixed
+- **WARNING**: An advisory — something to be aware of but not blocking
+- **INFO**: Informational only — for audit trails and logging
+
+### Step 3: Writing Conditions
+
+The `condition` field is where your business logic lives. Here are the patterns you'll use most often:
+
+| What You Want | How to Write It | Example |
+|---|---|---|
+| Check a number | `#field >= value` | `#age >= 18` |
+| Check if something exists | `#field != null` | `#email != null` |
+| Check text content | `#field.contains('text')` | `#email.contains('@')` |
+| Combine two checks | `condition1 && condition2` | `#age >= 18 && #email != null` |
+| Either check passes | `condition1 \|\| condition2` | `#vip == true \|\| #balance > 10000` |
+
+The `#` symbol always refers to a field in your input data. If your data has an `age` field, you write `#age`. If it has a `customerName` field, you write `#customerName`.
+
+### Step 4: Your First Enrichment
+
+Rules check your data. **Enrichments** add to your data. Think of enrichments as automatic lookups — you have a code like "A", and APEX converts it to "Active" before your rules run.
+
+**Your input data:**
+```json
+{ "statusCode": "A", "customerName": "John Smith" }
+```
+
+You know that "A" means "Active", "I" means "Inactive", and "S" means "Suspended". Rather than writing rules against raw codes, you can enrich your data with the human-readable name first:
+
+```yaml
+# customer-with-enrichment.yaml
+metadata:
+  name: "Customer Processing"
+  type: "rule-config"
+
+# Enrichments normally appear before rules — they run first in this example because APEX processes in document order
+enrichments:
+  - id: "status-lookup"              # Unique identifier for this enrichment
+    type: "lookup-enrichment"         # This enrichment performs a data lookup
+    lookup-config:                    # Configuration for what to look up and where
+      lookup-dataset:                 # Defines the reference data to search
+        type: "inline"                # Data is embedded right here in the YAML (other options: database, file, REST API)
+        key-field: "code"             # Which column in the dataset to match against
+        data:                         # The actual reference data rows
+          - code: "A"
+            name: "Active"
+          - code: "I"
+            name: "Inactive"
+          - code: "S"
+            name: "Suspended"
+      lookup-key: "#statusCode"       # Look up the value of statusCode from your input data ("A")
+    field-mappings:                    # What to copy from the matched row into your data
+      - source-field: "name"          # Take the "name" column from the matched row ("Active")
+        target-field: "statusName"    # Add it to your data as a new field called "statusName"
+
+# Rules run AFTER enrichments — they can use the enriched data
+rules:
+  - id: "active-check"
+    condition: "#statusName == 'Active'"    # This field was added by the enrichment above
+    message: "Customer must be Active"
+    severity: "ERROR"
+```
+
+**What happens when this runs:**
+
+| Step | What happens | Your data |
+|------|-------------|-----------|
+| 1. Input | Your raw data arrives | `{statusCode: "A", customerName: "John Smith"}` |
+| 2. Enrichment | Looks up "A" in the dataset, finds `name: "Active"` | `{statusCode: "A", customerName: "John Smith", statusName: "Active"}` |
+| 3. Rule | Checks `#statusName == 'Active'` → **Pass** | Result: MATCH |
+
+### Step 5: Putting It All Together
+
+Here's a complete example combining multiple enrichments and rules.
+
+**Your input data:**
+```json
+{ "age": 25, "email": "john@example.com", "statusCode": "A" }
+```
+
+```yaml
+# complete-customer-validation.yaml
+metadata:
+  name: "Complete Customer Validation"
+  version: "1.0.0"
+  type: "rule-config"
+
+enrichments:
+  # Lookup the customer's status description and transaction permissions
+  - id: "status-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:                                # Dataset has 3 columns: code, name, allowTransactions
+          - code: "A"
+            name: "Active"
+            allowTransactions: true
+          - code: "I"
+            name: "Inactive"
+            allowTransactions: false
+          - code: "S"
+            name: "Suspended"
+            allowTransactions: false
+      lookup-key: "#statusCode"              # Match input statusCode ("A") against the "code" column
+    field-mappings:
+      - source-field: "name"                 # Copy "Active" into your data as statusName
+        target-field: "statusName"
+      - source-field: "allowTransactions"    # Copy true into your data as canTransact
+        target-field: "canTransact"
+
+rules:
+  # Basic validation — these use your original input data
+  - id: "age-check"
+    condition: "#age >= 18"
+    message: "Customer must be at least 18 years old"
+    severity: "ERROR"
 
   - id: "email-check"
-    name: "Email Validation"
     condition: "#email != null && #email.contains('@')"
-    message: "Valid email address is required"
+    message: "A valid email address is required"
     severity: "ERROR"
 
-  - id: "name-check"
-    name: "Name Validation"
-    condition: "#name != null && #name.length() > 0"
-    message: "Customer name is required"
+  # This rule uses ENRICHED data — canTransact was added by the enrichment above
+  - id: "transaction-allowed"
+    condition: "#canTransact == true"
+    message: "Customer account does not allow transactions"
     severity: "ERROR"
 ```
 
-**Use this rules configuration in your Java code:**
+**The processing flow:**
+
+| Step | What happens | Data state |
+|------|-------------|------------|
+| 1. Input | Raw data arrives | `{age: 25, email: "john@example.com", statusCode: "A"}` |
+| 2. Enrichment | Looks up "A", adds `statusName` and `canTransact` | `{age: 25, email: "john@example.com", statusCode: "A", statusName: "Active", canTransact: true}` |
+| 3. Rule: age-check | `#age >= 18` → 25 >= 18 | **Pass** |
+| 4. Rule: email-check | `#email.contains('@')` → true | **Pass** |
+| 5. Rule: transaction-allowed | `#canTransact == true` → true | **Pass** |
+| 6. Result | All 3 rules passed | **All rules matched** |
+
+### For Developers: Java Integration
+
+Once your YAML rules are defined, integrating them into a Java application is straightforward:
 
 ```java
-// ⭐ SIMPLEST (One Line) - For single evaluation
-Map<String, Object> data = Map.of("age", 25, "email", "john@example.com", "name", "John Doe");
-RuleResult result = RulesEngine.fromFile("customer-rules.yaml").evaluate(data);
+// One-line evaluation
+RuleResult result = RulesEngine.fromFile("complete-customer-validation.yaml").evaluate(myData);
 
-// Check what happened
-if (result.isSuccess()) {
-    System.out.println("All validation rules passed!");
-} else {
-    System.out.println("Validation failed:");
-    result.getFailureMessages().forEach(System.out::println);
-}
-```
-
-**Alternative: Two-Line Pattern (When Reusing the Engine)**
-
-If you need to evaluate multiple datasets with the same rules, use the two-line pattern to reuse the engine:
-
-```java
-// EFFICIENT (Two Lines) - Reuse the engine for multiple evaluations
-RulesEngine engine = RulesEngine.fromFile("customer-rules.yaml");
-
-// Evaluate multiple customers with the same rules
-Map<String, Object> customer1 = Map.of("age", 25, "email", "john@example.com", "name", "John Doe");
+// Reusable engine (when evaluating many records)
+RulesEngine engine = RulesEngine.fromFile("complete-customer-validation.yaml");
 RuleResult result1 = engine.evaluate(customer1);
-
-Map<String, Object> customer2 = Map.of("age", 17, "email", "jane@example.com", "name", "Jane Smith");
 RuleResult result2 = engine.evaluate(customer2);
-
-// Check results
-if (result1.isSuccess()) {
-    System.out.println("Customer 1 passed all validations!");
-}
-if (!result2.isSuccess()) {
-    System.out.println("Customer 2 failed: " + result2.getFailureMessages());
-}
+engine.shutdown();  // Clean up when done
 ```
 
-**Understanding Rule Conditions:**
+For quick checks without YAML files:
 
-Rules use Spring Expression Language (SpEL) for conditions:
-- `#age >= 18` - Access the 'age' field and check if it's 18 or greater
-- `#email != null` - Check if the 'email' field exists and is not null
-- `#email.contains('@')` - Check if the email contains an @ symbol
-- `#name.length() > 0` - Check if the name has at least one character
+```java
+// Programmatic one-liner
+boolean isAdult = Rules.check("#age >= 18", Map.of("age", 25));
+```
 
-**Common Rule Patterns:**
-- **Validation**: `#age >= 18` (must be 18 or older)
-- **Range checking**: `#score >= 0 && #score <= 100` (score between 0-100)
-- **Required fields**: `#email != null` (email must exist)
-- **Pattern matching**: `#email.contains('@')` (email must contain @)
-- **Complex logic**: `#amount > 1000 ? #approvalRequired == true : true` (amounts over 1000 need approval)
-- **If-Then-Else**: `#age >= 18 ? 'ADULT' : 'MINOR'` (simple conditional assignment)
-- **Case Statement**: `#status == 'ACTIVE' ? 'Processing' : (#status == 'PENDING' ? 'Waiting' : 'Inactive')` (multiple conditions)
+### What's Next?
 
-#### If-Then-Else Statements
+You now understand the core concepts of APEX:
+- **Rules** check your data against business conditions
+- **Enrichments** add reference data before rules are evaluated
+- **Severity** levels control how failures are reported
+- **YAML configuration** keeps business logic separate from code
 
-For simple conditional logic, use ternary expressions in calculation enrichments:
+The following sections cover these topics in depth:
+- [Understanding Rule Conditions](#understanding-rule-conditions) — SpEL basics for reading YAML examples
+- [Enrichment Patterns and Expressions](#enrichment-patterns-and-expressions) — calculation enrichment YAML patterns
+- [Advanced YAML Patterns](#advanced-yaml-patterns) — result fields, rule chaining, and workflow patterns
+- [Dataset Enrichment](#dataset-enrichment) — all enrichment types and configuration options
+- [Advanced Architecture Features](#advanced-architecture-features) — scenarios, components, and error recovery
+
+## 3. YAML Configuration Reference
+
+YAML (Yet Another Markup Language) is a human-readable format for configuration files. Don't worry if you're new to YAML - it's designed to be easy to read and write. Think of it as a structured way to organize information, similar to how you might organize information in an outline.
+
+### Understanding YAML Basics
+
+YAML uses indentation (spaces) to show relationships between items. Here are the key concepts:
+- **Indentation matters**: Use spaces (not tabs) to show hierarchy
+- **Lists**: Items that start with a dash (`-`)
+- **Key-value pairs**: `key: value`
+- **Nested structures**: Indent to show items belong together
+
+### Configuration Structure
+
+Every APEX configuration file follows this basic structure:
+
+```yaml
+# Metadata section: Information about this configuration file
+metadata:
+  id: "configuration-unique-id"          # Required: Unique identifier for this configuration
+  name: "Configuration Name"              # Required: What this configuration does
+  version: "1.0.0"                       # Required: Version for tracking changes
+  description: "Configuration description" # Required: Detailed explanation
+  type: "rule-config"                     # Required: File type (rule-config, scenario, dataset, etc.)
+  author: "Team Name"                     # Required for rule-config: Who created/maintains this
+  created: "2025-08-02"                  # Optional: When it was created
+  last-modified: "2025-08-02"           # Optional: Last update date
+  tags: ["tag1", "tag2"]                # Optional: Categories for organization
+
+# Rules section: Your business logic
+rules:
+  # Individual rule definitions go here
+  # Each rule defines a condition to check
+
+# Enrichments section: Data enhancement
+enrichments:
+  # Enrichment definitions go here
+  # Each enrichment adds data to your objects
+
+# Rule groups section: Organized rule collections
+rule-groups:
+  # Rule group definitions go here
+  # Groups let you organize related rules together
+```
+
+**Why organize it this way?**
+- **Metadata**: Helps you track and document your configurations
+- **Rules**: Contains your business logic and validation requirements
+- **Enrichments**: Automatically adds useful information to your data
+- **Rule Groups**: Organizes related rules for better management
+
+### Rule Configuration
+
+Rules are where you define your business logic. Each rule is like a question you're asking about your data. Here's how to configure them:
+
+```yaml
+rules:
+  - id: "unique-rule-id"                    # Required: Unique identifier (like a name tag)
+    name: "Human Readable Name"             # Required: What this rule does in plain English
+    condition: "#field > 100"          # Required: The actual business logic to check
+    message: "Validation message"           # Optional: What to show if the rule fails
+    severity: "ERROR"                       # Optional: How serious is a failure? (ERROR, WARNING, INFO)
+    enabled: true                           # Optional: Turn this rule on/off (default: true)
+    tags: ["validation", "business"]        # Optional: Categories for organization
+    metadata:                               # Optional: Additional information for governance
+      owner: "Business Team"               # Who owns/maintains this rule
+      domain: "Finance"                    # What business area it belongs to
+      purpose: "Regulatory compliance"     # Why this rule exists
+```
+
+**Understanding each part:**
+
+- **id**: A unique name for this rule (like "customer-age-check"). Use descriptive names that make sense to your team.
+
+- **name**: A human-friendly description that anyone can understand (like "Customer Age Validation").
+
+- **condition**: The actual business logic using SpEL expressions. Common patterns:
+  - `#age >= 18` (age must be 18 or older)
+  - `#amount > 0 && #amount <= 1000` (amount between 0 and 1000)
+  - `#email != null && #email.contains('@')` (email must exist and contain @)
+
+- **message**: What users see when the rule fails. Make it helpful and actionable.
+
+- **severity**: How important is this rule?
+  - `ERROR`: Critical - must be fixed
+  - `WARNING`: Important - should be reviewed
+  - `INFO`: Informational - good to know
+
+- **enabled**: Allows you to temporarily turn rules on/off without deleting them.
+
+- **tags**: Help organize and filter rules. Use consistent tags across your organization.
+
+- **metadata**: Additional information for governance, documentation, and audit trails.
+
+### Enrichment Configuration
+
+Enrichments automatically add related information to your data. Think of them as smart lookups that happen automatically during rule evaluation.
+
+```yaml
+enrichments:
+  - id: "enrichment-id"                     # Required: Unique identifier for this enrichment
+    type: "lookup-enrichment"               # Required: Type of enrichment (lookup is most common)
+    condition: "['field'] != null"          # Optional: Only enrich if this condition is true
+    enabled: true                           # Optional: Turn this enrichment on/off (default: true)
+    lookup-config:                          # Configuration for the lookup process
+      lookup-dataset:                       # Where to find the lookup data
+        type: "inline"                      # Data source type: "inline" or "yaml-file"
+        key-field: "lookupKey"              # Field to match against in your data
+        cache-enabled: true                 # Keep lookup data in memory for speed
+        cache-ttl-seconds: 3600            # How long to cache (1 hour = 3600 seconds)
+        default-values:                     # What to use if no match is found
+          defaultField: "defaultValue"
+        data:                              # The actual lookup data (for inline type)
+          - lookupKey: "key1"              # This is what we match against
+            field1: "value1"               # Additional data to add
+            field2: "value2"
+    field-mappings:                        # How to add the looked-up data to your object
+      - source-field: "field1"             # Take this field from the lookup data
+        target-field: "enrichedField1"     # Add it to your object with this name
+      - source-field: "field2"
+        target-field: "enrichedField2"
+```
+
+**Understanding enrichment flow:**
+
+1. **Check condition**: If specified, only enrich when the condition is true
+2. **Find matching data**: Look up the key value in your dataset
+3. **Map fields**: Copy specified fields from the lookup data to your object
+4. **Use defaults**: If no match found, use default values (if configured)
+
+**Example in action:**
+- Your data has: `{statusCode: "A"}`
+- Lookup dataset has: `{code: "A", name: "Active", description: "Customer is active"}`
+- Field mappings copy `name` to `statusName` and `description` to `statusDescription`
+- Result: Your data now has: `{statusCode: "A", statusName: "Active", statusDescription: "Customer is active"}`
+
+**Common use cases:**
+- Convert codes to human-readable names (status codes, country codes, etc.)
+- Add regional information based on location codes
+- Enrich product data with category information
+- Add calculated fields based on lookup tables
+
+---
+
+## 4. Understanding Rule Conditions
+
+APEX rules use Spring Expression Language (SpEL) for conditions. The `#` symbol references fields from your input data. Here are the patterns you'll see most often in YAML examples:
+
+| Pattern | What It Does | Example |
+|---------|--------------|---------|
+| `#fieldName` | Access a field from your data | `#age` gets the age value |
+| `>=`, `<=`, `==`, `!=` | Comparison operators | `#age >= 18` checks if age is 18+ |
+| `&&`, `\|\|` | Logical AND, OR | `#age >= 18 && #hasId == true` |
+| `.method()` | Call a method on a value | `#email.contains('@')` |
+| `? :` | Ternary (if-then-else) | `#age >= 18 ? 'ADULT' : 'MINOR'` |
+| `!= null` | Null check | `#email != null` |
+
+**Examples in context:**
+
+```yaml
+rules:
+  - id: "age-check"
+    condition: "#age >= 18"                              # Simple comparison
+    message: "Must be 18 or older"
+    severity: "ERROR"
+
+  - id: "email-required"
+    condition: "#email != null && #email.contains('@')"  # Null-safe method call
+    message: "Valid email is required"
+    severity: "ERROR"
+
+  - id: "range-check"
+    condition: "#score >= 0 && #score <= 100"            # Range validation
+    message: "Score must be between 0 and 100"
+    severity: "WARNING"
+```
+
+---
+
+## 5. Enrichment Patterns and Expressions
+
+Enrichments automatically add related data to your input during rule processing. This section covers calculation enrichments, which derive new field values from existing data.
+
+### If-Then-Else Statements
+
+The ternary operator (`condition ? valueIfTrue : valueIfFalse`) provides simple branching logic. Use it when you need to assign different values based on a single condition. The syntax reads as: "if the condition is true, use the first value; otherwise, use the second value."
+
+The following example shows how to categorize customers by age and determine eligibility. Each calculation uses the ternary operator to make a decision based on the input data:
 
 ```yaml
 enrichments:
   - id: "age-category"
     type: "calculation-enrichment"
     name: "Age Category Assignment"
+    # Only run this enrichment if we have an age value
     condition: "#age != null"
     calculations:
+      # Categorize customer as ADULT (18+) or MINOR (under 18)
       - field: "ageCategory"
         expression: "#age >= 18 ? 'ADULT' : 'MINOR'"
+      
+      # Credit eligibility requires age 21+ AND minimum balance of $1000
       - field: "eligibleForCredit"
         expression: "#age >= 21 && #accountBalance >= 1000 ? true : false"
+      
+      # Senior discount (15%) for 65+, standard discount (5%) for adults, no discount for minors
       - field: "discountRate"
         expression: "#age >= 65 ? 0.15 : (#age >= 18 ? 0.05 : 0.0)"
 ```
 
-#### Case Statement (Multiple Conditions)
+### Case Statement (Multiple Conditions)
 
-For multiple conditions, use nested ternary expressions to simulate case statements:
+When you need to handle more than two outcomes, use nested ternary expressions to simulate a case/switch statement. Each nested ternary handles one condition, with the "else" portion containing the next condition. Read these from left to right as a series of "if-else-if" checks.
+
+The following example assigns customer tiers based on account balance thresholds, then uses the tier to determine benefits:
 
 ```yaml
 enrichments:
   - id: "customer-tier-case"
     type: "calculation-enrichment"
     name: "Customer Tier Case Logic"
+    # Only process if we have account balance data
     condition: "#accountBalance != null"
     calculations:
+      # Assign tier based on balance thresholds:
+      # $100K+ = PLATINUM, $50K+ = GOLD, $10K+ = SILVER, else BRONZE
       - field: "customerTier"
         expression: "#accountBalance >= 100000 ? 'PLATINUM' : (#accountBalance >= 50000 ? 'GOLD' : (#accountBalance >= 10000 ? 'SILVER' : 'BRONZE'))"
+      
+      # Discount rate depends on tier: PLATINUM=20%, GOLD=15%, SILVER=10%, BRONZE=5%
       - field: "discountRate"
         expression: "#customerTier == 'PLATINUM' ? 0.20 : (#customerTier == 'GOLD' ? 0.15 : (#customerTier == 'SILVER' ? 0.10 : 0.05))"
+      
+      # Credit limit based on tier level
       - field: "creditLimit"
         expression: "#customerTier == 'PLATINUM' ? 500000 : (#customerTier == 'GOLD' ? 250000 : (#customerTier == 'SILVER' ? 100000 : 25000))"
 ```
 
-**Advanced Case Statement with Status Logic:**
+### Error Handling and Null Safety
+
+Real-world data is often incomplete. Always check for null before accessing properties or methods. The pattern is: `#field != null ? doSomething : defaultValue`.
 
 ```yaml
 enrichments:
-  - id: "order-status-case"
+  - id: "safe-calculations"
     type: "calculation-enrichment"
-    name: "Order Status Processing"
-    condition: "#orderStatus != null"
-    calculations:
-      - field: "nextAction"
-        expression: "#orderStatus == 'NEW' ? 'VALIDATE' : (#orderStatus == 'VALIDATED' ? 'PROCESS' : (#orderStatus == 'PROCESSING' ? 'SHIP' : (#orderStatus == 'SHIPPED' ? 'DELIVER' : 'COMPLETE')))"
-      - field: "canCancel"
-        expression: "#orderStatus == 'NEW' || #orderStatus == 'VALIDATED' ? true : false"
-      - field: "estimatedDays"
-        expression: "#orderStatus == 'NEW' ? 1 : (#orderStatus == 'VALIDATED' ? 2 : (#orderStatus == 'PROCESSING' ? 3 : (#orderStatus == 'SHIPPED' ? 1 : 0)))"
-```
-
-#### Financial Services Examples
-
-**Risk Assessment with Multiple Factors:**
-
-```yaml
-enrichments:
-  - id: "risk-assessment"
-    type: "calculation-enrichment"
-    name: "Multi-Factor Risk Assessment"
-    condition: "#creditScore != null && #income != null"
-    calculations:
-      - field: "creditRiskScore"
-        expression: "#creditScore >= 750 ? 10 : (#creditScore >= 700 ? 20 : (#creditScore >= 650 ? 40 : 60))"
-      - field: "incomeRiskScore"
-        expression: "#income >= 100000 ? 5 : (#income >= 75000 ? 15 : (#income >= 50000 ? 25 : 35))"
-      - field: "totalRiskScore"
-        expression: "#creditRiskScore + #incomeRiskScore"
-      - field: "riskCategory"
-        expression: "#totalRiskScore <= 20 ? 'LOW' : (#totalRiskScore <= 40 ? 'MEDIUM' : (#totalRiskScore <= 60 ? 'HIGH' : 'VERY_HIGH'))"
-      - field: "approvalStatus"
-        expression: "#riskCategory == 'LOW' ? 'AUTO_APPROVE' : (#riskCategory == 'MEDIUM' ? 'REVIEW' : 'DECLINE')"
-```
-
-**Trading Limits Based on Account Type:**
-
-```yaml
-enrichments:
-  - id: "trading-limits"
-    type: "calculation-enrichment"
-    name: "Dynamic Trading Limits"
-    condition: "#accountType != null && #netWorth != null"
-    calculations:
-      - field: "dailyLimit"
-        expression: "#accountType == 'INSTITUTIONAL' ? 10000000 : (#accountType == 'HIGH_NET_WORTH' ? 1000000 : (#accountType == 'RETAIL' ? 100000 : 10000))"
-      - field: "leverageRatio"
-        expression: "#accountType == 'INSTITUTIONAL' ? 10.0 : (#accountType == 'HIGH_NET_WORTH' ? 5.0 : (#accountType == 'RETAIL' ? 2.0 : 1.0))"
-      - field: "marginRequirement"
-        expression: "#accountType == 'INSTITUTIONAL' ? 0.05 : (#accountType == 'HIGH_NET_WORTH' ? 0.10 : (#accountType == 'RETAIL' ? 0.25 : 0.50))"
-      - field: "canTradeOptions"
-        expression: "#accountType == 'INSTITUTIONAL' || (#accountType == 'HIGH_NET_WORTH' && #netWorth >= 1000000) ? true : false"
-```
-
-#### Data Validation Patterns
-
-**Comprehensive Field Validation:**
-
-```yaml
-rules:
-  - id: "email-validation"
-    name: "Email Format Validation"
-    condition: "#email != null && #email.matches('^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')"
-    message: "Email address must be in valid format"
-    severity: "ERROR"
-
-  - id: "phone-validation"
-    name: "Phone Number Validation"
-    condition: "#phone != null && (#phone.matches('^\\+?[1-9]\\d{1,14}$') || #phone.matches('^\\(\\d{3}\\)\\s?\\d{3}-\\d{4}$'))"
-    message: "Phone number must be in valid format"
-    severity: "ERROR"
-
-  - id: "date-range-validation"
-    name: "Date Range Validation"
-    condition: "#startDate != null && #endDate != null && #startDate.isBefore(#endDate)"
-    message: "Start date must be before end date"
-    severity: "ERROR"
-
-  - id: "amount-precision-validation"
-    name: "Amount Precision Validation"
-    condition: "#amount != null && T(java.math.BigDecimal).valueOf(#amount).scale() <= 2"
-    message: "Amount cannot have more than 2 decimal places"
-    severity: "ERROR"
-```
-
-**Business Logic Validation:**
-
-```yaml
-rules:
-  - id: "business-hours-check"
-    name: "Business Hours Validation"
-    condition: "T(java.time.LocalTime).now().isAfter(T(java.time.LocalTime).of(9, 0)) && T(java.time.LocalTime).now().isBefore(T(java.time.LocalTime).of(17, 0))"
-    message: "Transaction must be processed during business hours (9 AM - 5 PM)"
-    severity: "WARNING"
-
-  - id: "weekend-restriction"
-    name: "Weekend Transaction Restriction"
-    condition: "!T(java.time.LocalDate).now().getDayOfWeek().toString().matches('SATURDAY|SUNDAY') || #amount <= 10000"
-    message: "Large transactions (>$10,000) are not allowed on weekends"
-    severity: "ERROR"
-
-  - id: "holiday-processing"
-    name: "Holiday Processing Check"
-    condition: "#isHoliday != true || #urgentProcessing == true"
-    message: "Non-urgent transactions cannot be processed on holidays"
-    severity: "WARNING"
-```
-
-#### Mathematical and String Operations
-
-**Complex Calculations:**
-
-```yaml
-enrichments:
-  - id: "financial-calculations"
-    type: "calculation-enrichment"
-    name: "Financial Metrics Calculation"
-    condition: "#principal != null && #rate != null && #years != null"
-    calculations:
-      - field: "simpleInterest"
-        expression: "#principal * #rate * #years / 100"
-      - field: "compoundInterest"
-        expression: "#principal * T(java.lang.Math).pow(1 + #rate/100, #years) - #principal"
-      - field: "monthlyPayment"
-        expression: "#principal * (#rate/1200) / (1 - T(java.lang.Math).pow(1 + #rate/1200, -#years*12))"
-      - field: "totalPayment"
-        expression: "#monthlyPayment * #years * 12"
-      - field: "totalInterest"
-        expression: "#totalPayment - #principal"
-```
-
-**String Manipulation:**
-
-```yaml
-enrichments:
-  - id: "string-processing"
-    type: "calculation-enrichment"
-    name: "String Data Processing"
-    condition: "#customerName != null && #accountNumber != null"
-    calculations:
-      - field: "nameUpperCase"
-        expression: "#customerName.toUpperCase()"
-      - field: "initials"
-        expression: "#customerName.split(' ')[0].substring(0,1) + #customerName.split(' ')[1].substring(0,1)"
-      - field: "maskedAccount"
-        expression: "'****' + #accountNumber.substring(#accountNumber.length() - 4)"
-      - field: "accountPrefix"
-        expression: "#accountNumber.substring(0, 3)"
-      - field: "isVipName"
-        expression: "#customerName.toLowerCase().contains('vip') || #customerName.toLowerCase().contains('premium')"
-```
-
-**Collection and Array Operations:**
-
-```yaml
-enrichments:
-  - id: "collection-processing"
-    type: "calculation-enrichment"
-    name: "Collection Data Analysis"
-    condition: "#transactions != null && #transactions.size() > 0"
-    calculations:
-      - field: "transactionCount"
-        expression: "#transactions.size()"
-      - field: "totalAmount"
-        expression: "#transactions.![amount].sum()"
-      - field: "averageAmount"
-        expression: "#transactions.![amount].sum() / #transactions.size()"
-      - field: "maxAmount"
-        expression: "#transactions.![amount].max()"
-      - field: "minAmount"
-        expression: "#transactions.![amount].min()"
-      - field: "hasLargeTransactions"
-        expression: "#transactions.?[amount > 10000].size() > 0"
-      - field: "largeTransactionCount"
-        expression: "#transactions.?[amount > 10000].size()"
-```
-
-#### Date and Time Operations
-
-**Date Calculations:**
-
-```yaml
-enrichments:
-  - id: "date-calculations"
-    type: "calculation-enrichment"
-    name: "Date and Time Processing"
-    condition: "#birthDate != null"
-    calculations:
-      - field: "age"
-        expression: "T(java.time.Period).between(#birthDate, T(java.time.LocalDate).now()).getYears()"
-      - field: "isAdult"
-        expression: "#age >= 18"
-      - field: "daysSinceBirth"
-        expression: "T(java.time.temporal.ChronoUnit).DAYS.between(#birthDate, T(java.time.LocalDate).now())"
-      - field: "nextBirthday"
-        expression: "#birthDate.withYear(T(java.time.LocalDate).now().getYear() + (#birthDate.withYear(T(java.time.LocalDate).now().getYear()).isBefore(T(java.time.LocalDate).now()) ? 1 : 0))"
-      - field: "zodiacSign"
-        expression: "#birthDate.getMonthValue() == 1 ? 'Capricorn/Aquarius' : (#birthDate.getMonthValue() == 2 ? 'Aquarius/Pisces' : 'Other')"
-```
-
-**Business Date Logic:**
-
-```yaml
-enrichments:
-  - id: "business-date-logic"
-    type: "calculation-enrichment"
-    name: "Business Date Calculations"
     condition: "true"
     calculations:
-      - field: "currentBusinessDay"
-        expression: "T(java.time.LocalDate).now().getDayOfWeek().getValue() <= 5"
-      - field: "nextBusinessDay"
-        expression: "T(java.time.LocalDate).now().getDayOfWeek().getValue() == 5 ? T(java.time.LocalDate).now().plusDays(3) : (T(java.time.LocalDate).now().getDayOfWeek().getValue() == 6 ? T(java.time.LocalDate).now().plusDays(2) : T(java.time.LocalDate).now().plusDays(1))"
-      - field: "isQuarterEnd"
-        expression: "T(java.time.LocalDate).now().getMonthValue() % 3 == 0 && T(java.time.LocalDate).now().getDayOfMonth() >= 28"
-      - field: "daysUntilMonthEnd"
-        expression: "T(java.time.LocalDate).now().lengthOfMonth() - T(java.time.LocalDate).now().getDayOfMonth()"
+      # Safe age calculation: if birthDate exists, calculate age; otherwise return 0
+      - field: "safeAge"
+        expression: "#birthDate != null ? T(java.time.Period).between(#birthDate, T(java.time.LocalDate).now()).getYears() : 0"
+      
+      # Safe email normalization: lowercase if exists, otherwise use placeholder
+      - field: "safeEmail"
+        expression: "#email != null ? #email.toLowerCase() : 'no-email@unknown.com'"
+      
+      # Safe balance: use actual value or default to 0.0
+      - field: "safeBalance"
+        expression: "#accountBalance != null ? #accountBalance : 0.0"
+      
+      # Build full name from available parts, handling missing first/last names
+      - field: "safeName"
+        expression: "#firstName != null && #lastName != null ? #firstName + ' ' + #lastName : (#firstName != null ? #firstName : (#lastName != null ? #lastName : 'Unknown'))"
 ```
 
-#### Advanced Conditional Logic
+### Enrichment Groups
 
-**Multi-Criteria Decision Making:**
+Enrichment groups organize related enrichments into logical units, similar to how rule groups organize rules. You can combine enrichments with AND or OR operators and control execution behaviour.
+
+```yaml
+enrichment-groups:
+  # AND group: all enrichments must succeed for the group to succeed
+  - id: "customer-data-enrichment"
+    operator: "AND"
+    stop-on-first-failure: true
+    enrichment-ids:
+      - "status-lookup"
+      - "tier-calculation"
+      - "discount-assignment"
+
+  # OR group: group succeeds if any enrichment succeeds
+  - id: "fallback-pricing"
+    operator: "OR"
+    stop-on-first-failure: false
+    enrichment-ids:
+      - "real-time-price-lookup"
+      - "cached-price-lookup"
+      - "default-price-assignment"
+```
+
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `id` | Yes | — | Unique group identifier |
+| `operator` | Yes | — | `AND` (all must succeed) or `OR` (any can succeed) |
+| `stop-on-first-failure` | No | `true` | Stop on first failure (AND) or first success (OR) |
+| `parallel-execution` | No | `false` | Execute enrichments concurrently |
+| `error-handling` | No | — | `fail-fast`, `continue-on-error`, or `skip-on-error` |
+| `enrichment-ids` | Yes | — | List of enrichment IDs in execution order |
+| `enrichment-group-references` | No | — | References to other enrichment groups |
+
+### Conditional Mapping Enrichments
+
+Conditional mapping enrichments assign values based on priority-ordered rules. Each rule defines conditions and a mapping; the first matching rule wins.
 
 ```yaml
 enrichments:
-  - id: "loan-approval-logic"
-    type: "calculation-enrichment"
-    name: "Complex Loan Approval Logic"
-    condition: "#creditScore != null && #income != null && #debtToIncome != null"
-    calculations:
-      - field: "creditScoreCategory"
-        expression: "#creditScore >= 800 ? 'EXCELLENT' : (#creditScore >= 740 ? 'VERY_GOOD' : (#creditScore >= 670 ? 'GOOD' : (#creditScore >= 580 ? 'FAIR' : 'POOR')))"
-      - field: "incomeCategory"
-        expression: "#income >= 150000 ? 'HIGH' : (#income >= 75000 ? 'MEDIUM' : 'LOW')"
-      - field: "debtCategory"
-        expression: "#debtToIncome <= 0.28 ? 'LOW' : (#debtToIncome <= 0.36 ? 'MODERATE' : 'HIGH')"
-      - field: "approvalScore"
-        expression: "(#creditScoreCategory == 'EXCELLENT' ? 40 : (#creditScoreCategory == 'VERY_GOOD' ? 35 : (#creditScoreCategory == 'GOOD' ? 25 : (#creditScoreCategory == 'FAIR' ? 15 : 5)))) + (#incomeCategory == 'HIGH' ? 30 : (#incomeCategory == 'MEDIUM' ? 20 : 10)) + (#debtCategory == 'LOW' ? 30 : (#debtCategory == 'MODERATE' ? 20 : 5))"
-      - field: "loanDecision"
-        expression: "#approvalScore >= 80 ? 'APPROVED' : (#approvalScore >= 60 ? 'CONDITIONAL' : (#approvalScore >= 40 ? 'REVIEW_REQUIRED' : 'DECLINED'))"
-      - field: "interestRate"
-        expression: "#loanDecision == 'APPROVED' ? (#creditScoreCategory == 'EXCELLENT' ? 3.5 : (#creditScoreCategory == 'VERY_GOOD' ? 4.0 : 4.5)) : (#loanDecision == 'CONDITIONAL' ? 5.5 : 0.0)"
+  - id: "risk-tier-mapping"
+    type: "conditional-mapping-enrichment"
+    map-to-field: "riskTier"
+    mapping-rules:
+      - id: "high-risk"
+        priority: 1
+        conditions:
+          - field: "creditScore"
+            operator: "LESS_THAN"
+            value: 500
+        mapping:
+          type: "direct"
+          expression: "'HIGH_RISK'"
+
+      - id: "medium-risk"
+        priority: 2
+        conditions:
+          - field: "creditScore"
+            operator: "BETWEEN"
+            value: [500, 700]
+        mapping:
+          type: "direct"
+          expression: "'MEDIUM_RISK'"
+
+      - id: "low-risk"
+        priority: 3
+        conditions:
+          - field: "creditScore"
+            operator: "GREATER_THAN"
+            value: 700
+        mapping:
+          type: "direct"
+          expression: "'LOW_RISK'"
+
+    execution-settings:
+      stop-on-first-match: true
+      log-matched-rule: true
 ```
 
-**Geographic and Regional Logic:**
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `type` | Yes | — | Must be `conditional-mapping-enrichment` |
+| `map-to-field` | Yes | — | Target field where the mapped value is stored |
+| `mapping-rules` | Yes | — | Priority-ordered list of mapping rules |
+| `mapping-rules[].id` | Yes | — | Unique rule identifier |
+| `mapping-rules[].priority` | Yes | — | Lower number = evaluated first |
+| `mapping-rules[].conditions` | Yes | — | Conditions that must be met |
+| `mapping-rules[].mapping.type` | Yes | — | `direct` or `lookup` |
+| `mapping-rules[].mapping.expression` | No | — | SpEL expression for direct mappings |
+| `execution-settings.stop-on-first-match` | No | `true` | Stop after first matching rule |
+| `execution-settings.log-matched-rule` | No | `false` | Log which rule was matched |
 
-```yaml
-enrichments:
-  - id: "geographic-processing"
-    type: "calculation-enrichment"
-    name: "Geographic and Regional Processing"
-    condition: "#country != null && #state != null"
-    calculations:
-      - field: "region"
-        expression: "#country == 'US' ? (#state.matches('CA|OR|WA|NV|AZ') ? 'WEST' : (#state.matches('NY|NJ|CT|MA|PA') ? 'NORTHEAST' : (#state.matches('TX|FL|GA|NC|SC') ? 'SOUTH' : 'MIDWEST'))) : (#country == 'CA' ? 'CANADA' : 'INTERNATIONAL')"
-      - field: "timeZone"
-        expression: "#region == 'WEST' ? 'PST' : (#region == 'NORTHEAST' ? 'EST' : (#region == 'SOUTH' ? 'EST/CST' : 'CST'))"
-      - field: "taxRate"
-        expression: "#country == 'US' ? (#state == 'CA' ? 0.0725 : (#state == 'NY' ? 0.08 : (#state == 'TX' ? 0.0625 : 0.05))) : (#country == 'CA' ? 0.13 : 0.20)"
-      - field: "shippingZone"
-        expression: "#region == 'WEST' ? 1 : (#region == 'NORTHEAST' ? 2 : (#region == 'SOUTH' ? 3 : 4))"
-      - field: "isHighTaxState"
-        expression: "#taxRate > 0.07"
-```
+## 6. Advanced YAML Patterns
 
-#### Rule Chaining with Result Fields
+This section covers advanced APEX YAML configuration patterns: result fields, rule chaining, enrichment chaining, and rule-result-driven enrichments.
+
+### Rule Chaining with Result Fields
 
 APEX supports rule chaining through the `result-field` property, which allows you to store a rule's boolean evaluation result for use in subsequent rules. This enables sophisticated conditional logic where later rules can reference the outcomes of earlier rules.
 
@@ -883,7 +893,7 @@ rules:
 - Results are available in both the facts map (for SpEL) and enrichedData (for API consumers)
 - Performance impact is negligible for typical business rule scenarios (sub-millisecond overhead)
 
-#### Enrichment Chaining with Result Fields
+### Enrichment Chaining with Result Fields
 
 Similar to rules, enrichments also support the `result-field` property, allowing you to store enrichment evaluation results for use in subsequent enrichments or rules. This enables sophisticated data transformation pipelines with conditional logic and fallback handling.
 
@@ -990,60 +1000,6 @@ enrichments:
         expression: "'NORMAL'"
 ```
 
-**Java Usage Example:**
-
-```java
-// Create YAML configuration with enrichment chaining
-String yaml = """
-    enrichments:
-      - id: "lookup-counterparty"
-        type: "lookup-enrichment"
-        condition: "#counterparty != null"
-        result-field: "counterpartyFound"
-        lookup-config:
-          lookup-key: "#counterparty"
-          lookup-dataset:
-            type: "inline"
-            key-field: "counterpartyId"
-            data:
-              - counterpartyId: "BANK_A"
-                rating: "AAA"
-        field-mappings:
-          - source-field: "rating"
-            target-field: "counterpartyRating"
-
-      - id: "set-default-rating"
-        type: "field-enrichment"
-        condition: "#counterpartyFound == false"
-        field-mappings:
-          - source-field: "counterpartyRating"
-            target-field: "counterpartyRating"
-            expression: "'UNRATED'"
-
-    enrichment-groups:
-      - id: "counterparty-enrichment"
-        enrichment-ids:
-          - "lookup-counterparty"
-          - "set-default-rating"
-    """;
-
-// Load and evaluate
-YamlRuleConfiguration config = yamlLoader.fromYamlString(yaml);
-RulesEngine engine = RulesEngine.fromYamlConfig(config);
-
-// Test with existing counterparty
-Map<String, Object> data1 = Map.of("counterparty", "BANK_A");
-RuleResult result1 = engine.evaluate(data1);
-System.out.println(result1.getEnrichedData().get("counterpartyRating")); // "AAA"
-System.out.println(result1.getEnrichedData().get("counterpartyFound"));  // true
-
-// Test with unknown counterparty
-Map<String, Object> data2 = Map.of("counterparty", "UNKNOWN_BANK");
-RuleResult result2 = engine.evaluate(data2);
-System.out.println(result2.getEnrichedData().get("counterpartyRating")); // "UNRATED"
-System.out.println(result2.getEnrichedData().get("counterpartyFound"));  // false
-```
-
 **Best Practices:**
 - Use descriptive field names that clearly indicate what the result represents (e.g., `counterpartyFound`, `isHighValue`, `riskClassified`)
 - Chain enrichments to implement fallback logic when lookups fail or conditions don't match
@@ -1057,397 +1013,49 @@ System.out.println(result2.getEnrichedData().get("counterpartyFound"));  // fals
 - Only enrichments with `result-field` configured store results
 - Results are available in both the facts map (for SpEL) and enrichedData (for API consumers)
 
-#### 3.2 Enrichments: Adding Smart Data
+### Rule Chains Patterns
 
-#### Error Handling and Null Safety
+Rule chains define multi-step rule execution flows using the `rule-chains` keyword. The `pattern` field determines the behaviour. APEX supports six patterns:
 
-**Safe Navigation and Default Values:**
+| Pattern | Business Analogy | Key Configuration Fields | Status |
+|---------|-----------------|--------------------------|--------|
+| `conditional-chaining` | If-Then-Else logic | `trigger-rule`, `conditional-rules` (`on-trigger`, `on-no-trigger`) | Implemented |
+| `sequential-dependency` | Pipeline — each stage depends on the previous | `stages` (each with `rule`, `output-variable`) | Implemented |
+| `result-based-routing` | Switch/Case — route to different rule sets | `router-rule` (`output-variable`), `routes` | Implemented |
+| `accumulative-chaining` | Scorecard — accumulate a weighted total | `accumulator`, `accumulator-variable`, `accumulation-rules` (`rule`, `weight`), `decision-rule` | Implemented |
+| `complex-workflow` | Multi-stage with dependencies and conditional execution | `stages` (`depends-on`, `failure-action`, `conditional-execution`) | Validation only |
+| `fluent-builder` | Decision tree with nested success/failure paths | `root-rule` (`on-success`, `on-failure`) | Validation only |
 
-```yaml
-enrichments:
-  - id: "safe-calculations"
-    type: "calculation-enrichment"
-    name: "Null-Safe Calculations"
-    condition: "true"
-    calculations:
-      - field: "safeAge"
-        expression: "#birthDate != null ? T(java.time.Period).between(#birthDate, T(java.time.LocalDate).now()).getYears() : 0"
-      - field: "safeEmail"
-        expression: "#email != null ? #email.toLowerCase() : 'no-email@unknown.com'"
-      - field: "safeBalance"
-        expression: "#accountBalance != null ? #accountBalance : 0.0"
-      - field: "safeName"
-        expression: "#firstName != null && #lastName != null ? #firstName + ' ' + #lastName : (#firstName != null ? #firstName : (#lastName != null ? #lastName : 'Unknown'))"
-      - field: "safePhoneFormatted"
-        expression: "#phone != null && #phone.length() >= 10 ? '(' + #phone.substring(0,3) + ') ' + #phone.substring(3,6) + '-' + #phone.substring(6) : 'No Phone'"
-```
+**Example — Sequential Dependency (Pipeline):**
 
-**Validation with Error Messages:**
+Rules are defined in the `rules:` section and referenced by ID in the chain stages:
 
 ```yaml
 rules:
-  - id: "comprehensive-validation"
-    name: "Comprehensive Data Validation"
-    condition: "#email != null && #email.length() > 0 && #age != null && #age >= 0 && #phone != null && #phone.matches('^\\d{10}$')"
-    message: "All required fields are valid: email={{#email}}, age={{#age}}, phone={{#phone}}"
+  - id: "validate-trade"
+    condition: "#tradeId != null && #notional > 0 && #currency != null"
+    message: "Trade data is valid"
     severity: "INFO"
 
-  - id: "email-null-check"
-    name: "Email Null Validation"
-    condition: "#email != null"
-    message: "Email field is required and cannot be null"
-    severity: "ERROR"
+  - id: "check-counterparty"
+    condition: "#tradeValidated == true && #counterpartyStatus == 'ACTIVE'"
+    message: "Counterparty is active and approved"
+    severity: "INFO"
 
-  - id: "age-range-validation"
-    name: "Age Range Validation"
-    condition: "#age != null && #age >= 0 && #age <= 120"
-    message: "Age must be between 0 and 120, provided: {{#age}}"
-    severity: "ERROR"
-
-  - id: "conditional-validation"
-    name: "Conditional Field Validation"
-    condition: "#accountType == 'PREMIUM' ? (#creditLimit != null && #creditLimit > 0) : true"
-    message: "Premium accounts must have a valid credit limit"
-    severity: "ERROR"
-```
-
-#### Industry-Specific Examples
-
-**Healthcare/Insurance:**
-
-```yaml
-enrichments:
-  - id: "healthcare-processing"
-    type: "calculation-enrichment"
-    name: "Healthcare Data Processing"
-    condition: "#patientAge != null && #diagnosis != null"
-    calculations:
-      - field: "ageGroup"
-        expression: "#patientAge < 18 ? 'PEDIATRIC' : (#patientAge < 65 ? 'ADULT' : 'SENIOR')"
-      - field: "riskCategory"
-        expression: "#diagnosis.toLowerCase().contains('diabetes') || #diagnosis.toLowerCase().contains('heart') ? 'HIGH_RISK' : (#diagnosis.toLowerCase().contains('hypertension') ? 'MEDIUM_RISK' : 'LOW_RISK')"
-      - field: "copayAmount"
-        expression: "#riskCategory == 'HIGH_RISK' ? 50.0 : (#riskCategory == 'MEDIUM_RISK' ? 30.0 : 20.0)"
-      - field: "requiresPreAuth"
-        expression: "#riskCategory == 'HIGH_RISK' || #procedureCost > 5000"
-      - field: "coveragePercentage"
-        expression: "#ageGroup == 'SENIOR' ? 0.90 : (#ageGroup == 'PEDIATRIC' ? 0.95 : 0.80)"
-```
-
-**E-commerce/Retail:**
-
-```yaml
-enrichments:
-  - id: "ecommerce-processing"
-    type: "calculation-enrichment"
-    name: "E-commerce Order Processing"
-    condition: "#orderValue != null && #customerTier != null"
-    calculations:
-      - field: "shippingCost"
-        expression: "#orderValue >= 100 ? 0.0 : (#customerTier == 'PREMIUM' ? 5.0 : 10.0)"
-      - field: "discountPercentage"
-        expression: "#customerTier == 'PLATINUM' ? 0.15 : (#customerTier == 'GOLD' ? 0.10 : (#customerTier == 'SILVER' ? 0.05 : 0.0))"
-      - field: "discountAmount"
-        expression: "#orderValue * #discountPercentage"
-      - field: "finalAmount"
-        expression: "#orderValue - #discountAmount + #shippingCost"
-      - field: "loyaltyPoints"
-        expression: "T(java.lang.Math).floor(#finalAmount / 10)"
-      - field: "expeditedShipping"
-        expression: "#customerTier == 'PLATINUM' || #customerTier == 'GOLD'"
-      - field: "freeReturns"
-        expression: "#customerTier != 'BASIC' || #orderValue >= 50"
-```
-
-**Manufacturing/Supply Chain:**
-
-```yaml
-enrichments:
-  - id: "manufacturing-processing"
-    type: "calculation-enrichment"
-    name: "Manufacturing Quality Control"
-    condition: "#productionDate != null && #qualityScore != null"
-    calculations:
-      - field: "productAge"
-        expression: "T(java.time.temporal.ChronoUnit).DAYS.between(#productionDate, T(java.time.LocalDate).now())"
-      - field: "qualityGrade"
-        expression: "#qualityScore >= 95 ? 'A' : (#qualityScore >= 85 ? 'B' : (#qualityScore >= 75 ? 'C' : 'D'))"
-      - field: "shelfLife"
-        expression: "#productType == 'FOOD' ? 30 : (#productType == 'ELECTRONICS' ? 365 : (#productType == 'CLOTHING' ? 180 : 90))"
-      - field: "isExpired"
-        expression: "#productAge > #shelfLife"
-      - field: "discountRequired"
-        expression: "#productAge > (#shelfLife * 0.8) && !#isExpired"
-      - field: "clearancePrice"
-        expression: "#discountRequired ? #originalPrice * 0.7 : #originalPrice"
-```
-
-**Real Estate:**
-
-```yaml
-enrichments:
-  - id: "real-estate-processing"
-    type: "calculation-enrichment"
-    name: "Real Estate Valuation"
-    condition: "#squareFootage != null && #bedrooms != null && #location != null"
-    calculations:
-      - field: "pricePerSqFt"
-        expression: "#location == 'DOWNTOWN' ? 500 : (#location == 'SUBURBAN' ? 300 : (#location == 'RURAL' ? 150 : 200))"
-      - field: "baseValue"
-        expression: "#squareFootage * #pricePerSqFt"
-      - field: "bedroomBonus"
-        expression: "#bedrooms > 3 ? (#bedrooms - 3) * 10000 : 0"
-      - field: "bathroomBonus"
-        expression: "#bathrooms > 2 ? (#bathrooms - 2) * 5000 : 0"
-      - field: "ageAdjustment"
-        expression: "#yearBuilt != null ? (#yearBuilt < 1980 ? -20000 : (#yearBuilt > 2010 ? 15000 : 0)) : 0"
-      - field: "estimatedValue"
-        expression: "#baseValue + #bedroomBonus + #bathroomBonus + #ageAdjustment"
-      - field: "marketCategory"
-        expression: "#estimatedValue >= 1000000 ? 'LUXURY' : (#estimatedValue >= 500000 ? 'PREMIUM' : (#estimatedValue >= 250000 ? 'STANDARD' : 'AFFORDABLE'))"
-```
-
-Enrichments automatically add related information to your data during rule evaluation. Think of them as smart lookups that happen behind the scenes before your rules are evaluated.
-
-#### Performance Optimization Patterns
-
-**Conditional Execution for Expensive Operations:**
-
-```yaml
-enrichments:
-  - id: "expensive-calculation"
-    type: "calculation-enrichment"
-    name: "Conditional Expensive Calculations"
-    condition: "#amount > 10000 && #requiresDetailedAnalysis == true"  # Only run for high-value transactions
-    calculations:
-      - field: "complexRiskScore"
-        expression: "#creditScore * 0.4 + #incomeScore * 0.3 + #historyScore * 0.2 + #geographicScore * 0.1"
-      - field: "fraudProbability"
-        expression: "T(java.lang.Math).min(1.0, (#complexRiskScore < 50 ? 0.8 : (#complexRiskScore < 70 ? 0.4 : 0.1)))"
-      - field: "requiresManualReview"
-        expression: "#fraudProbability > 0.5 || #amount > 100000"
-
-  - id: "lightweight-screening"
-    type: "calculation-enrichment"
-    name: "Fast Screening for Small Transactions"
-    condition: "#amount <= 10000"  # Quick processing for small amounts
-    calculations:
-      - field: "basicRiskLevel"
-        expression: "#amount > 1000 ? 'MEDIUM' : 'LOW'"
-      - field: "autoApprove"
-        expression: "#basicRiskLevel == 'LOW' && #customerStatus == 'GOOD_STANDING'"
-```
-
-**Caching and Lookup Optimization:**
-
-```yaml
-enrichments:
-  - id: "cached-customer-data"
-    type: "lookup-enrichment"
-    name: "High-Performance Customer Lookup"
-    condition: "['customerId'] != null"
-    lookup-config:
-      lookup-dataset:
-        type: "database"
-        connection-name: "customer-cache"
-        query: "SELECT * FROM customer_cache WHERE customer_id = ?"
-        parameters:
-          - field: "customerId"
-        cache-enabled: true
-        cache-ttl-seconds: 3600  # Cache for 1 hour
-        cache-max-size: 10000    # Keep up to 10K customers in cache
-    field-mappings:
-      - source-field: "risk_profile"
-        target-field: "cachedRiskProfile"
-      - source-field: "credit_limit"
-        target-field: "cachedCreditLimit"
-```
-
-#### Complex Business Workflow Examples
-
-**Multi-Stage Approval Workflow:**
-
-```yaml
 rule-chains:
-  - id: "loan-approval-workflow"
+  - id: "settlement-eligibility-pipeline"
     pattern: "sequential-dependency"
     configuration:
       stages:
-        - stage: 1
-          name: "Initial Screening"
-          rule:
-            condition: "#creditScore >= 600 && #income >= 30000 && #debtToIncome <= 0.5"
-            message: "Initial screening passed"
-          output-variable: "initialScreeningPassed"
-
-        - stage: 2
-          name: "Document Verification"
-          rule:
-            condition: "#initialScreeningPassed && #documentsComplete == true && #identityVerified == true"
-            message: "Document verification completed"
-          output-variable: "documentsVerified"
-
-        - stage: 3
-          name: "Risk Assessment"
-          rule:
-            condition: "#documentsVerified && (#riskScore = #creditScore * 0.4 + #incomeStability * 0.3 + #collateralValue * 0.3) >= 70"
-            message: "Risk assessment completed with score: {{#riskScore}}"
-          output-variable: "riskAssessmentScore"
-
-        - stage: 4
-          name: "Final Approval Decision"
-          rule:
-            condition: "#riskAssessmentScore >= 80 ? 'AUTO_APPROVED' : (#riskAssessmentScore >= 70 ? 'MANAGER_APPROVAL' : 'DECLINED')"
-            message: "Final decision: {{#riskAssessmentScore >= 80 ? 'AUTO_APPROVED' : (#riskAssessmentScore >= 70 ? 'MANAGER_APPROVAL' : 'DECLINED')}}"
-          output-variable: "finalDecision"
+        - rule: "validate-trade"
+          output-variable: "tradeValidated"
+        - rule: "check-counterparty"
+          output-variable: "counterpartyApproved"
 ```
 
-**Dynamic Pricing Workflow:**
+If stage 1 fails, stage 2 does not execute. Each stage stores its result in `output-variable`, making it available to subsequent stages via SpEL (e.g. `#tradeValidated`).
 
-```yaml
-rule-chains:
-  - id: "dynamic-pricing-engine"
-    pattern: "accumulative-chaining"
-    configuration:
-      accumulator-variable: "finalPrice"
-      initial-value: "#basePrice"
-      accumulation-rules:
-        - id: "volume-discount"
-          condition: "#quantity >= 100 ? #finalPrice * 0.9 : (#quantity >= 50 ? #finalPrice * 0.95 : #finalPrice)"
-          message: "Volume discount applied"
-          weight: 1.0
-
-        - id: "customer-tier-discount"
-          condition: "#customerTier == 'PLATINUM' ? #finalPrice * 0.85 : (#customerTier == 'GOLD' ? #finalPrice * 0.90 : (#customerTier == 'SILVER' ? #finalPrice * 0.95 : #finalPrice))"
-          message: "Customer tier discount applied"
-          weight: 1.0
-
-        - id: "seasonal-adjustment"
-          condition: "#season == 'HOLIDAY' ? #finalPrice * 1.1 : (#season == 'CLEARANCE' ? #finalPrice * 0.8 : #finalPrice)"
-          message: "Seasonal pricing adjustment"
-          weight: 1.0
-
-        - id: "market-demand-adjustment"
-          condition: "#demandLevel == 'HIGH' ? #finalPrice * 1.05 : (#demandLevel == 'LOW' ? #finalPrice * 0.95 : #finalPrice)"
-          message: "Market demand adjustment"
-          weight: 1.0
-
-      final-decision-rule:
-        id: "price-validation"
-        condition: "#finalPrice >= #minimumPrice && #finalPrice <= #maximumPrice"
-        message: "Final price validated: {{#finalPrice}}"
-```
-
-**Fraud Detection Pipeline:**
-
-```yaml
-rule-chains:
-  - id: "fraud-detection-pipeline"
-    pattern: "conditional-chaining"
-    configuration:
-      rules:
-        - id: "basic-fraud-check"
-          condition: "#amount <= 5000 && #merchantCategory != 'HIGH_RISK'"
-          message: "Basic fraud check passed - low risk transaction"
-          next-rule: "velocity-check"
-
-        - id: "velocity-check"
-          condition: "#dailyTransactionCount <= 10 && #dailyTransactionAmount <= 50000"
-          message: "Velocity check passed"
-          next-rule: "geo-location-check"
-
-        - id: "geo-location-check"
-          condition: "#transactionLocation == #customerHomeLocation || #travelNotificationActive == true"
-          message: "Geographic location check passed"
-          next-rule: "final-approval"
-
-        - id: "enhanced-fraud-check"
-          condition: "#amount > 5000 || #merchantCategory == 'HIGH_RISK'"
-          message: "Enhanced fraud screening required"
-          next-rule: "ml-fraud-score"
-
-        - id: "ml-fraud-score"
-          condition: "#mlFraudScore < 0.7"
-          message: "Machine learning fraud score acceptable: {{#mlFraudScore}}"
-          next-rule: "manual-review"
-
-        - id: "manual-review"
-          condition: "#mlFraudScore >= 0.7 ? 'MANUAL_REVIEW_REQUIRED' : 'APPROVED'"
-          message: "Transaction requires manual review due to high fraud score"
-
-        - id: "final-approval"
-          condition: "'APPROVED'"
-          message: "Transaction approved through automated screening"
-```
-
-**Why use enrichments?**
-Instead of just having a status code like "A", enrichments can automatically add the full description "Active Customer" to your data, which your rules can then use.
-
-**Create an enrichment-focused configuration:**
-
-```yaml
-# Required metadata for all YAML files
-metadata:
-  name: "Customer Data Enrichment"
-  version: "1.0.0"
-  description: "Enrichment rules to add reference data to customer records"
-  type: "rule-config"
-  author: "data.enrichment@company.com"
-
-# Enrichments add extra data to your objects during rule evaluation
-enrichments:
-  - id: "status-enrichment"                    # Unique identifier for this enrichment
-    name: "Customer Status Enrichment"         # Human-readable name
-    type: "lookup-enrichment"                  # Type of enrichment (lookup from a dataset)
-    condition: "['statusCode'] != null"        # Only enrich if statusCode exists
-    lookup-config:
-      lookup-dataset:                          # The data to look up from
-        type: "inline"                         # Data is defined right here in the file
-        key-field: "code"                      # Field to match against
-        data:                                  # The actual lookup data
-          - code: "A"
-            name: "Active"
-            description: "Active customer"
-            priority: "High"
-          - code: "I"
-            name: "Inactive"
-            description: "Inactive customer"
-            priority: "Low"
-          - code: "S"
-            name: "Suspended"
-            description: "Suspended customer"
-            priority: "Medium"
-    field-mappings:                            # How to add the looked-up data to your object
-      - source-field: "name"                   # Take the "name" from lookup data
-        target-field: "statusName"             # Add it as "statusName" to your object
-      - source-field: "description"
-        target-field: "statusDescription"
-      - source-field: "priority"
-        target-field: "customerPriority"
-```
-
-**Use this enrichment configuration:**
-
-```java
-// ⭐ SIMPLEST (One Line) - For single evaluation
-Map<String, Object> data = Map.of("name", "John Doe", "statusCode", "A");
-RuleResult result = RulesEngine.fromFile("customer-enrichment.yaml").evaluate(data);
-
-// Access the enriched data
-Map<String, Object> enrichedData = result.getEnrichedData();
-System.out.println("Status Name: " + enrichedData.get("statusName"));         // "Active"
-System.out.println("Description: " + enrichedData.get("statusDescription"));  // "Active customer"
-System.out.println("Priority: " + enrichedData.get("customerPriority"));      // "High"
-```
-
-**What happens during enrichment:**
-1. Your data has `statusCode: "A"`
-2. APEX looks up "A" in the inline dataset
-3. It finds the matching record with name "Active", description "Active customer", priority "High"
-4. It adds `statusName: "Active"`, `statusDescription: "Active customer"`, and `customerPriority: "High"` to your data
-5. Your rules can now use these enriched fields
-
-#### 3.3 Rule Result References in Conditional Enrichments
+### Rule Result References in Conditional Enrichments
 
 APEX provides powerful context variables that allow enrichments to access the results of rule evaluations. This enables sophisticated conditional logic where enrichments are applied based on which rules passed or failed.
 
@@ -1594,129 +1202,122 @@ enrichments:
 - Build complex decision trees using rule results
 - Create audit trails showing which rules triggered specific actions
 
-#### 3.4 Combining Rules and Enrichments
+### Rule Categories
 
-The real power of YAML configuration comes from combining rules and enrichments. Enrichments run first to add data, then rules evaluate using both the original and enriched data.
-
-**Complete configuration with both rules and enrichments:**
+Categories group rules by business domain and control execution behaviour at a higher organizational level than rule groups. Rules assigned to a category inherit the category's execution settings.
 
 ```yaml
-# Required metadata for all YAML files
-metadata:
-  name: "Customer Validation and Enrichment"
-  version: "1.0.0"
-  description: "Complete customer processing with enrichment and validation"
-  type: "rule-config"
-  author: "customer.processing@company.com"
-  created: "2025-08-02"
+categories:
+  - name: "regulatory-compliance"
+    description: "MiFID II and EMIR regulatory compliance rules"
+    priority: 1
+    enabled: true
+    business-domain: "Compliance"
+    business-owner: "compliance-team@company.com"
+    stop-on-first-failure: true
+    parallel-execution: false
 
-# Enrichments run FIRST to add reference data
-enrichments:
-  - id: "status-enrichment"
-    name: "Customer Status Enrichment"
-    type: "lookup-enrichment"
-    condition: "['statusCode'] != null"
-    lookup-config:
-      lookup-dataset:
-        type: "inline"
-        key-field: "code"
-        data:
-          - code: "A"
-            name: "Active"
-            description: "Active customer"
-            allowTransactions: true
-            creditLimit: 10000
-          - code: "I"
-            name: "Inactive"
-            description: "Inactive customer"
-            allowTransactions: false
-            creditLimit: 0
-          - code: "S"
-            name: "Suspended"
-            description: "Suspended customer"
-            allowTransactions: false
-            creditLimit: 0
-    field-mappings:
-      - source-field: "name"
-        target-field: "statusName"
-      - source-field: "allowTransactions"
-        target-field: "canTransact"
-      - source-field: "creditLimit"
-        target-field: "maxCredit"
+  - name: "data-quality"
+    description: "Data quality and completeness validation"
+    priority: 2
+    enabled: true
+    business-domain: "Operations"
+    effective-date: "2026-01-01"
+    expiration-date: "2026-12-31"
 
-# Rules run AFTER enrichments and can use the enriched data
+  - name: "business-rules"
+    description: "Core business logic rules"
+    priority: 3
+    enabled: true
+    business-domain: "Trading"
+    parallel-execution: true
+```
+
+Rules reference their category by name:
+
+```yaml
 rules:
-  - id: "age-check"
-    name: "Age Validation"
-    condition: "#age >= 18"
-    message: "Customer must be at least 18 years old"
+  - id: "mifid-reporting-check"
+    category: "regulatory-compliance"
+    condition: "#reportingFlag == true"
+    message: "Trade must be flagged for MiFID II reporting"
     severity: "ERROR"
 
-  - id: "transaction-permission-check"
-    name: "Transaction Permission Check"
-    condition: "#canTransact == true"  # Uses enriched field!
-    message: "Customer status does not allow transactions"
+  - id: "trade-amount-check"
+    category: "business-rules"
+    condition: "#amount > 0"
+    message: "Trade amount must be positive"
     severity: "ERROR"
-
-  - id: "credit-limit-check"
-    name: "Credit Limit Validation"
-    condition: "#requestedAmount <= #maxCredit"  # Uses enriched field!
-    message: "Requested amount exceeds customer credit limit"
-    severity: "ERROR"
-
-  - id: "email-check"
-    name: "Email Validation"
-    condition: "#email != null && #email.contains('@')"
-    message: "Valid email address is required"
-    severity: "WARNING"
 ```
 
-**Using the combined configuration:**
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `name` | Yes | — | Unique category identifier |
+| `description` | No | — | Human-readable description |
+| `priority` | No | 100 | Execution priority (lower = higher priority) |
+| `enabled` | No | `true` | Whether category is active |
+| `business-domain` | No | — | Business domain classification |
+| `business-owner` | No | — | Owner responsible for category |
+| `stop-on-first-failure` | No | `false` | Stop on first rule failure in this category |
+| `parallel-execution` | No | `false` | Execute rules in this category concurrently |
+| `effective-date` | No | — | Date when category becomes effective (ISO 8601) |
+| `expiration-date` | No | — | Date when category expires (ISO 8601) |
 
-```java
-// ⭐ SIMPLEST (One Line) - For single evaluation
-Map<String, Object> data = Map.of(
-    "age", 25,
-    "email", "john@example.com",
-    "statusCode", "A",           // Will be enriched to add transaction permissions
-    "requestedAmount", 5000      // Will be validated against enriched credit limit
-);
-RuleResult result = RulesEngine.fromFile("customer-complete.yaml").evaluate(data);
+### Transformations
 
-// Check results
-if (result.isSuccess()) {
-    System.out.println("All rules passed!");
+Transformations modify data based on conditional logic. Each transformation rule evaluates a condition and executes different actions depending on whether it is true or false.
 
-    // Access enriched data
-    Map<String, Object> enrichedData = result.getEnrichedData();
-    System.out.println("Customer Status: " + enrichedData.get("statusName"));
-    System.out.println("Can Transact: " + enrichedData.get("canTransact"));
-    System.out.println("Credit Limit: " + enrichedData.get("maxCredit"));
-} else {
-    System.out.println("Some rules failed:");
-    result.getFailureMessages().forEach(System.out::println);
-}
+```yaml
+transformations:
+  - id: "trade-classification"
+    transformation-rules:
+      # Classify trades by notional amount
+      - condition: "#notional > 1000000"
+        actions-true:
+          - field: "tradeCategory"
+            value: "LARGE"
+          - field: "requiresApproval"
+            value: true
+        actions-false:
+          - field: "tradeCategory"
+            value: "STANDARD"
+          - field: "requiresApproval"
+            value: false
+
+      # Set settlement priority based on counterparty
+      - condition: "#counterparty != null && #counterparty.riskRating == 'HIGH'"
+        actions-true:
+          - field: "settlementPriority"
+            value: "URGENT"
+          - field: "reviewRequired"
+            value: true
+        actions-false:
+          - field: "settlementPriority"
+            value: "NORMAL"
+
+      # Transform using SpEL expressions
+      - condition: "#currency != null"
+        actions-true:
+          - field: "currencyUpper"
+            expression: "#currency.toUpperCase()"
+          - field: "processedTimestamp"
+            expression: "T(java.time.Instant).now().toString()"
 ```
 
-**Execution Flow:**
-1. **Enrichment Phase**: APEX looks up status code "A" and adds:
-   - `statusName: "Active"`
-   - `canTransact: true`
-   - `maxCredit: 10000`
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `id` | Yes | — | Unique transformation identifier |
+| `transformation-rules` | Yes | — | List of conditional transformation rules |
+| `transformation-rules[].condition` | Yes | — | SpEL expression evaluated against input data |
+| `transformation-rules[].actions-true` | No | — | Actions when condition is true |
+| `transformation-rules[].actions-false` | No | — | Actions when condition is false |
+| `actions-true[].field` | Yes | — | Target field name |
+| `actions-true[].value` | No | — | Static value to assign |
+| `actions-true[].expression` | No | — | SpEL expression to evaluate |
 
-2. **Rules Phase**: APEX evaluates rules using both original and enriched data:
-   - Age check: `25 >= 18` ✓ Pass
-   - Transaction permission: `true == true` ✓ Pass (uses enriched `canTransact`)
-   - Credit limit: `5000 <= 10000` ✓ Pass (uses enriched `maxCredit`)
-   - Email check: `john@example.com` contains '@' ✓ Pass
+> `actions-true` takes precedence over the legacy `actions` property. Use `actions-false` (or the legacy alias `else-actions`) for the false branch.
 
-**Key Benefits of This Approach:**
-- **Separation of Concerns**: Enrichments handle data lookup, rules handle business logic
-- **Reusability**: The same enrichments can be used by multiple rule sets
-- **Maintainability**: Business users can modify rules without touching enrichment logic
-- **Performance**: Enrichments run once, rules can use the enriched data multiple times
-
-### Which Approach Should You Use?
+## 7. Choosing Your Approach
 
 - **One-liner**: Perfect for simple, one-off rule checks
 - **Template-based**: Great for common validation scenarios with multiple related rules
@@ -1725,12 +1326,12 @@ if (result.isSuccess()) {
 
 **Data Integration Considerations:**
 - **Small, static data**: Use inline datasets or external YAML files
-- **Large or dynamic data**: Use [external data sources](#3-external-data-sources) (databases, REST APIs, file systems)
-- **Enterprise integration**: Connect to existing systems using the [APEX External Data Sources Guide](APEX_EXTERNAL_DATA_SOURCES_GUIDE.md)
+- **Large or dynamic data**: Use [external data sources](#15-external-data-source-integration) (databases, REST APIs, file systems)
+- **Enterprise integration**: Connect to existing systems using external data-source references (see [§15](#15-external-data-source-integration))
 
 You can start with the one-liner approach and gradually move to more sophisticated approaches as your needs grow!
 
-## Scenario-Based Processing Implementation
+## 8. Scenario-Based Processing
 
 ### Core Components
 
@@ -1852,267 +1453,88 @@ enrichments:
             quoteCurrency: "USD"
 ```
 
-### Data Type Detection and Routing
+### Classification-Based Routing
 
-APEX automatically detects data types using multiple strategies:
+APEX routes data to scenarios based on **field values in your input data** using classification rules. Each scenario defines a SpEL condition that is evaluated against the input — the **first matching scenario wins**.
 
-#### 1. Class Name Detection
-```java
-// Direct class name matching
-if (data.getClass().getSimpleName().equals("OtcOption")) {
-    return getScenario("otc-options-standard");
-}
-```
+#### How It Works
 
-#### 2. Fully Qualified Class Name Detection
-```java
-// Full package and class name matching
-if (data.getClass().getName().equals("dev.mars.apex.demo.data.OtcOption")) {
-    return getScenario("otc-options-standard");
-}
-```
+1. Each scenario in the registry has a `classification-rule` with a `condition`
+2. APEX evaluates scenarios **in registry order** against your input data
+3. The first scenario whose condition evaluates to `true` is selected
+4. If no scenario matches, the `default-scenario` is used
 
-#### 3. Interface-Based Detection
-```java
-// Interface implementation detection
-if (data instanceof FinancialInstrument) {
-    return getScenarioForInterface("FinancialInstrument");
-}
-```
-
-#### 4. Annotation-Based Detection
-```java
-// Custom annotation detection
-@ScenarioMapping("otc-options-standard")
-public class OtcOption {
-    // Class implementation
-}
-```
-
-### Routing Logic
-
-The routing engine follows this decision tree:
-
-```mermaid
-graph TD
-    A[Data Object Received] --> B{Class Name Match?}
-    B -->|Yes| C[Load Scenario]
-    B -->|No| D{Full Class Name Match?}
-    D -->|Yes| C
-    D -->|No| E{Interface Match?}
-    E -->|Yes| C
-    E -->|No| F{Annotation Match?}
-    F -->|Yes| C
-    F -->|No| G[Use Default/Fallback]
-
-    C --> H{Routing Rules?}
-    H -->|Yes| I[Apply Conditional Routing]
-    H -->|No| J[Standard Processing]
-
-    I --> K[Execute Scenario]
-    J --> K
-    G --> L[Log Warning & Continue]
-```
-
-### Conditional Routing
-
-Scenarios can include conditional routing rules that modify processing based on data content:
+#### Scenario Registry with Classification Rules
 
 ```yaml
-routing-rules:
-  - condition: "#notionalAmount > 10000000"
-    config-override: "config/high-value-validation.yaml"
-    enrichment-override: "config/enhanced-enrichment.yaml"
+# scenario-registry.yaml
+metadata:
+  type: "scenario-registry"
 
-  - condition: "#counterparty.riskRating == 'HIGH'"
-    validation-override: "config/high-risk-validation.yaml"
+scenarios:
+  # Most specific rules first (evaluated in order)
+  - scenario-id: "high-value-otc-validation"
+    config-file: "scenarios/high-value-otc.yaml"
+    classification-rule:
+      condition: "#tradeType == 'OTCOption' && #notional > 100000000"
+      description: "High-value OTC option trades (>$100M)"
 
-  - condition: "#jurisdiction == 'US'"
-    compliance-config: "config/us-regulatory-compliance.yaml"
+  - scenario-id: "us-otc-validation"
+    config-file: "scenarios/us-otc-option.yaml"
+    classification-rule:
+      condition: "#tradeType == 'OTCOption' && #region == 'US'"
+      description: "US-region OTC option trades"
+
+  - scenario-id: "otc-option-standard"
+    config-file: "scenarios/otc-option-standard.yaml"
+    classification-rule:
+      condition: "#tradeType == 'OTCOption'"
+      description: "All other OTC option trades"
+
+  - scenario-id: "equity-trade-validation"
+    config-file: "scenarios/equity-trade.yaml"
+    classification-rule:
+      condition: "#assetClass == 'Equity'"
+      description: "Equity trades"
+
+routing:
+  strategy: "classification-based"
+  default-scenario: "equity-trade-validation"  # Fallback if nothing matches
 ```
 
-## Bootstrap Demonstrations
+> **Ordering matters.** A $150M US OTC option trade matches three scenarios above. Because APEX uses first-match semantics, it selects `high-value-otc-validation` (the most specific). Place specific rules before general ones.
 
-APEX includes four comprehensive bootstrap demonstrations that showcase complete end-to-end scenarios with real-world financial data, infrastructure setup, and comprehensive processing pipelines. These demos are designed to help you understand APEX capabilities through practical, runnable examples.
+#### Classification Rule Patterns
 
-### Why Bootstrap Demos Matter
+| Pattern | Example Condition | Use Case |
+|---------|-------------------|----------|
+| Single field | `#tradeType == 'OTCOption'` | Route by product type |
+| AND conditions | `#tradeType == 'OTC' && #region == 'US'` | Multi-field match |
+| Numeric threshold | `#notional > 100000000` | Value-based routing |
+| OR conditions | `#region == 'US' \|\| #currency == 'USD'` | Alternative matches |
+| String operations | `#tradeId.startsWith('TR-')` | Pattern-based routing |
+| Null safety | `#counterparty != null && #counterparty.riskRating == 'HIGH'` | Safe nested access |
 
-Bootstrap demos provide:
-- **Complete Infrastructure Setup**: Automatic database creation, sample data generation, and configuration loading
-- **Real-World Scenarios**: Authentic financial services use cases with realistic data and business logic
-- **Progressive Learning**: Each demo builds on concepts from previous ones
-- **Self-Contained Execution**: Everything needed to run is included - no external dependencies
-- **Performance Benchmarking**: Real-time metrics and performance analysis
+## 9. Core Concepts
 
-### Available Bootstrap Demonstrations
-
-#### 1. Custody Auto-Repair Bootstrap
-**Complete custody settlement auto-repair for Asian markets**
-
-```bash
-cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap"
-```
-
-**What You'll Learn:**
-- Weighted rule-based decision making with sophisticated scoring
-- Sub-100ms processing with comprehensive performance metrics
-- Business-user maintainable YAML configuration
-- Real-world exception handling and edge cases
-
-**Key Features:**
-- **5 Progressive Scenarios**: From premium clients to exception handling
-- **66% Auto-Repair Success Rate**: Significantly above industry average (20-40%)
-- **Asian Markets Focus**: Japan, Hong Kong, Singapore with authentic market conventions
-- **Complete Audit Trail**: Regulatory compliance with detailed processing logs
-
-#### 2. Commodity Swap Validation Bootstrap
-**End-to-end commodity derivatives validation with static data enrichment**
-
-```bash
-cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap"
-```
-
-**What You'll Learn:**
-- Progressive API complexity from ultra-simple to advanced configuration
-- Multi-layered validation with 4 distinct approaches
-- Static data enrichment from multiple sources
-- Performance monitoring and optimization techniques
-
-**Key Features:**
-- **6 Learning Scenarios**: Each building on the previous one
-- **Realistic Market Data**: Energy (WTI, Brent), Metals (Gold, Silver), Agricultural (Corn)
-- **Complete Database Setup**: 5 comprehensive tables with production-ready structure
-- **API Progression**: Ultra-simple → Template-based → Advanced configuration
-
-#### 3. OTC Options Bootstrap Demo
-**Comprehensive OTC Options processing with multiple data lookup methods**
-
-```bash
-cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
-```
-
-**What You'll Learn:**
-- Three different data lookup approaches (inline, database, external files)
-- When to use each data integration method
-- Complete Spring Boot integration patterns
-- Realistic financial data structures and conventions
-
-**Key Features:**
-- **Multiple Data Sources**: PostgreSQL database, external YAML files, inline datasets
-- **Major Commodity Coverage**: Natural Gas, Oil, Metals, Agricultural products
-- **Authentic Financial Data**: Real OTC Options structures and market conventions
-- **Complete Integration**: Full Spring Boot application with dependency injection
-
-#### 4. Scenario-Based Processing Demo
-**Automatic data type routing and scenario-specific processing**
-
-```bash
-cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.ScenarioBasedProcessingDemo"
-```
-
-**What You'll Learn:**
-- Automatic data type detection and routing
-- Scenario-specific processing pipeline configuration
-- Centralized configuration management
-- Fallback handling for unknown data types
-
-**Key Features:**
-- **Intelligent Routing**: Automatic detection based on data structure
-- **Multiple Data Types**: OTC Options, Commodity Swaps, Settlement Instructions
-- **Centralized Registry**: Single configuration point for all scenarios
-- **Graceful Degradation**: Proper handling of edge cases and unknown types
-
-### Recommended Learning Path
-
-**For New Users:**
-1. **Start with OTC Options Bootstrap** (15-20 minutes)
-   - Learn basic data integration patterns
-   - Understand different data source approaches
-   - See complete end-to-end processing
-
-2. **Progress to Commodity Swap Validation** (20-30 minutes)
-   - Experience API progression from simple to advanced
-   - Learn multi-layered validation techniques
-   - Understand performance monitoring
-
-3. **Explore Custody Auto-Repair** (25-35 minutes)
-   - See real-world business logic in action
-   - Experience weighted rule-based decision making
-   - Understand exception handling and edge cases
-
-4. **Finish with Scenario-Based Processing** (15-20 minutes)
-   - Learn advanced routing and configuration management
-   - Understand centralized scenario management
-   - See how different data types are handled
-
-**Total Learning Time:** 75-105 minutes for comprehensive understanding
-
-### Running All Bootstrap Demos
-
-```bash
-# Navigate to demo module
-cd apex-demo
-
-# Run all demos in sequence (recommended for learning)
-./scripts/run-demos.sh     # Linux/Mac
-./scripts/run-demos.bat    # Windows
-
-# Or run individual demos
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.ScenarioBasedProcessingDemo"
-```
-
-### What to Expect
-
-Each bootstrap demo provides:
-- **Startup Messages**: Clear indication of what's being demonstrated
-- **Infrastructure Setup**: Automatic creation of databases, files, and configuration
-- **Progressive Scenarios**: Multiple scenarios showing different aspects
-- **Performance Metrics**: Real-time processing times and success rates
-- **Comprehensive Output**: Detailed logging of all processing steps
-- **Summary Reports**: Final analysis of results and key learnings
-
-### Integration with REST API
-
-All bootstrap demos integrate with the APEX REST API, providing examples of:
-- Rule evaluation via HTTP endpoints
-- Configuration management through API calls
-- Performance monitoring through actuator endpoints
-- Interactive testing through Swagger UI
-
-Start the REST API server and explore the interactive documentation:
-```bash
-cd apex-rest-api
-mvn spring-boot:run
-# Then visit: http://localhost:8080/swagger-ui.html
-```
-
-## Core Concepts
-
-Now that you've seen the three approaches to using APEX, let's dive deeper into the core concepts that make YAML configuration so powerful. We've already covered Rules and Enrichments in detail in the [YAML Configuration section](#3-yaml-configuration-most-flexible-approach), so here we'll focus on Datasets and provide a quick summary.
+Now that you've seen the Quick Start examples, let's dive deeper into the core concepts. Rules and Enrichments are covered in earlier sections, so here we'll focus on Datasets and provide a quick summary.
 
 ### Quick Summary: Rules and Enrichments
 
-**Rules** (detailed in [section 3.1](#31-rules-defining-your-business-logic)):
+**Rules** (see [Understanding Rule Conditions](#understanding-rule-conditions)):
 - Define your business logic using Spring Expression Language (SpEL)
 - Include conditions, messages, and severity levels
 - Run after enrichments and can use enriched data
 - Common patterns: validation, range checking, required fields
 
-**Enrichments** (detailed in [section 3.2](#32-enrichments-adding-smart-data)):
+**Enrichments** (see [Enrichment Patterns and Expressions](#enrichment-patterns-and-expressions)):
 - Automatically add related data during rule evaluation
 - Run before rules to provide additional context
 - Use lookup datasets to find related information
 - Map lookup results to new fields in your data
 
-**Combined Power** (detailed in [section 3.3](#33-combining-rules-and-enrichments)):
-- Enrichments run first to add reference data
+**Combined Power** (see [Quick Start Step 5](#step-5-putting-it-all-together)):
+- Enrichments normally appear before rules — APEX processes in document order
 - Rules then evaluate using both original and enriched data
 - Enables sophisticated business logic with clean separation of concerns
 
@@ -2193,7 +1615,7 @@ data:
 - Data that changes independently of your rule configurations
 - When you want to keep your main configuration file clean and focused
 
-## Using Parameters in APEX Rules
+## 10. Using Parameters in APEX Rules
 
 One of APEX's most powerful features is its ability to create generic, reusable rules through parameterization. Instead of creating multiple similar rules for different scenarios, you can create a single parameterized rule that adapts to different contexts. This section covers six different approaches to parameterization, each suited for different use cases.
 
@@ -2908,149 +2330,267 @@ RuleResult result = engine.evaluate(data);
 7. **Monitor Performance**: Track performance impact of parameterized rules
 8. **Version Control**: Keep parameter changes in version control with rule changes
 
-## YAML Configuration Guide
+## 11. Advanced Architecture Features
 
-YAML (Yet Another Markup Language) is a human-readable format for configuration files. Don't worry if you're new to YAML - it's designed to be easy to read and write. Think of it as a structured way to organize information, similar to how you might organize information in an outline.
+This section covers advanced architectural features that provide enterprise-grade capabilities for complex rule processing scenarios.
 
-### Understanding YAML Basics
+### Scenario-Based Processing Architecture
 
-YAML uses indentation (spaces) to show relationships between items. Here are the key concepts:
-- **Indentation matters**: Use spaces (not tabs) to show hierarchy
-- **Lists**: Items that start with a dash (`-`)
-- **Key-value pairs**: `key: value`
-- **Nested structures**: Indent to show items belong together
+APEX's scenario-based processing uses a sophisticated three-layer architecture that separates concerns and provides maximum flexibility for enterprise-scale rule management.
 
-### Configuration Structure
+#### Three-Layer Architecture
 
-Every APEX configuration file follows this basic structure:
+```mermaid
+graph TD
+    subgraph "Layer 1: Discovery"
+        Registry["Scenario Registry<br/>config/data-type-scenarios.yaml<br/>• Central catalog<br/>• Metadata management<br/>• Discovery API"]
+    end
+
+    subgraph "Layer 2: Routing"
+        ScenarioFiles["Scenario Files<br/>scenarios/*.yaml<br/>• Data type mappings<br/>• Rule file references<br/>• Lightweight routing"]
+    end
+
+    subgraph "Layer 3: Configuration"
+        ConfigFiles["Configuration Files<br/>config/*.yaml<br/>• Reusable rule sets<br/>• Business logic<br/>• Validation chains"]
+    end
+
+    Registry -->|"loads & validates"| ScenarioFiles
+    ScenarioFiles -->|"references"| ConfigFiles
+```
+
+#### Architecture Benefits
+
+**Centralized Management**
+- **Single Registry**: One place to discover all available scenarios
+- **Metadata Management**: Rich metadata for governance and compliance
+- **Version Control**: Complete change tracking and rollback capabilities
+- **Discovery API**: Programmatic access to scenario information
+
+**Type-Safe Routing**
+- **Automatic Detection**: Intelligent data type detection based on object structure
+- **Flexible Mapping**: Support for multiple scenarios per data type
+- **Fallback Handling**: Graceful degradation for unknown data types
+- **Performance Optimization**: Efficient routing with minimal overhead
+
+**Lightweight Configuration**
+- **Separation of Concerns**: Routing logic separate from business logic
+- **Reusable Components**: Rule configurations can be shared across scenarios
+- **Easy Maintenance**: Simple scenario files that are easy to understand and modify
+- **Scalable Architecture**: Supports large numbers of scenarios and data types
+
+#### Core Capabilities
+
+**Rule Evaluation**
+- **Three-Layer API Design**: Simple one-liner evaluation → Structured rule sets → Advanced rule chains
+- **SpEL Expression Support**: Full Spring Expression Language capabilities with custom functions
+- **Multiple Data Types**: Support for primitives, objects, collections, and complex nested structures
+- **Context Management**: Rich evaluation context with variable propagation and result tracking
+
+**Configuration Management**
+- **YAML Configuration**: External rule and dataset management with hot-reloading support
+- **Rule Groups**: Organize related rules with execution control and priority management
+- **Rule Chains**: Advanced patterns for nested rules and complex business logic workflows
+- **Data Service Configuration**: Programmatic setup of data sources for rule evaluation
+- **Metadata Support**: Enterprise metadata including business ownership, effective dates, and custom properties
+
+**Data Enrichment**
+- **YAML Dataset Enrichment**: Embed lookup datasets directly in configuration files
+- **Multiple Enrichment Types**: Lookup enrichment, transformation enrichment, and custom processors
+- **Caching Support**: High-performance in-memory caching with configurable strategies
+- **External Integration**: Support for database lookups, REST API calls, and custom data sources
+
+**Enterprise Features**
+- **Performance Monitoring**: Execution time tracking, rule performance analytics, and bottleneck identification
+- **Error Handling**: Comprehensive error management with detailed logging and graceful degradation
+- **Audit Trail**: Complete execution history with rule results and context tracking
+- **Security**: Input validation, expression sandboxing, and access control integration
+
+**Financial Services Support**
+- **OTC Derivatives Validation**: Specialized rules for financial instrument validation
+- **Regulatory Compliance**: Support for MiFID II, EMIR, and Dodd-Frank requirements
+- **Risk Assessment**: Multi-criteria risk scoring with weighted components
+- **Trade Processing**: Complex workflow patterns for trade lifecycle management
+- **Bootstrap Demos**: Complete end-to-end financial scenarios with database setup and infrastructure
+- **Asian Markets Support**: Specialized patterns for Asian regulatory regimes and market conventions
+
+**Advanced Rule Patterns**
+- **Conditional Chaining**: Execute expensive rules only when conditions are met
+- **Sequential Dependency**: Build processing pipelines where each stage uses previous results
+- **Result-Based Routing**: Route to different rule sets based on intermediate results
+- **Accumulative Chaining**: Build up scores across multiple criteria with weighted components
+- **Complex Financial Workflow**: Multi-stage processing with dependencies and conditional execution
+- **Fluent Rule Builder**: Complex decision trees with conditional branching logic
+
+### Component Architecture (v2.2)
+
+Components group multiple YAML files into reusable units for scenario processing. This enables modular configuration management and promotes reuse across different scenarios.
+
+#### Component Structure
 
 ```yaml
-# Metadata section: Information about this configuration file
+# components/validation-component.yaml
 metadata:
-  id: "configuration-unique-id"          # Required: Unique identifier for this configuration
-  name: "Configuration Name"              # Required: What this configuration does
-  version: "1.0.0"                       # Required: Version for tracking changes
-  description: "Configuration description" # Required: Detailed explanation
-  type: "rule-config"                     # Required: File type (rule-config, scenario, dataset, etc.)
-  author: "Team Name"                     # Required for rule-config: Who created/maintains this
-  created: "2025-08-02"                  # Optional: When it was created
-  last-modified: "2025-08-02"           # Optional: Last update date
-  tags: ["tag1", "tag2"]                # Optional: Categories for organization
+  id: "comprehensive-validation"
+  name: "Comprehensive Validation Component"
+  version: "1.0.0"
+  type: "component"  # Key: type must be "component"
 
-# Rules section: Your business logic
-rules:
-  # Individual rule definitions go here
-  # Each rule defines a condition to check
+rule-configurations:
+  - file: "rules/basic-validation.yaml"
+    failure-policy: "terminate"
+  - file: "rules/compliance-rules.yaml"
+    failure-policy: "continue-with-warnings"
 
-# Enrichments section: Data enhancement
-enrichments:
-  # Enrichment definitions go here
-  # Each enrichment adds data to your objects
+enrichment-refs:
+  - file: "enrichments/market-data.yaml"
+    execution-order: 10
 
-# Rule groups section: Organized rule collections
-rule-groups:
-  # Rule group definitions go here
-  # Groups let you organize related rules together
+component-refs:  # Nested components (max depth 5)
+  - file: "components/sub-component.yaml"
+    execution-order: 20
 ```
 
-**Why organize it this way?**
-- **Metadata**: Helps you track and document your configurations
-- **Rules**: Contains your business logic and validation requirements
-- **Enrichments**: Automatically adds useful information to your data
-- **Rule Groups**: Organizes related rules for better management
+#### Nesting Depth Rules
 
-### Rule Configuration
+| Depth Level | Status | Behavior |
+|-------------|--------|----------|
+| 1-2 | OK | Normal processing |
+| 3-5 | WARNING | Logs warning, continues processing |
+| 6+ | ERROR | Fails to load component |
 
-Rules are where you define your business logic. Each rule is like a question you're asking about your data. Here's how to configure them:
+#### Execution Order
+
+Components support explicit `execution-order` or document order (APEX default). Use execution-order when you need deterministic sequencing across multiple components.
+
+### Error Recovery System
+
+APEX provides severity-based error handling with configurable recovery strategies for enterprise-grade fault tolerance.
+
+#### Severity Levels & Default Behavior
+
+| Severity | Default Recovery | Default Strategy | Use Case |
+|----------|------------------|------------------|----------|
+| CRITICAL | Disabled | FAIL_FAST | System failures, data corruption |
+| ERROR | Disabled | FAIL_FAST | Business logic failures, missing required data |
+| WARNING | Enabled | CONTINUE_WITH_DEFAULT | Non-critical issues, optional validations |
+| INFO | Enabled | CONTINUE_WITH_DEFAULT | Informational, audit trails |
+
+#### Recovery Strategies
+
+- **FAIL_FAST**: Immediately fail, no recovery attempt
+- **CONTINUE_WITH_DEFAULT**: Log error, continue with safe defaults
+- **RETRY_WITH_SAFE_EXPRESSION**: Retry with simplified expression
+- **SKIP_RULE**: Skip failed rule, continue processing
+
+#### YAML Configuration
 
 ```yaml
-rules:
-  - id: "unique-rule-id"                    # Required: Unique identifier (like a name tag)
-    name: "Human Readable Name"             # Required: What this rule does in plain English
-    condition: "#field > 100"          # Required: The actual business logic to check
-    message: "Validation message"           # Optional: What to show if the rule fails
-    severity: "ERROR"                       # Optional: How serious is a failure? (ERROR, WARNING, INFO)
-    enabled: true                           # Optional: Turn this rule on/off (default: true)
-    tags: ["validation", "business"]        # Optional: Categories for organization
-    metadata:                               # Optional: Additional information for governance
-      owner: "Business Team"               # Who owns/maintains this rule
-      domain: "Finance"                    # What business area it belongs to
-      purpose: "Regulatory compliance"     # Why this rule exists
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+  
+  severity-policies:
+    CRITICAL:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+    ERROR:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 1
+      retry-delay: 100
+    INFO:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
 ```
 
-**Understanding each part:**
+#### Critical Concept: ResultType vs Severity
 
-- **id**: A unique name for this rule (like "customer-age-check"). Use descriptive names that make sense to your team.
+Understanding the distinction between ResultType (system-level) and Severity (business-level):
 
-- **name**: A human-friendly description that anyone can understand (like "Customer Age Validation").
+- **ResultType** (system-level): MATCH, NO_MATCH, ERROR, ENRICHMENT_FAILURE
+- **Severity** (business-level): CRITICAL, ERROR, WARNING, INFO
 
-- **condition**: The actual business logic using SpEL expressions. Common patterns:
-  - `#age >= 18` (age must be 18 or older)
-  - `#amount > 0 && #amount <= 1000` (amount between 0 and 1000)
-  - `#email != null && #email.contains('@')` (email must exist and contain @)
+When condition evaluates to TRUE → ResultType=MATCH (severity is irrelevant)
+When condition evaluates to FALSE + ERROR severity + recovery disabled → ResultType=ERROR (fail-fast behavior)
 
-- **message**: What users see when the rule fails. Make it helpful and actionable.
+### External Data-Source Reference System
 
-- **severity**: How important is this rule?
-  - `ERROR`: Critical - must be fixed
-  - `WARNING`: Important - should be reviewed
-  - `INFO`: Informational - good to know
+The defining architectural pattern of APEX—infrastructure configs live separately from business logic for clean separation of concerns.
 
-- **enabled**: Allows you to temporarily turn rules on/off without deleting them.
-
-- **tags**: Help organize and filter rules. Use consistent tags across your organization.
-
-- **metadata**: Additional information for governance, documentation, and audit trails.
-
-### Enrichment Configuration
-
-Enrichments automatically add related information to your data. Think of them as smart lookups that happen automatically during rule evaluation.
+#### Business Logic File (Lean)
 
 ```yaml
+# trade-validation.yaml
+metadata:
+  name: "Trade Validation Rules"
+  type: "rule-config"
+
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/customer-database.yaml"  # External reference
+  - name: "market-data-api"
+    source: "data-sources/market-data.yaml"
+
 enrichments:
-  - id: "enrichment-id"                     # Required: Unique identifier for this enrichment
-    type: "lookup-enrichment"               # Required: Type of enrichment (lookup is most common)
-    condition: "['field'] != null"          # Optional: Only enrich if this condition is true
-    enabled: true                           # Optional: Turn this enrichment on/off (default: true)
-    lookup-config:                          # Configuration for the lookup process
-      lookup-dataset:                       # Where to find the lookup data
-        type: "inline"                      # Data source type: "inline" or "yaml-file"
-        key-field: "lookupKey"              # Field to match against in your data
-        cache-enabled: true                 # Keep lookup data in memory for speed
-        cache-ttl-seconds: 3600            # How long to cache (1 hour = 3600 seconds)
-        default-values:                     # What to use if no match is found
-          defaultField: "defaultValue"
-        data:                              # The actual lookup data (for inline type)
-          - lookupKey: "key1"              # This is what we match against
-            field1: "value1"               # Additional data to add
-            field2: "value2"
-    field-mappings:                        # How to add the looked-up data to your object
-      - source-field: "field1"             # Take this field from the lookup data
-        target-field: "enrichedField1"     # Add it to your object with this name
-      - source-field: "field2"
-        target-field: "enrichedField2"
+  - id: "customer-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "customer-database"
+        query-ref: "getActiveCustomer"
+      lookup-key: "#customerId"
+    field-mappings:
+      - source-field: "creditLimit"
+        target-field: "customerCreditLimit"
+
+rules:
+  - id: "validate-credit-limit"
+    condition: "#tradeAmount <= #customerCreditLimit"
+    message: "Trade amount exceeds customer credit limit"
+    severity: "ERROR"
 ```
 
-**Understanding enrichment flow:**
+#### External Data Source Configuration
 
-1. **Check condition**: If specified, only enrich when the condition is true
-2. **Find matching data**: Look up the key value in your dataset
-3. **Map fields**: Copy specified fields from the lookup data to your object
-4. **Use defaults**: If no match found, use default values (if configured)
+```yaml
+# data-sources/customer-database.yaml
+metadata:
+  name: "Customer Database Configuration"
+  type: "external-data-config"
 
-**Example in action:**
-- Your data has: `{statusCode: "A"}`
-- Lookup dataset has: `{code: "A", name: "Active", description: "Customer is active"}`
-- Field mappings copy `name` to `statusName` and `description` to `statusDescription`
-- Result: Your data now has: `{statusCode: "A", statusName: "Active", statusDescription: "Customer is active"}`
+data-source:
+  type: "database"
+  connection:
+    driver: "org.postgresql.Driver"
+    url: "${DB_URL:jdbc:postgresql://localhost:5432/customers}"
+    username: "${DB_USER:apex_user}"
+    password: "${DB_PASSWORD}"
+  pool:
+    max-size: 10
+    min-idle: 2
+    connection-timeout: 5000
 
-**Common use cases:**
-- Convert codes to human-readable names (status codes, country codes, etc.)
-- Add regional information based on location codes
-- Enrich product data with category information
-- Add calculated fields based on lookup tables
+queries:
+  - id: "getActiveCustomer"
+    sql: "SELECT customer_id, name, credit_limit, status FROM customers WHERE customer_id = :customerId AND status = 'ACTIVE'"
+    parameters:
+      - name: "customerId"
+        type: "string"
+```
 
-## Dataset Enrichment
+#### Benefits of External References
+
+- **Clean Separation**: Business logic YAML files remain focused and readable
+- **Environment Portability**: Same business rules work across dev/test/prod with different data sources
+- **Security**: Credentials stay in infrastructure configs, not business logic files
+- **Reusability**: Multiple rule configs can reference the same data source
+- **Maintenance**: Update connection details in one place
+
+## 12. Dataset Enrichment
 
 Dataset enrichment is one of APEX's most powerful features. It automatically adds related information to your data during rule evaluation, transforming simple codes into rich, meaningful data.
 
@@ -3080,7 +2620,7 @@ Dataset enrichment works best for reference data - information that helps explai
 Dataset enrichment loads all data into memory for fast lookups. This works great for small, stable reference data but isn't efficient for large or frequently changing datasets.
 
 **💡 Solution for Large or Dynamic Data:**
-For scenarios that exceed these limitations, APEX provides powerful [external data sources](#3-external-data-sources) that can connect to databases, REST APIs, file systems, and caches. See the complete [APEX External Data Sources Guide](APEX_EXTERNAL_DATA_SOURCES_GUIDE.md) for enterprise-scale data integration.
+For scenarios that exceed these limitations, APEX provides powerful [external data sources](#15-external-data-source-integration) that can connect to databases, REST APIs, file systems, and caches. See [§15 External Data Source Integration](#15-external-data-source-integration) for enterprise-scale data integration.
 
 ### Dataset Types
 
@@ -3335,9 +2875,9 @@ This is just an introduction to external data sources. For comprehensive coverag
 - **Security and encryption**
 - **Enterprise patterns and best practices**
 
-See the **[APEX External Data Sources Guide](APEX_EXTERNAL_DATA_SOURCES_GUIDE.md)** - the authoritative resource for external data integration.
+See [§15 External Data Source Integration](#15-external-data-source-integration) for the complete external data integration reference.
 
-## Comprehensive Lookup Configuration Guide
+## 13. Lookup Configuration
 
 ### Understanding Lookup Operations
 
@@ -3675,9 +3215,9 @@ field-mappings:
 
 #### See Also
 
-- **[APEX SpEL Guide](APEX_SPEL_GUIDE.md)** - Comprehensive SpEL documentation with examples
-- **[APEX YAML Reference](APEX_YAML_REFERENCE.md)** - Complete YAML configuration reference
-- **[APEX Conditional Processing Guide](APEX_CONDITIONAL_PROCESSING_GUIDE.md)** - Conditional processing patterns
+- [§6 Advanced YAML Patterns](#6-advanced-yaml-patterns) — Rule result references, rule chains, and advanced patterns
+- [§3 YAML Configuration Reference](#3-yaml-configuration-reference) — Complete YAML configuration reference
+- [§5 Enrichment Patterns and Expressions](#5-enrichment-patterns-and-expressions) — Conditional processing patterns
 
 ### Advanced Field Mapping and Transformation
 
@@ -4303,7 +3843,7 @@ configuration:
 - **Performance Tuning**: Adjustable performance and caching parameters
 - **Regional Compliance**: Support for different regulatory regimes and market conventions
 
-## Scenario-Based Configuration Management
+## 14. Scenario Configuration Management
 
 ### Overview
 
@@ -4323,7 +3863,7 @@ Scenarios provide a three-layer architecture:
 
 1. **Registry Layer**: Central discovery mechanism (`config/data-type-scenarios.yaml`)
 2. **Scenario Layer**: Lightweight routing files (`scenarios/*.yaml`)
-3. **Rule Configuration Layer**: Actual business logic files (`bootstrap/*.yaml`, `config/*.yaml`)
+3. **Rule Configuration Layer**: Actual business logic files (`config/*.yaml`)
 
 ### Example: OTC Options Scenario
 
@@ -4362,7 +3902,7 @@ scenario:
 
   # References to existing rule configuration files
   rule-configurations:
-    - "bootstrap/otc-options-bootstrap.yaml"
+    - "config/otc-options-rules.yaml"
     - "config/derivatives-validation-rules.yaml"
 ```
 
@@ -4749,7 +4289,7 @@ mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlDependencyAnalysisDem
 mvn test -Dtest=YamlValidationIntegrationTest -pl apex-demo
 ```
 
-## External Data Source Integration
+## 15. External Data Source Integration
 
 ### Overview
 
@@ -5002,11 +4542,119 @@ enrichments:
 - Use graceful degradation strategies
 - Monitor and alert on failures
 
-For detailed configuration guides, see:
-- [Database Configuration Guide](external-data-sources/database-configuration.md)
-- [REST API Configuration Guide](external-data-sources/rest-api-configuration.md)
-- [File System Configuration Guide](external-data-sources/file-system-configuration.md)
-- [Best Practices Guide](external-data-sources/best-practices.md)
+### Data Sinks
+
+Data sinks define **output destinations** for processed data. While data sources bring data IN for rule evaluation, data sinks send results OUT to external systems such as databases, message queues, or file stores.
+
+**When to use data sinks:**
+- Writing rule evaluation results to an audit database
+- Publishing enriched data to downstream systems
+- Persisting transformed records for reporting or compliance
+
+```yaml
+data-sinks:
+  - name: "audit-database"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "audit_db"
+      username: "audit_user"
+      password: "${AUDIT_DB_PASSWORD}"
+    schema:
+      auto-create: true
+      table-name: "rule_audit_log"
+    operations:
+      - name: "insertAuditRecord"
+        value: "INSERT INTO rule_audit_log (rule_id, result, timestamp) VALUES (:ruleId, :result, :timestamp)"
+    error-handling:
+      strategy: "log-and-continue"
+      max-retries: 3
+    batch:
+      enabled: true
+      batch-size: 100
+      timeout-ms: 5000
+```
+
+**Data Sink Properties:**
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `name` | Unique identifier for the sink | Yes |
+| `type` | Sink type (`database`, `file`, `message-queue`) | Yes |
+| `source-type` | Specific technology (e.g. `postgresql`, `csv`) | Yes |
+| `connection` | Connection details (host, port, credentials) | Yes |
+| `schema` | Schema settings (`auto-create`, `table-name`) | No |
+| `operations` | Named write operations (SQL statements or templates) | Yes |
+| `error-handling` | Error strategy and retry settings | No |
+| `batch` | Batch write settings (`enabled`, `batch-size`, `timeout-ms`) | No |
+
+### Pipeline Orchestration
+
+Pipelines define **multi-step processing workflows** that coordinate extraction, transformation, and loading of data. Each step can depend on previous steps, enabling complex ETL-style processing within APEX.
+
+**When to use pipelines:**
+- Multi-stage data processing with dependencies between steps
+- ETL workflows that extract from sources, transform with rules, and load into sinks
+- Coordinated batch processing with monitoring and error handling
+
+```yaml
+metadata:
+  type: "pipeline-config"
+
+pipeline:
+  name: "trade-processing-pipeline"
+  description: "End-to-end trade processing with validation and audit"
+
+  steps:
+    - name: "extract-trades"
+      type: "extract"
+      source: "trade-database"
+      operation: "getUnprocessedTrades"
+
+    - name: "validate-trades"
+      type: "transform"
+      depends-on:
+        - "extract-trades"
+      transformation:
+        config-file: "rules/trade-validation.yaml"
+
+    - name: "load-results"
+      type: "load"
+      depends-on:
+        - "validate-trades"
+      sink: "audit-database"
+      operation: "insertAuditRecord"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 2
+
+  monitoring:
+    enabled: true
+    log-progress: true
+    collect-metrics: true
+```
+
+**Pipeline Properties:**
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `pipeline.name` | Pipeline identifier | Yes |
+| `pipeline.description` | Human-readable description | No |
+| `steps[].name` | Unique step name | Yes |
+| `steps[].type` | Step type (`extract`, `transform`, `load`) | Yes |
+| `steps[].depends-on` | List of prerequisite step names | No |
+| `steps[].source` | Data source name (for `extract` steps) | Conditional |
+| `steps[].sink` | Data sink name (for `load` steps) | Conditional |
+| `steps[].transformation` | Rule config reference (for `transform` steps) | Conditional |
+| `execution.mode` | Execution mode (`sequential`, `parallel`) | No |
+| `execution.error-handling` | Error strategy (`stop-on-error`, `continue`) | No |
+| `monitoring.enabled` | Enable execution monitoring | No |
+| `monitoring.log-progress` | Log step-by-step progress | No |
+| `monitoring.collect-metrics` | Collect performance metrics | No |
 
 ---
 
@@ -5016,7 +4664,7 @@ For detailed configuration guides, see:
 **Date:** 2025-08-28
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-## Data Management Overview
+## 16. Data Management Overview
 
 APEX (Advanced Processing Engine for eXpressions) provides comprehensive data management capabilities designed for enterprise-grade applications, including scenario-based configuration management, enterprise YAML validation, and the revolutionary **external data-source reference system**. This guide takes you on a journey from basic data concepts to advanced enterprise implementations, ensuring you understand each concept thoroughly before moving to the next level.
 
@@ -5029,7 +4677,7 @@ APEX (Advanced Processing Engine for eXpressions) provides comprehensive data ma
 
 > **🎯 Validation Status**: This guide contains **production-ready, tested examples**. All YAML configurations have been verified through comprehensive testing in the apex-demo module. Performance metrics and execution results are included where applicable.
 
-## Data Management Table of Contents
+### Data Management Table of Contents
 
 **Part 1: Getting Started with Data**
 1. [Introduction to Data Configuration](#1-introduction-to-data-configuration)
@@ -5070,9 +4718,9 @@ APEX (Advanced Processing Engine for eXpressions) provides comprehensive data ma
 
 ---
 
-# Part 1: Getting Started with Data
+#### Part 1: Getting Started with Data
 
-## 1. Introduction to Data Configuration
+### Introduction to Data Configuration
 
 ### What is Data Configuration?
 
@@ -5125,7 +4773,7 @@ This guide will teach you:
 
 Let's start with the basics of YAML, the format we use for data configuration.
 
-## 2. Understanding YAML Basics
+### Understanding YAML Basics
 
 ### What is YAML?
 
@@ -5242,7 +4890,7 @@ currencies:  # Comments can go at the end of lines
 
 Now that you understand basic YAML syntax, let's create your first data configuration file.
 
-## 3. Your First Data Configuration
+### Your First Data Configuration
 
 ### Creating a Simple Currency Dataset
 
@@ -5388,7 +5036,7 @@ If you test with an unknown currency:
 
 This is the foundation of data configuration. Next, we'll explore different types of data structures you can create.
 
-## 4. Basic Data Types and Structures
+### Basic Data Types and Structures
 
 Now that you've created your first dataset, let's explore the different types of data you can store and how to structure them effectively.
 
@@ -5554,9 +5202,9 @@ data:
 
 Next, we'll learn about the important distinction between dataset files and rule configuration files.
 
-# Part 2: Core Data Concepts
+#### Part 2: Core Data Concepts
 
-## 5. Dataset Files vs Rule Configuration Files
+### Dataset Files vs Rule Configuration Files
 
 One of the most important concepts to understand is the difference between **Dataset Files** and **Rule Configuration Files**. They serve different purposes and have different structures.
 
@@ -5734,7 +5382,7 @@ project-root/
     └── business-rules.yaml
 ```
 
-## 6. Working with Simple Datasets
+### Working with Simple Datasets
 
 Now that you understand the difference between dataset files and rule configuration files, let's dive deeper into creating and using simple datasets effectively.
 
@@ -5853,7 +5501,7 @@ Test with this sample data:
 4. **Keep records complete**: Each record should have all required fields
 5. **Use clear field names**: `max-amount` is clearer than `limit`
 
-## Advanced Data Management Topics
+### Advanced Data Management Topics
 
 The sections above provide a solid foundation for data management in APEX. For comprehensive coverage of advanced topics including:
 
@@ -5878,7 +5526,7 @@ Each section builds upon the foundation established here and provides production
 
 ---
 
-## Rule Groups Configuration
+## 17. Rule Groups
 
 ### Overview
 
@@ -6340,7 +5988,7 @@ RuleResult groupResult = engine.executeRuleGroup(group, data);
 - Document rule group purpose and business logic
 - Version control rule group configurations
 
-## Data Service Configuration
+## 18. Data Service Configuration
 
 ### Overview
 
@@ -6500,7 +6148,7 @@ manager.loadDataSources(
 - Add monitoring and health checks for data sources
 - Use appropriate caching strategies for performance
 
-## Migration from External Services
+## 19. Migration from External Services
 
 ### Step-by-Step Migration Process
 
@@ -6565,7 +6213,7 @@ public void testCurrencyEnrichment() {
 }
 ```
 
-## Best Practices
+## 20. Best Practices
 
 Following these best practices will help you build maintainable, performant, and reliable rule-based systems with APEX. These recommendations come from real-world experience and will save you time and effort in the long run.
 
@@ -6618,7 +6266,7 @@ Proper maintenance practices prevent technical debt and ensure long-term success
 - Consider the impact of rule changes on existing processes
 - Maintain a changelog for significant rule modifications
 
-## Advanced Rule Patterns
+## 21. Advanced Rule Patterns
 
 For complex business scenarios requiring rule dependencies and chaining, the Rules Engine supports sophisticated patterns where rules depend on results of previous rules. These patterns are essential for multi-stage workflows and decision trees.
 
@@ -6633,27 +6281,23 @@ For complex business scenarios requiring rule dependencies and chaining, the Rul
 
 ### Quick Example: Conditional Chaining
 
-```java
-// Rule A: Check if customer qualifies for high-value processing
-Rule ruleA = new Rule(
-    "HighValueCustomerCheck",
-    "#customerType == 'PREMIUM' && #transactionAmount > 100000",
-    "Customer qualifies for high-value processing"
-);
-
-// Execute Rule A first
-List<RuleResult> resultsA = ruleEngineService.evaluateRules(
-    Arrays.asList(ruleA), createEvaluationContext(context));
-
-// Conditional execution of Rule B based on Rule A result
-if (resultsA.get(0).isTriggered()) {
-    Rule ruleB = new Rule(
-        "EnhancedDueDiligenceCheck",
-        "#accountAge >= 3",
-        "Enhanced due diligence check passed"
-    );
-    // Execute enhanced validation only when needed
-}
+```yaml
+rule-chains:
+  - id: "high-risk-workflow"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        condition: "#amount > 1000000"
+        message: "Checking for high-value transaction"
+      conditional-rules:
+        on-trigger:
+          - id: "manager-approval"
+            condition: "#approvalLevel >= 2"
+            message: "Manager approval required"
+        on-no-trigger:
+          - id: "standard-processing"
+            condition: "true"
+            message: "Standard processing applied"
 ```
 
 ### Quick Example: Accumulative Chaining
@@ -7423,7 +7067,7 @@ rule-chains:
                 message: "Minimum deposit requirement not met"
 ```
 
-This comprehensive example demonstrates how all 6 implemented patterns work together to create sophisticated business processing systems with routing, scoring, conditional processing, sequential calculations, complex workflows, and decision trees.
+This comprehensive example demonstrates how the rule chain patterns work together to create sophisticated business processing systems with routing, scoring, conditional processing, sequential calculations, complex workflows, and decision trees. Note that `complex-workflow` and `fluent-builder` are currently validated at configuration time but not yet executed at runtime — use the four implemented patterns (`conditional-chaining`, `sequential-dependency`, `result-based-routing`, `accumulative-chaining`) for production workloads.
 
 ### Integration with Existing Rules
 
@@ -7449,9 +7093,7 @@ rule-chains:
       # Advanced configuration here
 ```
 
-For complete implementation details, examples, and architecture information, see the **[Technical Reference Guide](TECHNICAL_REFERENCE.md)** section on "Nested Rules and Rule Chaining Patterns".
-
-## Configuration Standards and Validation
+## 22. Configuration Standards and Validation
 
 ### Overview
 
@@ -7562,7 +7204,7 @@ metadata:
 - `risk-reviewer`: Email of risk approver
 - `operational-impact`: Impact level (Low, Medium, High, Critical)
 
-## Scenario-Based Processing Implementation Patterns
+## 23. Scenario-Based Processing Implementation Patterns
 
 ### Service-Based Implementation
 
@@ -7681,7 +7323,7 @@ public class ScenarioRegistry {
 }
 ```
 
-## Scenario-Based Processing Best Practices
+## 24. Scenario-Based Processing Best Practices
 
 ### 1. Scenario Organization
 
@@ -7975,7 +7617,7 @@ For long-term configuration quality:
 4. **Documentation updates** as standards evolve
 5. **Compliance reviews** for regulatory requirements
 
-## Getting Help
+## 25. Getting Help
 
 ### Common Issues
 
@@ -8191,7 +7833,7 @@ divide(java.math.BigDecimal,int,int) in java.math.BigDecimal has been deprecated
 - Bootstrap scenario development for specific business domains
 - Performance optimization and tuning services
 
-## Scenario-Based Processing Integration Examples
+## 26. Scenario-Based Processing Integration Examples
 
 ### Spring Boot Integration
 
@@ -8239,7 +7881,7 @@ public class ScenarioBatchProcessor {
 }
 ```
 
-## Monitoring and Observability
+## 27. Monitoring and Observability
 
 ### Key Metrics
 
@@ -9456,3 +9098,163 @@ java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
 ---
 
 *End of Appendix A: APEX Comprehensive Demos Guide*
+
+---
+
+## Appendix B: System Architecture
+
+This appendix provides a detailed view of APEX's internal architecture for developers who need to understand the system's components and their interactions.
+
+### Complete System Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "Input Layer"
+        A[Business Data]
+        B[YAML Configuration]
+        C[Rule Definitions]
+    end
+
+    subgraph "Rules Engine Core"
+        D[Expression Evaluator]
+        E[Rule Engine Service]
+        F[Rule Chain Executor]
+        G[Context Manager]
+    end
+
+    subgraph "Pattern Executors"
+        H[Conditional Chaining]
+        I[Sequential Dependency]
+        J[Result-Based Routing]
+        K[Accumulative Chaining]
+        L[Complex Workflow]
+        M[Fluent Builder]
+    end
+
+    subgraph "External Data Sources"
+        N[Database Sources]
+        O[REST API Sources]
+        P[File System Sources]
+        Q[Cache Sources]
+    end
+
+    subgraph "Data Enrichment"
+        R[YAML Datasets]
+        S[Lookup Service]
+        T[Transformation Engine]
+    end
+
+    subgraph "Pipeline Orchestration"
+        U[Pipeline Executor]
+        V[Data Sinks]
+        W[Step Dependencies]
+        X[Error Handling]
+    end
+
+    subgraph "Output Layer"
+        Y[Rule Results]
+        Z[Execution Metrics]
+        AA[Audit Trail]
+        BB[Performance Data]
+    end
+
+    A --> D
+    B --> E
+    C --> E
+
+    D --> E
+    E --> F
+    F --> G
+
+    F --> H
+    F --> I
+    F --> J
+    F --> K
+    F --> L
+    F --> M
+
+    E --> N
+    N --> O
+    O --> P
+    P --> Q
+
+    H --> R
+    I --> R
+    J --> R
+    K --> R
+    L --> R
+    M --> R
+
+    U --> Y
+    V --> Z
+    W --> AA
+    X --> BB
+
+    G --> R
+    G --> S
+    G --> T
+
+    style A fill:#e1f5fe
+    style B fill:#e1f5fe
+    style C fill:#e1f5fe
+    style D fill:#fff3e0
+    style E fill:#fff3e0
+    style F fill:#fff3e0
+    style G fill:#fff3e0
+    style R fill:#e8f5e8
+    style S fill:#e8f5e8
+    style T fill:#e8f5e8
+    style Y fill:#f3e5f5
+    style Z fill:#f3e5f5
+    style AA fill:#f3e5f5
+    style BB fill:#f3e5f5
+```
+
+### Architecture Components
+
+#### Input Layer
+- **Business Data**: The data objects or Maps you want to evaluate against rules
+- **YAML Configuration**: Rule definitions, enrichments, and data source references
+- **Rule Definitions**: Individual rules with conditions, messages, and severity levels
+
+#### Rules Engine Core
+- **Expression Evaluator**: SpEL (Spring Expression Language) evaluation engine
+- **Rule Engine Service**: Central orchestration of rule evaluation
+- **Rule Chain Executor**: Handles complex rule chain patterns
+- **Context Manager**: Manages evaluation context and variable propagation
+
+#### Pattern Executors
+Six built-in patterns for complex rule workflows:
+- **Conditional Chaining**: Execute rules only when conditions are met
+- **Sequential Dependency**: Build pipelines where each stage uses previous results
+- **Result-Based Routing**: Route to different rule sets based on intermediate results
+- **Accumulative Chaining**: Build up scores across multiple criteria
+- **Complex Workflow**: Multi-stage processing with dependencies
+- **Fluent Builder**: Complex decision trees with conditional branching
+
+#### External Data Sources
+- **Database Sources**: PostgreSQL, H2, and other JDBC-compatible databases
+- **REST API Sources**: HTTP/HTTPS endpoints for real-time data
+- **File System Sources**: CSV, JSON, XML files
+- **Cache Sources**: In-memory caching with configurable strategies
+
+#### Data Enrichment
+- **YAML Datasets**: Inline reference data embedded in configuration
+- **Lookup Service**: Registry of lookup configurations for data retrieval
+- **Transformation Engine**: Field mapping and expression-based transformations
+
+#### Pipeline Orchestration
+- **Pipeline Executor**: Orchestrates multi-step ETL workflows
+- **Data Sinks**: Output destinations (databases, files)
+- **Step Dependencies**: Manages execution order and dependencies
+- **Error Handling**: Configurable error recovery and logging
+
+#### Output Layer
+- **Rule Results**: Pass/fail status, matched rules, failure messages
+- **Execution Metrics**: Timing data, rule counts, performance statistics
+- **Audit Trail**: Complete execution history for compliance
+- **Performance Data**: Bottleneck identification and optimization data
+
+---
+
+*End of Appendix B: System Architecture*

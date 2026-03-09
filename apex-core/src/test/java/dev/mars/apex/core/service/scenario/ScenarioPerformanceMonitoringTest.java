@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -17,9 +19,16 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Nested;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +99,7 @@ class ScenarioPerformanceMonitoringTest {
             assertTrue(result.getTotalExecutionTimeMs() <= wallClockTime + 100,
                 "Tracked time should be close to wall clock time (within 100ms margin)");
 
-            logger.info("✓ Execution time tracked: {}ms (wall clock: {}ms)",
+            logger.info("[OK] Execution time tracked: {}ms (wall clock: {}ms)",
                 result.getTotalExecutionTimeMs(), wallClockTime);
         }
         
@@ -128,7 +137,7 @@ class ScenarioPerformanceMonitoringTest {
             assertTrue(result.getTotalExecutionTimeMs() >= 0,
                 "Result should have total execution time");
 
-            logger.info("✓ Performance metrics collected for {} stages",
+            logger.info("[OK] Performance metrics collected for {} stages",
                 result.getStageResults().size());
         }
         
@@ -164,7 +173,7 @@ class ScenarioPerformanceMonitoringTest {
             assertTrue(averageTime <= totalTime,
                 "Average should not exceed total time");
 
-            logger.info("✓ Average execution time: {}ms (total: {}ms, runs: {})",
+            logger.info("[OK] Average execution time: {}ms (total: {}ms, runs: {})",
                 averageTime, totalTime, runs);
         }
         
@@ -201,7 +210,7 @@ class ScenarioPerformanceMonitoringTest {
                     "Should be able to access execution time for stage: " + stageResult.getStageName());
             }
 
-            logger.info("✓ Performance data accessible: total={}ms, stages={}",
+            logger.info("[OK] Performance data accessible: total={}ms, stages={}",
                 result.getTotalExecutionTimeMs(), stageResults.size());
         }
         
@@ -234,7 +243,7 @@ class ScenarioPerformanceMonitoringTest {
             if (result.getTotalExecutionTimeMs() > 1000) {
                 logger.warn("TEST: Slow query detected - execution: {}ms", result.getTotalExecutionTimeMs());
             } else {
-                logger.info("✓ Query executed efficiently: {}ms", result.getTotalExecutionTimeMs());
+                logger.info("[OK] Query executed efficiently: {}ms", result.getTotalExecutionTimeMs());
             }
         }
     }

@@ -1,13 +1,20 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Nested;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +48,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SetFieldValueNestedPathTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SetFieldValueNestedPathTest.class);
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     private String createEnrichmentYaml(String targetField) {
@@ -211,7 +218,7 @@ public class SetFieldValueNestedPathTest {
             Map<String, Object> enrichedData = result.getEnrichedData();
             assertNull(enrichedData.get("missing"), "SpEL does not auto-create missing map");
             
-            LOGGER.info("✓ Failure properly propagated to RuleResult: {}", result.getFailureMessages());
+            LOGGER.info("[OK] Failure properly propagated to RuleResult: {}", result.getFailureMessages());
         }
 
         @Test
@@ -237,7 +244,7 @@ public class SetFieldValueNestedPathTest {
             Map<String, Object> enrichedData = result.getEnrichedData();
             assertNull(enrichedData.get("items"), "SpEL does not auto-create missing list");
             
-            LOGGER.info("✓ Failure properly propagated to RuleResult: {}", result.getFailureMessages());
+            LOGGER.info("[OK] Failure properly propagated to RuleResult: {}", result.getFailureMessages());
         }
 
         @Test
@@ -269,7 +276,7 @@ public class SetFieldValueNestedPathTest {
             Map<String, Object> resultA = (Map<String, Object>) enrichedData.get("a");
             assertNull(resultA.get("b"), "SpEL does not auto-create missing intermediate 'b'");
             
-            LOGGER.info("✓ Failure properly propagated to RuleResult: {}", result.getFailureMessages());
+            LOGGER.info("[OK] Failure properly propagated to RuleResult: {}", result.getFailureMessages());
         }
     }
 

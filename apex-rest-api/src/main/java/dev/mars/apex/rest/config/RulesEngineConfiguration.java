@@ -1,20 +1,25 @@
 package dev.mars.apex.rest.config;
 
 import dev.mars.apex.core.api.RulesService;
-import dev.mars.apex.core.api.SimpleRulesEngine;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleFactory;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.service.data.DataServiceManager;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.RuleFactory;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.core.service.data.external.manager.DataSourceManager;
+import dev.mars.apex.core.service.data.external.ExternalDataSource;
+import dev.mars.apex.core.service.data.external.DataSourceType;
+import dev.mars.apex.core.service.data.external.ConnectionStatus;
+import dev.mars.apex.core.service.data.external.DataSourceMetrics;
+import dev.mars.apex.core.service.data.external.DataSourceException;
+import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
+import dev.mars.apex.core.service.enrichment.EnrichmentProcessor;
+import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
+import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 
-import dev.mars.apex.core.service.engine.TemplateProcessorService;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.expression.ExpressionEvaluationService;
+import dev.mars.apex.rest.service.TemplateProcessorService;
+import dev.mars.apex.engine.core.ExpressionEvaluatorService;
+import dev.mars.apex.rest.service.ExpressionEvaluationService;
 import dev.mars.apex.core.service.transform.GenericTransformerService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.data.DataSource;
-import dev.mars.apex.core.config.yaml.RulesEngineService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,24 +74,16 @@ public class RulesEngineConfiguration {
         return new RulesService();
     }
     
-    /**
-     * SimpleRulesEngine bean for basic rule operations.
-     * This provides a simplified API for common use cases.
-     */
-    @Bean
-    public SimpleRulesEngine simpleRulesEngine() {
-        logger.info("Creating SimpleRulesEngine bean");
-        return new SimpleRulesEngine();
-    }
+
     
     /**
-     * YamlConfigurationLoader bean for loading YAML configurations.
+     * ConfigurationLoader bean for loading YAML configurations.
      * This is used by the configuration management endpoints.
      */
     @Bean
-    public YamlConfigurationLoader yamlConfigurationLoader() {
-        logger.info("Creating YamlConfigurationLoader bean");
-        return new YamlConfigurationLoader();
+    public ConfigurationLoader yamlConfigurationLoader() {
+        logger.info("Creating ConfigurationLoader bean");
+        return new ConfigurationLoader();
     }
     
     /**
@@ -94,11 +91,11 @@ public class RulesEngineConfiguration {
      * This provides a pre-configured engine for immediate use.
      */
     @Bean("defaultRulesEngine")
-    public RulesEngine defaultRulesEngine(YamlConfigurationLoader loader) {
+    public RulesEngine defaultRulesEngine(ConfigurationLoader loader) {
         try {
             // Create base engine configuration
-            dev.mars.apex.core.engine.config.RulesEngineConfiguration engineConfig =
-                new dev.mars.apex.core.engine.config.RulesEngineConfiguration();
+            dev.mars.apex.engine.core.RulesEngineConfiguration engineConfig =
+                new dev.mars.apex.engine.core.RulesEngineConfiguration();
 
             // Configure performance monitoring
             if (rulesProperties.getPerformance().getMonitoring().isEnabled()) {
@@ -136,9 +133,10 @@ public class RulesEngineConfiguration {
 
             return new RulesEngine(engineConfig);
         } catch (Exception e) {
-            logger.error("Error creating RulesEngine: {}", e.getMessage(), e);
+            logger.error("Error creating RulesEngine: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             logger.info("Falling back to empty configuration");
-            return new RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
+            return new RulesEngine(new dev.mars.apex.engine.core.RulesEngineConfiguration());
         }
     }
 
@@ -171,18 +169,13 @@ public class RulesEngineConfiguration {
     }
 
     /**
-     * DataServiceManager bean for data source management.
-     * Creates a DataServiceManager with test data sources for REST API operations.
+     * DataSourceManager bean for data source management.
+     * Creates a DataSourceManager for REST API operations.
      */
     @Bean
-    public DataServiceManager dataServiceManager() {
-        logger.info("Creating DataServiceManager bean with test data sources");
-        DataServiceManager manager = new DataServiceManager();
-
-        // Add a test data source for integration tests
-        manager.loadDataSource(new TestDataSource("testDataSource", "testData"));
-
-        return manager;
+    public DataSourceManager dataSourceManager() {
+        logger.info("Creating DataSourceManager bean");
+        return new DataSourceManager();
     }
 
     /**
@@ -197,43 +190,38 @@ public class RulesEngineConfiguration {
     }
 
     /**
-     * YamlEnrichmentProcessor bean for data enrichment operations.
+     * RuleGroupEvaluationService bean for canonical rule group evaluation.
      */
     @Bean
-    public YamlEnrichmentProcessor yamlEnrichmentProcessor(
+    public RuleGroupEvaluationService ruleGroupEvaluationService() {
+        logger.info("Creating RuleGroupEvaluationService bean");
+        return new RuleGroupEvaluationService(new UnifiedRuleEvaluator());
+    }
+
+    /**
+     * EnrichmentProcessor bean for data enrichment operations.
+     */
+    @Bean
+    public EnrichmentProcessor EnrichmentProcessor(
             LookupServiceRegistry lookupServiceRegistry,
-            ExpressionEvaluatorService expressionEvaluatorService) {
-        logger.info("Creating YamlEnrichmentProcessor bean");
-        return new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService);
+            ExpressionEvaluatorService expressionEvaluatorService,
+            RuleGroupEvaluationService ruleGroupEvaluationService) {
+        logger.info("Creating EnrichmentProcessor bean");
+        return new EnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService, null, ruleGroupEvaluationService);
     }
 
     /**
-     * YamlRuleFactory bean for creating rules engine configurations.
+     * RuleFactory bean for creating rules engine configurations.
      */
     @Bean
-    public YamlRuleFactory yamlRuleFactory() {
-        logger.info("Creating YamlRuleFactory bean");
-        return new YamlRuleFactory();
+    public RuleFactory RuleFactory() {
+        logger.info("Creating RuleFactory bean");
+        return new RuleFactory();
     }
 
 
 
-    /**
-     * Create the universal YAML rules engine service bean.
-     * This is the primary service for content-agnostic YAML processing.
-     *
-     * @param yamlConfigurationLoader The YAML configuration loader
-     * @param yamlRuleFactory The YAML rule factory
-     * @return RulesEngineService configured for universal processing
-     */
-    @Bean
-    @Primary
-    public RulesEngineService rulesEngineService(
-            YamlConfigurationLoader yamlConfigurationLoader,
-            YamlRuleFactory yamlRuleFactory) {
-        logger.info("Creating RulesEngineService bean - Universal YAML processing active");
-        return new RulesEngineService(yamlConfigurationLoader, yamlRuleFactory);
-    }
+
 
     /**
      * TemplateProcessorService bean for template processing operations.
@@ -248,7 +236,7 @@ public class RulesEngineConfiguration {
     /**
      * Simple test data source for integration testing.
      */
-    private static class TestDataSource implements DataSource {
+    private static class TestDataSource implements ExternalDataSource {
         private final String name;
         private final String dataType;
 
@@ -270,6 +258,71 @@ public class RulesEngineConfiguration {
         @Override
         public boolean supportsDataType(String dataType) {
             return this.dataType.equals(dataType);
+        }
+
+        @Override
+        public DataSourceType getSourceType() {
+            return DataSourceType.CUSTOM;
+        }
+
+        @Override
+        public ConnectionStatus getConnectionStatus() {
+            return ConnectionStatus.connected("Test data source");
+        }
+
+        @Override
+        public DataSourceMetrics getMetrics() {
+            return null;
+        }
+
+        @Override
+        public void initialize(DataSourceConfiguration config) throws DataSourceException {
+            // No-op for test data source
+        }
+
+        @Override
+        public void shutdown() {
+            // No-op for test data source
+        }
+
+        @Override
+        public boolean isHealthy() {
+            return true;
+        }
+
+        @Override
+        public <T> java.util.List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
+            return java.util.List.of();
+        }
+
+        @Override
+        public <T> T queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
+            return null;
+        }
+
+        @Override
+        public <T> java.util.List<java.util.List<T>> batchQuery(java.util.List<String> queries) throws DataSourceException {
+            return java.util.List.of();
+        }
+
+        @Override
+        public void batchUpdate(java.util.List<String> updates) throws DataSourceException {
+            // No-op for test data source
+        }
+
+        @Override
+        public DataSourceConfiguration getConfiguration() {
+            return null;
+        }
+
+        @Override
+        public void refresh() throws DataSourceException {
+            // No-op for test data source
+        }
+
+        @Override
+        public boolean testConnection() {
+            return true;
         }
 
         @SuppressWarnings("unchecked")

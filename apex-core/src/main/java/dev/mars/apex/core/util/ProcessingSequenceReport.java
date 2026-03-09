@@ -1,6 +1,6 @@
 package dev.mars.apex.core.util;
 
-import dev.mars.apex.core.config.yaml.ProcessingItem;
+import dev.mars.apex.core.config.sequential.ProcessingItem;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +21,7 @@ import java.util.List;
  * showing both configuration/initialization phase and execution phase.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-11-08
  */
 public class ProcessingSequenceReport {
 
@@ -31,23 +31,6 @@ public class ProcessingSequenceReport {
     private final List<ProcessingItem> plannedSequence;
     private final List<ProcessingItem> filteredItems;
     
-    /**
-     * Creates a new processing sequence report (backward compatibility constructor).
-     *
-     * @param yamlFilePath The path to the YAML file analyzed
-     * @param originalSequence The original item order from the YAML document
-     * @param plannedSequence The planned execution order after filtering
-     * @param filteredItems Items removed by groups-only logic
-     * @deprecated Use {@link #ProcessingSequenceReport(String, List, List, List, List)} instead
-     */
-    @Deprecated
-    public ProcessingSequenceReport(String yamlFilePath,
-                                   List<ProcessingItem> originalSequence,
-                                   List<ProcessingItem> plannedSequence,
-                                   List<ProcessingItem> filteredItems) {
-        this(yamlFilePath, new ArrayList<>(), originalSequence, plannedSequence, filteredItems);
-    }
-
     /**
      * Creates a new processing sequence report with configuration sections.
      *
@@ -146,7 +129,7 @@ public class ProcessingSequenceReport {
 
         // Configuration/Initialization Phase
         if (!configurationSections.isEmpty()) {
-            sb.append("PHASE 1: CONFIGURATION/INITIALIZATION (").append(configurationSections.size()).append(" sections - processed at load time)\n");
+            sb.append("CONFIGURATION/INITIALIZATION (").append(configurationSections.size()).append(" sections - processed at load time)\n");
             sb.append("-".repeat(100)).append("\n");
             for (int i = 0; i < configurationSections.size(); i++) {
                 String section = configurationSections.get(i);
@@ -159,7 +142,7 @@ public class ProcessingSequenceReport {
         }
 
         // Original sequence
-        sb.append("PHASE 2: EXECUTION SEQUENCE (").append(originalSequence.size()).append(" items in YAML document order)\n");
+        sb.append("EXECUTION SEQUENCE (").append(originalSequence.size()).append(" items in YAML document order)\n");
         sb.append("-".repeat(100)).append("\n");
         if (originalSequence.isEmpty()) {
             sb.append("  (empty)\n");
@@ -271,7 +254,7 @@ public class ProcessingSequenceReport {
      */
     private String getConfigurationSectionDescription(String sectionName) {
         return switch (sectionName) {
-            case "metadata" -> "File metadata and processing mode";
+            case "metadata" -> "File metadata and configuration identity";
             case "categories" -> "Category definitions for metadata inheritance";
             case "data-sources" -> "Data source connections (databases, APIs, files)";
             case "data-source-refs" -> "External data source references";

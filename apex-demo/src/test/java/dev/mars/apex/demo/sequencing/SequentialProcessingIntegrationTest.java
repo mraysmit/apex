@@ -1,13 +1,22 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.*;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.sequential.*;
+import dev.mars.apex.demo.ColoredTestOutputExtension;
+import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,31 +29,30 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * Test Coverage:
  * 1. OrderedYamlParser Integration
- * 2. SequentialYamlProcessor Integration
- * 3. Processing Mode Detection and Selection
- * 4. Backward Compatibility with Standard Processing
+ * 2. RulesEngine Sequential Processing Integration
+ * 3. Backward Compatibility with Standard Processing
+ * 4. Section Order Preservation
  * 5. Core Sequential Processing Functionality
  *
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since Phase 4 - Integration
  */
-@DisplayName("Phase 4: Sequential Processing Integration Tests")
-class SequentialProcessingIntegrationTest {
+@ExtendWith(ColoredTestOutputExtension.class)
+@DisplayName("Sequential Processing Integration Tests")
+class SequentialProcessingIntegrationTest extends DemoTestBase {
 
-    private static final Logger LOGGER = Logger.getLogger(SequentialProcessingIntegrationTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SequentialProcessingIntegrationTest.class);
 
     private OrderedYamlParser orderedParser;
-    private SequentialYamlProcessor sequentialProcessor;
-    private YamlConfigurationLoader standardLoader;
+    private ConfigurationLoader standardLoader;
     
     @BeforeEach
-    void setUp() {
+    void setUpIntegration() {
         LOGGER.info("=== PHASE 4 TEST: Sequential Processing Integration ===");
 
         // Initialize sequential processing components
         this.orderedParser = new OrderedYamlParser();
-        this.sequentialProcessor = new SequentialYamlProcessor();
-        this.standardLoader = new YamlConfigurationLoader();
+        this.standardLoader = new ConfigurationLoader();
     }
     
     @Test
@@ -52,11 +60,10 @@ class SequentialProcessingIntegrationTest {
     void testOrderedYamlParserIntegration() throws Exception {
         LOGGER.info("Testing OrderedYamlParser integration...");
 
-        // Create YAML with sequential processing mode
+        // Create YAML with enrichments before rules
         String sequentialYaml = """
             metadata:
               name: "sequential-test"
-              processing-mode: "sequential"
 
             enrichments:
               - id: "customer-lookup"
@@ -77,76 +84,70 @@ class SequentialProcessingIntegrationTest {
         // Verify parsing worked
         assertNotNull(orderedConfig);
         assertNotNull(orderedConfig.getConfiguration());
-        assertEquals(OrderedYamlConfiguration.ProcessingMode.SEQUENTIAL, orderedConfig.getProcessingMode());
+
+        // Verify section order is preserved (enrichments before rules)
+        assertNotNull(orderedConfig.getSectionOrder());
+        assertTrue(orderedConfig.getSectionOrder().size() >= 2, "Should detect at least metadata and enrichments");
 
         LOGGER.info("OrderedYamlParser integration test PASSED - Parsing successful!");
     }
     
     @Test
-    @DisplayName("SequentialYamlProcessor Integration Test")
-    void testSequentialYamlProcessorIntegration() throws Exception {
-        LOGGER.info("Testing SequentialYamlProcessor integration...");
+    @DisplayName("RulesEngine Sequential Processing Integration Test")
+    void testRulesEngineSequentialProcessingIntegration() throws Exception {
+        LOGGER.info("Testing RulesEngine sequential processing integration...");
 
-        // Create YAML with sequential processing mode
+        // Create YAML with enrichments and rules
         String sequentialYaml = """
             metadata:
               name: "sequential-processor-test"
-              processing-mode: "sequential"
+              type: "rule-config"
 
             enrichments:
               - id: "customer-lookup"
-                type: "constant-enrichment"
-                target-field: "customerName"
-                constant-value: "John Doe"
+                name: "Customer Data Enrichment"
+                type: "lookup-enrichment"
+                lookup-config:
+                  lookup-key: "#customerId"
+                  lookup-dataset:
+                    type: "inline"
+                    key-field: "customerId"
+                    data:
+                      - customerId: "CUST001"
+                        customerName: "John Doe"
+                field-mappings:
+                  - source-field: "customerName"
+                    target-field: "customerName"
 
             rules:
               - id: "validate-customer"
-                conditions:
-                  - field: "#customerName"
-                    operator: "not_null"
+                name: "Validate Customer"
+                condition: "#customerName != null"
+                message: "Customer name is present"
             """;
 
-        // Parse and process sequentially
-        OrderedYamlConfiguration orderedConfig = orderedParser.parseYamlString(sequentialYaml, "test");
-        RuleResult result = sequentialProcessor.processOrderedConfigurationWithResult(orderedConfig, "test");
+        // Process through the production RulesEngine pipeline
+        ConfigurationLoader loader = new ConfigurationLoader();
+        YamlRuleConfiguration config = loader.fromYamlString(sequentialYaml);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
-        // Verify processing worked
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("customerId", "CUST001");
+
+        RuleResult result = engine.evaluate(testData);
+
+        // Verify processing worked through the real pipeline
         assertNotNull(result);
         assertTrue(result.isSuccess(), "Processing should succeed");
-        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(), "Result type should be MATCH");
         assertFalse(result.hasFailures(), "Should have no failures");
 
-        LOGGER.info("SequentialYamlProcessor integration test PASSED - Processing successful!");
-    }
-    
-    @Test
-    @DisplayName("Processing Mode Detection Test")
-    void testProcessingModeDetection() throws Exception {
-        LOGGER.info("Testing processing mode detection...");
+        // Verify enrichment actually executed
+        Map<String, Object> enrichedData = result.getEnrichedData();
+        assertNotNull(enrichedData, "Enriched data should not be null");
+        assertEquals("John Doe", enrichedData.get("customerName"),
+            "Lookup enrichment should set customerName");
 
-        // Test sequential mode detection
-        String sequentialYaml = """
-            metadata:
-              processing-mode: "sequential"
-            enrichments:
-              - id: "test-enrichment"
-            """;
-
-        OrderedYamlConfiguration orderedConfig = orderedParser.parseYamlString(sequentialYaml, "test");
-        assertEquals(OrderedYamlConfiguration.ProcessingMode.SEQUENTIAL, orderedConfig.getProcessingMode());
-
-        // Test standard mode detection
-        String standardYaml = """
-            metadata:
-              processing-mode: "standard"
-            enrichments:
-              - id: "test-enrichment"
-            """;
-
-        OrderedYamlConfiguration standardConfig = orderedParser.parseYamlString(standardYaml, "test");
-        assertEquals(OrderedYamlConfiguration.ProcessingMode.STANDARD, standardConfig.getProcessingMode());
-
-        LOGGER.info("Processing mode detection test PASSED - Modes detected correctly!");
+        LOGGER.info("RulesEngine sequential processing integration test PASSED!");
     }
     
     @Test
@@ -154,7 +155,7 @@ class SequentialProcessingIntegrationTest {
     void testBackwardCompatibility() throws Exception {
         LOGGER.info("Testing backward compatibility with existing YAML configurations...");
 
-        // Test YAML without processing-mode (should default to standard)
+        // Test YAML with minimal metadata
         String legacyYaml = """
             metadata:
               name: "legacy-test"
@@ -172,9 +173,10 @@ class SequentialProcessingIntegrationTest {
                     target-field: "legacyField"
             """;
 
-        // Should parse and default to STANDARD mode
+        // Should parse successfully with OrderedYamlParser
         OrderedYamlConfiguration orderedConfig = orderedParser.parseYamlString(legacyYaml, "test");
-        assertEquals(OrderedYamlConfiguration.ProcessingMode.STANDARD, orderedConfig.getProcessingMode());
+        assertNotNull(orderedConfig);
+        assertNotNull(orderedConfig.getConfiguration());
 
         // Should also work with standard loader
         YamlRuleConfiguration standardConfig = standardLoader.fromYamlString(legacyYaml);
@@ -192,7 +194,6 @@ class SequentialProcessingIntegrationTest {
         String testYaml = """
             metadata:
               name: "order-test"
-              processing-mode: "sequential"
 
             enrichments:
               - id: "first-enrichment"

@@ -50,7 +50,7 @@ public class RulePerformanceMetrics implements Serializable {
     private final String evaluationPhase;
     private final Exception evaluationException;
 
-    // Phase 3B: Recovery metrics fields
+    // Recovery metrics fields
     private final boolean recoveryAttempted;
     private final boolean recoverySuccessful;
     private final String recoveryStrategy;
@@ -73,7 +73,7 @@ public class RulePerformanceMetrics implements Serializable {
         this.evaluationPhase = builder.evaluationPhase;
         this.evaluationException = builder.evaluationException;
 
-        // Phase 3B: Initialize recovery metrics
+        // Initialize recovery metrics
         this.recoveryAttempted = builder.recoveryAttempted;
         this.recoverySuccessful = builder.recoverySuccessful;
         this.recoveryStrategy = builder.recoveryStrategy;
@@ -207,7 +207,7 @@ public class RulePerformanceMetrics implements Serializable {
         return evaluationException != null;
     }
 
-    // Phase 3B: Recovery metrics getters
+    // Recovery metrics getters
 
     /**
      * Check if error recovery was attempted for this rule evaluation.
@@ -280,7 +280,7 @@ public class RulePerformanceMetrics implements Serializable {
         if (hasException()) {
             summary.append(", Error: ").append(evaluationException.getMessage());
         }
-        // Phase 3B: Include recovery information in summary
+        // Include recovery information in summary
         if (recoveryAttempted) {
             summary.append(", Recovery: ").append(recoverySuccessful ? "SUCCESS" : "FAILED");
             if (recoveryStrategy != null) {
@@ -345,7 +345,7 @@ public class RulePerformanceMetrics implements Serializable {
         private String evaluationPhase = "evaluation";
         private Exception evaluationException;
 
-        // Phase 3B: Recovery metrics builder fields
+        // Recovery metrics builder fields
         private boolean recoveryAttempted = false;
         private boolean recoverySuccessful = false;
         private String recoveryStrategy;
@@ -406,7 +406,7 @@ public class RulePerformanceMetrics implements Serializable {
             return this;
         }
 
-        // Phase 3B: Recovery metrics builder methods
+        // Recovery metrics builder methods
 
         public Builder recoveryAttempted(boolean recoveryAttempted) {
             this.recoveryAttempted = recoveryAttempted;

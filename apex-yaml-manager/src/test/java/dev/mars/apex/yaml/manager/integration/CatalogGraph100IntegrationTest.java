@@ -16,11 +16,11 @@ package dev.mars.apex.yaml.manager.integration;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.YamlConfigMetadata;
+import dev.mars.apex.yaml.manager.model.ConfigMetadata;
 import dev.mars.apex.yaml.manager.service.CatalogScanService;
 import dev.mars.apex.yaml.manager.service.CatalogService;
 import dev.mars.apex.yaml.manager.service.DependencyAnalysisService;
-import dev.mars.apex.yaml.manager.service.YamlContentAnalyzer;
+import dev.mars.apex.yaml.manager.service.ContentAnalyzer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,14 +60,14 @@ public class CatalogGraph100IntegrationTest {
 
     private CatalogService catalogService;
     private CatalogScanService catalogScanService;
-    private YamlContentAnalyzer contentAnalyzer;
+    private ContentAnalyzer contentAnalyzer;
     private DependencyAnalysisService dependencyService;
     private String graph100Path;
 
     @BeforeEach
     public void setUp() {
         catalogService = new CatalogService();
-        contentAnalyzer = new YamlContentAnalyzer();
+        contentAnalyzer = new ContentAnalyzer();
         catalogScanService = new CatalogScanService();
         dependencyService = new DependencyAnalysisService();
 
@@ -121,13 +121,13 @@ public class CatalogGraph100IntegrationTest {
     public void testTypeDistributionAnalysis() {
         scanAndIndexDirectory(new File(graph100Path));
         
-        Collection<YamlConfigMetadata> allConfigs = catalogService.getAllConfigurations();
+        Collection<ConfigMetadata> allConfigs = catalogService.getAllConfigurations();
         
         // Count by type
         Map<String, Long> typeDistribution = allConfigs.stream()
             .filter(c -> c.getType() != null)
             .collect(Collectors.groupingBy(
-                YamlConfigMetadata::getType,
+                ConfigMetadata::getType,
                 Collectors.counting()
             ));
         
@@ -151,12 +151,12 @@ public class CatalogGraph100IntegrationTest {
         scanAndIndexDirectory(new File(graph100Path));
         
         // Find scenario files by type
-        List<YamlConfigMetadata> scenarios = catalogService.findByType("scenario");
+        List<ConfigMetadata> scenarios = catalogService.findByType("scenario");
         
         logger.info("Found {} scenario files", scenarios.size());
         
         // Log scenario details
-        for (YamlConfigMetadata scenario : scenarios) {
+        for (ConfigMetadata scenario : scenarios) {
             logger.debug("Scenario: id={}, name={}", scenario.getId(), scenario.getName());
         }
         
@@ -173,7 +173,7 @@ public class CatalogGraph100IntegrationTest {
         scanAndIndexDirectory(new File(graph100Path));
         
         // Find rule files
-        List<YamlConfigMetadata> rules = catalogService.findByType("rule-config");
+        List<ConfigMetadata> rules = catalogService.findByType("rule-config");
         
         logger.info("Found {} rule files", rules.size());
         assertNotNull(rules);
@@ -189,7 +189,7 @@ public class CatalogGraph100IntegrationTest {
         scanAndIndexDirectory(new File(graph100Path));
         
         // Find enrichment files
-        List<YamlConfigMetadata> enrichments = catalogService.findByType("enrichment-config");
+        List<ConfigMetadata> enrichments = catalogService.findByType("enrichment-config");
         
         logger.info("Found {} enrichment files", enrichments.size());
         assertNotNull(enrichments);
@@ -205,13 +205,13 @@ public class CatalogGraph100IntegrationTest {
         scanAndIndexDirectory(new File(graph100Path));
         
         // Find dataset files
-        List<YamlConfigMetadata> datasets = catalogService.findByType("dataset");
+        List<ConfigMetadata> datasets = catalogService.findByType("dataset");
         
         logger.info("Found {} dataset files", datasets.size());
         assertNotNull(datasets);
         
         // Log dataset names
-        for (YamlConfigMetadata dataset : datasets) {
+        for (ConfigMetadata dataset : datasets) {
             logger.debug("Dataset: {}", dataset.getId());
         }
     }
@@ -226,7 +226,7 @@ public class CatalogGraph100IntegrationTest {
         scanAndIndexDirectory(new File(graph100Path));
         
         // Find pipeline files
-        List<YamlConfigMetadata> pipelines = catalogService.findByType("pipeline");
+        List<ConfigMetadata> pipelines = catalogService.findByType("pipeline");
         
         logger.info("Found {} pipeline files", pipelines.size());
         assertNotNull(pipelines);
@@ -241,16 +241,16 @@ public class CatalogGraph100IntegrationTest {
     public void testCircularDependencyDetection() {
         scanAndIndexDirectory(new File(graph100Path));
         
-        Collection<YamlConfigMetadata> allConfigs = catalogService.getAllConfigurations();
+        Collection<ConfigMetadata> allConfigs = catalogService.getAllConfigurations();
         
         // Find files with "cycle" in their ID
-        List<YamlConfigMetadata> cycleFiles = allConfigs.stream()
+        List<ConfigMetadata> cycleFiles = allConfigs.stream()
             .filter(c -> c.getId() != null && c.getId().contains("cycle"))
             .collect(Collectors.toList());
         
         logger.info("Found {} files with circular dependencies", cycleFiles.size());
         
-        for (YamlConfigMetadata cycleFile : cycleFiles) {
+        for (ConfigMetadata cycleFile : cycleFiles) {
             logger.debug("Cycle file: {}", cycleFile.getId());
         }
         
@@ -266,10 +266,10 @@ public class CatalogGraph100IntegrationTest {
     public void testDeepChainDetection() {
         scanAndIndexDirectory(new File(graph100Path));
         
-        Collection<YamlConfigMetadata> allConfigs = catalogService.getAllConfigurations();
+        Collection<ConfigMetadata> allConfigs = catalogService.getAllConfigurations();
         
         // Find files with "chain" in their ID
-        List<YamlConfigMetadata> chainFiles = allConfigs.stream()
+        List<ConfigMetadata> chainFiles = allConfigs.stream()
             .filter(c -> c.getId() != null && c.getId().contains("chain"))
             .collect(Collectors.toList());
         
@@ -288,10 +288,10 @@ public class CatalogGraph100IntegrationTest {
     public void testEdgeCaseFilesDetection() {
         scanAndIndexDirectory(new File(graph100Path));
         
-        Collection<YamlConfigMetadata> allConfigs = catalogService.getAllConfigurations();
+        Collection<ConfigMetadata> allConfigs = catalogService.getAllConfigurations();
         
         // Find edge case files (files starting with 98 or 99)
-        List<YamlConfigMetadata> edgeCaseFiles = allConfigs.stream()
+        List<ConfigMetadata> edgeCaseFiles = allConfigs.stream()
             .filter(c -> {
                 String id = c.getId();
                 return id != null && (id.startsWith("98-") || id.startsWith("99-"));
@@ -300,7 +300,7 @@ public class CatalogGraph100IntegrationTest {
         
         logger.info("Found {} edge case test files", edgeCaseFiles.size());
         
-        for (YamlConfigMetadata edgeCase : edgeCaseFiles) {
+        for (ConfigMetadata edgeCase : edgeCaseFiles) {
             logger.debug("Edge case file: {}", edgeCase.getId());
         }
         

@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * - Configurable maximum size
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class InMemoryCacheManager implements CacheManager {
@@ -91,8 +91,8 @@ public class InMemoryCacheManager implements CacheManager {
         }
         
         this.running = true;
-        LOGGER.info("In-memory cache manager initialized with maxSize={}, defaultTTL={}s", 
-            maxSize, defaultTtlSeconds);
+        LOGGER.debug("Cache '{}' initialized: maxSize={}, ttl={}s", 
+            configuration.getName(), maxSize, defaultTtlSeconds);
     }
     
     @Override
@@ -149,7 +149,8 @@ public class InMemoryCacheManager implements CacheManager {
             }
 
         } catch (Exception e) {
-            LOGGER.error("Failed to put value in cache for key: {}", key, e);
+            LOGGER.error("Failed to put value in cache for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
     }
     
@@ -189,7 +190,8 @@ public class InMemoryCacheManager implements CacheManager {
             return entry.getValue();
             
         } catch (Exception e) {
-            LOGGER.error("Failed to get value from cache for key: {}", key, e);
+            LOGGER.error("Failed to get value from cache for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             statistics.recordMiss();
             return null;
         }
@@ -211,7 +213,8 @@ public class InMemoryCacheManager implements CacheManager {
             return false;
 
         } catch (Exception e) {
-            LOGGER.error("Failed to remove value from cache for key: {}", key, e);
+            LOGGER.error("Failed to remove value from cache for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return false;
         }
     }
@@ -241,7 +244,8 @@ public class InMemoryCacheManager implements CacheManager {
             return true;
             
         } catch (Exception e) {
-            LOGGER.error("Failed to check key existence in cache: {}", key, e);
+            LOGGER.error("Failed to check key existence in cache for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return false;
         }
     }
@@ -269,7 +273,8 @@ public class InMemoryCacheManager implements CacheManager {
                 .collect(Collectors.toList());
                 
         } catch (Exception e) {
-            LOGGER.error("Failed to get keys by pattern: {}", pattern, e);
+            LOGGER.error("Failed to get keys by pattern '{}': {}", pattern, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return Collections.emptyList();
         }
     }
@@ -285,7 +290,8 @@ public class InMemoryCacheManager implements CacheManager {
                 .collect(Collectors.toList());
                 
         } catch (Exception e) {
-            LOGGER.error("Failed to get all keys from cache", e);
+            LOGGER.error("Failed to get all keys from cache: {}", e.getMessage());
+            LOGGER.debug("Stack trace for cache key retrieval failure:", e);
             return Collections.emptyList();
         }
     }
@@ -300,10 +306,11 @@ public class InMemoryCacheManager implements CacheManager {
         try {
             cache.clear();
             currentSize.set(0);
-            LOGGER.info("Cache cleared for '{}'", configuration.getName());
+            LOGGER.debug("Cache '{}' cleared", configuration.getName());
 
         } catch (Exception e) {
-            LOGGER.error("Failed to clear cache", e);
+            LOGGER.error("Failed to clear cache '{}': {}", configuration.getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
     }
     
@@ -331,7 +338,8 @@ public class InMemoryCacheManager implements CacheManager {
             }
 
         } catch (Exception e) {
-            LOGGER.error("Failed to evict expired entries", e);
+            LOGGER.error("Failed to evict expired entries: {}", e.getMessage());
+            LOGGER.debug("Stack trace for cache eviction failure:", e);
         } finally {
             evictionLock.writeLock().unlock();
         }
@@ -365,7 +373,7 @@ public class InMemoryCacheManager implements CacheManager {
         
         cache.clear();
         currentSize.set(0);
-        LOGGER.info("In-memory cache manager shut down for '{}'", configuration.getName());
+        LOGGER.debug("Cache '{}' shut down", configuration.getName());
     }
 
     /**
@@ -419,7 +427,8 @@ public class InMemoryCacheManager implements CacheManager {
             }
 
         } catch (Exception e) {
-            LOGGER.error("Failed to evict LRU entry", e);
+            LOGGER.error("Failed to evict LRU entry: {}", e.getMessage());
+            LOGGER.debug("Stack trace for LRU eviction failure:", e);
         }
     }
 

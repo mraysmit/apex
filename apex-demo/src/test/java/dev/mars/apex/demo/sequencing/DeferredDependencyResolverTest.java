@@ -1,10 +1,10 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver;
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver.DependencyAnalysis;
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver.DeferredSection;
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver.CircularDependencyResult;
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver.DependencyResolutionStatus;
+import dev.mars.apex.core.config.sequential.DeferredDependencyResolver;
+import dev.mars.apex.core.config.sequential.DeferredDependencyResolver.DependencyAnalysis;
+import dev.mars.apex.core.config.sequential.DeferredDependencyResolver.DeferredSection;
+import dev.mars.apex.core.config.sequential.DeferredDependencyResolver.CircularDependencyResult;
+import dev.mars.apex.core.config.sequential.DeferredDependencyResolver.DependencyResolutionStatus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,11 +28,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * 4. Unresolvable dependency handling
  * 5. Deferred processing queue management
  * 
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @version 1.0
  * @since Phase 3
  */
-@DisplayName("Phase 3: Deferred Dependency Resolution Tests")
+@DisplayName("Deferred Dependency Resolution Tests")
 public class DeferredDependencyResolverTest {
     
     private static final Logger LOGGER = Logger.getLogger(DeferredDependencyResolverTest.class.getName());

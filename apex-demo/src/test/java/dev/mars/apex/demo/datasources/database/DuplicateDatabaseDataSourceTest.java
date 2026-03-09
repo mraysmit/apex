@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.datasources.database;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.core.cache.ApexCacheManager;
 
@@ -153,11 +153,11 @@ public class DuplicateDatabaseDataSourceTest extends DemoTestBase {
                 "Hit rate should be 50% (1 hit out of 2 accesses)");
 
             logger.info("VERIFICATION SUCCESSFUL:");
-            logger.info("   ✓ Only 1 DatasetLookupService created for database query (not 2)");
-            logger.info("   ✓ Second enrichment reused first enrichment's dataset");
-            logger.info("   ✓ Memory duplication eliminated via caching");
-            logger.info("   ✓ 50% memory savings achieved");
-            logger.info("   ✓ Database dataset deduplication works same as inline!");
+            logger.info("   [OK] Only 1 DatasetLookupService created for database query (not 2)");
+            logger.info("   [OK] Second enrichment reused first enrichment's dataset");
+            logger.info("   [OK] Memory duplication eliminated via caching");
+            logger.info("   [OK] 50% memory savings achieved");
+            logger.info("   [OK] Database dataset deduplication works same as inline!");
             logger.info("=================================================================");
 
             // Verify enrichment results are still correct
@@ -285,7 +285,7 @@ public class DuplicateDatabaseDataSourceTest extends DemoTestBase {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }

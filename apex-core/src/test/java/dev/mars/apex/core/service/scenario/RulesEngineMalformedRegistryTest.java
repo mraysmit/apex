@@ -16,13 +16,22 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.engine.core.RulesEngine;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for malformed scenario registry handling in RulesEngine.
  * 
- * <p>Migrated from DataTypeScenarioServiceMalformedRegistryTest to use the new RulesEngine API.</p>
+ * <p>Replaces the deleted DataTypeScenarioServiceMalformedRegistryTest, using the new RulesEngine API.</p>
  * 
  * <p>Tests cover:</p>
  * <ul>
@@ -64,6 +73,15 @@ class RulesEngineMalformedRegistryTest {
     
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineMalformedRegistryTest.class);
     
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RulesEngineMalformedRegistryTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RulesEngineMalformedRegistryTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RulesEngineMalformedRegistryTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: missing scenarios, invalid YAML, malformed registry structures");
+    }
+
     // ========================================
     // Missing Scenarios Section Tests
     // ========================================
@@ -87,7 +105,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Load registry should throw exception for empty registry
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for registry with missing scenarios section");
@@ -114,7 +132,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Load registry should throw exception
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for registry with empty scenarios list");
@@ -141,7 +159,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Load registry should throw exception
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for registry with null scenarios section");
@@ -283,7 +301,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Should throw exception for invalid YAML
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for invalid YAML syntax");
@@ -309,7 +327,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Should throw exception for non-existent scenario file
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for non-existent scenario file");
@@ -324,7 +342,7 @@ class RulesEngineMalformedRegistryTest {
     void testNonExistentRegistryFile() {
         logger.info("TEST: Triggering intentional error - Non-existent registry file");
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             RulesEngine.fromScenarioRegistry("/path/that/does/not/exist/registry.yaml");
         }, "Should throw exception for non-existent registry file");
     }
@@ -344,7 +362,7 @@ class RulesEngineMalformedRegistryTest {
     void testEmptyRegistryPath() {
         logger.info("TEST: Triggering intentional error - Empty registry path");
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             RulesEngine.fromScenarioRegistry("");
         }, "Should throw exception for empty registry path");
     }
@@ -359,5 +377,12 @@ class RulesEngineMalformedRegistryTest {
         Files.writeString(registryFile, content);
         registryFile.toFile().deleteOnExit();
         return registryFile;
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RulesEngineMalformedRegistryTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RulesEngineMalformedRegistryTest intentional error tests completed");
+        MDC.remove("testContext");
     }
 }

@@ -17,9 +17,9 @@ package dev.mars.apex.demo.lookup;
  */
 
 import dev.mars.apex.demo.DemoTestBase;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.slf4j.Logger;
@@ -87,14 +87,14 @@ public class BarrierOptionNestedTest extends DemoTestBase {
             logger.info("Validating APEX nested enrichment results...");
             validateApexNestedEnrichmentResults(enrichedData);
 
-            logger.info("✓ APEX successfully processed all nested data structures");
+            logger.info("[OK] APEX successfully processed all nested data structures");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
     }
 
     @Test
-    @DisplayName("Validate APEX Nested Validation Rules Processing - Phase 3: Complete Validation")
+    @DisplayName("Validate APEX Nested Validation Rules Processing - Complete Validation")
     void testApexNestedValidationCapabilities() {
         logger.info("=== Testing APEX Nested Validation Rules Processing ===");
 
@@ -119,7 +119,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
             // VALIDATE: APEX processed ALL 3 validation rules configuration
             validateApexNestedValidationResults(config, barrierOptionData);
 
-            logger.info("✓ APEX successfully processed all nested validation rules");
+            logger.info("[OK] APEX successfully processed all nested validation rules");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -227,7 +227,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
         assertNotNull(extractedPrice, "APEX should extract nested price: underlyingAsset.marketData.currentPrice");
         assertEquals("2100.00", extractedPrice,
                     "APEX should extract nested price: underlyingAsset.marketData.currentPrice");
-        logger.debug("✓ Level 2 navigation validation passed");
+        logger.debug("[OK] Level 2 navigation validation passed");
 
         // VALIDATE: APEX cross-nested-field business calculation
         logger.debug("Validating cross-nested-field business calculation...");
@@ -237,7 +237,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
         assertNotNull(barrierSpread, "APEX should calculate barrier spread");
         assertEquals(150.0, Double.parseDouble(barrierSpread.toString()),
                     "APEX should calculate: barrierLevel (2300) - strikePrice (2150) = 150");
-        logger.debug("✓ Cross-nested calculation validation passed");
+        logger.debug("[OK] Cross-nested calculation validation passed");
 
         // VALIDATE: APEX Level 3 nested conditional processing
         logger.debug("Validating Level 3 nested conditional processing...");
@@ -247,7 +247,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
         assertNotNull(rebatePercentage, "APEX should calculate rebate percentage from Level 3 nested data");
         assertEquals(33.33, Double.parseDouble(rebatePercentage.toString()), 0.01,
                     "APEX should calculate: (rebateAmount (5000) / premium (15000)) * 100 = 33.33%");
-        logger.debug("✓ Level 3 conditional processing validation passed");
+        logger.debug("[OK] Level 3 conditional processing validation passed");
 
         // VALIDATE: APEX nested date calculation with SpEL
         logger.debug("Validating nested date calculation with SpEL...");
@@ -257,9 +257,9 @@ public class BarrierOptionNestedTest extends DemoTestBase {
         assertNotNull(observationDays, "APEX should calculate days between nested observation period dates");
         assertEquals(91L, Long.parseLong(observationDays.toString()),
                     "APEX should calculate days between 2025-09-19 and 2025-12-19 = 91 days");
-        logger.debug("✓ Nested date calculation validation passed");
+        logger.debug("[OK] Nested date calculation validation passed");
 
-        logger.info("✓ All 4 APEX nested enrichments validated successfully:");
+        logger.info("[OK] All 4 APEX nested enrichments validated successfully:");
         logger.info("  - Level 2 Navigation: {}", extractedPrice);
         logger.info("  - Cross-Nested Calculation: {}", barrierSpread);
         logger.info("  - Level 3 Conditional: {}%", rebatePercentage);
@@ -288,7 +288,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
         assertTrue(rules.get(2).getCondition().contains("rebateTerms") && rules.get(2).getCondition().contains("rebateAmount"),
                 "Third rule should validate rebate amount");
 
-        logger.info("✓ All 3 APEX nested validation rules configured successfully:");
+        logger.info("[OK] All 3 APEX nested validation rules configured successfully:");
         logger.info("  - Barrier vs Strike Validation: CONFIGURED");
         logger.info("  - Date Consistency Validation: CONFIGURED");
         logger.info("  - Rebate Amount Validation: CONFIGURED");

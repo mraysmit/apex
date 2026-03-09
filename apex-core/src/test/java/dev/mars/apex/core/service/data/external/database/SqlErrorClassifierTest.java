@@ -1,7 +1,12 @@
 package dev.mars.apex.core.service.data.external.database;
 
 import org.junit.jupiter.api.Test;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.sql.SQLException;
 
@@ -10,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test cases for SqlErrorClassifier to ensure proper categorization of SQL errors.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class SqlErrorClassifierTest {
 
     @Test

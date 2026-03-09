@@ -340,8 +340,7 @@ class SaveLoadConfigurationUITest {
     // Helper methods
 
     private void clearAndEnterText(WebElement element, String text) {
-        element.clear();
-        element.sendKeys(text);
+        CodeMirrorTestHelper.clearAndEnterText(driver, element, text);
     }
 }
 

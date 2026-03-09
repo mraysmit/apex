@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -17,14 +19,22 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Nested;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static dev.mars.apex.engine.scenario.ScenarioRegistryManager.matchesClassificationRule;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -83,7 +93,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("type", "OTC");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should match when first OR condition is true");
         }
 
@@ -100,7 +110,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("type", "LISTED");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should match when second OR condition is true");
         }
 
@@ -117,7 +127,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("type", "DERIVATIVE");
 
             // Then: Should not match
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should not match when no OR conditions are true");
         }
 
@@ -134,7 +144,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("type", null);
 
             // Then: Should match because second condition is true
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should match when second OR condition (null check) is true");
         }
 
@@ -152,7 +162,7 @@ class ScenarioAdvancedFeaturesTest {
             // 'category' field is missing
 
             // Then: Should match because first condition is true
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should match when first OR condition is true, even if second field is missing");
         }
     }
@@ -180,7 +190,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("trade", trade);
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should access single-level nested field");
         }
 
@@ -201,7 +211,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("trade", trade);
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should access multi-level nested field");
         }
 
@@ -218,7 +228,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("trade", null);
 
             // Then: Should not throw exception
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should handle null nested fields gracefully");
         }
 
@@ -235,7 +245,7 @@ class ScenarioAdvancedFeaturesTest {
             // 'trade' object is missing entirely
 
             // Then: Should not throw exception, should return false
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should handle missing nested objects gracefully without throwing exception");
         }
 
@@ -255,7 +265,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("trade", trade);
 
             // Then: Should not throw exception, should return false
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should handle partial nested structures gracefully");
         }
     }
@@ -281,7 +291,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("description", "This is an urgent trade");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should support .contains() string operation");
         }
 
@@ -298,7 +308,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("code", "OTC-12345");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should support .startsWith() string operation");
         }
 
@@ -315,7 +325,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("name", "LongName");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should support .length() string operation");
         }
 
@@ -332,7 +342,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("description", null);
 
             // Then: Should not throw exception, should return false
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should handle null strings gracefully in string operations");
         }
 
@@ -349,7 +359,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("code", "");
 
             // Then: Should not match (empty string has length 0)
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should correctly evaluate empty strings in length operations");
         }
 
@@ -366,7 +376,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("code", "otc-12345");
 
             // Then: Should not match (case-sensitive)
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "String operations should be case-sensitive");
         }
     }
@@ -409,7 +419,7 @@ class ScenarioAdvancedFeaturesTest {
             assertNotNull(result.getStageResults(), "Should have stage results");
             assertFalse(result.getStageResults().isEmpty(), "Should have at least one stage result");
 
-            logger.info("✓ Flag-for-review policy validated: status={}, requiresReview={}",
+            logger.info("[OK] Flag-for-review policy validated: status={}, requiresReview={}",
                 result.getExecutionStatus(), result.requiresReview());
         }
     }
@@ -471,7 +481,7 @@ class ScenarioAdvancedFeaturesTest {
             assertTrue(status.contains("PARTIAL") || status.contains("FAILURE"),
                 "Scenario should show partial success or failure status, got: " + status);
 
-            logger.info("✓ Dependency handling validated: stage-1 failed, stage-2 skipped. Status: {}",
+            logger.info("[OK] Dependency handling validated: stage-1 failed, stage-2 skipped. Status: {}",
                 result.getExecutionStatus());
         }
     }

@@ -17,8 +17,8 @@
  */
 package dev.mars.apex.sync.validation;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.diff.SchemaComparisonResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -113,8 +113,8 @@ class SchemaDiffMigrationValidationTest_RemovedColumns {
             "Report should mention email column");
         assertTrue(reportContent.contains("Removed Columns"), "Report should have removed columns section");
         
-        logger.info("✓ Breaking changes detected: {} removed columns flagged", comparison.getRemovedColumns().size());
-        logger.info("✓ Migration is NOT backward compatible - existing applications may break");
+        logger.info("[OK] Breaking changes detected: {} removed columns flagged", comparison.getRemovedColumns().size());
+        logger.info("[OK] Migration is NOT backward compatible - existing applications may break");
     }
 
     private SchemaComparisonResult extractComparisonResult(RuleResult result) {

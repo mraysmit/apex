@@ -16,9 +16,13 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.ScenarioRegistryLoader;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
+import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

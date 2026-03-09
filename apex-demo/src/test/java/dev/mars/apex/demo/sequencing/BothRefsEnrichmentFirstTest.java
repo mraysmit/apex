@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,11 +35,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Rule-refs expands BEFORE inline rules
  * - All enrichments execute BEFORE all rules
  */
-@DisplayName("CRITICAL: Both Refs - Enrichment-Refs First")
+@DisplayName("Both Refs - Enrichment-Refs First")
 class BothRefsEnrichmentFirstTest extends DemoTestBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BothRefsEnrichmentFirstTest.class);
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     @Test
     @DisplayName("Test 1: Verify both enrichments and rules loaded from external files")

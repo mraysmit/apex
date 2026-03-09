@@ -19,9 +19,9 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -144,8 +144,8 @@ class ReadSchemaDatabasePipelineStageTestMultiTable extends SyncTestBase {
         assertTrue(reportContent.contains("CUSTOMERS") || reportContent.contains("customers"), 
             "Report should contain CUSTOMERS table");
 
-        logger.info("✓ HTML report generated: {}", reportPath);
-        logger.info("✓ Successfully read 5 table schemas with report generation");
+        logger.info("[OK] HTML report generated: {}", reportPath);
+        logger.info("[OK] Successfully read 5 table schemas with report generation");
     }
 
     private void setupTestDatabase() throws Exception {

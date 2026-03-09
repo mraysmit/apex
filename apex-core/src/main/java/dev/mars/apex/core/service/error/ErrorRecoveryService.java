@@ -1,11 +1,10 @@
 package dev.mars.apex.core.service.error;
 
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleResult;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +27,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Service for handling error recovery in rule evaluation.
  *
- * This enum is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+ * This enum is part of the APEX Rules Engine, providing
+ * production-ready rules evaluation capabilities.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
@@ -37,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ErrorRecoveryService {
     private static final Logger logger = LoggerFactory.getLogger(ErrorRecoveryService.class);
-    private static final ExpressionParser parser = new SpelExpressionParser();
+    private static final ExpressionParser parser = dev.mars.apex.engine.core.SpelParserHolder.INSTANCE;
     
     private final ErrorRecoveryStrategy defaultStrategy;
     

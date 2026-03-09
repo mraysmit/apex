@@ -18,13 +18,13 @@ package dev.mars.apex.playground.examples;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlValidationResult;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.validation.MetadataValidator;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.validation.ValidationResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -64,12 +64,12 @@ public class PlaygroundExamplesValidationTest {
     private static final Logger logger = LoggerFactory.getLogger(PlaygroundExamplesValidationTest.class);
     private static final String EXAMPLES_BASE_PATH = "examples";
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         objectMapper = new ObjectMapper();
         logger.info("Test setup complete");
     }
@@ -97,7 +97,7 @@ public class PlaygroundExamplesValidationTest {
     /**
      * Helper method to load YAML configuration from file
      */
-    private YamlRuleConfiguration loadYamlConfig(String yamlPath) throws YamlConfigurationException {
+    private YamlRuleConfiguration loadYamlConfig(String yamlPath) throws ConfigurationException {
         Path path = resolveExamplePath(yamlPath);
         return yamlLoader.loadFromFile(path.toString());
     }
@@ -132,7 +132,7 @@ public class PlaygroundExamplesValidationTest {
             assertTrue(result.isTriggered(), "Rule should trigger for age=20 (>= 18)");
             assertTrue(result.isSuccess(), "Rule execution should succeed");
             
-            logger.info("✓ minimal-rule test passed - age {} triggered rule", testData.get("age"));
+            logger.info("[OK] minimal-rule test passed - age {} triggered rule", testData.get("age"));
         }
 
         @Test
@@ -156,7 +156,7 @@ public class PlaygroundExamplesValidationTest {
             assertNotNull(result, "RuleResult should not be null");
             assertTrue(result.isTriggered(), "age-too-young rule should trigger for age=17");
             
-            logger.info("✓ simple-age-validation test passed - age {} is too young", testData.get("age"));
+            logger.info("[OK] simple-age-validation test passed - age {} is too young", testData.get("age"));
         }
 
         @Test
@@ -185,7 +185,7 @@ public class PlaygroundExamplesValidationTest {
             RuleResult currencyResult = engine.executeRule(checkCurrencyRule, testData);
             assertTrue(currencyResult.isTriggered(), "check-currency should trigger for USD");
             
-            logger.info("✓ quick-start test passed - amount={}, currency={}", 
+            logger.info("[OK] quick-start test passed - amount={}, currency={}", 
                 testData.get("amount"), testData.get("currency"));
         }
 
@@ -215,7 +215,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals(1000, enrichedData.get("trade_amount"), 
                 "trade_amount should be extracted from trade.amount");
             
-            logger.info("✓ nested-field-navigation test passed - extracted currency={}, amount={}", 
+            logger.info("[OK] nested-field-navigation test passed - extracted currency={}, amount={}", 
                 enrichedData.get("trade_currency"), enrichedData.get("trade_amount"));
         }
     }
@@ -260,7 +260,7 @@ public class PlaygroundExamplesValidationTest {
             RuleResult currencyResult = engine.executeRule(currencyRule, testData);
             assertTrue(currencyResult.isTriggered(), "currency-validation should trigger for USD");
             
-            logger.info("✓ value-threshold test passed - amount={}, currency={}", 
+            logger.info("[OK] value-threshold test passed - amount={}, currency={}", 
                 testData.get("amount"), testData.get("currency"));
         }
     }
@@ -300,7 +300,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals("HIGH_VALUE", enrichedData.get("valueCategory"), 
                 "valueCategory should be 'HIGH_VALUE' for notionalAmount=15000000");
             
-            logger.info("✓ constant-value-enrichment test passed");
+            logger.info("[OK] constant-value-enrichment test passed");
         }
 
         @Test
@@ -322,7 +322,7 @@ public class PlaygroundExamplesValidationTest {
             RuleResult result = engine.executeRule(tradeDateRule, testData);
             assertTrue(result.isTriggered(), "validate-trade-date should trigger when tradeDate is present");
             
-            logger.info("✓ financial-validation test passed");
+            logger.info("[OK] financial-validation test passed");
         }
 
         @Test
@@ -350,7 +350,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals("Payment", enrichedData.get("transaction_category"),
                 "transaction_category should be enriched from lookup for TXN001");
 
-            logger.info("✓ enrichment-service-requirement test passed");
+            logger.info("[OK] enrichment-service-requirement test passed");
         }
 
         @Test
@@ -392,7 +392,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals("FCA_COMPLIANCE_REQUIRED", enrichedData.get("regulatoryCompliance"),
                 "regulatoryCompliance should be FCA_COMPLIANCE_REQUIRED for UK market");
 
-            logger.info("✓ comprehensive-financial-settlement test passed");
+            logger.info("[OK] comprehensive-financial-settlement test passed");
         }
 
         @Test
@@ -433,7 +433,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals("BATCH", enrichedData.get("processingMode"), "processingMode should be 'BATCH'");
             assertEquals("V2.1", enrichedData.get("validationVersion"), "validationVersion should be 'V2.1'");
 
-            logger.info("✓ constant-values test passed");
+            logger.info("[OK] constant-values test passed");
         }
     }
 
@@ -469,7 +469,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals("Premium support, expedited processing", enrichedData.get("customerTierBenefits"),
                 "customerTierBenefits should match PLATINUM tier");
 
-            logger.info("✓ dynamic-pricing test passed");
+            logger.info("[OK] dynamic-pricing test passed");
         }
 
         @Test
@@ -520,7 +520,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals(123L, ((Number) roundedResult).longValue(),
                 "round(123.456) should be 123");
 
-            logger.info("✓ math-calculations test passed");
+            logger.info("[OK] math-calculations test passed");
         }
 
         @SuppressWarnings("unchecked")
@@ -573,7 +573,7 @@ public class PlaygroundExamplesValidationTest {
             RuleResult emailResult = engine.executeRule(emailRule, testData);
             assertTrue(emailResult.isTriggered(), "email-check should trigger for email containing '@'");
 
-            logger.info("✓ inline-groups test passed");
+            logger.info("[OK] inline-groups test passed");
         }
     }
 
@@ -612,7 +612,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals("URGENT", routing.get("priority"),
                 "routing.priority should be URGENT for high-value USD");
 
-            logger.info("✓ payment-routing test passed");
+            logger.info("[OK] payment-routing test passed");
         }
     }
 
@@ -661,7 +661,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals("DERIVATIVES_DESK", enrichedData.get("productTeam"),
                 "productTeam should be DERIVATIVES_DESK");
 
-            logger.info("✓ advanced-routing test passed");
+            logger.info("[OK] advanced-routing test passed");
         }
 
         @Test
@@ -703,7 +703,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals("HIGH", enrichedData.get("SETTLEMENT_PRIORITY"),
                 "SETTLEMENT_PRIORITY should be HIGH for rank <= 2");
 
-            logger.info("✓ fx-transaction-processing test passed");
+            logger.info("[OK] fx-transaction-processing test passed");
         }
 
         @Test
@@ -739,7 +739,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals(0.20, enrichedData.get("discount"),
                 "discount should be 0.20 (20%) for VIP customer");
 
-            logger.info("✓ nested-discount-logic test passed");
+            logger.info("[OK] nested-discount-logic test passed");
         }
 
         @Test
@@ -782,7 +782,7 @@ public class PlaygroundExamplesValidationTest {
             assertEquals("APPROVED", finalStatus, "finalApplicationStatus should be 'APPROVED'");
             logger.info("finalApplicationStatus value: {} (type: {})", finalStatus, finalStatus.getClass().getSimpleName());
 
-            logger.info("✓ waterfall-approval test passed");
+            logger.info("[OK] waterfall-approval test passed");
         }
     }
 
@@ -835,7 +835,7 @@ public class PlaygroundExamplesValidationTest {
                 "sourceSystem should be 'CSV_IMPORT'");
             assertNotNull(enrichedData.get("importDate"), "importDate should be set");
 
-            logger.info("✓ customer-pipeline test passed");
+            logger.info("[OK] customer-pipeline test passed");
         }
 
         @Test
@@ -866,7 +866,7 @@ public class PlaygroundExamplesValidationTest {
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created successfully");
 
-            logger.info("✓ json-transformation test passed (configuration validated)");
+            logger.info("[OK] json-transformation test passed (configuration validated)");
         }
     }
 
@@ -884,7 +884,7 @@ public class PlaygroundExamplesValidationTest {
             logger.info("Scanning for YAML files in: {}", examplesPath);
 
             // Use null base path so we can pass absolute paths
-            YamlMetadataValidator validator = new YamlMetadataValidator(null);
+            MetadataValidator validator = new MetadataValidator(null);
             List<String> errors = new ArrayList<>();
 
             try (Stream<Path> paths = Files.walk(examplesPath)) {
@@ -892,7 +892,7 @@ public class PlaygroundExamplesValidationTest {
                      .filter(p -> p.toString().endsWith(".yaml") || p.toString().endsWith(".yml"))
                      .forEach(path -> {
                          logger.debug("Validating: {}", path);
-                         YamlValidationResult result = validator.validateFile(path.toAbsolutePath().toString());
+                         ValidationResult result = validator.validateFile(path.toAbsolutePath().toString());
                          if (!result.isValid()) {
                              errors.add("Validation failed for " + examplesPath.relativize(path) + ": " + result.getErrors());
                          }
@@ -903,7 +903,7 @@ public class PlaygroundExamplesValidationTest {
                 fail("Validation failed for " + errors.size() + " files:\n" + String.join("\n", errors));
             }
             
-            logger.info("✓ All YAML files validated successfully");
+            logger.info("[OK] All YAML files validated successfully");
         }
     }
 }

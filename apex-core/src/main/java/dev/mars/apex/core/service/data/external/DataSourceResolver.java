@@ -3,7 +3,8 @@ package dev.mars.apex.core.service.data.external;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.mars.apex.core.util.PropertyResolver;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -26,13 +27,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * - Resolve file-based and classpath-based references
  * - Support for environment-specific configurations
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-08-28
  * @version 1.0.0
  */
 public class DataSourceResolver {
     
-    private final RulesEngineLogger logger = new RulesEngineLogger(DataSourceResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataSourceResolver.class);
 
     private final ObjectMapper yamlMapper;
     private final Map<String, ExternalDataSourceConfig> configCache;
@@ -40,7 +41,7 @@ public class DataSourceResolver {
     public DataSourceResolver() {
         this.yamlMapper = new ObjectMapper(new YAMLFactory());
         this.configCache = new ConcurrentHashMap<>();
-        logger.info("DataSourceResolver initialized with YAML mapper and configuration cache");
+        logger.debug("DataSourceResolver initialized");
     }
     
     /**

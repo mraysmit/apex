@@ -1,0 +1,85 @@
+# ============================================================================
+# APEX RulesEngine Pipeline Integration Test - Pipeline + Rules
+# ============================================================================
+#
+# PURPOSE:
+# Validates document-order processing where pipeline executes before rules.
+# Tests that RulesEngine.evaluate() processes sections in correct order.
+#
+# TEST COVERAGE:
+# - Document order: pipeline section processed first
+# - Rules section processed after pipeline
+# - Both sections execute successfully in single evaluate() call
+#
+# USED BY: RulesEnginePipelineIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "rules-engine-pipeline-rules-test"
+  name: "RulesEngine Pipeline Integration - With Rules"
+  description: "Tests pipeline execution with rule validation"
+  type: "rule-config"
+  version: "1.0"
+  author: "Mark A Ray-Smith Cityline Ltd"
+  tags: ["test", "pipeline", "rules", "document-order"]
+
+# Inline data source for pipeline
+data-sources:
+  - name: "test-rules-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 in-memory database for pipeline + rules"
+
+    connection:
+      database: "mem:rules_pipeline_test"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS test_data (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255)
+          );
+
+          INSERT INTO test_data (id, name) VALUES
+            (1, 'Test Record 1');
+
+    queries:
+      getAll: "SELECT id, name FROM test_data"
+
+# Simple pipeline
+pipeline:
+  name: "test-pipeline-with-rules"
+  description: "Pipeline that executes before rules"
+  
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "test-extract"
+      type: "extract"
+      source: "test-rules-source"
+      operation: "getAll"
+      description: "Extract test data"
+
+# Rules that execute after pipeline
+rules:
+  - id: "validate-customer-id"
+    name: "Validate Customer ID"
+    condition: "#customerId != null && #customerId.length() > 0"
+    message: "Customer ID is valid"
+    severity: "INFO"
+    priority: 1
+  
+  - id: "validate-customer-tier"
+    name: "Validate Customer Tier"
+    condition: "#customerTier != null"
+    message: "Customer tier is present"
+    severity: "INFO"
+    priority: 2
+

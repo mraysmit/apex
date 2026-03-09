@@ -1,0 +1,47 @@
+metadata:
+  id: "json-report-json-output-test"
+  name: "JSON Report Generation Test"
+  type: "pipeline-config"
+  version: "1.0"
+  author: "Mark Andrew Ray-Smith Cityline Ltd "
+  description: "Test JSON report generation from schema-diff pipeline"
+
+data-sources:
+  - name: "csv-source"
+    type: "file-system"
+    connection:
+      base-path: "src/test/resources/test-data"
+    config:
+      file-pattern: "customers.csv"
+      
+  - name: "csv-target"
+    type: "file-system"
+    connection:
+      base-path: "src/test/resources/test-data"
+    config:
+      file-pattern: "customers_with_phone.csv"
+
+pipeline:
+  name: "json-report-test"
+  execution:
+    mode: "sequential"
+  
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "csv-source"
+      parameters:
+        file: "src/test/resources/test-data/customers.csv"
+      
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "csv-target"
+      parameters:
+        file: "src/test/resources/test-data/customers_with_phone.csv"
+      
+    - name: "compare-schemas"
+      type: "schema-diff"
+      parameters:
+        source-step: "read-source-schema"
+        target-step: "read-target-schema"
+        json-report-output: "apex-data-sync/reports/schema-diff-json-test.json"

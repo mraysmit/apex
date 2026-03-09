@@ -19,9 +19,9 @@ package dev.mars.apex.playground.controller;
 
 import dev.mars.apex.playground.model.PlaygroundRequest;
 import dev.mars.apex.playground.model.PlaygroundResponse;
-import dev.mars.apex.playground.model.YamlValidationResponse;
+import dev.mars.apex.playground.model.ValidationResponse;
 import dev.mars.apex.playground.service.PlaygroundService;
-import dev.mars.apex.playground.service.YamlValidationService;
+import dev.mars.apex.playground.service.ValidationService;
 import dev.mars.apex.playground.service.ExampleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,14 +58,44 @@ public class ApiController {
     private static final Logger logger = LoggerFactory.getLogger(ApiController.class);
 
     private final PlaygroundService playgroundService;
-    private final YamlValidationService yamlValidationService;
+    private final ValidationService yamlValidationService;
     private final ExampleService exampleService;
 
     @Autowired
-    public ApiController(PlaygroundService playgroundService, YamlValidationService yamlValidationService, ExampleService exampleService) {
+    public ApiController(PlaygroundService playgroundService, ValidationService yamlValidationService, ExampleService exampleService) {
         this.playgroundService = playgroundService;
         this.yamlValidationService = yamlValidationService;
         this.exampleService = exampleService;
+    }
+
+    /**
+     * Root API endpoint - returns API info and available endpoints.
+     */
+    @GetMapping({"", "/"})
+    @Operation(
+        summary = "API info",
+        description = "Returns basic API information and a list of available endpoints."
+    )
+    @ApiResponse(responseCode = "200", description = "API info returned")
+    public ResponseEntity<Map<String, Object>> apiInfo() {
+        logger.debug("API info requested");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("service", "apex-playground");
+        response.put("version", "1.0.0");
+        response.put("description", "APEX Playground REST API");
+        response.put("endpoints", Map.of(
+            "health", "GET /playground/api/health",
+            "process", "POST /playground/api/process",
+            "validate", "POST /playground/api/validate",
+            "examples", "GET /playground/api/examples",
+            "settings", "GET /playground/api/settings",
+            "upload-data", "POST /playground/api/upload/data",
+            "upload-yaml", "POST /playground/api/upload/yaml",
+            "datasources", "GET /playground/api/datasources/connections"
+        ));
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -124,7 +154,7 @@ public class ApiController {
         description = "Validate YAML rules configuration syntax and structure."
     )
     @ApiResponse(responseCode = "200", description = "Validation completed")
-    public ResponseEntity<YamlValidationResponse> validateYaml(
+    public ResponseEntity<ValidationResponse> validateYaml(
             @RequestBody Map<String, Object> request) {
 
         logger.info("YAML validation request received");
@@ -132,18 +162,18 @@ public class ApiController {
         try {
             String yamlContent = (String) request.get("yamlContent");
             if (yamlContent == null) {
-                YamlValidationResponse errorResponse = new YamlValidationResponse(false, "YAML content is required");
+                ValidationResponse errorResponse = new ValidationResponse(false, "YAML content is required");
                 errorResponse.addError("Missing 'yamlContent' field in request", 0, 0);
                 return ResponseEntity.ok(errorResponse);
             }
 
-            YamlValidationResponse response = yamlValidationService.validateYaml(yamlContent);
+            ValidationResponse response = yamlValidationService.validateYaml(yamlContent);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error validating YAML: {}", e.getMessage());
             logger.debug("Full exception details:", e);
-            YamlValidationResponse errorResponse = new YamlValidationResponse(false, "Validation failed: " + e.getMessage());
+            ValidationResponse errorResponse = new ValidationResponse(false, "Validation failed: " + e.getMessage());
             errorResponse.addError("Validation error: " + e.getMessage(), 0, 0);
             return ResponseEntity.ok(errorResponse);
         }
@@ -324,6 +354,7 @@ public class ApiController {
 
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid data file upload: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -364,7 +395,7 @@ public class ApiController {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
 
             // Validate YAML syntax
-            YamlValidationResponse validationResult = yamlValidationService.validateYaml(content);
+            ValidationResponse validationResult = yamlValidationService.validateYaml(content);
             if (!validationResult.isValid()) {
                 throw new IllegalArgumentException("Invalid YAML syntax: " + validationResult.getMessage());
             }
@@ -381,6 +412,7 @@ public class ApiController {
 
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid YAML file upload: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -466,6 +498,53 @@ public class ApiController {
             return "CSV";
         } else {
             return "JSON"; // Default for .json and .txt files
+        }
+    }
+
+    // ========================================================================
+    // Settings Endpoints
+    // ========================================================================
+
+    /**
+     * Get current playground settings.
+     */
+    @GetMapping("/settings")
+    @Operation(summary = "Get settings", description = "Get current playground settings")
+    @ApiResponse(responseCode = "200", description = "Settings retrieved")
+    public ResponseEntity<Map<String, Object>> getSettings() {
+        Map<String, Object> settings = new HashMap<>();
+        settings.put("examplesDir", exampleService.getExamplesDir());
+        settings.put("resolvedExamplesPath", exampleService.getResolvedExamplesPath());
+        java.io.File dir = new java.io.File(exampleService.getExamplesDir());
+        settings.put("directoryExists", dir.exists() && dir.isDirectory());
+        return ResponseEntity.ok(settings);
+    }
+
+    /**
+     * Update playground settings.
+     */
+    @PutMapping("/settings")
+    @Operation(summary = "Update settings", description = "Update playground settings")
+    @ApiResponse(responseCode = "200", description = "Settings updated")
+    public ResponseEntity<Map<String, Object>> updateSettings(@RequestBody Map<String, Object> settings) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            if (settings.containsKey("examplesDir")) {
+                String newDir = String.valueOf(settings.get("examplesDir"));
+                exampleService.setExamplesDir(newDir);
+                result.put("examplesDir", exampleService.getExamplesDir());
+                result.put("resolvedExamplesPath", exampleService.getResolvedExamplesPath());
+                
+                // Check if directory exists
+                java.io.File dir = new java.io.File(exampleService.getExamplesDir());
+                result.put("directoryExists", dir.exists() && dir.isDirectory());
+            }
+            result.put("success", true);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(result);
         }
     }
 }

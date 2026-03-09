@@ -17,8 +17,8 @@ package dev.mars.apex.rest.controller;
  */
 
 
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.engine.TemplateProcessorService;
+import dev.mars.apex.engine.core.ExpressionEvaluatorService;
+import dev.mars.apex.rest.service.TemplateProcessorService;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -121,7 +121,8 @@ public class TemplateController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error processing JSON template: {}", e.getMessage(), e);
+            logger.error("Error processing JSON template: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "JSON template processing failed");
@@ -187,7 +188,8 @@ public class TemplateController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error processing XML template: {}", e.getMessage(), e);
+            logger.error("Error processing XML template: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "XML template processing failed");
@@ -254,7 +256,8 @@ public class TemplateController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error processing text template: {}", e.getMessage(), e);
+            logger.error("Error processing text template: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Text template processing failed");
@@ -310,6 +313,7 @@ public class TemplateController {
 
                 } catch (Exception e) {
                     logger.warn("Error processing template '{}': {}", templateItem.getName(), e.getMessage());
+                    logger.debug("Full exception details:", e);
                     templateResult.put("success", false);
                     templateResult.put("error", e.getMessage());
                 }
@@ -331,7 +335,8 @@ public class TemplateController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during batch template processing: {}", e.getMessage(), e);
+            logger.error("Error during batch template processing: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Batch template processing failed");

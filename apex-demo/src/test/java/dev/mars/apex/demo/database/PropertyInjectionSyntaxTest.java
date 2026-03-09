@@ -15,7 +15,7 @@
  */
 package dev.mars.apex.demo.database;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *    - Validation: Complex strings handled correctly
  *
  * TECHNICAL APPROACH:
- * - Uses reflection to test YamlConfigurationLoader.resolveProperties() directly
+ * - Uses reflection to test ConfigurationLoader.resolveProperties() directly
  * - Focuses on syntax validation rather than end-to-end functionality
  * - Provides clear logging for each syntax pattern tested
  * - Maintains simple, focused test methods for easy debugging
@@ -79,15 +79,15 @@ class PropertyInjectionSyntaxTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertyInjectionSyntaxTest.class);
     
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
     private Method resolvePropertiesMethod;
 
     @BeforeEach
     void setUp() throws Exception {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
         
         // Access private resolveProperties method for direct testing
-        resolvePropertiesMethod = YamlConfigurationLoader.class.getDeclaredMethod("resolveProperties", String.class);
+        resolvePropertiesMethod = ConfigurationLoader.class.getDeclaredMethod("resolveProperties", String.class);
         resolvePropertiesMethod.setAccessible(true);
     }
 

@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -16,11 +18,20 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -51,6 +62,15 @@ class ScenarioStageMissingDependencyTest {
     
     private ScenarioStageExecutor executor;
     
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(ScenarioStageMissingDependencyTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ScenarioStageMissingDependencyTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(ScenarioStageMissingDependencyTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: missing stage dependencies, unresolved dependency chains");
+    }
+
     @BeforeEach
     void setUp() {
         executor = new ScenarioStageExecutor();
@@ -256,6 +276,13 @@ class ScenarioStageMissingDependencyTest {
         assertTrue(result.getSkippedStages().containsKey("stage-b") || 
                    result.isSuccessful(),
             "Should handle case-sensitive dependency mismatch");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(ScenarioStageMissingDependencyTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ScenarioStageMissingDependencyTest intentional error tests completed");
+        MDC.remove("testContext");
     }
 }
 

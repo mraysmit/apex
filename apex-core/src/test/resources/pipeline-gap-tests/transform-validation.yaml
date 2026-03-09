@@ -1,0 +1,64 @@
+# ============================================================================
+# Transform Step - Validation Rules Test
+# ============================================================================
+# Tests transform step with validation transformations.
+# Exercises applyValidation() method with different rule types.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "transform-validation-test"
+  name: "Transform Validation Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests transform step validation rules"
+
+data-sources:
+  - name: "validation-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:validation_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, customer_name, status FROM validation_source"
+
+pipeline:
+  name: "transform-validation-pipeline"
+  description: "Pipeline with validation transforms"
+
+  execution:
+    mode: "sequential"
+    max-retries: 0
+
+  steps:
+    - name: "extract-for-validation"
+      type: "extract"
+      source: "validation-source"
+      operation: "getAllRecords"
+      description: "Extract records for validation"
+
+    - name: "validate-records"
+      type: "transform"
+      description: "Apply validation rules"
+      depends-on: ["extract-for-validation"]
+      transformations:
+        - name: "check-required-name"
+          type: "validation"
+          rule: "required"
+          field: "customer_name"
+          
+        - name: "check-status-format"
+          type: "validation"
+          rule: "status-format"
+          field: "status"
+          
+        - name: "check-unknown-rule"
+          type: "validation"
+          rule: "unknown-rule-type"
+          field: "id"

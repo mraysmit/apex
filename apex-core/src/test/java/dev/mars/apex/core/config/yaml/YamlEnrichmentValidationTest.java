@@ -1,4 +1,8 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -18,8 +22,14 @@ package dev.mars.apex.core.config.yaml;
 
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -43,11 +53,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("YAML Enrichment Validation Tests")
 class YamlEnrichmentValidationTest {
 
-    private YamlConfigurationLoader configurationLoader;
+    private ConfigurationLoader configurationLoader;
 
     @BeforeEach
     void setUp() {
-        configurationLoader = new YamlConfigurationLoader();
+        configurationLoader = new ConfigurationLoader();
     }
 
     @Test
@@ -70,7 +80,7 @@ class YamlEnrichmentValidationTest {
         String invalidYaml = createEnrichmentYamlWithMissingId();
 
         // When & Then
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             InputStream inputStream = new ByteArrayInputStream(invalidYaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(inputStream);
         });
@@ -98,7 +108,7 @@ class YamlEnrichmentValidationTest {
             """;
 
         // When & Then
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             InputStream inputStream = new ByteArrayInputStream(invalidYaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(inputStream);
         });
@@ -123,7 +133,7 @@ class YamlEnrichmentValidationTest {
             """;
 
         // When & Then
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             InputStream inputStream = new ByteArrayInputStream(invalidYaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(inputStream);
         });
@@ -294,7 +304,7 @@ class YamlEnrichmentValidationTest {
         String invalidYaml = createEnrichmentYamlWithInvalidSeverity();
 
         // When & Then
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             InputStream inputStream = new ByteArrayInputStream(invalidYaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(inputStream);
         });
@@ -398,7 +408,7 @@ class YamlEnrichmentValidationTest {
                 name: Composite Group
                 enrichment-group-references: [ missing ]
             """;
-        YamlConfigurationException ex = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException ex = assertThrows(ConfigurationException.class, () -> {
             InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(is);
         });
@@ -419,7 +429,7 @@ class YamlEnrichmentValidationTest {
                 name: Self Group
                 enrichment-group-references: [ self ]
             """;
-        YamlConfigurationException ex = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException ex = assertThrows(ConfigurationException.class, () -> {
             InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(is);
         });
@@ -443,7 +453,7 @@ class YamlEnrichmentValidationTest {
                 name: G2
                 enrichment-group-references: [ g1 ]
             """;
-        YamlConfigurationException ex = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException ex = assertThrows(ConfigurationException.class, () -> {
             InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(is);
         });

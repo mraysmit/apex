@@ -17,8 +17,12 @@ package dev.mars.apex.core.config.component;
  */
 
 import dev.mars.apex.core.config.ResourceResolver;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -248,8 +252,8 @@ class ComponentLoaderClasspathTest {
         
         String resourcePath = TEST_RESOURCES_BASE + "circular-classpath-a.yaml";
         
-        YamlConfigurationException exception = assertThrows(
-                YamlConfigurationException.class,
+        ConfigurationException exception = assertThrows(
+                ConfigurationException.class,
                 () -> loader.loadComponentFromClasspath(resourcePath),
                 "Should throw exception for circular reference"
         );
@@ -320,7 +324,7 @@ class ComponentLoaderClasspathTest {
         
         String resourcePath = "non-existent/component.yaml";
         
-        assertThrows(YamlConfigurationException.class,
+        assertThrows(ConfigurationException.class,
                 () -> loader.loadComponentFromClasspath(resourcePath),
                 "Should throw exception for non-existent resource");
         

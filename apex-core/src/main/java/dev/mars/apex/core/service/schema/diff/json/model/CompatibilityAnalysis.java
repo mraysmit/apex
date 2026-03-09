@@ -26,7 +26,7 @@ import java.util.List;
  * Compatibility analysis including breaking changes and safe changes.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-18
  */
 public class CompatibilityAnalysis {
 

@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.monitoring;
 
+import dev.mars.apex.core.constants.SeverityConstants;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -195,7 +197,7 @@ public class PerformanceAnalyzer {
             insights.add(new PerformanceInsight("SLOWEST_RULE", slowest.getRuleName(),
                     String.format("Slowest rule in system (%.2fms average)",
                             slowest.getAverageEvaluationTimeMillis()),
-                    "INFO")
+                    SeverityConstants.INFO)
                     .withDetail("averageTime", slowest.getAverageEvaluationTimeMillis())
                     .withDetail("evaluationCount", slowest.getEvaluationCount()));
         }
@@ -212,7 +214,7 @@ public class PerformanceAnalyzer {
             insights.add(new PerformanceInsight("MOST_FAILURES", mostFailed.getRuleName(),
                     String.format("Rule with most failures (%d failures, %.1f%% success rate)",
                             mostFailed.getFailedEvaluations(), mostFailed.getSuccessRate() * 100),
-                    "WARNING")
+                    SeverityConstants.WARNING)
                     .withDetail("failedEvaluations", mostFailed.getFailedEvaluations())
                     .withDetail("successRate", mostFailed.getSuccessRate()));
         }
@@ -230,7 +232,7 @@ public class PerformanceAnalyzer {
             insights.add(new PerformanceInsight("SYSTEM_SUMMARY", "SYSTEM",
                     String.format("System processed %d evaluations in %.2fms total (%.2fms average)",
                             totalEvaluations, totalTime, totalTime / totalEvaluations),
-                    "INFO")
+                    SeverityConstants.INFO)
                     .withDetail("totalEvaluations", totalEvaluations)
                     .withDetail("totalTime", totalTime)
                     .withDetail("averageTime", totalTime / totalEvaluations));
@@ -370,7 +372,7 @@ public class PerformanceAnalyzer {
         if (!insights.isEmpty()) {
             report.append("\nPERFORMANCE INSIGHTS:\n");
             insights.stream()
-                    .filter(insight -> !"INFO".equals(insight.getSeverity()))
+                    .filter(insight -> !SeverityConstants.INFO.equals(insight.getSeverity()))
                     .forEach(insight -> report.append("  ").append(insight.toString()).append("\n"));
         }
 

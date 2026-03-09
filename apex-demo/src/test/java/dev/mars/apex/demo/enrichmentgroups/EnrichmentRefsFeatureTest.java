@@ -1,10 +1,10 @@
 package dev.mars.apex.demo.enrichmentgroups;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -35,14 +35,14 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
 
     /**
      * Load configuration using the new enrichment-refs feature.
-     * The YamlConfigurationLoader will automatically process enrichment-refs
+     * The ConfigurationLoader will automatically process enrichment-refs
      * and merge enrichments and enrichment groups from external files.
      */
     private YamlRuleConfiguration loadConfigWithEnrichmentRefs() {
         try {
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             return loader.loadFromFile(MAIN_CONFIG_PATH);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to load YAML with enrichment-refs: " + e.getMessage());
             return null;
         }
@@ -115,7 +115,7 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
             assertEquals("Y_VALUE", enrichedData.get("output_y"), "r2 should have set output_y");
             assertEquals("Z_VALUE", enrichedData.get("output_z"), "r3 should have set output_z");
             assertEquals("W_VALUE", enrichedData.get("output_w"), "r4 should have set output_w");
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to create RulesEngine: " + e.getMessage());
         }
     }
@@ -145,7 +145,7 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
             assertEquals("Y_VALUE", enrichedData.get("output_y"), "r2 should have set output_y");
             assertEquals("Z_VALUE", enrichedData.get("output_z"), "r3 should have set output_z");
             assertEquals("W_VALUE", enrichedData.get("output_w"), "r4 should have set output_w");
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to create RulesEngine: " + e.getMessage());
         }
     }
@@ -175,7 +175,7 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
             assertNotNull(enrichedData.get("output_y"), "output_y should be set");
             assertNotNull(enrichedData.get("output_z"), "output_z should be set");
             assertNotNull(enrichedData.get("output_w"), "output_w should be set");
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to create RulesEngine: " + e.getMessage());
         }
     }
@@ -196,7 +196,7 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
             RuleResult result = engine.evaluate(data);
             // Result may fail due to missing required fields, but engine should be created successfully
             assertNotNull(result, "Result should not be null");
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to create RulesEngine: " + e.getMessage());
         }
     }

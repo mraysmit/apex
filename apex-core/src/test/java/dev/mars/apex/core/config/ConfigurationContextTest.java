@@ -1,4 +1,8 @@
 package dev.mars.apex.core.config;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -17,12 +21,17 @@ package dev.mars.apex.core.config;
  */
 
 import dev.mars.apex.core.config.component.ComponentConfiguration;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,6 +45,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Comprehensive tests for ConfigurationContext.
+ *
+ * <p><strong>INTENTIONAL FAILURE TEST CLASS</strong></p>
+ * <p>This test class includes tests that intentionally trigger ERROR log messages
+ * to verify error handling behavior. DevOps: ERROR messages between the
+ * [INTENTIONAL-FAILURE-TEST-CLASS-START] and [INTENTIONAL-FAILURE-TEST-CLASS-END]
+ * markers are EXPECTED and should NOT be investigated.</p>
+ *
+ * <p>Expected ERROR types in this test class:</p>
+ * <ul>
+ *   <li>Invalid YAML configuration errors (missing required fields)</li>
+ *   <li>Circular component reference detection errors</li>
+ *   <li>Failed component loading errors</li>
+ * </ul>
  *
  * Tests cover:
  * - Registration and lookup of configurations, data sources, scenarios, and components
@@ -52,6 +74,27 @@ class ConfigurationContextTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationContextTest.class);
     private ConfigurationContext context;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        Logger logger = LoggerFactory.getLogger(ConfigurationContextTest.class);
+        logger.info("================================================================================");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ConfigurationContextTest");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] This test class intentionally triggers ERROR logs");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected ERRORs: invalid YAML, circular references, failed component loading");
+        logger.info("================================================================================");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        Logger logger = LoggerFactory.getLogger(ConfigurationContextTest.class);
+        logger.info("================================================================================");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ConfigurationContextTest");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] All ERROR messages above were EXPECTED and tested intentionally");
+        logger.info("================================================================================");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {

@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.ProcessingItem;
+import dev.mars.apex.core.config.sequential.ProcessingItem;
 import dev.mars.apex.core.util.ProcessingSequenceReport;
-import dev.mars.apex.core.util.YamlProcessingSequenceAnalyzer;
+import dev.mars.apex.core.util.ProcessingSequenceAnalyzer;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * CRITICAL GAP DETECTION TEST
  * 
- * <p>This test exposes gaps in the YamlProcessingSequenceAnalyzer by testing
+ * <p>This test exposes gaps in the ProcessingSequenceAnalyzer by testing
  * YAML sections that are NOT currently handled by the analyzer.
  * 
  * <p>CRITICAL GAPS:
@@ -28,10 +28,10 @@ import static org.junit.jupiter.api.Assertions.*;
  *   <li>error-recovery - Section-level only (not in itemOrder)</li>
  * </ul>
  */
-@DisplayName("CRITICAL: Analyzer Gap Detection Test")
+@DisplayName("Analyzer Gap Detection Test")
 public class AnalyzerGapDetectionTest extends DemoTestBase {
 
-    private final YamlProcessingSequenceAnalyzer analyzer = new YamlProcessingSequenceAnalyzer();
+    private final ProcessingSequenceAnalyzer analyzer = new ProcessingSequenceAnalyzer();
 
     @Test
     @DisplayName("GAP 1: Analyzer handles transformations in itemOrder")
@@ -158,7 +158,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
     }
 
     @Test
-    @DisplayName("CRITICAL: Analyzer shows MULTIPLE items in SAME section")
+    @DisplayName("Analyzer shows MULTIPLE items in SAME section")
     void testAnalyzerShowsMultipleItemsInSameSection() {
         // Test4B has 4 enrichment items in ONE enrichments section
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test4B_AllStandaloneTest.yaml";
@@ -181,7 +181,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
     }
 
     @Test
-    @DisplayName("CRITICAL: COMPLEX YAML - Multiple sections with multiple items AND groups-only logic")
+    @DisplayName("COMPLEX YAML - Multiple sections with multiple items AND groups-only logic")
     void testAnalyzerComplexYamlWithGroupsOnlyLogic() {
         // Test4 has:
         // - enrichments section with 4 items (standalone-1, grouped-1, standalone-2, grouped-2)
@@ -223,7 +223,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
     }
 
     @Test
-    @DisplayName("CRITICAL: MOST COMPLEX YAML - Numbered suffixes + multiple groups + interleaving")
+    @DisplayName("MOST COMPLEX YAML - Numbered suffixes + multiple groups + interleaving")
     void testAnalyzerMostComplexYaml() {
         // Test6B has:
         // - enrichments-1 (2 items: standalone-1, grouped-A1)

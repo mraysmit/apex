@@ -17,8 +17,14 @@
 package dev.mars.apex.core.service.data.external.database;
 
 import org.junit.jupiter.api.Test;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 
 import java.sql.Connection;
@@ -39,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * This test proves that the refactoring maintains 100% functional equivalence.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ParameterProcessingComparisonTest {
 
     private Connection connection;

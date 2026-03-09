@@ -1,0 +1,76 @@
+# ============================================================================
+# APEX RulesEngine Pipeline Integration Test - Simple Extract Pipeline
+# ============================================================================
+#
+# PURPOSE:
+# Validates basic pipeline execution through RulesEngine.evaluate() with
+# inline data source. This is the simplest possible pipeline configuration
+# for testing the integration implemented in Step 3.
+#
+# TEST COVERAGE:
+# - Pipeline configuration loading via RulesEngine.fromFile()
+# - Data source initialization (inline type)
+# - Pipeline execution via evaluate() method
+# - RuleResult generation for successful pipeline execution
+#
+# USED BY: RulesEnginePipelineIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "rules-engine-pipeline-simple-test"
+  name: "RulesEngine Pipeline Integration - Simple Extract"
+  description: "Validates basic pipeline execution through RulesEngine.evaluate() with inline data source"
+  type: "pipeline-config"
+  version: "1.0"
+  author: "Mark A Ray-Smith Cityline Ltd"
+  tags: ["test", "pipeline", "integration", "unit-test"]
+
+# Inline data source - simplest possible configuration
+data-sources:
+  - name: "test-simple-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 in-memory database for simple pipeline validation"
+
+    connection:
+      database: "mem:simple_pipeline_test"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS test_data (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255),
+            value INTEGER
+          );
+
+          INSERT INTO test_data (id, name, value) VALUES
+            (1, 'Test Record 1', 100),
+            (2, 'Test Record 2', 200),
+            (3, 'Test Record 3', 300);
+
+    queries:
+      getAll: "SELECT id, name, \"value\" FROM test_data"
+
+# Simple single-step pipeline
+pipeline:
+  name: "simple-integration-test-pipeline"
+  description: "Minimal pipeline for RulesEngine integration testing"
+  
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+  
+  steps:
+    - name: "test-extract"
+      type: "extract"
+      source: "test-simple-source"
+      operation: "getAll"
+      description: "Extract test data from H2 database"
+

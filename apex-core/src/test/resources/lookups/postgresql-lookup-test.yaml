@@ -62,6 +62,7 @@ enrichments:
         type: "database"
         data-source-ref: "test-postgres"
         query-ref: "getUserById"
+        key-field: "userId"
       cache-enabled: false
     
     field-mappings:

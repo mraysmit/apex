@@ -17,8 +17,8 @@ package dev.mars.apex.yaml.manager.integration;
  */
 
 import dev.mars.apex.yaml.manager.model.TreeNode;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
-import dev.mars.apex.yaml.manager.service.YamlContentAnalyzer;
+import dev.mars.apex.yaml.manager.model.ContentSummary;
+import dev.mars.apex.yaml.manager.service.ContentAnalyzer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -30,18 +30,18 @@ import static org.junit.jupiter.api.Assertions.*;
  * from actual APEX YAML files.
  * 
  * This test proves:
- * 1. YamlContentAnalyzer correctly reads and parses real YAML files
+ * 1. ContentAnalyzer correctly reads and parses real YAML files
  * 2. TreeNode can hold and display content summaries
  * 3. The complete flow from YAML file → analysis → tree node works end-to-end
  */
 @DisplayName("TreeNode with Content Integration Tests")
 class TreeNodeWithContentIntegrationTest {
 
-    private YamlContentAnalyzer analyzer;
+    private ContentAnalyzer analyzer;
 
     @BeforeEach
     void setUp() {
-        analyzer = new YamlContentAnalyzer();
+        analyzer = new ContentAnalyzer();
     }
 
     @Test
@@ -87,7 +87,7 @@ class TreeNodeWithContentIntegrationTest {
     @DisplayName("Should display rule count in tree node summary")
     void testRuleCountDisplayInNode() {
         TreeNode node = new TreeNode("src/test/resources/apex-yaml-samples/trade-validation-rules.yaml", 0);
-        YamlContentSummary summary = analyzer.analyzYamlContent(node.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(node.getName());
         node.setContentSummary(summary);
 
         // Verify the node has the correct rule count from the YAML file
@@ -99,7 +99,7 @@ class TreeNodeWithContentIntegrationTest {
     @DisplayName("Should display enrichment count in tree node summary")
     void testEnrichmentCountDisplayInNode() {
         TreeNode node = new TreeNode("src/test/resources/apex-yaml-samples/trade-enrichment.yaml", 0);
-        YamlContentSummary summary = analyzer.analyzYamlContent(node.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(node.getName());
         node.setContentSummary(summary);
 
         // Verify the node has the correct enrichment count from the YAML file
@@ -124,7 +124,7 @@ class TreeNodeWithContentIntegrationTest {
     @DisplayName("Should display metadata in tree node summary")
     void testMetadataDisplayInNode() {
         TreeNode node = new TreeNode("src/test/resources/apex-yaml-samples/trade-validation-rules.yaml", 0);
-        YamlContentSummary summary = analyzer.analyzYamlContent(node.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(node.getName());
         node.setContentSummary(summary);
 
         // Verify metadata is extracted from YAML file
@@ -178,7 +178,7 @@ class TreeNodeWithContentIntegrationTest {
     @DisplayName("Should prove console output can display rule counts from real YAML")
     void testConsoleOutputWithRealContent() {
         TreeNode node = new TreeNode("src/test/resources/apex-yaml-samples/trade-validation-rules.yaml", 0);
-        YamlContentSummary summary = analyzer.analyzYamlContent(node.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(node.getName());
         node.setContentSummary(summary);
 
         // This proves the data is available for console output
@@ -199,7 +199,7 @@ class TreeNodeWithContentIntegrationTest {
         sb.append(node.getName()).append(" [depth=").append(node.getDepth()).append("]");
         
         if (node.getContentSummary() != null) {
-            YamlContentSummary summary = node.getContentSummary();
+            ContentSummary summary = node.getContentSummary();
             sb.append(" | [SUMMARY] ");
             
             if (summary.getFileType() != null) {

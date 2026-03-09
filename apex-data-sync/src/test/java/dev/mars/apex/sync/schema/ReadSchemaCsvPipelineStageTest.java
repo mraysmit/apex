@@ -19,9 +19,9 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.ExecutionStep;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -122,7 +122,7 @@ class ReadSchemaCsvPipelineStageTest extends SyncTestBase {
         assertEquals("name", nameColumn.getName());
         assertEquals("VARCHAR", nameColumn.getDataType());
 
-        logger.info("✓ Successfully read CSV schema with {} columns", schema.getColumns().size());
+        logger.info("[OK] Successfully read CSV schema with {} columns", schema.getColumns().size());
         
         // Display metrics
         displayPipelineMetrics(result);
@@ -188,7 +188,7 @@ class ReadSchemaCsvPipelineStageTest extends SyncTestBase {
             logger.info("  Column: {} - Type: {}", col.getName(), col.getDataType());
         });
 
-        logger.info("✓ Successfully read CSV schema with {} columns", schema.getColumns().size());
+        logger.info("[OK] Successfully read CSV schema with {} columns", schema.getColumns().size());
         displayPipelineMetrics(result);
 
         // Cleanup
@@ -216,7 +216,7 @@ class ReadSchemaCsvPipelineStageTest extends SyncTestBase {
             stmt.execute("INSERT INTO customers VALUES (1, 'John Doe', 'john@example.com')");
             stmt.execute("INSERT INTO customers VALUES (2, 'Jane Smith', 'jane@example.com')");
 
-            logger.info("✓ Test database initialized with customers table");
+            logger.info("[OK] Test database initialized with customers table");
         }
     }
 
@@ -231,7 +231,7 @@ class ReadSchemaCsvPipelineStageTest extends SyncTestBase {
             writer.write("2,Jane Smith,jane@example.com,false\n");
             writer.write("3,Bob Johnson,bob@example.com,true\n");
         }
-        logger.info("✓ Created test CSV file: {}", csvFile.getAbsolutePath());
+        logger.info("[OK] Created test CSV file: {}", csvFile.getAbsolutePath());
         return csvFile;
     }
 
@@ -250,7 +250,7 @@ class ReadSchemaCsvPipelineStageTest extends SyncTestBase {
             writer.write("1003,Carol,Williams,carol.w@company.com,68000.75,Marketing,2021-03-01,1988-11-05,false,555-0103,5003\n");
             writer.write("1004,David,Brown,david.brown@company.com,95000.25,Engineering,2018-09-20,1982-01-30,true,555-0104,5001\n");
         }
-        logger.info("✓ Created large test CSV file with 11 columns: {}", csvFile.getAbsolutePath());
+        logger.info("[OK] Created large test CSV file with 11 columns: {}", csvFile.getAbsolutePath());
         return csvFile;
     }
 

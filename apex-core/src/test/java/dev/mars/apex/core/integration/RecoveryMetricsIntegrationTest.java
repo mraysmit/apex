@@ -2,18 +2,29 @@ package dev.mars.apex.core.integration;
 
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.monitoring.PerformanceSnapshot;
-import dev.mars.apex.core.util.RulesEngineLogger;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
+import dev.mars.apex.engine.core.SpelParserHolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,14 +33,32 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Phase 3B: Integration test for end-to-end recovery metrics functionality.
+ * Integration test for end-to-end recovery metrics functionality.
  * Tests the complete flow from rule evaluation through error recovery to metrics collection.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RecoveryMetricsIntegrationTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(RecoveryMetricsIntegrationTest.class);
     private UnifiedRuleEvaluator evaluator;
     private RulePerformanceMonitor performanceMonitor;
     private ErrorRecoveryConfig errorRecoveryConfig;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RecoveryMetricsIntegrationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RecoveryMetricsIntegrationTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RecoveryMetricsIntegrationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: recovery metrics collection, error recovery attempts");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RecoveryMetricsIntegrationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RecoveryMetricsIntegrationTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {
@@ -52,7 +81,7 @@ class RecoveryMetricsIntegrationTest {
         ErrorRecoveryService errorRecoveryService = new ErrorRecoveryService();
         
         // Create unified rule evaluator
-        evaluator = new UnifiedRuleEvaluator(new SpelExpressionParser(), errorRecoveryService, performanceMonitor, errorRecoveryConfig);
+        evaluator = new UnifiedRuleEvaluator(SpelParserHolder.INSTANCE, errorRecoveryService, performanceMonitor, errorRecoveryConfig);
     }
 
     @Test
@@ -69,7 +98,8 @@ class RecoveryMetricsIntegrationTest {
             1,  // priority
             "ERROR",
             null,  // metadata
-            "defaultValue123"  // Phase 3A default-value
+            "defaultValue123",  // Phase 3A default-value
+            null, null, null, null, null, true
         );
 
         Map<String, Object> facts = new HashMap<>();
@@ -115,7 +145,7 @@ class RecoveryMetricsIntegrationTest {
         // Create evaluator with metrics disabled
         ErrorRecoveryService errorRecoveryService = new ErrorRecoveryService();
         UnifiedRuleEvaluator evaluatorWithoutMetrics = new UnifiedRuleEvaluator(
-            new SpelExpressionParser(), errorRecoveryService, performanceMonitor, configWithoutMetrics);
+            SpelParserHolder.INSTANCE, errorRecoveryService, performanceMonitor, configWithoutMetrics);
         
         Rule ruleWithDefault = new Rule(
             "test-rule",
@@ -127,7 +157,8 @@ class RecoveryMetricsIntegrationTest {
             1,  // priority
             "ERROR",
             null,  // metadata
-            "defaultValue"
+            "defaultValue",
+            null, null, null, null, null, true
         );
         
         Map<String, Object> facts = new HashMap<>();
@@ -164,7 +195,8 @@ class RecoveryMetricsIntegrationTest {
             1,  // priority
             "ERROR",
             null,  // metadata
-            "defaultValue"
+            "defaultValue",
+            null, null, null, null, null, true
         );
         
         Map<String, Object> facts = new HashMap<>();
@@ -213,7 +245,8 @@ class RecoveryMetricsIntegrationTest {
             1,  // priority
             "ERROR",
             null,  // metadata
-            null   // no default value
+            null,  // no default value
+            null, null, null, null, null, true
         );
         
         Map<String, Object> facts = new HashMap<>();

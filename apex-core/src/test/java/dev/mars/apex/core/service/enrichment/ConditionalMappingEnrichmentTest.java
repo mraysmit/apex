@@ -1,12 +1,17 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlEnrichment;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.DisplayName;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +21,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for Phase 3: Conditional Mapping Enrichment functionality.
+ * Test class for Conditional Mapping Enrichment functionality.
  * Tests the new conditional-mapping-enrichment type with priority-based processing.
  */
 public class ConditionalMappingEnrichmentTest {
@@ -126,7 +131,7 @@ public class ConditionalMappingEnrichmentTest {
                   stop-on-first-match: true
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Process enrichment using RulesEngine
@@ -179,7 +184,7 @@ public class ConditionalMappingEnrichmentTest {
                   stop-on-first-match: true
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Process enrichment using RulesEngine
@@ -236,7 +241,7 @@ public class ConditionalMappingEnrichmentTest {
                   stop-on-first-match: true
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Process enrichment using RulesEngine

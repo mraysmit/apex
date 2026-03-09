@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - System should continue processing with reasonable defaults
  * - Failure policies should work correctly with configuration errors
  *
- * This test specifically validates the fix for YamlConfigurationException being
+ * This test specifically validates the fix for ConfigurationException being
  * thrown for missing field-mappings in calculation-enrichment configurations.
  */
 @ExtendWith(ColoredTestOutputExtension.class)

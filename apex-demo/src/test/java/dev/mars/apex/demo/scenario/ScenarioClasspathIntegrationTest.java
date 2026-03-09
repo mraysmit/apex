@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.scenario;
 
-import dev.mars.apex.core.config.yaml.ScenarioRegistryLoader;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioStage;
 import dev.mars.apex.demo.DemoTestBase;
@@ -96,14 +96,14 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
      * Helper method to load scenarios from classpath.
      * Uses the stream-based API with classpath base for relative path resolution.
      */
-    private Map<String, ScenarioConfiguration> loadScenariosFromClasspath() throws YamlConfigurationException {
+    private Map<String, ScenarioConfiguration> loadScenariosFromClasspath() throws ConfigurationException {
         try (InputStream registryStream = getClass().getClassLoader().getResourceAsStream(CLASSPATH_REGISTRY)) {
             if (registryStream == null) {
-                throw new YamlConfigurationException("Registry not found on classpath: " + CLASSPATH_REGISTRY);
+                throw new ConfigurationException("Registry not found on classpath: " + CLASSPATH_REGISTRY);
             }
             return scenarioLoader.loadRegistry(registryStream, CLASSPATH_BASE);
         } catch (Exception e) {
-            throw new YamlConfigurationException("Failed to load scenarios from classpath: " + e.getMessage(), e);
+            throw new ConfigurationException("Failed to load scenarios from classpath: " + e.getMessage(), e);
         }
     }
 
@@ -128,7 +128,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             assertNotNull(scenarios, "Scenarios map should not be null");
             assertFalse(scenarios.isEmpty(), "Scenarios map should not be empty");
 
-            logger.info("✓ Successfully loaded {} scenarios from classpath registry", scenarios.size());
+            logger.info("[OK] Successfully loaded {} scenarios from classpath registry", scenarios.size());
 
             // Log loaded scenarios
             scenarios.forEach((id, config) -> {
@@ -162,7 +162,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             assertEquals("otc-option-validation", otcScenario.getScenarioId(),
                     "Scenario ID should match");
 
-            logger.info("✓ OTC Option scenario loaded successfully:");
+            logger.info("[OK] OTC Option scenario loaded successfully:");
             logger.info("  - Scenario ID: {}", otcScenario.getScenarioId());
             logger.info("  - Business Domain: {}", otcScenario.getBusinessDomain());
             logger.info("  - Enabled: {}", otcScenario.isEnabled());
@@ -178,12 +178,12 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
 
             String nonExistentPath = "non/existent/registry.yaml";
 
-            YamlConfigurationException exception = assertThrows(
-                    YamlConfigurationException.class,
+            ConfigurationException exception = assertThrows(
+                    ConfigurationException.class,
                     () -> {
                         try (InputStream stream = getClass().getClassLoader().getResourceAsStream(nonExistentPath)) {
                             if (stream == null) {
-                                throw new YamlConfigurationException("Registry not found: " + nonExistentPath);
+                                throw new ConfigurationException("Registry not found: " + nonExistentPath);
                             }
                             scenarioLoader.loadRegistry(stream, "non/existent/");
                         }
@@ -194,7 +194,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             assertTrue(exception.getMessage().contains("not found") || exception.getMessage().contains(nonExistentPath),
                     "Exception message should indicate resource not found");
 
-            logger.info("✓ Correctly threw exception: {}", exception.getMessage());
+            logger.info("[OK] Correctly threw exception: {}", exception.getMessage());
             logger.info("=== Non-Existent Resource Test PASSED ===");
         }
     }
@@ -223,7 +223,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             assertEquals("OTC Derivatives", otcScenario.getBusinessDomain());
             assertTrue(otcScenario.isEnabled(), "Scenario should be enabled");
 
-            logger.info("✓ Basic scenario properties validated");
+            logger.info("[OK] Basic scenario properties validated");
             logger.info("  - Scenario ID: {}", otcScenario.getScenarioId());
             logger.info("  - Business Domain: {}", otcScenario.getBusinessDomain());
             logger.info("  - Enabled: {}", otcScenario.isEnabled());
@@ -231,7 +231,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             // Verify stages are present
             List<ScenarioStage> stages = otcScenario.getProcessingStages();
             if (stages != null && !stages.isEmpty()) {
-                logger.info("✓ Scenario has {} stages:", stages.size());
+                logger.info("[OK] Scenario has {} stages:", stages.size());
                 stages.forEach(stage -> {
                     logger.info("  - Stage: {} (failure-policy: {})",
                             stage.getStageName(), stage.getFailurePolicy());
@@ -243,7 +243,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             // Verify data types
             List<String> dataTypes = otcScenario.getDataTypes();
             if (dataTypes != null && !dataTypes.isEmpty()) {
-                logger.info("✓ Scenario data types: {}", dataTypes);
+                logger.info("[OK] Scenario data types: {}", dataTypes);
             }
 
             logger.info("=== OTC Option Scenario Configuration Test PASSED ===");
@@ -265,7 +265,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             assertEquals("Trading", simpleScenario.getBusinessDomain());
             assertTrue(simpleScenario.isEnabled(), "Scenario should be enabled");
 
-            logger.info("✓ Simple trade scenario validated:");
+            logger.info("[OK] Simple trade scenario validated:");
             logger.info("  - Scenario ID: {}", simpleScenario.getScenarioId());
             logger.info("  - Business Domain: {}", simpleScenario.getBusinessDomain());
             logger.info("  - Enabled: {}", simpleScenario.isEnabled());
@@ -288,7 +288,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
                 assertNotNull(config.getScenarioId(), "Scenario " + id + " should have scenarioId");
                 assertNotNull(config.getBusinessDomain(), "Scenario " + id + " should have businessDomain");
 
-                logger.info("✓ Scenario '{}' has required metadata", id);
+                logger.info("[OK] Scenario '{}' has required metadata", id);
             });
 
             logger.info("=== All Scenarios Required Metadata Test PASSED ===");
@@ -314,7 +314,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             // We expect 2 scenarios based on our test registry
             assertEquals(2, scenarios.size(), "Should load 2 scenarios from registry");
 
-            logger.info("✓ Loaded all {} expected scenarios", scenarios.size());
+            logger.info("[OK] Loaded all {} expected scenarios", scenarios.size());
 
             // List all scenarios
             scenarios.keySet().forEach(id -> logger.info("  - {}", id));
@@ -333,7 +333,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             // Both scenarios should be enabled based on our test registry
             scenarios.forEach((id, config) -> {
                 assertTrue(config.isEnabled(), "Scenario '" + id + "' should be enabled");
-                logger.info("✓ Scenario '{}' enabled status: {}", id, config.isEnabled());
+                logger.info("[OK] Scenario '{}' enabled status: {}", id, config.isEnabled());
             });
 
             logger.info("=== Scenario Enabled Status Test PASSED ===");

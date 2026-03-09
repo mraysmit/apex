@@ -16,10 +16,10 @@ package dev.mars.apex.demo.rulegroups;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleResult;
 
 import java.util.List;
 import java.util.Map;
@@ -126,11 +126,11 @@ public class SimpleInlineRuleGroupStandaloneTest {
             System.out.println("   • 2 rules: simple-rule-1 (always true), simple-rule-2 (always false)");
             System.out.println("   • 2 rule groups: base-validation (AND), composite-validation (OR)");
             System.out.println("   • 1 inline reference: composite-validation → base-validation");
-            System.out.println("   • Base group (AND): FAILED ✓ (expected)");
-            System.out.println("   • Composite group (OR): PASSED ✓ (expected)");
+            System.out.println("   • Base group (AND): FAILED [OK] (expected)");
+            System.out.println("   • Composite group (OR): PASSED [OK] (expected)");
             System.out.println("\n🚀 Inline rule-group references implementation is working!");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             System.err.println("YAML Configuration Error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);

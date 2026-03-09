@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -97,7 +97,7 @@ public class ConditionalExpressionLookupTest extends DemoTestBase {
                 ('POOR', 'HIGH', 12.50, 250000.00, 'DETAILED_REVIEW', 'Full financial disclosure, tax returns (2 years), bank statements (6 months), references', 10, 'Mandatory co-signer, asset verification, debt consolidation plan', 0.50, 'EXECUTIVE')
                 """);
 
-            logger.info("✓ H2 database setup completed");
+            logger.info("[OK] H2 database setup completed");
 
         } catch (Exception e) {
             logger.error("Failed to setup H2 database: " + e.getMessage(), e);

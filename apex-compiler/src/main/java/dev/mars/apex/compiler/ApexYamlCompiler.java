@@ -1,6 +1,6 @@
 package dev.mars.apex.compiler;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer;
 
 import java.nio.file.Path;
@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 public class ApexYamlCompiler {
     
     public ApexYamlCompiler() {
-        new YamlConfigurationLoader();
+        new ConfigurationLoader();
     }
     
     /**

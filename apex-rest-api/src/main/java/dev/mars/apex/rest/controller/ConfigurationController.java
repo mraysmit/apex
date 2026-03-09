@@ -1,8 +1,8 @@
 package dev.mars.apex.rest.controller;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.RulesEngineService;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import dev.mars.apex.rest.util.TestAwareLogger;
 
 import java.io.ByteArrayInputStream;
 import java.time.Instant;
@@ -58,13 +56,7 @@ public class ConfigurationController {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationController.class);
 
     @Autowired
-    private YamlConfigurationLoader yamlConfigurationLoader;
-
-    @Autowired
-    private RulesEngineService rulesEngineService;
-
-    @Autowired
-    private TestAwareLogger testAwareLogger;
+    private ConfigurationLoader yamlConfigurationLoader;
     
     // Store the current configuration for inspection
     private YamlRuleConfiguration currentConfiguration;
@@ -157,14 +149,14 @@ public class ConfigurationController {
                     )
                 )
             )
-            String yamlContent) throws dev.mars.apex.core.config.yaml.YamlConfigurationException {
+            String yamlContent) throws ConfigurationException {
 
         logger.info("Loading new YAML configuration");
         logger.debug("YAML content length: {} characters", yamlContent.length());
 
         // Use test-aware logger for enhanced testing capabilities
-        testAwareLogger.warn(logger, "Configuration loading initiated via REST API - this may cause temporary service disruption");
-        testAwareLogger.error(logger, "YAML configuration size: {} bytes", yamlContent.getBytes().length);
+        logger.warn("Configuration loading initiated via REST API - this may cause temporary service disruption");
+        logger.error("YAML configuration size: {} bytes", yamlContent.getBytes().length);
 
         // Load configuration from string content
         YamlRuleConfiguration config = yamlConfigurationLoader.loadFromStream(
@@ -213,7 +205,7 @@ public class ConfigurationController {
     })
     public ResponseEntity<Map<String, Object>> uploadConfiguration(
             @Parameter(description = "YAML configuration file to upload")
-            @RequestParam("file") MultipartFile file) throws dev.mars.apex.core.config.yaml.YamlConfigurationException, java.io.IOException {
+            @RequestParam("file") MultipartFile file) throws ConfigurationException, java.io.IOException {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest()
@@ -276,7 +268,7 @@ public class ConfigurationController {
         @ApiResponse(responseCode = "400", description = "Configuration is invalid")
     })
     public ResponseEntity<Map<String, Object>> validateConfiguration(
-            @RequestBody String yamlContent) throws dev.mars.apex.core.config.yaml.YamlConfigurationException {
+            @RequestBody String yamlContent) throws ConfigurationException {
 
         logger.info("Validating YAML configuration");
 
@@ -307,3 +299,4 @@ public class ConfigurationController {
         return ResponseEntity.ok(response);
     }
 }
+

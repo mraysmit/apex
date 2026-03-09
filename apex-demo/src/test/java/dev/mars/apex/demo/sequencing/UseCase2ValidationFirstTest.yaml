@@ -1,4 +1,4 @@
-﻿# ============================================================================
+# ============================================================================
 # USE CASE 2: Validation-First Processing
 # ============================================================================
 # Business Scenario: Performance-optimized transaction processing
@@ -22,8 +22,6 @@ metadata:
   created: "2025-10-30"
   business-domain: "Transaction Processing"
   tags: ["use-case", "validation-first", "performance", "sequential-processing"]
-  processing-mode: "sequential"
-
 # STEP 1: No separate data-sources section needed for inline lookup data
 
 # STEP 2: RULES FIRST (validate input data quality)

@@ -1,7 +1,9 @@
 metadata:
+  id: "async-patterns-test"
   name: "Async Enrichment Patterns Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test asynchronous enrichment execution patterns"
 
 enrichments:

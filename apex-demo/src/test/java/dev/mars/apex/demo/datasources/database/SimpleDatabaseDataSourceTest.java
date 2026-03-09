@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.datasources.database;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -95,7 +95,7 @@ public class SimpleDatabaseDataSourceTest extends DemoTestBase {
             stmt.close();
             conn.close();
 
-            logger.info("✓ H2 database setup complete");
+            logger.info("[OK] H2 database setup complete");
         } catch (Exception e) {
             fail("Database setup failed: " + e.getMessage());
         }
@@ -107,7 +107,7 @@ public class SimpleDatabaseDataSourceTest extends DemoTestBase {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }
@@ -148,7 +148,7 @@ public class SimpleDatabaseDataSourceTest extends DemoTestBase {
             assertEquals("john.smith@example.com", enrichedData.get("customerEmail"));
             assertEquals("ORD123", enrichedData.get("orderId"));
 
-            logger.info("✓ Database data source enrichment successful");
+            logger.info("[OK] Database data source enrichment successful");
         } catch (Exception e) {
             fail("Database data source test failed: " + e.getMessage());
         }
@@ -184,7 +184,7 @@ public class SimpleDatabaseDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("customerName"));
             assertNull(enrichedData.get("customerEmail"));
 
-            logger.info("✓ Missing customer ID handled correctly");
+            logger.info("[OK] Missing customer ID handled correctly");
         } catch (Exception e) {
             fail("Missing customer ID test failed: " + e.getMessage());
         }
@@ -222,7 +222,7 @@ public class SimpleDatabaseDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("customerName"));
             assertNull(enrichedData.get("customerEmail"));
 
-            logger.info("✓ Unknown customer ID handled correctly");
+            logger.info("[OK] Unknown customer ID handled correctly");
         } catch (Exception e) {
             fail("Unknown customer ID test failed: " + e.getMessage());
         }

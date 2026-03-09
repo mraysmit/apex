@@ -1,0 +1,54 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Test that rule-chains survive import → blocks → YAML roundtrip
+# Phase 1 regression test for generator gap fix
+# ============================================================================
+
+metadata:
+  id: "rule-chains-roundtrip-test"
+  name: "Rule Chains Roundtrip Test"
+  version: "1.0.0"
+  description: "Verifies rule-chains are preserved through import/export cycle"
+  type: "rule-config"
+  author: "APEX Test Suite"
+  tags: ["roundtrip", "rule-chains", "phase1"]
+
+rule-chains:
+  - id: "approval-chain"
+    name: "Approval Chain"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        id: "check-threshold"
+        name: "Check Threshold"
+        condition: "#amount > 1000"
+        message: "Amount exceeds threshold"
+        result-field: "thresholdExceeded"
+        severity: "INFO"
+      conditional-rules:
+        on-trigger:
+          - id: "escalate"
+            name: "Escalate"
+            condition: "true"
+            message: "Escalated for review"
+            result-field: "escalated"
+            severity: "WARNING"
+
+  - id: "sequential-check"
+    name: "Sequential Check"
+    pattern: "sequential-dependency"
+    configuration:
+      stages:
+        - id: "stage-1"
+          name: "Stage 1"
+          condition: "#status == 'active'"
+          message: "Status is active"
+          result-field: "stage1Result"
+          severity: "INFO"
+        - id: "stage-2"
+          name: "Stage 2"
+          condition: "#stage1Result == true && #balance > 0"
+          message: "Balance positive"
+          result-field: "stage2Result"
+          severity: "INFO"

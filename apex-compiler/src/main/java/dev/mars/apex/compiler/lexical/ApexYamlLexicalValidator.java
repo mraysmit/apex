@@ -1,6 +1,6 @@
 package dev.mars.apex.compiler.lexical;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
@@ -69,7 +69,7 @@ public class ApexYamlLexicalValidator {
     private final Yaml yamlParser;
     
     public ApexYamlLexicalValidator() {
-        new YamlConfigurationLoader();
+        new ConfigurationLoader();
         this.yamlParser = new Yaml();
     }
     

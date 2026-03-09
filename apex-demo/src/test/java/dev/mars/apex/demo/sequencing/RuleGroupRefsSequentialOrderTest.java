@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,11 +48,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RuleGroupRefsSequentialOrderTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleGroupRefsSequentialOrderTest.class);
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     public void setUp() {
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
     }
 
     @Test
@@ -115,12 +115,12 @@ public class RuleGroupRefsSequentialOrderTest {
 
         LOGGER.info("Rule-Group-Refs Placeholder Expansion Test PASSED");
         LOGGER.info("   Processing Order Verified:");
-        LOGGER.info("   1. E1 (inline): enrich-market-data ✓");
-        LOGGER.info("   2. E2 (inline): calculate-risk-metrics ✓");
-        LOGGER.info("   3. E3 (inline): calculate-exposure ✓");
-        LOGGER.info("   4. RG1 (from ref): trade-validation-group ✓");
-        LOGGER.info("   5. RG2 (from ref): risk-validation-group ✓");
-        LOGGER.info("   6. R1: validate-complete-processing ✓");
+        LOGGER.info("   1. E1 (inline): enrich-market-data [OK]");
+        LOGGER.info("   2. E2 (inline): calculate-risk-metrics [OK]");
+        LOGGER.info("   3. E3 (inline): calculate-exposure [OK]");
+        LOGGER.info("   4. RG1 (from ref): trade-validation-group [OK]");
+        LOGGER.info("   5. RG2 (from ref): risk-validation-group [OK]");
+        LOGGER.info("   6. R1: validate-complete-processing [OK]");
         LOGGER.info("");
         LOGGER.info("   🎯 CRITICAL FIX VERIFIED: rule-group-refs expanded at correct position!");
     }
@@ -174,7 +174,7 @@ public class RuleGroupRefsSequentialOrderTest {
         assertNotNull(enriched1.get("valueAtRisk"), "VaR should be calculated");
         assertNotNull(enriched1.get("netExposure"), "Net exposure should be calculated");
 
-        LOGGER.info("✓ Test Case 1: Valid trade - all rule groups passed");
+        LOGGER.info("[OK] Test Case 1: Valid trade - all rule groups passed");
 
         // Test Case 2: Excessive notional - should trigger validation error
         Map<String, Object> excessiveNotional = new HashMap<>();
@@ -186,7 +186,7 @@ public class RuleGroupRefsSequentialOrderTest {
         // APEX Design Principle: Validation rules are informational/reporting, not blocking
         assertTrue(result2.isSuccess(), "Result should succeed even when validation rules trigger (APEX design: rules are informational)");
 
-        LOGGER.info("✓ Test Case 2: Excessive notional - validation rule triggered correctly (reported violation without blocking processing)");
+        LOGGER.info("[OK] Test Case 2: Excessive notional - validation rule triggered correctly (reported violation without blocking processing)");
 
         // Test Case 3: Invalid strike price - should trigger validation error
         Map<String, Object> invalidStrike = new HashMap<>();
@@ -197,7 +197,7 @@ public class RuleGroupRefsSequentialOrderTest {
         RuleResult result3 = engine.evaluate(invalidStrike);
         assertTrue(result3.isSuccess(), "Result should succeed even when validation rules trigger (APEX design: rules are informational)");
 
-        LOGGER.info("✓ Test Case 3: Invalid strike - validation rule triggered correctly (reported violation without blocking processing)");
+        LOGGER.info("[OK] Test Case 3: Invalid strike - validation rule triggered correctly (reported violation without blocking processing)");
 
         LOGGER.info("Rule-Group-Refs Execution Order with Validation Failures Test PASSED");
     }

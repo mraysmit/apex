@@ -16,13 +16,13 @@ package dev.mars.apex.demo.rulegroups;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlConfigurationMerger;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.ConfigurationMerger;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 
 import java.util.List;
@@ -52,11 +52,11 @@ public class BasicYamlRuleGroupProcessingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(BasicYamlRuleGroupProcessingTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
     }
     
     @Nested
@@ -88,7 +88,7 @@ public class BasicYamlRuleGroupProcessingTest {
 
                 logSuccess("AND group with all true rules executed successfully using separate files - group passed");
 
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 logError("Failed to load configuration from separate files: " + e.getMessage());
                 fail("Failed to load configuration from separate files: " + e.getMessage());
             }
@@ -134,7 +134,7 @@ public class BasicYamlRuleGroupProcessingTest {
 
                 logSuccess("AND group with mixed rules executed successfully using separate files - group failed as expected");
 
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 logError("Failed to load configuration from separate files: " + e.getMessage());
                 fail("Failed to load configuration from separate files: " + e.getMessage());
             }
@@ -176,7 +176,7 @@ public class BasicYamlRuleGroupProcessingTest {
             YamlRuleConfiguration config;
             try {
                 config = yamlLoader.fromYamlString(yamlContent);
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 fail("Failed to load YAML configuration: " + e.getMessage());
                 return;
             }
@@ -186,7 +186,7 @@ public class BasicYamlRuleGroupProcessingTest {
             RulesEngine engine;
             try {
                 engine = RulesEngine.fromYamlConfig(config);
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 logError("Failed to create RulesEngine: " + e.getMessage());
                 fail("Failed to create RulesEngine: " + e.getMessage());
                 return;
@@ -256,7 +256,7 @@ public class BasicYamlRuleGroupProcessingTest {
             YamlRuleConfiguration config;
             try {
                 config = yamlLoader.fromYamlString(yamlContent);
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 fail("Failed to load YAML configuration: " + e.getMessage());
                 return;
             }
@@ -266,7 +266,7 @@ public class BasicYamlRuleGroupProcessingTest {
             RulesEngine engine;
             try {
                 engine = RulesEngine.fromYamlConfig(config);
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 logError("Failed to create RulesEngine: " + e.getMessage());
                 fail("Failed to create RulesEngine: " + e.getMessage());
                 return;
@@ -325,7 +325,7 @@ public class BasicYamlRuleGroupProcessingTest {
             YamlRuleConfiguration config;
             try {
                 config = yamlLoader.fromYamlString(yamlContent);
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 fail("Failed to load YAML configuration: " + e.getMessage());
                 return;
             }
@@ -335,7 +335,7 @@ public class BasicYamlRuleGroupProcessingTest {
             RulesEngine engine;
             try {
                 engine = RulesEngine.fromYamlConfig(config);
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 logError("Failed to create RulesEngine: " + e.getMessage());
                 fail("Failed to create RulesEngine: " + e.getMessage());
                 return;
@@ -400,7 +400,7 @@ public class BasicYamlRuleGroupProcessingTest {
             YamlRuleConfiguration config;
             try {
                 config = yamlLoader.fromYamlString(yamlContent);
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 fail("Failed to load YAML configuration: " + e.getMessage());
                 return;
             }
@@ -410,7 +410,7 @@ public class BasicYamlRuleGroupProcessingTest {
             RulesEngine engine;
             try {
                 engine = RulesEngine.fromYamlConfig(config);
-            } catch (YamlConfigurationException e) {
+            } catch (ConfigurationException e) {
                 logError("Failed to create RulesEngine: " + e.getMessage());
                 fail("Failed to create RulesEngine: " + e.getMessage());
                 return;
@@ -435,13 +435,13 @@ public class BasicYamlRuleGroupProcessingTest {
     }
 
     /**
-     * Helper method to merge YAML configurations (replicates YamlRulesEngineService.mergeYamlConfigurations).
+     * Helper method to merge YAML configurations.
      */
     /**
      * Helper method to merge YAML configurations.
      * Delegates to the public utility class in apex-core.
      */
     private void mergeYamlConfigurations(YamlRuleConfiguration target, YamlRuleConfiguration source) {
-        YamlConfigurationMerger.merge(target, source);
+        ConfigurationMerger.merge(target, source);
     }
 }

@@ -17,7 +17,7 @@ package dev.mars.apex.yaml.manager;
  */
 
 import dev.mars.apex.yaml.manager.model.TreeNode;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
+import dev.mars.apex.yaml.manager.model.ContentSummary;
 
 /**
  * Demo class to display tree view in console.
@@ -106,7 +106,7 @@ public class TreeConsoleDemo {
     /**
      * Print YAML content summary for a node.
      */
-    private static void printContentSummary(YamlContentSummary summary, String prefix, boolean isLast) {
+    private static void printContentSummary(ContentSummary summary, String prefix, boolean isLast) {
         String summaryPrefix = prefix + (isLast ? "    " : "│   ");
 
         StringBuilder sb = new StringBuilder();

@@ -1,7 +1,9 @@
 metadata:
+  id: "reusable-blocks-test"
   name: "Reusable Blocks Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test template definitions for reusable rule and enrichment blocks"
 
 templates:

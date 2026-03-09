@@ -1,7 +1,9 @@
 metadata:
+  id: "dynamic-lookups-test"
   name: "Dynamic Lookups Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test dynamic lookup configuration based on runtime conditions"
 
 enrichments:

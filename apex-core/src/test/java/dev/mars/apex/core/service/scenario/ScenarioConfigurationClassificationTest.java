@@ -17,11 +17,18 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.*;
 
+import static dev.mars.apex.engine.scenario.ScenarioRegistryManager.matchesClassificationRule;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -71,7 +78,7 @@ class ScenarioConfigurationClassificationTest {
         matchingData.put("tradeType", "OTCOption");
 
         // Then: Should match
-        assertTrue(scenario.matchesClassificationRule(matchingData),
+        assertTrue(matchesClassificationRule(scenario, matchingData),
             "Should match when tradeType is OTCOption");
     }
 
@@ -86,7 +93,7 @@ class ScenarioConfigurationClassificationTest {
         nonMatchingData.put("tradeType", "Swap");
 
         // Then: Should not match
-        assertFalse(scenario.matchesClassificationRule(nonMatchingData),
+        assertFalse(matchesClassificationRule(scenario, nonMatchingData),
             "Should not match when tradeType is Swap");
     }
 
@@ -101,7 +108,7 @@ class ScenarioConfigurationClassificationTest {
         dataWithoutField.put("otherField", "value");
 
         // Then: Should not match (gracefully handle missing field)
-        assertFalse(scenario.matchesClassificationRule(dataWithoutField),
+        assertFalse(matchesClassificationRule(scenario, dataWithoutField),
             "Should not match when required field is missing");
     }
 
@@ -122,7 +129,7 @@ class ScenarioConfigurationClassificationTest {
         matchingData.put("region", "US");
 
         // Then: Should match
-        assertTrue(scenario.matchesClassificationRule(matchingData),
+        assertTrue(matchesClassificationRule(scenario, matchingData),
             "Should match when both tradeType is OTCOption AND region is US");
     }
 
@@ -139,7 +146,7 @@ class ScenarioConfigurationClassificationTest {
         partialData.put("region", "EU");  // Wrong region
 
         // Then: Should not match
-        assertFalse(scenario.matchesClassificationRule(partialData),
+        assertFalse(matchesClassificationRule(scenario, partialData),
             "Should not match when region is EU instead of US");
     }
 
@@ -160,7 +167,7 @@ class ScenarioConfigurationClassificationTest {
         highValueTrade.put("notional", 150000000);
 
         // Then: Should match
-        assertTrue(scenario.matchesClassificationRule(highValueTrade),
+        assertTrue(matchesClassificationRule(scenario, highValueTrade),
             "Should match when notional is greater than 100 million");
     }
 
@@ -177,7 +184,7 @@ class ScenarioConfigurationClassificationTest {
         lowValueTrade.put("notional", 50000000);
 
         // Then: Should not match
-        assertFalse(scenario.matchesClassificationRule(lowValueTrade),
+        assertFalse(matchesClassificationRule(scenario, lowValueTrade),
             "Should not match when notional is below 100 million");
     }
 
@@ -196,7 +203,7 @@ class ScenarioConfigurationClassificationTest {
         data.put("tradeType", "OTCOption");
 
         // Then: Should return false
-        assertFalse(scenario.matchesClassificationRule(data),
+        assertFalse(matchesClassificationRule(scenario, data),
             "Should return false when no classification rule is defined");
     }
 
@@ -272,7 +279,7 @@ class ScenarioConfigurationClassificationTest {
 
         // When: Evaluate against null data
         // Then: Should not throw exception, should return false
-        assertFalse(scenario.matchesClassificationRule(null),
+        assertFalse(matchesClassificationRule(scenario, null),
             "Should handle null data gracefully and return false");
     }
 }

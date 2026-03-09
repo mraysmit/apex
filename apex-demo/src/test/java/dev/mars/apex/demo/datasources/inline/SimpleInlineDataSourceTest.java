@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.datasources.inline;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -88,7 +88,7 @@ public class SimpleInlineDataSourceTest extends DemoTestBase {
             assertEquals("$", enrichedData.get("currencySymbol"));
             assertEquals(1000.0, enrichedData.get("amount"));
 
-            logger.info("✓ Inline data source enrichment successful");
+            logger.info("[OK] Inline data source enrichment successful");
         } catch (Exception e) {
             fail("Inline data source test failed: " + e.getMessage());
         }
@@ -124,7 +124,7 @@ public class SimpleInlineDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("currencyName"));
             assertNull(enrichedData.get("currencySymbol"));
 
-            logger.info("✓ Missing currency code handled correctly");
+            logger.info("[OK] Missing currency code handled correctly");
         } catch (Exception e) {
             fail("Missing currency code test failed: " + e.getMessage());
         }
@@ -162,7 +162,7 @@ public class SimpleInlineDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("currencyName"));
             assertNull(enrichedData.get("currencySymbol"));
 
-            logger.info("✓ Unknown currency code handled correctly");
+            logger.info("[OK] Unknown currency code handled correctly");
         } catch (Exception e) {
             fail("Unknown currency code test failed: " + e.getMessage());
         }

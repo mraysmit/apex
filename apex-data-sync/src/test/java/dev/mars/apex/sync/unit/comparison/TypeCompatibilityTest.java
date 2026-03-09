@@ -19,9 +19,9 @@
 package dev.mars.apex.sync.unit.comparison;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.ExecutionStep;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.ExecutionStep;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -130,7 +130,7 @@ public class TypeCompatibilityTest extends SyncTestBase {
                    targetAmountCol.getDataType().contains("NUMERIC"),
                    "Amount should still be DECIMAL/NUMERIC type, was: " + targetAmountCol.getDataType());
 
-        logger.info("✓ Type compatibility changes detected via schema comparison");
+        logger.info("[OK] Type compatibility changes detected via schema comparison");
         validateExecutionRate(2, 2, "Type compatibility validation");
     }
 
@@ -166,7 +166,7 @@ public class TypeCompatibilityTest extends SyncTestBase {
             assertTrue(targetMaxLength < sourceMaxLength, "Target VARCHAR should be narrower");
         }
         
-        logger.info("✓ VARCHAR narrowing detected");
+        logger.info("[OK] VARCHAR narrowing detected");
         validateExecutionRate(2, 2, "Type narrowing");
     }
 
@@ -187,7 +187,7 @@ public class TypeCompatibilityTest extends SyncTestBase {
             assertNotNull(col.getDataType());
         }
         
-        logger.info("✓ All column types validated");
+        logger.info("[OK] All column types validated");
         validateExecutionRate(2, 2, "Column types");
     }
 }

@@ -1,7 +1,12 @@
 package dev.mars.apex.core.service.monitoring;
 
 import org.junit.jupiter.api.Test;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.time.Duration;
 import java.time.Instant;
@@ -9,9 +14,10 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Phase 3B: Unit tests for recovery metrics in PerformanceSnapshot.
+ * Unit tests for recovery metrics in PerformanceSnapshot.
  * Tests the aggregation of recovery metrics across multiple rule evaluations.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class PerformanceSnapshotRecoveryTest {
 
     @Test

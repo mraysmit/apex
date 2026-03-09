@@ -33,7 +33,7 @@ import java.nio.file.Paths;
  * Generates HTML reports from JSON schema diff data using Handlebars templates.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-18
  */
 public class JsonBasedHtmlReportGenerator {
 
@@ -48,8 +48,9 @@ public class JsonBasedHtmlReportGenerator {
             this.compiledTemplate = handlebars.compile("main");
             logger.info("[SchemaDiff.HTML] Handlebars template compiled successfully");
         } catch (IOException e) {
-            logger.error("[SchemaDiff.HTML] Failed to compile Handlebars template", e);
-            throw new RuntimeException("Failed to compile template", e);
+            logger.error("[SchemaDiff.HTML] Failed to compile Handlebars template: {}", e.getMessage());
+            logger.debug("Stack trace for Handlebars template compilation failure:", e);
+            throw new java.io.UncheckedIOException("Failed to compile Handlebars template", e);
         }
     }
 

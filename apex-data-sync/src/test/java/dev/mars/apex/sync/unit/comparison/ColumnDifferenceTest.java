@@ -19,9 +19,9 @@
 package dev.mars.apex.sync.unit.comparison;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.ExecutionStep;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.ExecutionStep;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,7 +112,7 @@ public class ColumnDifferenceTest extends SyncTestBase {
                 "Name column should be wider in after schema");
         }
         
-        logger.info("✓ Column size increase detected");
+        logger.info("[OK] Column size increase detected");
         validateExecutionRate(2, 2, "Column size increase");
     }
 
@@ -136,7 +136,7 @@ public class ColumnDifferenceTest extends SyncTestBase {
             .anyMatch(col -> "CREATED_AT".equalsIgnoreCase(col.getName()));
         assertTrue(hasCreatedAt, "After schema should have created_at column");
         
-        logger.info("✓ New column detected");
+        logger.info("[OK] New column detected");
         validateExecutionRate(2, 2, "New column detection");
     }
 
@@ -156,7 +156,7 @@ public class ColumnDifferenceTest extends SyncTestBase {
         int columnDifference = afterSchema.getColumns().size() - beforeSchema.getColumns().size();
         assertEquals(1, columnDifference, "Should have 1 additional column");
         
-        logger.info("✓ Column count comparison: {} → {}", 
+        logger.info("[OK] Column count comparison: {} → {}", 
             beforeSchema.getColumns().size(), afterSchema.getColumns().size());
         validateExecutionRate(2, 2, "Column count comparison");
     }

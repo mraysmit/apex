@@ -1,30 +1,36 @@
-# APEX Enrichment Rules for Input Data Classification Phase 1 Tests
-# Simple enrichment rules for testing the classification system.
+# ============================================================================
+# APEX Enrichment Stage Configuration for InputDataClassificationPhase1Test
+# ============================================================================
+# PURPOSE:
+# This file provides the configuration for the "enrichment" STAGE in the
+# InputDataClassificationPhase1Test scenario. It uses validation rules
+# (type: rule-config) to SIMULATE enrichment processing for testing purposes.
+# ============================================================================
 
 metadata:
-  id: "classification-test-enrichment-rules"
-  name: "Classification Test Enrichment Rules"
-  description: "Basic enrichment rules for classification testing"
+  id: "input-classification-enrichment-rules"
+  name: "Input Classification Enrichment Rules"
   version: "1.0.0"
+  description: "Validation rules that simulate enrichment stage for input data classification"
   type: "rule-config"
-  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  author: "APEX Demo"
 
-# Simple enrichment rules for testing
+# Simulated enrichment rules for classification
 rules:
-  - rule-id: "add-processing-timestamp"
-    rule-name: "Add Processing Timestamp"
-    description: "Adds processing timestamp to the data"
-    severity: "INFO"
+  - id: "classification-label-check"
+    name: "Classification Label Check"
+    description: "Verify classification label assignment (simulates enrichment)"
     condition: "true"
-    action: "addField"
-    field-name: "processingTimestamp"
-    field-value: "#{T(java.time.Instant).now().toString()}"
-    
-  - rule-id: "add-classification-marker"
-    rule-name: "Add Classification Marker"
-    description: "Adds marker indicating data was classified"
     severity: "INFO"
+    category: "enrichment"
+    message: "Classification label verified"
+    enabled: true
+
+  - id: "classification-confidence-check"
+    name: "Classification Confidence Check"
+    description: "Verify classification confidence score (simulates enrichment)"
     condition: "true"
-    action: "addField"
-    field-name: "classificationProcessed"
-    field-value: "true"
+    severity: "INFO"
+    category: "enrichment"
+    message: "Classification confidence verified"
+    enabled: true

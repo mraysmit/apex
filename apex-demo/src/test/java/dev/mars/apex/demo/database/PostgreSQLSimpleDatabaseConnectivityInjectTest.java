@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.database;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.demo.util.TestContainerImages;
 import org.junit.jupiter.api.*;
@@ -63,7 +63,7 @@ public class PostgreSQLSimpleDatabaseConnectivityInjectTest extends DemoTestBase
             statement.execute("CREATE TABLE test_table (id VARCHAR(10), name VARCHAR(50))");
             statement.execute("INSERT INTO test_table VALUES ('1', 'Test Name')");
 
-            logger.info("✓ PostgreSQL database setup completed");
+            logger.info("[OK] PostgreSQL database setup completed");
 
         } catch (Exception e) {
             throw new RuntimeException("PostgreSQL database setup failed", e);
@@ -94,7 +94,7 @@ public class PostgreSQLSimpleDatabaseConnectivityInjectTest extends DemoTestBase
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
             assertEquals("Test Name", enrichedData.get("name"));
-            logger.info("✓ PostgreSQL database connectivity test passed");
+            logger.info("[OK] PostgreSQL database connectivity test passed");
 
         } catch (Exception e) {
             fail("PostgreSQL database connectivity test failed: " + e.getMessage());

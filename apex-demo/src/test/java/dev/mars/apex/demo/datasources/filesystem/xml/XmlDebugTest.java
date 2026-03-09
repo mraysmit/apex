@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.datasources.filesystem.xml;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ public class XmlDebugTest extends DemoTestBase {
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/FileSystemLookupDemoTest-xml.yaml");
             assertNotNull(config, "YAML configuration should not be null");
 
-            logger.info("✓ Successfully loaded XML configuration");
+            logger.info("[OK] Successfully loaded XML configuration");
             logger.info("Configuration ID: {}", config.getMetadata().getId());
             logger.info("Configuration Name: {}", config.getMetadata().getName());
 
@@ -63,7 +63,7 @@ public class XmlDebugTest extends DemoTestBase {
 
             // Check if enrichment worked
             if (enrichedData.containsKey("productName")) {
-                logger.info("✓ XML enrichment SUCCESSFUL!");
+                logger.info("[OK] XML enrichment SUCCESSFUL!");
                 logger.info("  Product Name: {}", enrichedData.get("productName"));
                 logger.info("  Product Price: {}", enrichedData.get("productPrice"));
                 logger.info("  Product Category: {}", enrichedData.get("productCategory"));
@@ -91,7 +91,7 @@ public class XmlDebugTest extends DemoTestBase {
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/datasources/filesystem/xml/SimpleXmlDataSourceTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
 
-            logger.info("✓ Successfully loaded SimpleXmlDataSourceTest configuration");
+            logger.info("[OK] Successfully loaded SimpleXmlDataSourceTest configuration");
 
             // Create test data with product ID
             Map<String, Object> testData = new HashMap<>();
@@ -115,7 +115,7 @@ public class XmlDebugTest extends DemoTestBase {
 
             // Check if enrichment worked
             if (enrichedData.containsKey("productName")) {
-                logger.info("✓ SimpleXmlDataSourceTest configuration WORKS!");
+                logger.info("[OK] SimpleXmlDataSourceTest configuration WORKS!");
                 assertEquals("US Treasury Bond", enrichedData.get("productName"));
                 assertEquals(1200.0, enrichedData.get("productPrice"));
                 assertEquals("FixedIncome", enrichedData.get("productCategory"));
@@ -171,7 +171,7 @@ public class XmlDebugTest extends DemoTestBase {
                 logger.error("✗ No matches found with the regex pattern!");
                 logger.error("This explains why XML parsing is failing.");
             } else {
-                logger.info("✓ Regex pattern works correctly, found {} matches", matchCount);
+                logger.info("[OK] Regex pattern works correctly, found {} matches", matchCount);
             }
 
         } catch (Exception e) {
@@ -217,7 +217,7 @@ public class XmlDebugTest extends DemoTestBase {
 
             // For now, just check that the configuration is being parsed
             // The format-config issue will be addressed separately
-            logger.info("✓ Configuration parsing appears to be working correctly.");
+            logger.info("[OK] Configuration parsing appears to be working correctly.");
             logger.info("The format-config field needs to be added to the LookupDataset class.");
 
         } catch (Exception e) {

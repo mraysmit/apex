@@ -1,4 +1,4 @@
-![APEX System Logo](APEX%20System%20logo.png)
+<img src="APEX%20System%20logo.png" alt="APEX System Logo" width="200">
 
 # APEX - Technical Reference Guide
 
@@ -1366,8 +1366,51 @@ These components coordinate and manage multiple data sources:
 - **`DataSourceManager`** - The smart coordinator that handles load balancing between multiple data sources and automatic failover when sources go down.
 - **`DataServiceManager`** - A simpler manager for programmatic configuration, great for testing and demos.
 - **`DemoDataServiceManager`** - Pre-configured with sample data sources for quick demos and testing.
-- **`DataSourceRegistry`** - The central directory that keeps track of all available data sources and monitors their health.
-- **`DataSourceFactory`** - The factory that creates and configures data source instances, handling resource management and caching.
+- **`DataSourceRegistry`** - The **SINGLE SOURCE OF TRUTH** for all external data sources. Provides unified caching, thread-safe deduplication, and lifecycle management.
+- **`DataSourceFactory`** - Low-level factory that creates data source instances. Does not cache instances (that's DataSourceRegistry's job). Maintains underlying resource caches (JDBC pools, HTTP clients).
+
+##### Data Source Caching Architecture (APEX 2.2+)
+
+The data source caching follows a layered architecture with clear separation of concerns:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              DataSourceRegistry (Singleton)                      │
+│         SINGLE SOURCE OF TRUTH for ExternalDataSource           │
+│                                                                 │
+│   Caches:                                                       │
+│   - dataSources: ExternalDataSource instances by name           │
+│   - jdbcPoolCache: HikariCP pools by connection key             │
+│   - httpClientCache: HttpClient instances by base URL           │
+│   - pendingCreations: Deduplication for concurrent requests     │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+                    calls when cache miss
+                               ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                      DataSourceFactory                           │
+│              Low-level factory (creates instances)              │
+│   - createDataSource() → always creates fresh instance          │
+│   - Maintains underlying resource caches (JDBC, HTTP)           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Design Principles:**
+
+1. **Single Source of Truth**: All components (RulesEngine, PipelineExecutionManager, DatasetLookupServiceFactory) use DataSourceRegistry for data source access
+2. **Thread-Safe Deduplication**: Concurrent requests for the same data source are automatically deduplicated via CompletableFuture pattern
+3. **Resource Sharing**: JDBC connection pools and HTTP clients are shared across data sources with the same connection details
+4. **Lazy Creation**: Data sources are created on first access via `getOrCreate()`
+
+**Usage:**
+
+```java
+// Primary API - get existing or create new (RECOMMENDED)
+ExternalDataSource ds = DataSourceRegistry.getInstance().getOrCreate("my-db", config);
+
+// Lookup only (no creation)
+Optional<ExternalDataSource> ds = DataSourceRegistry.getInstance().get("my-db");
+```
 
 #### Implementation Classes (The Workers)
 These are the actual implementations that do the work of connecting to different systems:

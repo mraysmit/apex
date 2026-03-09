@@ -1,9 +1,9 @@
 package dev.mars.apex.core.api;
 
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public class RuleSet {
         try {
             return ruleSetClass.getDeclaredConstructor(String.class).newInstance(categoryName);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create rule set of type " + ruleSetClass.getSimpleName(), e);
+            throw new IllegalStateException("Failed to create rule set of type " + ruleSetClass.getSimpleName(), e);
         }
     }
 

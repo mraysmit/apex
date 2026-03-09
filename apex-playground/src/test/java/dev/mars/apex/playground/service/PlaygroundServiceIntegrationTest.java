@@ -38,12 +38,12 @@ class PlaygroundServiceIntegrationTest {
 
     private PlaygroundService playgroundService;
     private DataProcessingService dataProcessingService;
-    private YamlValidationService yamlValidationService;
+    private ValidationService yamlValidationService;
 
     @BeforeEach
     void setUp() {
         dataProcessingService = new DataProcessingService();
-        yamlValidationService = new YamlValidationService();
+        yamlValidationService = new ValidationService();
         playgroundService = new PlaygroundService(dataProcessingService, yamlValidationService);
     }
 

@@ -16,10 +16,10 @@
 
 package dev.mars.apex.demo.enrichmentgroups;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
 
@@ -106,7 +106,7 @@ public class StopOnFirstFailureOrEnrichmentGroupTest extends DemoTestBase {
             assertEquals("C", enrichedData.get("c_copy"));
 
             logSuccess("RulesEngine OR enrichment group with stop-on-first-failure succeeded");
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to load YAML or create RulesEngine: " + e.getMessage());
         }
     }
@@ -166,7 +166,7 @@ public class StopOnFirstFailureOrEnrichmentGroupTest extends DemoTestBase {
             assertEquals("B", enrichedData.get("b_copy"));
 
             logSuccess("RulesEngine OR enrichment group (no stop) succeeded");
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to load YAML or create RulesEngine: " + e.getMessage());
         }
     }

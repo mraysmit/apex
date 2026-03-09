@@ -16,7 +16,7 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleResult;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,7 +37,7 @@ import java.util.Map;
  * - NON_CRITICAL_FAILURE: Optional stage failed, scenario can continue
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-27
  */
 public class StageExecutionResult {
     

@@ -33,6 +33,7 @@ enrichments:
         type: "database"
         data-source-ref: "test-h2-database"
         query: "SELECT customer_name, credit_rating, country FROM customers WHERE customer_id = :customerId"
+        key-field: "customerId"
         parameters:
           - field: "customerId"
             type: "string"
@@ -59,7 +60,7 @@ enrichments:
 enrichment-groups:
   - id: "customer-enrichment-group"
     name: "Customer Enrichment Group"
-    description: "CRITICAL: Group containing database lookup enrichment that requires yamlConfig"
+    description: Group containing database lookup enrichment that requires yamlConfig"
     operator: "AND"
     enrichment-ids:
       - "customer-database-lookup"

@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -127,7 +127,7 @@ public class EnrichmentResultFieldTest extends DemoTestBase {
             assertNull(enrichedData2.get("validationStatus"),
                 "Validation should not have run because counterpartyFound=false");
 
-            logger.info("✓ Lookup enrichment result-field test completed successfully");
+            logger.info("[OK] Lookup enrichment result-field test completed successfully");
             
         } catch (Exception e) {
             logger.error("Lookup enrichment result-field test failed", e);
@@ -213,7 +213,7 @@ public class EnrichmentResultFieldTest extends DemoTestBase {
             assertNull(enrichedData2.get("requiresApproval"),
                 "Approval should not be set because isHighValue=false");
 
-            logger.info("✓ Field enrichment result-field test completed successfully");
+            logger.info("[OK] Field enrichment result-field test completed successfully");
             
         } catch (Exception e) {
             logger.error("Field enrichment result-field test failed", e);
@@ -314,7 +314,7 @@ public class EnrichmentResultFieldTest extends DemoTestBase {
             assertNull(enrichedData2.get("approvalWorkflow"),
                 "Approval workflow should not be set because riskClassified=false");
 
-            logger.info("✓ Conditional mapping enrichment result-field test completed successfully");
+            logger.info("[OK] Conditional mapping enrichment result-field test completed successfully");
             
         } catch (Exception e) {
             logger.error("Conditional mapping enrichment result-field test failed", e);

@@ -80,11 +80,13 @@ public class DependencyController {
             
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid request for dependency tree: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error("INVALID_REQUEST", "Invalid request: " + e.getMessage()));
 
         } catch (Exception e) {
-            logger.error("Failed to generate dependency tree for: " + rootFile, e);
+            logger.error("Failed to generate dependency tree for '{}': {}", rootFile, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("TREE_GENERATION_FAILED", "Failed to generate dependency tree: " + e.getMessage()));
         }
@@ -119,11 +121,13 @@ public class DependencyController {
             
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid file path for dependency analysis: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error("INVALID_FILE_PATH", "Invalid file path: " + e.getMessage()));
 
         } catch (Exception e) {
-            logger.error("Failed to analyze dependencies for: " + filePath, e);
+            logger.error("Failed to analyze dependencies for '{}': {}", filePath, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("ANALYSIS_FAILED", "Failed to analyze dependencies: " + e.getMessage()));
         }
@@ -157,11 +161,13 @@ public class DependencyController {
             
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid request for tree validation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error("INVALID_REQUEST", "Invalid request: " + e.getMessage()));
 
         } catch (Exception e) {
-            logger.error("Failed to validate dependency tree for: " + rootFile, e);
+            logger.error("Failed to validate dependency tree for '{}': {}", rootFile, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("VALIDATION_FAILED", "Failed to validate dependency tree: " + e.getMessage()));
         }
@@ -196,6 +202,7 @@ public class DependencyController {
             
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid file path for node details: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error("INVALID_FILE_PATH", "Invalid file path: " + e.getMessage()));
 
@@ -207,7 +214,8 @@ public class DependencyController {
             throw e;
 
         } catch (Exception e) {
-            logger.error("Failed to get node details for: " + filePath, e);
+            logger.error("Failed to get node details for '{}': {}", filePath, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("NODE_DETAILS_FAILED", "Failed to get node details: " + e.getMessage()));
         }
@@ -242,11 +250,13 @@ public class DependencyController {
             
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid folder path for scanning: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error("INVALID_FOLDER_PATH", "Invalid folder path: " + e.getMessage()));
 
         } catch (Exception e) {
-            logger.error("Failed to scan folder: " + folderPath, e);
+            logger.error("Failed to scan folder '{}': {}", folderPath, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("SCAN_FAILED", "Failed to scan folder: " + e.getMessage()));
         }
@@ -281,6 +291,7 @@ public class DependencyController {
 
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid file path for content retrieval: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error("INVALID_FILE_PATH", "Invalid file path: " + e.getMessage()));
 
@@ -292,7 +303,8 @@ public class DependencyController {
             throw e;
 
         } catch (Exception e) {
-            logger.error("Failed to get file content for: " + filePath, e);
+            logger.error("Failed to get file content for '{}': {}", filePath, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("FILE_CONTENT_FAILED", "Failed to get file content: " + e.getMessage()));
         }

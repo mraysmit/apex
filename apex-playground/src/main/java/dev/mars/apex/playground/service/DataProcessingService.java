@@ -87,6 +87,7 @@ public class DataProcessingService {
             }
         } catch (Exception e) {
             logger.error("Failed to parse {} data: {}", format, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Failed to parse " + format + " data: " + e.getMessage(), e);
         }
     }

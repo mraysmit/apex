@@ -16,7 +16,7 @@ package dev.mars.apex.yaml.manager.service;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.YamlConfigMetadata;
+import dev.mars.apex.yaml.manager.model.ConfigMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -53,13 +53,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class CatalogScanServiceClasspathTest {
 
     private CatalogScanService catalogScanService;
-    private YamlContentAnalyzer contentAnalyzer;
+    private ContentAnalyzer contentAnalyzer;
     private CatalogService catalogService;
 
     @BeforeEach
     void setUp() {
         catalogScanService = new CatalogScanService();
-        contentAnalyzer = new YamlContentAnalyzer();
+        contentAnalyzer = new ContentAnalyzer();
         catalogService = new CatalogService();
 
         // Inject dependencies using reflection
@@ -314,7 +314,7 @@ class CatalogScanServiceClasspathTest {
     }
 
     @Nested
-    @DisplayName("YamlContentAnalyzer InputStream method tests")
+    @DisplayName("ContentAnalyzer InputStream method tests")
     class YamlContentAnalyzerStreamTests {
 
         @Test
@@ -375,13 +375,13 @@ class CatalogScanServiceClasspathTest {
     }
 
     @Nested
-    @DisplayName("YamlConfigMetadata classpath fields tests")
+    @DisplayName("ConfigMetadata classpath fields tests")
     class MetadataClasspathFieldsTests {
 
         @Test
         @DisplayName("Should have default false for isClasspathResource")
         void shouldDefaultToFalseForClasspathResource() {
-            YamlConfigMetadata metadata = new YamlConfigMetadata();
+            ConfigMetadata metadata = new ConfigMetadata();
             
             assertFalse(metadata.isClasspathResource());
             assertNull(metadata.getClasspathPrefix());
@@ -390,7 +390,7 @@ class CatalogScanServiceClasspathTest {
         @Test
         @DisplayName("Should set and get isClasspathResource")
         void shouldSetAndGetClasspathResource() {
-            YamlConfigMetadata metadata = new YamlConfigMetadata();
+            ConfigMetadata metadata = new ConfigMetadata();
             
             metadata.setClasspathResource(true);
             assertTrue(metadata.isClasspathResource());
@@ -402,7 +402,7 @@ class CatalogScanServiceClasspathTest {
         @Test
         @DisplayName("Should set and get classpathPrefix")
         void shouldSetAndGetClasspathPrefix() {
-            YamlConfigMetadata metadata = new YamlConfigMetadata();
+            ConfigMetadata metadata = new ConfigMetadata();
             
             String prefix = "META-INF/apex/";
             metadata.setClasspathPrefix(prefix);

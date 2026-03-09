@@ -19,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * are valid according to APEX YAML grammar and lexical rules.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-11-10
+ * @version 1.0
  */
 @DisplayName("Phase 1 Classification YAML Validation Test")
 class Phase1ClassificationYamlValidationTest {

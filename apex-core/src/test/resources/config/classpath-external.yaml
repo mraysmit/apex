@@ -4,7 +4,7 @@ metadata:
   version: 1.0.0
   description: External enrichments loaded from classpath for groups-only logic testing
   type: external-data-config
-  author: APEX Core Team
+  author: Mark A Ray-Smith Cityline Ltd
   created: '2025-11-10'
   tags:
     - test

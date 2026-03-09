@@ -2,7 +2,6 @@ metadata:
   name: "Enrichment Group References Execution Order Test"
   type: "rule-config"
   version: "1.0.0"
-  processing-mode: "sequential"
   description: |
     Test to verify when enrichment-group-references should execute.
     

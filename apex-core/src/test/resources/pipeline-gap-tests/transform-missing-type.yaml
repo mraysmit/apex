@@ -1,0 +1,58 @@
+# ============================================================================
+# Transform Step - Missing Type/Field Test
+# ============================================================================
+# Tests transform step with transformation missing required type/field.
+# Exercises the early return in applyTransformation() when type/field is null.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "transform-missing-type-test"
+  name: "Transform Missing Type Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests transform step with missing type property"
+
+data-sources:
+  - name: "validation-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:validation_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, customer_name, status FROM validation_source"
+
+pipeline:
+  name: "transform-missing-type-pipeline"
+  description: "Pipeline with missing type transform"
+
+  execution:
+    mode: "sequential"
+    max-retries: 0
+
+  steps:
+    - name: "extract-for-test"
+      type: "extract"
+      source: "validation-source"
+      operation: "getAllRecords"
+      description: "Extract records"
+
+    - name: "transform-missing-type"
+      type: "transform"
+      description: "Test missing type property"
+      depends-on: ["extract-for-test"]
+      transformations:
+        - name: "no-type"
+          field: "some_field"
+          # No 'type' property - exercises early return
+          
+        - name: "no-field"
+          type: "field-addition"
+          # No 'field' property - exercises early return
+          value: "test"

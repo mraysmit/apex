@@ -4,7 +4,7 @@ import dev.mars.apex.playground.model.PlaygroundRequest;
 import dev.mars.apex.playground.model.PlaygroundResponse;
 import dev.mars.apex.playground.service.DataProcessingService;
 import dev.mars.apex.playground.service.PlaygroundService;
-import dev.mars.apex.playground.service.YamlValidationService;
+import dev.mars.apex.playground.service.ValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -41,7 +41,7 @@ public class ExamplesIntegrationTest {
     @BeforeEach
     void setUp() {
         DataProcessingService dataProcessingService = new DataProcessingService();
-        YamlValidationService yamlValidationService = new YamlValidationService();
+        ValidationService yamlValidationService = new ValidationService();
         playgroundService = new PlaygroundService(dataProcessingService, yamlValidationService);
     }
 

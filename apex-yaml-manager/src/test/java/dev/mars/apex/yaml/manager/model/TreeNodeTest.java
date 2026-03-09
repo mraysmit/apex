@@ -196,7 +196,7 @@ class TreeNodeTest {
     @Test
     @DisplayName("Should set and get content summary")
     void testContentSummary() {
-        YamlContentSummary summary = new YamlContentSummary("test.yaml");
+        ContentSummary summary = new ContentSummary("test.yaml");
         summary.setFileType("rules");
         summary.setRuleCount(5);
         summary.setRuleGroupCount(2);
@@ -215,11 +215,11 @@ class TreeNodeTest {
         TreeNode child1 = new TreeNode("child1.yaml", 1);
         TreeNode child2 = new TreeNode("child2.yaml", 1);
 
-        YamlContentSummary summary1 = new YamlContentSummary("child1.yaml");
+        ContentSummary summary1 = new ContentSummary("child1.yaml");
         summary1.setFileType("enrichments");
         summary1.setEnrichmentCount(3);
 
-        YamlContentSummary summary2 = new YamlContentSummary("child2.yaml");
+        ContentSummary summary2 = new ContentSummary("child2.yaml");
         summary2.setFileType("rules");
         summary2.setRuleCount(4);
 

@@ -17,13 +17,13 @@ package dev.mars.apex.playground.service;
  */
 
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlDataSourceRef;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.core.config.model.YamlDataSourceRef;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.playground.model.PlaygroundRequest;
 import dev.mars.apex.playground.model.PlaygroundResponse;
 import dev.mars.apex.playground.model.RuleExecutionResult;
@@ -55,11 +55,11 @@ public class PlaygroundService {
     private static final Logger logger = LoggerFactory.getLogger(PlaygroundService.class);
 
     private final DataProcessingService dataProcessingService;
-    private final YamlValidationService yamlValidationService;
+    private final ValidationService yamlValidationService;
 
     @Autowired
     public PlaygroundService(DataProcessingService dataProcessingService,
-                           YamlValidationService yamlValidationService) {
+                           ValidationService yamlValidationService) {
         this.dataProcessingService = dataProcessingService;
         this.yamlValidationService = yamlValidationService;
     }
@@ -106,7 +106,7 @@ public class PlaygroundService {
             long rulesStartTime = System.currentTimeMillis();
 
             // Parse YAML to config object
-            YamlConfigurationLoader configLoader = new YamlConfigurationLoader();
+            ConfigurationLoader configLoader = new ConfigurationLoader();
             YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(request.getYamlRules());
 
             // Extract enrichment sources
@@ -189,8 +189,9 @@ public class PlaygroundService {
 
             logger.info("Processing completed successfully in {}ms", response.getMetrics().getTotalTimeMs());
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("YAML configuration error: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             response.setSuccess(false);
             response.setMessage("YAML configuration error: " + e.getMessage());
             response.addError("YAML configuration error: " + e.getMessage());

@@ -1,7 +1,9 @@
 metadata:
+  id: "conditional-rules-test"
   name: "Conditional Rules Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test conditional rule execution based on runtime context"
 
 rules:

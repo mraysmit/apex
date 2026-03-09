@@ -6,14 +6,111 @@
  */
 
 // Global variables
-let sourceDataEditor, yamlRulesEditor;
+let sourceDataEditor;
+let yamlCmEditor = null; // CodeMirror instance for YAML editor
 let currentDataFormat = 'JSON';
 let currentExample = null;
+
+// Backward-compatible yamlRulesEditor reference (used by drag-drop setup)
+let yamlRulesEditor;
+
+// ========================================================================
+// APEX Keyword Colorization — matches Visual Rule Editor exactly
+// ========================================================================
+const APEX_KEYWORDS = {
+    metadata: ['metadata', 'id', 'type', 'version', 'description', 'author', 'business-domain', 'effective-date', 'expiration-date', 'tags'],
+    rules: ['rules', 'rule', 'condition', 'message', 'severity', 'priority', 'category', 'result-field', 'error-code', 'success-code', 'no-match-message'],
+    enrichment: ['enrichments', 'enrichment', 'enrichment-groups', 'field-mappings', 'source-field', 'target-field', 'expression', 'calculation-config', 'lookup-config', 'lookup-key', 'lookup-dataset', 'field-enrichment', 'calculation-enrichment', 'lookup-enrichment'],
+    rulegroup: ['rule-groups', 'rule-group', 'rule-ids', 'operator', 'enrichment-ids'],
+    datasource: ['data-sources', 'data-source', 'data-source-refs', 'connection-config', 'host', 'port', 'database', 'username', 'password', 'base-url', 'timeout', 'queries', 'query', 'endpoints', 'endpoint', 'path', 'base-path', 'file-pattern', 'format', 'parameters'],
+    scenario: ['scenario', 'scenarios', 'input-type', 'rule-config', 'enrichment-config'],
+    pipeline: ['pipeline', 'pipelines', 'stages', 'stage', 'mode', 'error-handling', 'max-retries', 'retry-delay-ms'],
+    common: ['enabled', 'name', 'source', 'value', 'field', 'key-field']
+};
+
+// Build reverse lookup: keyword → category
+const KEYWORD_CATEGORY_MAP = {};
+for (const [category, keywords] of Object.entries(APEX_KEYWORDS)) {
+    keywords.forEach(kw => KEYWORD_CATEGORY_MAP[kw] = category);
+}
+
+// ========================================================================
+// YAML Editor Value Helpers (abstracts CodeMirror vs textarea)
+// ========================================================================
+function getYamlContent() {
+    return yamlCmEditor ? yamlCmEditor.getValue() : '';
+}
+
+function setYamlContent(value) {
+    if (yamlCmEditor) {
+        yamlCmEditor.setValue(value || '');
+        yamlCmEditor.save(); // Sync back to hidden textarea for Selenium compatibility
+    }
+}
+
+// ========================================================================
+// Font Zoom Controls for YAML Editor
+// ========================================================================
+let yamlEditorFontSize = 14;
+const YAML_MIN_FONT_SIZE = 8;
+const YAML_MAX_FONT_SIZE = 28;
+
+function zoomYamlEditor(delta) {
+    yamlEditorFontSize = Math.max(YAML_MIN_FONT_SIZE, Math.min(YAML_MAX_FONT_SIZE, yamlEditorFontSize + delta));
+    document.getElementById('yamlZoomLevel').textContent = yamlEditorFontSize + 'px';
+    if (yamlCmEditor) {
+        const wrapper = yamlCmEditor.getWrapperElement();
+        wrapper.style.fontSize = yamlEditorFontSize + 'px';
+        yamlCmEditor.refresh();
+    }
+}
+
+// ========================================================================
+// Copy YAML to Clipboard
+// ========================================================================
+function copyYamlToClipboard() {
+    const content = getYamlContent();
+    if (!content) {
+        showAlert('No YAML content to copy.', 'warning');
+        return;
+    }
+    navigator.clipboard.writeText(content).then(() => {
+        // Brief visual feedback on the copy button
+        const btn = document.querySelector('[onclick="copyYamlToClipboard()"]');
+        if (btn) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.replace('btn-outline-secondary', 'btn-success');
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.replace('btn-success', 'btn-outline-secondary');
+            }, 1000);
+        }
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = content;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showAlert('YAML copied to clipboard!', 'success');
+        } catch (err) {
+            showAlert('Failed to copy to clipboard.', 'danger');
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    });
+}
 
 // Initialize playground when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initializePlayground();
     setupEventListeners();
+    initPlaygroundExampleModal();
+    initSourceFileHandlers();
     // loadDefaultExample(); // Disabled to start with empty UI
 });
 
@@ -23,9 +120,42 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializePlayground() {
     console.log('Initializing APEX Playground...');
 
-    // Initialize editors (placeholder - will be enhanced with CodeMirror in Phase 3)
+    // Initialize source data editor (plain textarea)
     sourceDataEditor = document.getElementById('sourceDataEditor');
+
+    // Keep reference to textarea for drag-drop setup
     yamlRulesEditor = document.getElementById('yamlRulesEditor');
+
+    // Initialize CodeMirror on the YAML editor with APEX keyword highlighting
+    yamlCmEditor = CodeMirror.fromTextArea(document.getElementById('yamlRulesEditor'), {
+        mode: 'yaml',
+        theme: currentEditorTheme,
+        lineNumbers: true,
+        lineWrapping: false,
+        indentUnit: 2,
+        tabSize: 2,
+        indentWithTabs: false,
+        styleActiveLine: true,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        placeholder: 'Enter your YAML rules configuration here or drag and drop a YAML file...',
+        extraKeys: {
+            Tab: function(cm) {
+                cm.replaceSelection('  ', 'end');
+            }
+        }
+    });
+
+    // Apply APEX keyword overlay for colorization
+    applyApexOverlay(yamlCmEditor);
+
+    // Set initial theme toggle icon
+    updateThemeToggleIcon();
+
+    // Keep hidden textarea in sync for Selenium test compatibility
+    yamlCmEditor.on('change', function() {
+        yamlCmEditor.save();
+    });
 
     // Set initial data format
     updateDataFormat('JSON');
@@ -34,6 +164,77 @@ function initializePlayground() {
     loadTransferredData();
 
     console.log('Playground initialized successfully');
+}
+
+/**
+ * Apply APEX keyword colorization overlay to CodeMirror.
+ * This adds color classes to YAML keys matching APEX domain keywords,
+ * exactly matching the Visual Rule Editor's Prism-based colorization.
+ */
+function applyApexOverlay(cm) {
+    CodeMirror.defineMode('yaml-apex', function(config) {
+        const yamlMode = CodeMirror.getMode(config, 'yaml');
+        return CodeMirror.overlayMode(yamlMode, {
+            token: function(stream) {
+                // Match YAML keys at start of a line (optional whitespace, then key, then colon)
+                if (stream.sol() || stream.peek() === ' ' || stream.peek() === '-') {
+                    // Skip leading whitespace and list markers
+                    stream.eatWhile(/[\s-]/);
+                    // Try to match a YAML key
+                    const keyMatch = stream.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(?=\s*:)/);
+                    if (keyMatch) {
+                        const keyword = keyMatch[1];
+                        const category = KEYWORD_CATEGORY_MAP[keyword];
+                        if (category) {
+                            return 'apex-' + category;
+                        }
+                    }
+                }
+                // Match SpEL expressions in strings (contains #)
+                if (stream.match(/#[a-zA-Z{]/)) {
+                    stream.skipTo('"') || stream.skipTo("'") || stream.skipToEnd();
+                    return 'apex-spel';
+                }
+                stream.next();
+                return null;
+            }
+        });
+    });
+    cm.setOption('mode', 'yaml-apex');
+}
+
+// ========================================================================
+// Dark / Light Theme Toggle
+// ========================================================================
+const DARK_THEME = 'material-darker';
+const LIGHT_THEME = 'eclipse';
+let currentEditorTheme = localStorage.getItem('apex_editor_theme') || DARK_THEME;
+
+/**
+ * Toggle the YAML editor between dark and light mode.
+ * Persists the choice to localStorage.
+ */
+function toggleEditorTheme() {
+    if (!yamlCmEditor) return;
+    currentEditorTheme = (currentEditorTheme === DARK_THEME) ? LIGHT_THEME : DARK_THEME;
+    yamlCmEditor.setOption('theme', currentEditorTheme);
+    localStorage.setItem('apex_editor_theme', currentEditorTheme);
+    updateThemeToggleIcon();
+}
+
+/**
+ * Update the toggle button icon: moon for dark mode, sun for light mode.
+ */
+function updateThemeToggleIcon() {
+    const icon = document.getElementById('themeToggleIcon');
+    if (!icon) return;
+    if (currentEditorTheme === DARK_THEME) {
+        icon.className = 'fas fa-moon';
+        icon.parentElement.title = 'Switch to Light Mode';
+    } else {
+        icon.className = 'fas fa-sun';
+        icon.parentElement.title = 'Switch to Dark Mode';
+    }
 }
 
 /**
@@ -58,7 +259,7 @@ function loadTransferredData() {
 
         // Load YAML into the rules editor
         if (transferData.yaml && yamlRulesEditor) {
-            yamlRulesEditor.value = transferData.yaml;
+            setYamlContent(transferData.yaml);
             document.getElementById('yamlRulesFileName').textContent = 'From Visual Editor';
             console.log('Loaded YAML from Visual Editor');
         }
@@ -97,7 +298,7 @@ function setupEventListeners() {
     document.getElementById('clearBtn').addEventListener('click', clearAll);
     
     // Load example button
-    document.getElementById('loadExampleBtn').addEventListener('click', loadExample);
+    document.getElementById('loadExampleBtn').addEventListener('click', openLoadExampleModal);
     
     // Save config button
     document.getElementById('saveConfigBtn').addEventListener('click', saveConfiguration);
@@ -131,9 +332,103 @@ function setupEventListeners() {
     setupDragAndDrop();
     
     // Reset validation status when YAML content changes
-    yamlRulesEditor.addEventListener('input', function() {
-        resetYamlValidationStatus();
+    if (yamlCmEditor) {
+        yamlCmEditor.on('change', function() {
+            resetYamlValidationStatus();
+        });
+    }
+
+    // Settings button
+    document.getElementById('settingsBtn').addEventListener('click', openSettings);
+    document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+    document.getElementById('resetExamplesDirBtn').addEventListener('click', () => {
+        document.getElementById('examplesDirInput').value = 'examples';
+        previewSettingsPath('examples');
     });
+    document.getElementById('examplesDirInput').addEventListener('input', function() {
+        previewSettingsPath(this.value);
+    });
+}
+
+/**
+ * Open the settings modal and load current settings from the server
+ */
+async function openSettings() {
+    try {
+        const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/settings`);
+        if (!response.ok) throw new Error('Failed to load settings');
+        const data = await response.json();
+        document.getElementById('examplesDirInput').value = data.examplesDir || 'examples';
+        updateResolvedPath(data.resolvedExamplesPath, data.directoryExists);
+        const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        modal.show();
+    } catch (error) {
+        console.error('Error loading settings:', error);
+        showAlert('Failed to load settings.', 'danger');
+    }
+}
+
+/**
+ * Preview the resolved path while the user types
+ */
+async function previewSettingsPath(dir) {
+    if (!dir || !dir.trim()) {
+        document.getElementById('resolvedPathValue').textContent = '--';
+        document.getElementById('dirStatusBadge').style.display = 'none';
+        return;
+    }
+    try {
+        const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/settings`);
+        if (response.ok) {
+            const data = await response.json();
+            // Show the current resolved path as a hint; actual preview requires save
+            updateResolvedPath(data.resolvedExamplesPath, true);
+        }
+    } catch (e) {
+        // Silently ignore preview errors
+    }
+}
+
+/**
+ * Save settings to the server
+ */
+async function saveSettings() {
+    const examplesDir = document.getElementById('examplesDirInput').value.trim();
+    if (!examplesDir) {
+        showAlert('Examples folder path cannot be empty.', 'warning');
+        return;
+    }
+    try {
+        const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/settings`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ examplesDir: examplesDir })
+        });
+        if (!response.ok) throw new Error('Failed to save settings');
+        const data = await response.json();
+        updateResolvedPath(data.resolvedExamplesPath, data.directoryExists);
+        bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+        showAlert('Settings saved successfully.', 'success');
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        showAlert('Failed to save settings.', 'danger');
+    }
+}
+
+/**
+ * Update the resolved path display and directory-exists badge
+ */
+function updateResolvedPath(resolvedPath, exists) {
+    document.getElementById('resolvedPathValue').textContent = resolvedPath || '--';
+    const badge = document.getElementById('dirExistsBadge');
+    const container = document.getElementById('dirStatusBadge');
+    if (resolvedPath) {
+        container.style.display = '';
+        badge.className = exists ? 'badge bg-success' : 'badge bg-warning text-dark';
+        badge.textContent = exists ? 'Directory exists' : 'Directory not found';
+    } else {
+        container.style.display = 'none';
+    }
 }
 
 /**
@@ -142,7 +437,7 @@ function setupEventListeners() {
 async function processData() {
     const processBtn = document.getElementById('processBtn');
     const sourceData = sourceDataEditor.value.trim();
-    const yamlRules = yamlRulesEditor.value.trim();
+    const yamlRules = getYamlContent().trim();
 
     if (!sourceData || !yamlRules) {
         showAlert('Please provide both source data and YAML rules configuration.', 'warning');
@@ -207,7 +502,7 @@ async function processData() {
  * @returns {Promise<{valid: boolean, message: string}>} Validation result
  */
 async function validateYaml() {
-    const yamlRules = yamlRulesEditor.value.trim();
+    const yamlRules = getYamlContent().trim();
 
     if (!yamlRules) {
         showAlert('Please provide YAML rules configuration to validate.', 'warning');
@@ -302,45 +597,87 @@ function showConfirmationModal(message, onConfirm) {
  */
 function resetPlayground() {
     sourceDataEditor.value = '';
-    yamlRulesEditor.value = '';
+    setYamlContent('');
     document.getElementById('validationResults').innerHTML = '<p class="text-muted">Click "Process" to see validation results...</p>';
     document.getElementById('enrichmentResults').innerHTML = '<p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>';
+    document.getElementById('traceResults').innerHTML = '<p class="text-muted">Click "Process" to see execution trace...</p>';
     updateYamlStatus(true, 'Valid');
     updateProcessingTime(0);
 
     // Clear file name displays
     clearSourceDataFileName();
     clearYamlRulesFileName();
-    
+
+    // Clear source data panel state
+    sourceDataFiles = [];
+    renderSourceFileList();
+    document.getElementById('sourceJsonError').style.display = 'none';
+    updateSourceTreeView();
+
     // Clear current example context
     currentExample = null;
 }
 
 /**
- * Load an example configuration
+ * Example Modal — adapter for shared ExampleModal module.
+ * Initializes the shared module with Playground-specific callbacks.
  */
-async function loadExample() {
-    try {
-        const response = await fetch(window.playgroundConfig.apiBaseUrl + '/examples');
-        const data = await response.json();
+function initPlaygroundExampleModal() {
+    ExampleModal.init({
+        apiBaseUrl: window.playgroundConfig.apiBaseUrl,
+        loadBtnId: 'loadSelectedExampleBtn',
+        escapeHtml: escapeHtml,
+        formatFileSize: formatFileSize,
+        onLoad: function (detail, options) {
+            // Clear existing content before loading new example
+            resetPlayground();
 
-        if (data.error) {
-            console.error('Error from server:', data.error);
-            loadDefaultExample();
-            return;
+            let loaded = [];
+
+            // Set current example context
+            currentExample = {
+                category: options.category,
+                id: options.id,
+                name: detail.name || options.id
+            };
+
+            // Load YAML
+            if (options.loadYaml && detail.yaml) {
+                setYamlContent(detail.yaml);
+                updateYamlRulesFileName(currentExample.name.toLowerCase().replace(/\s+/g, '-') + '.yaml', detail.yaml.length);
+                loaded.push('YAML');
+            }
+
+            // Load JSON data
+            if (options.loadData && detail.sampleData) {
+                const jsonStr = typeof detail.sampleData === 'string'
+                    ? detail.sampleData
+                    : JSON.stringify(detail.sampleData, null, 2);
+                sourceDataEditor.value = jsonStr;
+                updateSourceDataFileName(currentExample.name.toLowerCase().replace(/\s+/g, '-') + '-data.json', jsonStr.length);
+                loaded.push('JSON data');
+            }
+
+            resetYamlValidationStatus();
+
+            if (loaded.length > 0) {
+                showAlert('Loaded: ' + loaded.join(' + ') + ' from "' + currentExample.name + '"', 'success');
+            } else {
+                showAlert('Nothing was loaded (no content available).', 'warning');
+            }
+        },
+        onToast: function (message, type) {
+            showAlert(message, type === 'error' ? 'danger' : type);
         }
+    });
+}
 
-        // Show example selection dialog
-        showExampleSelectionDialog(data);
-
-    } catch (error) {
-        console.error('Error loading examples:', error);
-        loadDefaultExample();
-    }
+function openLoadExampleModal() {
+    ExampleModal.open();
 }
 
 /**
- * Load default example data
+ * Load default example data (fallback)
  */
 function loadDefaultExample() {
     // Clear existing content
@@ -371,7 +708,7 @@ rules:
     message: "Valid email address required"`;
     
     sourceDataEditor.value = JSON.stringify(exampleData, null, 2);
-    yamlRulesEditor.value = exampleYaml;
+    setYamlContent(exampleYaml);
 
     // Update file name displays for example
     updateSourceDataFileName('example-data.json', JSON.stringify(exampleData, null, 2).length);
@@ -381,163 +718,12 @@ rules:
 }
 
 /**
- * Show example selection dialog
- */
-function showExampleSelectionDialog(examplesData) {
-    // Create modal dialog
-    const modal = document.createElement('div');
-    modal.className = 'example-modal';
-    modal.innerHTML = `
-        <div class="example-modal-content">
-            <div class="example-modal-header">
-                <h3>Select Example</h3>
-                <button class="example-modal-close">&times;</button>
-            </div>
-            <div class="example-modal-body">
-                ${createExampleCategoriesHTML(examplesData)}
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    // Attach listeners to example items
-    attachExampleListeners();
-
-    // Add event listeners
-    modal.querySelector('.example-modal-close').addEventListener('click', () => {
-        document.body.removeChild(modal);
-    });
-
-    // Close on background click
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            document.body.removeChild(modal);
-        }
-    });
-}
-
-/**
- * Create HTML for example categories using Bootstrap Accordion
- */
-function createExampleCategoriesHTML(examplesData) {
-    let html = '<div class="accordion" id="examplesAccordion">';
-    let index = 0;
-
-    Object.keys(examplesData).forEach(category => {
-        if (category === 'timestamp' || category === 'message' || category === 'error') return;
-
-        const examples = examplesData[category];
-        if (Array.isArray(examples) && examples.length > 0) {
-            const categoryId = `category-${index}`;
-            const isFirst = index === 0;
-            
-            html += `
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="heading-${categoryId}">
-                        <button class="accordion-button ${isFirst ? '' : 'collapsed'}" type="button" 
-                                data-bs-toggle="collapse" data-bs-target="#collapse-${categoryId}" 
-                                aria-expanded="${isFirst}" aria-controls="collapse-${categoryId}">
-                            ${category.charAt(0).toUpperCase() + category.slice(1)}
-                            <span class="badge bg-secondary ms-2">${examples.length}</span>
-                        </button>
-                    </h2>
-                    <div id="collapse-${categoryId}" class="accordion-collapse collapse ${isFirst ? 'show' : ''}" 
-                         aria-labelledby="heading-${categoryId}" data-bs-parent="#examplesAccordion">
-                        <div class="accordion-body p-0">
-                            <div class="list-group list-group-flush">
-                                ${examples.map(example => `
-                                    <button type="button" class="list-group-item list-group-item-action example-item ${example.available ? '' : 'disabled'}"
-                                            data-category="${category}"
-                                            data-id="${example.id}">
-                                        <div class="d-flex w-100 justify-content-between">
-                                            <h6 class="mb-1">${example.name}</h6>
-                                            <small class="text-muted">${formatFileSize(example.size)}</small>
-                                        </div>
-                                        <p class="mb-1 small text-muted">${example.description || 'No description available'}</p>
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            index++;
-        }
-    });
-
-    html += '</div>';
-
-    return html;
-}
-
-/**
- * Attach event listeners to example items
- */
-function attachExampleListeners() {
-    document.querySelectorAll('.example-item:not(.disabled)').forEach(item => {
-        item.addEventListener('click', () => {
-            const category = item.dataset.category;
-            const id = item.dataset.id;
-            loadSpecificExample(category, id);
-            document.querySelector('.example-modal').remove();
-        });
-    });
-}
-
-/**
- * Load a specific example by category and ID
- */
-async function loadSpecificExample(category, id) {
-    try {
-        const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/examples/${category}/${id}`);
-        const example = await response.json();
-
-        if (example.error) {
-            console.error('Error loading example:', example.error);
-            loadDefaultExample();
-            return;
-        }
-
-        // Clear existing content before loading new example
-        resetPlayground();
-        
-        // Set current example context
-        currentExample = {
-            category: category,
-            id: id,
-            name: example.name
-        };
-
-        // Load the example data
-        if (example.yaml) {
-            yamlRulesEditor.value = example.yaml;
-            updateYamlRulesFileName(`${example.name.toLowerCase().replace(/\s+/g, '-')}.yaml`, example.yaml.length);
-        }
-
-        if (example.sampleData) {
-            sourceDataEditor.value = JSON.stringify(example.sampleData, null, 2);
-            updateSourceDataFileName(`${example.name.toLowerCase().replace(/\s+/g, '-')}-data.json`, JSON.stringify(example.sampleData, null, 2).length);
-        }
-
-        // Reset validation status when loading a new example
-        resetYamlValidationStatus();
-
-        showAlert(`Example "${example.name}" loaded successfully`, 'success');
-
-    } catch (error) {
-        console.error('Error loading specific example:', error);
-        loadDefaultExample();
-    }
-}
-
-/**
  * Save current configuration
  */
 function saveConfiguration() {
     const config = {
         sourceData: sourceDataEditor.value,
-        yamlRules: yamlRulesEditor.value,
+        yamlRules: getYamlContent(),
         dataFormat: currentDataFormat,
         timestamp: new Date().toISOString()
     };
@@ -606,7 +792,7 @@ async function saveData() {
  * Save YAML rules to file or server
  */
 async function saveYaml() {
-    const content = yamlRulesEditor.value;
+    const content = getYamlContent();
     if (!content) {
         showAlert('No YAML rules to save.', 'warning');
         return;
@@ -657,6 +843,298 @@ function updateDataFormat(format) {
     console.log('Data format updated to:', format);
 }
 
+// ========================================================================
+// Source Data — Tabbed Panel (Editor / Tree View / Files)
+// ========================================================================
+let sourceDataFiles = [];
+
+/**
+ * Switch between Editor, Tree View and Files tabs
+ */
+function switchSourceDataTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('#sourceDataOutput .nav-link').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
+
+    // Update panels
+    document.querySelectorAll('.source-data-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+
+    if (tabName === 'editor') {
+        document.getElementById('sourceEditorPanel').classList.add('active');
+    } else if (tabName === 'tree') {
+        document.getElementById('sourceTreePanel').classList.add('active');
+        updateSourceTreeView();
+    } else if (tabName === 'files') {
+        document.getElementById('sourceFilesPanel').classList.add('active');
+    }
+}
+
+/**
+ * Format JSON in the source data editor
+ */
+function formatSourceJson() {
+    const text = sourceDataEditor.value.trim();
+    if (!text) return;
+
+    try {
+        const parsed = JSON.parse(text);
+        sourceDataEditor.value = JSON.stringify(parsed, null, 2);
+        document.getElementById('sourceJsonError').style.display = 'none';
+        // Ensure JSON format is selected
+        document.getElementById('jsonFormat').checked = true;
+        updateDataFormat('JSON');
+    } catch (e) {
+        document.getElementById('sourceJsonError').textContent = 'JSON Error: ' + e.message;
+        document.getElementById('sourceJsonError').style.display = 'block';
+    }
+}
+
+/**
+ * Clear all source data
+ */
+function clearSourceData() {
+    sourceDataEditor.value = '';
+    document.getElementById('sourceJsonError').style.display = 'none';
+    sourceDataFiles = [];
+    renderSourceFileList();
+    updateSourceTreeView();
+    clearSourceDataFileName();
+}
+
+/**
+ * Update the tree view panel from current editor content
+ */
+function updateSourceTreeView() {
+    const container = document.getElementById('sourceTreeContainer');
+    const text = sourceDataEditor.value.trim();
+
+    if (!text) {
+        container.innerHTML = '<p class="text-muted fst-italic p-3">Enter JSON in the Editor tab to see a tree view</p>';
+        return;
+    }
+
+    try {
+        const data = JSON.parse(text);
+        container.innerHTML = renderSourceJsonTree(data, '');
+    } catch (e) {
+        container.innerHTML = '<p class="text-danger p-3">Invalid JSON: ' + escapeHtmlSimple(e.message) + '</p>';
+    }
+}
+
+/**
+ * Render a JSON value as an interactive collapsible tree
+ */
+function renderSourceJsonTree(data, path) {
+    if (data === null) {
+        return '<span class="source-tree-null">null</span>';
+    }
+    if (typeof data === 'string') {
+        return '<span class="source-tree-string">"' + escapeHtmlSimple(data) + '"</span>';
+    }
+    if (typeof data === 'number') {
+        return '<span class="source-tree-number">' + data + '</span>';
+    }
+    if (typeof data === 'boolean') {
+        return '<span class="source-tree-boolean">' + data + '</span>';
+    }
+
+    if (Array.isArray(data)) {
+        if (data.length === 0) return '<span class="text-muted">[]</span>';
+
+        const id = 'stree_' + Math.random().toString(36).substr(2, 9);
+        let html = '<span class="source-tree-toggle" onclick="toggleSourceTreeNode(\'' + id + '\')">&#9660;</span>';
+        html += '<span class="text-muted">[</span>';
+        html += '<span class="text-muted" style="font-size: 0.8em;"> ' + data.length + ' items</span>';
+        html += '<div id="' + id + '" class="source-tree-node">';
+        data.forEach((item, idx) => {
+            html += '<div>';
+            html += '<span class="source-tree-key">[' + idx + ']</span>: ';
+            html += renderSourceJsonTree(item, path + '[' + idx + ']');
+            if (idx < data.length - 1) html += ',';
+            html += '</div>';
+        });
+        html += '</div>';
+        html += '<span class="text-muted">]</span>';
+        return html;
+    }
+
+    if (typeof data === 'object') {
+        const keys = Object.keys(data);
+        if (keys.length === 0) return '<span class="text-muted">{}</span>';
+
+        const id = 'stree_' + Math.random().toString(36).substr(2, 9);
+        let html = '<span class="source-tree-toggle" onclick="toggleSourceTreeNode(\'' + id + '\')">&#9660;</span>';
+        html += '<span class="text-muted">{</span>';
+        html += '<div id="' + id + '" class="source-tree-node">';
+        keys.forEach((key, idx) => {
+            html += '<div>';
+            html += '<span class="source-tree-key">"' + escapeHtmlSimple(key) + '"</span>: ';
+            html += renderSourceJsonTree(data[key], path + '.' + key);
+            if (idx < keys.length - 1) html += ',';
+            html += '</div>';
+        });
+        html += '</div>';
+        html += '<span class="text-muted">}</span>';
+        return html;
+    }
+
+    return '<span>' + String(data) + '</span>';
+}
+
+/**
+ * Toggle collapse/expand of a tree node
+ */
+function toggleSourceTreeNode(id) {
+    const node = document.getElementById(id);
+    const toggle = node.previousElementSibling.previousElementSibling;
+    if (node.style.display === 'none') {
+        node.style.display = 'block';
+        toggle.innerHTML = '&#9660;';
+    } else {
+        node.style.display = 'none';
+        toggle.innerHTML = '&#9654;';
+    }
+}
+
+/**
+ * Simple HTML escaping for display
+ */
+function escapeHtmlSimple(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
+// --- Source Data Files Panel ---
+
+/**
+ * Initialize file handlers for the Files tab
+ */
+function initSourceFileHandlers() {
+    const dropZone = document.getElementById('sourceFileDrop');
+    const fileInput = document.getElementById('sourceFileInput');
+    if (!dropZone || !fileInput) return;
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleSourceFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        handleSourceFiles(e.target.files);
+        e.target.value = '';
+    });
+}
+
+/**
+ * Handle dropped or selected files
+ */
+function handleSourceFiles(files) {
+    Array.from(files).forEach(file => {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (!['json', 'xml', 'csv', 'txt'].includes(ext)) {
+            showAlert('Unsupported file type: ' + file.name, 'warning');
+            return;
+        }
+
+        const existingIndex = sourceDataFiles.findIndex(f => f.name === file.name);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const fileData = {
+                name: file.name,
+                size: file.size,
+                content: e.target.result,
+                format: ext.toUpperCase()
+            };
+
+            if (existingIndex >= 0) {
+                sourceDataFiles[existingIndex] = fileData;
+            } else {
+                sourceDataFiles.push(fileData);
+            }
+            renderSourceFileList();
+        };
+        reader.readAsText(file);
+    });
+}
+
+/**
+ * Render the file list in the Files tab
+ */
+function renderSourceFileList() {
+    const list = document.getElementById('sourceFileList');
+    if (sourceDataFiles.length === 0) {
+        list.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+    sourceDataFiles.forEach((file, idx) => {
+        const sizeStr = file.size < 1024 ? file.size + ' B' :
+                       file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' :
+                       (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+        const formatBadge = '<span class="badge bg-secondary ms-1">' + (file.format || '?') + '</span>';
+
+        html += '<div class="source-file-item">';
+        html += '<div>';
+        html += '<span class="source-file-name">' + escapeHtmlSimple(file.name) + '</span>';
+        html += formatBadge;
+        html += '<span class="source-file-size">' + sizeStr + '</span>';
+        html += '</div>';
+        html += '<div class="d-flex gap-1">';
+        html += '<button class="btn btn-success btn-sm py-0 px-2" style="font-size:0.75rem;" onclick="loadSourceFileToEditor(' + idx + ')">Open</button>';
+        html += '<button class="btn btn-outline-danger btn-sm py-0 px-2" style="font-size:0.75rem;" onclick="removeSourceFile(' + idx + ')">&#x2715;</button>';
+        html += '</div>';
+        html += '</div>';
+    });
+    list.innerHTML = html;
+}
+
+/**
+ * Load a file from the Files list into the Editor tab
+ */
+function loadSourceFileToEditor(idx) {
+    const file = sourceDataFiles[idx];
+    if (!file) return;
+
+    sourceDataEditor.value = file.content;
+    updateSourceDataFileName(file.name, file.size);
+
+    // Auto-detect format
+    autoDetectDataFormat(file.name);
+
+    // Switch to Editor tab
+    document.querySelectorAll('#sourceDataOutput .nav-link').forEach(tab => tab.classList.remove('active'));
+    document.querySelector('#sourceDataOutput .nav-link').classList.add('active');
+    document.querySelectorAll('.source-data-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('sourceEditorPanel').classList.add('active');
+}
+
+/**
+ * Remove a file from the Files list
+ */
+function removeSourceFile(idx) {
+    sourceDataFiles.splice(idx, 1);
+    renderSourceFileList();
+}
+
 /**
  * Update YAML validation status
  */
@@ -667,11 +1145,10 @@ function updateYamlStatus(isValid, message) {
 }
 
 /**
- * Display validation results
+ * Display validation results with structured per-rule rendering
  */
 function displayValidationResults(results) {
     console.log('displayValidationResults called with:', results);
-    console.log('results.valid =', results?.valid, 'type:', typeof results?.valid);
 
     const container = document.getElementById('validationResults');
     if (!container) {
@@ -679,34 +1156,109 @@ function displayValidationResults(results) {
         return;
     }
 
-    // Determine validation status - check for "valid" field in results
+    // Determine validation status
     const isValid = results && results.valid === true;
-    console.log('isValid =', isValid);
     const statusIcon = isValid
         ? '<span class="validation-status-icon valid">✓</span>'
         : '<span class="validation-status-icon invalid">✗</span>';
     const statusText = isValid ? 'PASSED' : 'FAILED';
     const statusClass = isValid ? 'validation-passed' : 'validation-failed';
 
-    // Build the HTML with status indicator at the top
-    const statusHtml = `
-        <div class="validation-status ${statusClass}">
-            ${statusIcon}
-            <span class="validation-status-text">${statusText}</span>
-        </div>
-        <pre>${JSON.stringify(results, null, 2)}</pre>
-    `;
+    let html = '';
 
-    container.innerHTML = statusHtml;
+    // Status banner
+    html += `<div class="validation-status ${statusClass}">
+        ${statusIcon}
+        <span class="validation-status-text">${statusText}</span>
+    </div>`;
 
-    // Visual feedback for update
+    // Summary counts
+    if (results.rulesExecuted != null) {
+        html += '<div class="validation-summary">';
+        html += `<span class="validation-summary-item"><strong>${results.rulesExecuted}</strong> executed</span>`;
+        html += `<span class="validation-summary-item text-success"><strong>${results.rulesPassed || 0}</strong> passed</span>`;
+        html += `<span class="validation-summary-item text-danger"><strong>${results.rulesFailed || 0}</strong> failed</span>`;
+        html += '</div>';
+    }
+
+    // Per-rule results
+    if (results.results && results.results.length > 0) {
+        html += '<div class="validation-rules-list">';
+        results.results.forEach((rule, index) => {
+            const passed = rule.passed === true;
+            const ruleIcon = passed
+                ? '<i class="fas fa-check-circle text-success me-2"></i>'
+                : '<i class="fas fa-times-circle text-danger me-2"></i>';
+            const ruleClass = passed ? 'validation-rule-passed' : 'validation-rule-failed';
+
+            // Severity badge
+            let severityBadge = '';
+            if (rule.severity) {
+                const sevClass = rule.severity === 'ERROR' ? 'bg-danger'
+                    : rule.severity === 'WARNING' ? 'bg-warning text-dark'
+                    : rule.severity === 'CRITICAL' ? 'bg-dark'
+                    : 'bg-info';
+                severityBadge = `<span class="badge ${sevClass} ms-2" style="font-size: 0.7em">${rule.severity}</span>`;
+            }
+
+            // Category badge
+            let categoryBadge = '';
+            if (rule.category) {
+                categoryBadge = `<span class="badge bg-secondary ms-1" style="font-size: 0.7em">${rule.category}</span>`;
+            }
+
+            html += `<div class="validation-rule-item ${ruleClass}">`;
+            html += `<div class="d-flex align-items-start">`;
+            html += `<div class="validation-rule-icon">${ruleIcon}</div>`;
+            html += `<div class="flex-grow-1">`;
+
+            // Rule header: name/id + badges
+            html += `<div class="validation-rule-header">`;
+            html += `<span class="validation-rule-name">${rule.ruleName || rule.ruleId || 'Rule ' + (index + 1)}</span>`;
+            if (rule.ruleId && rule.ruleName && rule.ruleId !== rule.ruleName) {
+                html += `<span class="validation-rule-id ms-2">(${rule.ruleId})</span>`;
+            }
+            html += severityBadge;
+            html += categoryBadge;
+            html += '</div>';
+
+            // Message
+            if (rule.message) {
+                html += `<div class="validation-rule-message">${escapeHtml(rule.message)}</div>`;
+            }
+
+            // Condition (collapsed by default)
+            if (rule.condition) {
+                html += `<div class="validation-rule-condition"><code>${escapeHtml(rule.condition)}</code></div>`;
+            }
+
+            html += '</div></div></div>';
+        });
+        html += '</div>';
+    } else if (results.message) {
+        // Fallback for simple message-only responses
+        html += `<div class="mt-2"><pre>${escapeHtml(typeof results.message === 'string' ? results.message : JSON.stringify(results.message, null, 2))}</pre></div>`;
+    }
+
+    container.innerHTML = html;
+
+    // Visual feedback flash
     const originalBg = container.style.backgroundColor;
     container.style.transition = 'background-color 0.3s';
-    container.style.backgroundColor = isValid ? '#d4edda' : '#f8d7da'; // Green or red tint
-
+    container.style.backgroundColor = isValid ? '#d4edda' : '#f8d7da';
     setTimeout(() => {
         container.style.backgroundColor = originalBg || '#f8f9fa';
     }, 500);
+}
+
+/**
+ * Escape HTML special characters for safe display
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
 }
 
 /**
@@ -916,7 +1468,7 @@ function handleYamlFileDrop(e) {
         const file = files[0];
         if (validateYamlFile(file)) {
             readFileContent(file, (content) => {
-                yamlRulesEditor.value = content;
+                setYamlContent(content);
                 showAlert(`YAML file "${file.name}" loaded successfully!`, 'success');
 
                 // Update file name display
@@ -963,7 +1515,7 @@ function handleYamlFileUpload(event) {
         showUploadProgress(file);
 
         readFileContent(file, (content) => {
-            yamlRulesEditor.value = content;
+            setYamlContent(content);
             hideUploadProgress();
             showAlert(`YAML file "${file.name}" uploaded successfully!`, 'success');
 
@@ -997,7 +1549,7 @@ function handleConfigFileUpload(event) {
                 }
 
                 if (config.yamlRules) {
-                    yamlRulesEditor.value = config.yamlRules;
+                    setYamlContent(config.yamlRules);
                     updateYamlRulesFileName('loaded-rules.yaml', config.yamlRules.length);
                 }
 
@@ -1277,15 +1829,15 @@ function hideUploadProgress() {
  * Toggle the bottom right panel collapse state
  */
 function toggleBottomRightPanel() {
-    const grid = document.querySelector('.playground-grid');
+    const panel = document.getElementById('bottomRightPanel');
     const btn = document.getElementById('collapseBottomRightBtn');
 
-    if (grid.classList.contains('bottom-right-collapsed')) {
-        grid.classList.remove('bottom-right-collapsed');
+    if (panel.classList.contains('panel-collapsed')) {
+        panel.classList.remove('panel-collapsed');
         btn.classList.remove('collapsed');
         btn.title = 'Collapse panel';
     } else {
-        grid.classList.add('bottom-right-collapsed');
+        panel.classList.add('panel-collapsed');
         btn.classList.add('collapsed');
         btn.title = 'Expand panel';
     }
@@ -1295,15 +1847,15 @@ function toggleBottomRightPanel() {
  * Toggle the bottom left panel collapse state
  */
 function toggleBottomLeftPanel() {
-    const grid = document.querySelector('.playground-grid');
+    const panel = document.getElementById('bottomLeftPanel');
     const btn = document.getElementById('collapseBottomLeftBtn');
 
-    if (grid.classList.contains('bottom-left-collapsed')) {
-        grid.classList.remove('bottom-left-collapsed');
+    if (panel.classList.contains('panel-collapsed')) {
+        panel.classList.remove('panel-collapsed');
         btn.classList.remove('collapsed');
         btn.title = 'Collapse panel';
     } else {
-        grid.classList.add('bottom-left-collapsed');
+        panel.classList.add('panel-collapsed');
         btn.classList.add('collapsed');
         btn.title = 'Expand panel';
     }

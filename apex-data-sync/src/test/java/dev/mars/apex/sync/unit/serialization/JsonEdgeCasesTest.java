@@ -21,9 +21,9 @@ package dev.mars.apex.sync.unit.serialization;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.ExecutionStep;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.ExecutionStep;
 import dev.mars.apex.core.service.schema.SchemaMetadata;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +78,7 @@ public class JsonEdgeCasesTest extends SyncTestBase {
         SchemaMetadata schema = (SchemaMetadata) steps.get(0).getStepData();
         assertEquals(2, schema.getColumns().size(), "Should have minimal 2 columns");
         
-        logger.info("✓ Minimal column table handled");
+        logger.info("[OK] Minimal column table handled");
         validateExecutionRate(1, 1, "Minimal columns handling");
     }
 
@@ -99,7 +99,7 @@ public class JsonEdgeCasesTest extends SyncTestBase {
         assertNotNull(json);
         assertTrue(json.contains("columns"));
         
-        logger.info("✓ Table without PK serialized successfully");
+        logger.info("[OK] Table without PK serialized successfully");
         validateExecutionRate(1, 1, "No PK serialization");
     }
 }

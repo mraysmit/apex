@@ -115,7 +115,8 @@ public class PlaygroundApplication {
         log.info("");
         log.info("=".repeat(60));
         log.info("  APEX Playground is ready!");
-        log.info("  UI:      {}/playground/apex_editor_main.html", baseUrl);
+        log.info("  Home:    {}/playground", baseUrl);
+        log.info("  Editor:  {}/playground/apex_editor_main.html", baseUrl);
         log.info("  Swagger: {}/swagger-ui.html", baseUrl);
         log.info("  API:     {}/playground/api", baseUrl);
         log.info("=".repeat(60));

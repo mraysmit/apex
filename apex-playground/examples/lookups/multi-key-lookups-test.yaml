@@ -1,7 +1,9 @@
 metadata:
+  id: "multi-key-lookups-test"
   name: "Multi-Key Lookups Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test lookup enrichments with multiple key fields"
 
 enrichments:

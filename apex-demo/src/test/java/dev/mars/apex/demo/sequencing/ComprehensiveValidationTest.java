@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Validate enriched data values and rule execution results
  * - Follow patterns from RuleGroupsSequentialBasicTest
  *
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @version 2.0 - Rewritten to follow APEX testing principles
  */
 @DisplayName("Comprehensive Sequential Processing Validation")

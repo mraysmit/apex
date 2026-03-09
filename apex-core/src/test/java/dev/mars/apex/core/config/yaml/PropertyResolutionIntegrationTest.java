@@ -1,16 +1,29 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.AfterEach;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,9 +35,9 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class PropertyResolutionIntegrationTest {
 
-    private static final Logger LOGGER = Logger.getLogger(PropertyResolutionIntegrationTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionIntegrationTest.class);
     
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @TempDir
     Path tempDir;
@@ -33,7 +46,7 @@ public class PropertyResolutionIntegrationTest {
     void setUp() {
         LOGGER.info("Setting up PropertyResolutionIntegrationTest");
         
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
         
         // Set up test environment variables and system properties
         System.setProperty("TEST_DB_HOST", "test-host");
@@ -109,7 +122,7 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("test_user", dsConfig.getConnection().getUsername());
         assertEquals("secret123", dsConfig.getConnection().getPassword());
         
-        LOGGER.info("✓ Property resolution from file works correctly");
+        LOGGER.info("[OK] Property resolution from file works correctly");
     }
 
     @Test
@@ -146,7 +159,7 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("test_database", dsConfig.getConnection().getDatabase());
         assertEquals("test_user", dsConfig.getConnection().getUsername());
         
-        LOGGER.info("✓ Property resolution from stream works correctly");
+        LOGGER.info("[OK] Property resolution from stream works correctly");
     }
 
     @Test
@@ -181,7 +194,7 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("test_user", dsConfig.getConnection().getUsername());
         assertEquals("default_password", dsConfig.getConnection().getPassword()); // Default value used
         
-        LOGGER.info("✓ Property resolution from YAML string works correctly");
+        LOGGER.info("[OK] Property resolution from YAML string works correctly");
     }
 
     @Test
@@ -216,7 +229,7 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("static_user", dsConfig.getConnection().getUsername());
         assertEquals("static_password", dsConfig.getConnection().getPassword());
         
-        LOGGER.info("✓ YAML without placeholders works correctly");
+        LOGGER.info("[OK] YAML without placeholders works correctly");
     }
 
     @Test
@@ -236,13 +249,13 @@ public class PropertyResolutionIntegrationTest {
                   host: "${DEFINITELY_MISSING_PROPERTY}"
             """;
         
-        Exception exception = assertThrows(YamlConfigurationException.class, () -> {
+        Exception exception = assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yamlContent);
         });
         
         assertTrue(exception.getMessage().contains("Property not found: DEFINITELY_MISSING_PROPERTY"));
         
-        LOGGER.info("✓ Missing required properties throw correct exception: " + exception.getMessage());
+        LOGGER.info("[OK] Missing required properties throw correct exception: " + exception.getMessage());
     }
 
     @Test
@@ -276,6 +289,7 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("fallback_database", dsConfig.getConnection().getDatabase());
         assertEquals("user_test_user_suffix", dsConfig.getConnection().getUsername());
         
-        LOGGER.info("✓ Complex property patterns work correctly");
+        LOGGER.info("[OK] Complex property patterns work correctly");
     }
 }
+

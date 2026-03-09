@@ -1,7 +1,9 @@
 metadata:
+  id: "component-groups-test"
   name: "Component Groups Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test multiple components with grouping and organization"
 
 components:

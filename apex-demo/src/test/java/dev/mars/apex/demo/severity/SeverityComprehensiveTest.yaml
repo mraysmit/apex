@@ -19,21 +19,21 @@ rules:
   - id: "critical-amount-check"
     name: "Critical Amount Validation"
     condition: "#amount != null && #amount > 100000"
-    message: "CRITICAL: Amount {{#amount}} exceeds maximum allowed limit of 100,000"
+    message: Amount {{#amount}} exceeds maximum allowed limit of 100,000"
     severity: "ERROR"
     priority: 1
 
   - id: "mandatory-field-check"
     name: "Mandatory Field Validation"
     condition: "#customerId != null && #customerId.trim().length() > 0"
-    message: "CRITICAL: Customer ID is mandatory and cannot be empty"
+    message: Customer ID is mandatory and cannot be empty"
     severity: "ERROR"
     priority: 1
 
   - id: "compliance-violation-check"
     name: "Compliance Violation Check"
     condition: "#riskScore != null && #riskScore <= 85"
-    message: "CRITICAL: Risk score {{#riskScore}} violates compliance threshold (max 85)"
+    message: Risk score {{#riskScore}} violates compliance threshold (max 85)"
     severity: "ERROR"
     priority: 1
 

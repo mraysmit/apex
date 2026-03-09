@@ -1,10 +1,10 @@
 package dev.mars.apex.rest.controller;
 
 import dev.mars.apex.core.api.RulesService;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.config.yaml.RulesEngineService;
+import dev.mars.apex.engine.core.RuleBuilder;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.rest.dto.*;
 import dev.mars.apex.rest.service.RuleEvaluationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,9 +69,6 @@ public class RulesController {
 
     @Autowired
     private RulesEngine rulesEngine;
-
-    @Autowired
-    private RulesEngineService rulesEngineService;
     
     /**
      * Simple rule check endpoint.
@@ -372,19 +369,19 @@ public class RulesController {
         try {
             // Create Rule object from request
             String severity = request.getRule().getSeverity() != null ? request.getRule().getSeverity() : "INFO";
-            Rule rule = new Rule(
-                request.getRule().getName(),
-                request.getRule().getCondition(),
-                request.getRule().getMessage(),
-                severity
-            );
+            Rule rule = new RuleBuilder()
+                .withName(request.getRule().getName())
+                .withCondition(request.getRule().getCondition())
+                .withMessage(request.getRule().getMessage())
+                .withSeverity(severity)
+                .build();
 
             // Execute the rule
             RuleResult result = rulesEngine.executeRule(rule, request.getFacts());
 
-            // Check for business logic failures (ResultType.ERROR)
-            if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                logger.error("CRITICAL: Rule execution failed with ERROR result type");
+            // Check for business logic failures (ResultType.ERROR or ENRICHMENT_FAILURE)
+            if (result.isError()) {
+                logger.error("Rule execution failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("error", "Rule execution failed");
@@ -426,7 +423,8 @@ public class RulesController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error executing rule: {}", e.getMessage(), e);
+            logger.error("Error executing rule: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Rule execution failed");
@@ -455,7 +453,12 @@ public class RulesController {
             List<Rule> rules = new ArrayList<>();
             for (RuleDto ruleDto : request.getRules()) {
                 String severity = ruleDto.getSeverity() != null ? ruleDto.getSeverity() : "INFO";
-                Rule rule = new Rule(ruleDto.getName(), ruleDto.getCondition(), ruleDto.getMessage(), severity);
+                Rule rule = new RuleBuilder()
+                    .withName(ruleDto.getName())
+                    .withCondition(ruleDto.getCondition())
+                    .withMessage(ruleDto.getMessage())
+                    .withSeverity(severity)
+                    .build();
                 rules.add(rule);
             }
 
@@ -464,9 +467,9 @@ public class RulesController {
             for (Rule rule : rules) {
                 RuleResult result = rulesEngine.executeRule(rule, request.getFacts());
 
-                // Check for business logic failures (ResultType.ERROR) - fail fast
-                if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                    logger.error("CRITICAL: Batch rule execution failed with ERROR result type for rule: {}", rule.getName());
+                // Check for business logic failures (ResultType.ERROR or ENRICHMENT_FAILURE) - fail fast
+                if (result.isError()) {
+                    logger.error("Batch rule execution failed with ERROR result type for rule: {}", rule.getName());
                     Map<String, Object> errorResponse = new HashMap<>();
                     errorResponse.put("success", false);
                     errorResponse.put("error", "Batch rule execution failed");
@@ -511,7 +514,8 @@ public class RulesController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during batch rule execution: {}", e.getMessage(), e);
+            logger.error("Error during batch rule execution: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Batch rule execution failed");

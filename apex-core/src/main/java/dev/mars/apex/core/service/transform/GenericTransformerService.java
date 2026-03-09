@@ -1,9 +1,11 @@
 package dev.mars.apex.core.service.transform;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.TransformerRule;
+import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RuleBuilder;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.TransformerRule;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -235,7 +237,7 @@ public class GenericTransformerService {
             GenericTransformer<T> typedTransformer = (GenericTransformer<T>) transformer;
             return typedTransformer.transformWithResult(value);
         } catch (Exception e) {
-            logger.warn("Error transforming value: {}", e.getMessage());
+            logger.error("Error transforming value: {}", e.getMessage());
             logger.debug("Full exception details:", e);
             return RuleResult.error(transformerName, "Error transforming value: " + e.getMessage());
         }
@@ -311,11 +313,12 @@ public class GenericTransformerService {
         logger.debug("Applying rule condition to value: " + ruleCondition);
 
         // Create a rule from the condition
-        Rule rule = new Rule(
-            "Transformation Rule",
-            ruleCondition,
-            "Transformation rule with condition: " + ruleCondition
-        );
+        Rule rule = new RuleBuilder()
+            .withName("Transformation Rule")
+            .withCondition(ruleCondition)
+            .withMessage("Transformation rule with condition: " + ruleCondition)
+            .withSeverity(SeverityConstants.INFO)
+            .build();
 
         // Apply the rule
         return applyRule(rule, value, additionalFacts, transformerName);
@@ -341,11 +344,12 @@ public class GenericTransformerService {
         additionalFacts.put("lookupData", lookupData);
 
         // Create a rule from the condition that uses lookupData instead of additionalFacts
-        Rule rule = new Rule(
-            "Transformation Rule",
-            ruleCondition.replace("#coreData", "#value"),
-            "Transformation rule with condition: " + ruleCondition
-        );
+        Rule rule = new RuleBuilder()
+            .withName("Transformation Rule")
+            .withCondition(ruleCondition.replace("#coreData", "#value"))
+            .withMessage("Transformation rule with condition: " + ruleCondition)
+            .withSeverity(SeverityConstants.INFO)
+            .build();
 
         // Apply the rule
         return applyRule(rule, value, additionalFacts, transformerName);

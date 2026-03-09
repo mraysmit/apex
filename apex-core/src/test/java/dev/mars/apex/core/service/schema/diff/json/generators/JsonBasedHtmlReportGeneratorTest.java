@@ -17,8 +17,14 @@ package dev.mars.apex.core.service.schema.diff.json.generators;
 
 import dev.mars.apex.core.service.schema.diff.json.model.*;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for {@link JsonBasedHtmlReportGenerator}.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class JsonBasedHtmlReportGeneratorTest {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonBasedHtmlReportGeneratorTest.class);
@@ -68,7 +75,7 @@ class JsonBasedHtmlReportGeneratorTest {
         assertTrue(html.contains("Schema Diff Report"));
         assertTrue(html.contains("Matching"));
         assertTrue(html.contains("test-source"));
-        logger.info("  ✓ HTML generation successful - contains expected content");
+        logger.info("  [OK] HTML generation successful - contains expected content");
     }
 
     @Test
@@ -86,7 +93,7 @@ class JsonBasedHtmlReportGeneratorTest {
         String html = Files.readString(Path.of(path));
         assertTrue(html.contains("10")); // matching count
         assertTrue(html.contains("5"));  // added count
-        logger.info("  ✓ Statistics correctly rendered in HTML");
+        logger.info("  [OK] Statistics correctly rendered in HTML");
     }
 
     private SchemaDiffReport createTestReport() {

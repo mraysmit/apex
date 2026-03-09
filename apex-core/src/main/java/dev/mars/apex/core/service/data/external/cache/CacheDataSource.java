@@ -44,7 +44,7 @@ import java.util.*;
  * - Batch operations
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class CacheDataSource implements ExternalDataSource {
@@ -129,7 +129,8 @@ public class CacheDataSource implements ExternalDataSource {
             return testValue.equals(retrieved);
             
         } catch (Exception e) {
-            LOGGER.warn("Cache connection test failed for '{}'", configuration.getName(), e);
+            LOGGER.warn("Cache connection test failed for '{}': {}", configuration.getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return false;
         }
     }
@@ -185,7 +186,8 @@ public class CacheDataSource implements ExternalDataSource {
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from cache", e);
+            LOGGER.error("Failed to get data from cache: {}", e.getMessage());
+            LOGGER.debug("Stack trace for cache data retrieval failure:", e);
             return null;
         }
     }

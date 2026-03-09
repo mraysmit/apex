@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.codes;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,11 +57,11 @@ public class TradeValidationCodesDemo extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             config = loader.loadFromFile(CONFIG_FILE);
             assertNotNull(config, "Configuration should not be null");
 
-            logger.info("✓ Configuration loaded: {} enrichments, {} rules",
+            logger.info("[OK] Configuration loaded: {} enrichments, {} rules",
                        config.getEnrichments() != null ? config.getEnrichments().size() : 0,
                        config.getRules() != null ? config.getRules().size() : 0);
         } catch (Exception e) {
@@ -106,7 +106,7 @@ public class TradeValidationCodesDemo extends DemoTestBase {
         assertEquals(4500.00, enrichedData.get("underlyingPrice"), "Underlying price should be enriched");
         assertEquals("PRICING_ENRICHED_NORMAL_VOL", enrichedData.get("pricingEnrichmentStatus"),
                     "Pricing enrichment status should indicate normal volatility");
-        logger.info("✓ Pricing enriched: IV=18.5%, Underlying=$4500, Status=PRICING_ENRICHED_NORMAL_VOL");
+        logger.info("[OK] Pricing enriched: IV=18.5%, Underlying=$4500, Status=PRICING_ENRICHED_NORMAL_VOL");
 
         // Validate Greeks calculation
         assertNotNull(enrichedData.get("optionDelta"), "Option delta should be calculated");
@@ -114,7 +114,7 @@ public class TradeValidationCodesDemo extends DemoTestBase {
                     "Greeks calculation status should indicate OTM");
         assertEquals("LOW_DELTA", enrichedData.get("riskCategory"),
                     "Risk category should be LOW_DELTA for OTM option");
-        logger.info("✓ Greeks calculated: Delta={}, Status=GREEKS_CALCULATED_OTM, Risk=LOW_DELTA",
+        logger.info("[OK] Greeks calculated: Delta={}, Status=GREEKS_CALCULATED_OTM, Risk=LOW_DELTA",
                    enrichedData.get("optionDelta"));
 
         // Validate notional calculation
@@ -123,14 +123,14 @@ public class TradeValidationCodesDemo extends DemoTestBase {
                     "Notional calculation status should indicate normal size");
         assertEquals("TIER_2_STANDARD", enrichedData.get("notionalTier"),
                     "Notional tier should be TIER_2_STANDARD");
-        logger.info("✓ Notional calculated: $460,000, Status=NOTIONAL_CALCULATED_NORMAL, Tier=TIER_2_STANDARD");
+        logger.info("[OK] Notional calculated: $460,000, Status=NOTIONAL_CALCULATED_NORMAL, Tier=TIER_2_STANDARD");
 
         logger.info("\n=== RULE VALIDATION RESULTS ===");
 
         // Validate required fields (first matching rule will execute)
         assertEquals("REQUIRED_FIELDS_VALID", enrichedData.get("requiredFieldsValidation"),
                     "Required fields validation should pass");
-        logger.info("✓ Required fields: REQUIRED_FIELDS_VALID");
+        logger.info("[OK] Required fields: REQUIRED_FIELDS_VALID");
 
         logger.info("\n=== SUMMARY ===");
         logger.info("This demo shows success/error codes working for:");
@@ -180,7 +180,7 @@ public class TradeValidationCodesDemo extends DemoTestBase {
         assertEquals(45.8, enrichedData.get("impliedVolatility"), "Implied volatility should be enriched");
         assertEquals("PRICING_ENRICHED_HIGH_VOL", enrichedData.get("pricingEnrichmentStatus"),
                     "Pricing enrichment status should indicate high volatility");
-        logger.info("✓ Pricing enriched: IV=45.8%, Status=PRICING_ENRICHED_HIGH_VOL (HIGH VOLATILITY)");
+        logger.info("[OK] Pricing enriched: IV=45.8%, Status=PRICING_ENRICHED_HIGH_VOL (HIGH VOLATILITY)");
 
         // Validate notional calculation - Large notional
         assertEquals(12500000.0, enrichedData.get("tradeNotional"), "Notional should be calculated correctly");
@@ -188,7 +188,7 @@ public class TradeValidationCodesDemo extends DemoTestBase {
                     "Notional calculation status should indicate large size");
         assertEquals("TIER_1_LARGE", enrichedData.get("notionalTier"),
                     "Notional tier should be TIER_1_LARGE");
-        logger.info("✓ Notional calculated: $12,500,000, Status=NOTIONAL_CALCULATED_LARGE, Tier=TIER_1_LARGE");
+        logger.info("[OK] Notional calculated: $12,500,000, Status=NOTIONAL_CALCULATED_LARGE, Tier=TIER_1_LARGE");
 
         logger.info("\n=== SUMMARY ===");
         logger.info("This test demonstrates dynamic success codes based on data thresholds:");
@@ -234,7 +234,7 @@ public class TradeValidationCodesDemo extends DemoTestBase {
         // Validate required fields - SHOULD FAIL (error code instead of success code)
         assertEquals("REQUIRED_FIELDS_MISSING", enrichedData.get("requiredFieldsValidation"),
                     "Required fields validation should fail with error code");
-        logger.info("✓ Required fields: REQUIRED_FIELDS_MISSING (ERROR CODE)");
+        logger.info("[OK] Required fields: REQUIRED_FIELDS_MISSING (ERROR CODE)");
 
         logger.info("\n=== SUMMARY ===");
         logger.info("This test demonstrates error codes:");

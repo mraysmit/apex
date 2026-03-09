@@ -18,8 +18,8 @@
 package dev.mars.apex.sync.validation;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,7 +190,7 @@ class SchemaDiffReportOutputOptionsTest extends SyncTestBase {
             assertTrue(Files.exists(reportPath), 
                 "Report should be in target/reports/ when only filename is provided");
             
-            logger.info("✓ Report created in default directory: {}", reportPath.toAbsolutePath());
+            logger.info("[OK] Report created in default directory: {}", reportPath.toAbsolutePath());
             
             engine.shutdown();
         } finally {
@@ -219,7 +219,7 @@ class SchemaDiffReportOutputOptionsTest extends SyncTestBase {
             assertTrue(Files.exists(reportPath), 
                 "Report should be at specified relative path");
             
-            logger.info("✓ Report created at relative path: {}", reportPath.toAbsolutePath());
+            logger.info("[OK] Report created at relative path: {}", reportPath.toAbsolutePath());
             
             engine.shutdown();
         } finally {
@@ -250,7 +250,7 @@ class SchemaDiffReportOutputOptionsTest extends SyncTestBase {
             assertTrue(Files.isDirectory(reportPath.getParent()), 
                 "All parent directories should be created");
             
-            logger.info("✓ Report created with nested directories: {}", reportPath.toAbsolutePath());
+            logger.info("[OK] Report created with nested directories: {}", reportPath.toAbsolutePath());
             
             engine.shutdown();
         } finally {
@@ -279,7 +279,7 @@ class SchemaDiffReportOutputOptionsTest extends SyncTestBase {
             assertTrue(Files.exists(reportPath), 
                 "Report should be created in module root reports/ folder");
             
-            logger.info("✓ Report created in module root: {}", reportPath.toAbsolutePath());
+            logger.info("[OK] Report created in module root: {}", reportPath.toAbsolutePath());
             
             engine.shutdown();
         } finally {

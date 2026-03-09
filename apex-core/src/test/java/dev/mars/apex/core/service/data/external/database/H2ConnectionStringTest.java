@@ -18,13 +18,20 @@ package dev.mars.apex.core.service.data.external.database;
 
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import org.junit.jupiter.api.AfterEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0.0
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class H2ConnectionStringTest {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(H2ConnectionStringTest.class);
@@ -338,7 +346,7 @@ class H2ConnectionStringTest {
             """;
 
         // Load YAML configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromStream(new ByteArrayInputStream(yamlContent.getBytes()));
 
         var yamlDataSource = config.getDataSources().stream()
@@ -353,7 +361,7 @@ class H2ConnectionStringTest {
             JdbcTemplateFactory.createDataSource(dataSourceConfig);
         });
 
-        LOGGER.info("✓ Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
+        LOGGER.info("[OK] Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
         assertTrue(exception.getErrorType() == DataSourceException.ErrorType.CONNECTION_ERROR ||
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR,
                    "Should be connection or configuration error");
@@ -492,7 +500,7 @@ class H2ConnectionStringTest {
      */
     private void testH2ConnectionFromYaml(String yamlContent, String dataSourceName) throws Exception {
         // Load YAML configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromStream(new ByteArrayInputStream(yamlContent.getBytes()));
         
         assertNotNull(config, "Configuration should be loaded");

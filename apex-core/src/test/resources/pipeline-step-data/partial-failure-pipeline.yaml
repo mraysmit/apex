@@ -14,7 +14,7 @@ metadata:
   id: "partial-failure-pipeline-test"
   name: "Partial Failure Pipeline Test"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   description: "Test pipeline for handling partial failure scenarios"
   id: "partial-failure-pipeline-test"
   name: "Partial Failure Pipeline Test"

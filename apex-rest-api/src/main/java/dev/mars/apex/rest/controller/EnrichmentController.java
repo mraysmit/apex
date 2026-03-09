@@ -17,11 +17,10 @@ package dev.mars.apex.rest.controller;
  */
 
 
-import dev.mars.apex.core.config.yaml.RulesEngineService;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,10 +57,7 @@ public class EnrichmentController {
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentController.class);
 
     @Autowired
-    private RulesEngineService rulesEngineService;
-
-    @Autowired
-    private YamlConfigurationLoader yamlConfigurationLoader;
+    private ConfigurationLoader yamlConfigurationLoader;
 
     /**
      * Get predefined enrichment configurations.
@@ -95,7 +91,8 @@ public class EnrichmentController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error retrieving configurations: {}", e.getMessage(), e);
+            logger.error("Error retrieving configurations: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Configuration retrieval failed");
@@ -151,8 +148,7 @@ public class EnrichmentController {
             );
 
             // Create RulesEngine and evaluate (universal YAML processing)
-            @SuppressWarnings("deprecation")
-            RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromConfig(yamlConfig);
+            RulesEngine rulesEngine = RulesEngine.fromYamlConfig(yamlConfig);
 
             // Convert target object to Map for RulesEngine.evaluate()
             Map<String, Object> inputData = new HashMap<>();
@@ -166,9 +162,9 @@ public class EnrichmentController {
 
             RuleResult result = rulesEngine.evaluate(yamlConfig, inputData);
 
-            // Check for business logic failures (ResultType.ERROR)
-            if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                logger.error("CRITICAL: Enrichment processing failed with ERROR result type");
+            // Check for business logic failures (ResultType.ERROR or ENRICHMENT_FAILURE)
+            if (result.isError()) {
+                logger.error("Enrichment processing failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("error", "Enrichment processing failed");
@@ -202,7 +198,8 @@ public class EnrichmentController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during object enrichment: {}", e.getMessage(), e);
+            logger.error("Error during object enrichment: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Object enrichment failed");
@@ -253,8 +250,7 @@ public class EnrichmentController {
             );
 
             // Create RulesEngine for universal YAML processing
-            @SuppressWarnings("deprecation")
-            RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromConfig(yamlConfig);
+            RulesEngine rulesEngine = RulesEngine.fromYamlConfig(yamlConfig);
 
             // Process all objects
             List<Object> enrichedObjects = new ArrayList<>();
@@ -271,9 +267,9 @@ public class EnrichmentController {
 
                 RuleResult result = rulesEngine.evaluate(yamlConfig, inputData);
 
-                // Check for business logic failures (ResultType.ERROR)
-                if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                    logger.error("CRITICAL: Batch enrichment processing failed with ERROR result type for object");
+                // Check for business logic failures (ResultType.ERROR or ENRICHMENT_FAILURE)
+                if (result.isError()) {
+                    logger.error("Batch enrichment processing failed with ERROR result type for object");
                     Map<String, Object> errorResponse = new HashMap<>();
                     errorResponse.put("success", false);
                     errorResponse.put("error", "Batch enrichment processing failed");
@@ -310,7 +306,8 @@ public class EnrichmentController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during batch enrichment: {}", e.getMessage(), e);
+            logger.error("Error during batch enrichment: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Batch enrichment failed");
@@ -359,8 +356,7 @@ public class EnrichmentController {
             );
 
             // Create RulesEngine and evaluate (universal YAML processing)
-            @SuppressWarnings("deprecation")
-            RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromConfig(config);
+            RulesEngine rulesEngine = RulesEngine.fromYamlConfig(config);
 
             // Convert target object to Map for RulesEngine.evaluate()
             Map<String, Object> inputData = new HashMap<>();
@@ -374,9 +370,9 @@ public class EnrichmentController {
 
             RuleResult result = rulesEngine.evaluate(config, inputData);
 
-            // Check for business logic failures (ResultType.ERROR)
-            if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                logger.error("CRITICAL: Predefined enrichment processing failed with ERROR result type");
+            // Check for business logic failures (ResultType.ERROR or ENRICHMENT_FAILURE)
+            if (result.isError()) {
+                logger.error("Predefined enrichment processing failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("error", "Predefined enrichment processing failed");
@@ -406,7 +402,8 @@ public class EnrichmentController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during predefined enrichment: {}", e.getMessage(), e);
+            logger.error("Error during predefined enrichment: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Predefined enrichment failed");

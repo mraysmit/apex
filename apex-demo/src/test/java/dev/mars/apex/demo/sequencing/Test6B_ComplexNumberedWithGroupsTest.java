@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -108,13 +108,13 @@ public class Test6B_ComplexNumberedWithGroupsTest extends DemoTestBase {
         assertEquals("grouped-B1", executionLog.get(4), "Position 4 MUST be grouped-B1");
         assertEquals("standalone-3", executionLog.get(5), "Position 5 MUST be standalone-3");
 
-        LOGGER.info("✓ TEST 6B PASSED: All 5 definitive assertion types verified");
-        LOGGER.info("  ✓ Exact count: 6 items");
-        LOGGER.info("  ✓ Exact order: Complex interleaving preserved");
-        LOGGER.info("  ✓ What executed: 3 standalone + 3 grouped");
-        LOGGER.info("  ✓ No double execution: Each item executes exactly once");
-        LOGGER.info("  ✓ Position verification: All items at correct positions");
-        LOGGER.info("  ✓ Complex scenario: Multiple numbered sections + multiple groups work correctly");
+        LOGGER.info("[OK] TEST 6B PASSED: All 5 definitive assertion types verified");
+        LOGGER.info("  [OK] Exact count: 6 items");
+        LOGGER.info("  [OK] Exact order: Complex interleaving preserved");
+        LOGGER.info("  [OK] What executed: 3 standalone + 3 grouped");
+        LOGGER.info("  [OK] No double execution: Each item executes exactly once");
+        LOGGER.info("  [OK] Position verification: All items at correct positions");
+        LOGGER.info("  [OK] Complex scenario: Multiple numbered sections + multiple groups work correctly");
     }
 }
 

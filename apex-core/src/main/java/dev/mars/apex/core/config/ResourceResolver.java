@@ -16,7 +16,9 @@ package dev.mars.apex.core.config;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.util.RulesEngineLogger;
+import dev.mars.apex.core.config.exception.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -73,13 +75,13 @@ import java.util.Objects;
  * concurrently, though it's recommended to configure paths during initialization.</p>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 3.0
- * @see dev.mars.apex.core.config.yaml.YamlConfigurationLoader
- * @see dev.mars.apex.core.config.yaml.ScenarioRegistryLoader
+ * @since 2026-01-08
+ * @see dev.mars.apex.core.config.loader.ConfigurationLoader
+ * @see dev.mars.apex.core.config.loader.ScenarioRegistryLoader
  */
 public class ResourceResolver {
 
-    private static final RulesEngineLogger logger = new RulesEngineLogger(ResourceResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceResolver.class);
 
     /**
      * Resolution strategy determining the order of resolution attempts.

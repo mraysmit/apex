@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  * In production, you would typically use a proper XML parser like DOM or SAX.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class XmlDataLoader implements DataLoader {
@@ -79,10 +79,12 @@ public class XmlDataLoader implements DataLoader {
             LOGGER.debug("Loaded {} objects from XML file: {}", results.size(), filePath);
             
         } catch (IOException e) {
-            LOGGER.error("Failed to load XML file: {}", filePath, e);
+            LOGGER.error("Failed to load XML file '{}': {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Failed to parse XML file: {}", filePath, e);
+            LOGGER.error("Failed to parse XML file '{}': {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new IOException("XML parsing failed", e);
         }
         

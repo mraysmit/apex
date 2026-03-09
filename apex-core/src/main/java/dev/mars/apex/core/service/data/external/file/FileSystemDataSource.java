@@ -57,7 +57,7 @@ import java.util.stream.StreamSupport;
  * - Health monitoring
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class FileSystemDataSource implements ExternalDataSource {
@@ -211,7 +211,8 @@ public class FileSystemDataSource implements ExternalDataSource {
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from file system", e);
+            LOGGER.error("Failed to get data from file system: {}", e.getMessage());
+            LOGGER.debug("Stack trace for file system data retrieval failure:", e);
             return null;
         }
     }
@@ -354,7 +355,8 @@ public class FileSystemDataSource implements ExternalDataSource {
             }
             
         } catch (Exception e) {
-            LOGGER.error("Failed to load initial data for file system data source '{}'", getName(), e);
+            LOGGER.error("Failed to load initial data for file system data source '{}': {}", getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
     }
     
@@ -442,14 +444,15 @@ public class FileSystemDataSource implements ExternalDataSource {
                     FileTime lastModified = Files.getLastModifiedTime(filePath);
                     fileModificationTimes.put(cacheKey, lastModified.toInstant());
                 } catch (IOException e) {
-                    LOGGER.warn("Failed to get modification time for file: {}", filePath, e);
+                    LOGGER.debug("Failed to get modification time for file: {} - {}", filePath, e.getMessage());
                 }
             }
             
             LOGGER.debug("Loaded and cached file: {}", filePath);
             
         } catch (Exception e) {
-            LOGGER.error("Failed to load file: {}", filePath, e);
+            LOGGER.error("Failed to load file '{}': {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
     }
     
@@ -747,12 +750,13 @@ public class FileSystemDataSource implements ExternalDataSource {
                         LOGGER.debug("Reloaded modified file: {}", file);
                     }
                 } catch (IOException e) {
-                    LOGGER.warn("Failed to check modification time for file: {}", file, e);
+                    LOGGER.debug("Failed to check modification time for file: {} - {}", file, e.getMessage());
                 }
             }
             
         } catch (Exception e) {
-            LOGGER.error("Error during file change check", e);
+            LOGGER.error("Error during file change check: {}", e.getMessage());
+            LOGGER.debug("Stack trace for file change check error:", e);
         }
     }
     

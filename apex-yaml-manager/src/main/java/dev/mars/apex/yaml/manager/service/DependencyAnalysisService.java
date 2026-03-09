@@ -16,15 +16,15 @@ package dev.mars.apex.yaml.manager.service;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.util.YamlDependencyAnalyzer;
-import dev.mars.apex.core.util.YamlDependencyGraph;
-import dev.mars.apex.core.util.YamlNode;
+import dev.mars.apex.core.util.DependencyAnalyzer;
+import dev.mars.apex.core.util.DependencyGraph;
+import dev.mars.apex.core.util.Node;
 import dev.mars.apex.yaml.manager.model.CircularDependencyInfo;
 import dev.mars.apex.yaml.manager.model.DependencyMetrics;
 import dev.mars.apex.yaml.manager.model.EnhancedYamlDependencyGraph;
 import dev.mars.apex.yaml.manager.model.ImpactAnalysisResult;
 import dev.mars.apex.yaml.manager.model.TreeNode;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
+import dev.mars.apex.yaml.manager.model.ContentSummary;
 import dev.mars.apex.yaml.manager.util.CircularDependencyDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,15 +52,15 @@ public class DependencyAnalysisService {
 
     private static final Logger logger = LoggerFactory.getLogger(DependencyAnalysisService.class);
 
-    private final YamlDependencyAnalyzer yamlAnalyzer;
+    private final DependencyAnalyzer yamlAnalyzer;
 
     @Autowired(required = false)
-    private YamlContentAnalyzer contentAnalyzer;
+    private ContentAnalyzer contentAnalyzer;
 
     private String currentBasePath;
 
     public DependencyAnalysisService() {
-        this.yamlAnalyzer = new YamlDependencyAnalyzer();
+        this.yamlAnalyzer = new DependencyAnalyzer();
         logger.info("DependencyAnalysisService initialized");
     }
 
@@ -75,7 +75,7 @@ public class DependencyAnalysisService {
             // Determine base path and root argument for analyzer
             java.nio.file.Path rootPath = java.nio.file.Paths.get(rootFilePath);
             boolean isAbsolute = rootPath.isAbsolute();
-            YamlDependencyAnalyzer analyzerToUse = this.yamlAnalyzer;
+            DependencyAnalyzer analyzerToUse = this.yamlAnalyzer;
             String analyzerRootArg = rootFilePath;
 
             logger.info("Path analysis: isAbsolute={}, parent={}, fileName={}",
@@ -83,19 +83,19 @@ public class DependencyAnalysisService {
 
             if (isAbsolute) {
                 this.currentBasePath = rootPath.getParent().toString();
-                analyzerToUse = new YamlDependencyAnalyzer(this.currentBasePath);
+                analyzerToUse = new DependencyAnalyzer(this.currentBasePath);
                 analyzerRootArg = rootPath.getFileName().toString();
                 logger.info("Using dynamic basePath for analysis: {} with root {}", this.currentBasePath, analyzerRootArg);
             } else {
                 // For relative paths, use current working directory as base path
                 this.currentBasePath = System.getProperty("user.dir");
-                analyzerToUse = new YamlDependencyAnalyzer(this.currentBasePath);
+                analyzerToUse = new DependencyAnalyzer(this.currentBasePath);
                 logger.info("Using relative path analysis with basePath: {}", this.currentBasePath);
             }
 
             // Use core analyzer to build basic graph
             logger.info("Building basic dependency graph...");
-            YamlDependencyGraph basicGraph = analyzerToUse.analyzeYamlDependencies(analyzerRootArg);
+            DependencyGraph basicGraph = analyzerToUse.analyzeYamlDependencies(analyzerRootArg);
             logger.info("Basic graph created with {} nodes and {} dependencies",
                 basicGraph.getAllNodes().size(), basicGraph.getAllDependencies().size());
 
@@ -106,7 +106,7 @@ public class DependencyAnalysisService {
 
             // Copy nodes from basic graph
             logger.info("Copying {} nodes to enhanced graph...", basicGraph.getAllNodes().size());
-            for (YamlNode node : basicGraph.getAllNodes()) {
+            for (Node node : basicGraph.getAllNodes()) {
                 enhancedGraph.addNode(node);
                 logger.debug("Added node: {}", node.getFilePath());
             }
@@ -352,12 +352,12 @@ public class DependencyAnalysisService {
         node.setPath(filePath);
         node.setId(filePath);
 
-        // Get YAML content information from apex-core YamlNode (do this BEFORE circular dependency check)
-        YamlNode yamlNode = graph.getNode(filePath);
+        // Get YAML content information from apex-core Node (do this BEFORE circular dependency check)
+        Node yamlNode = graph.getNode(filePath);
         if (yamlNode != null) {
-            logger.debug("Using apex-core YamlNode data for: {}", filePath);
-            YamlContentSummary summary = createSummaryFromYamlNode(yamlNode);
-            logger.debug("Content summary from YamlNode for {}: type={}, exists={}, valid={}",
+            logger.debug("Using apex-core Node data for: {}", filePath);
+            ContentSummary summary = createSummaryFromYamlNode(yamlNode);
+            logger.debug("Content summary from Node for {}: type={}, exists={}, valid={}",
                 filePath, summary.getFileType(), yamlNode.exists(), yamlNode.isYamlValid());
             node.setContentSummary(summary);
 
@@ -372,7 +372,7 @@ public class DependencyAnalysisService {
                 node.setCreated(summary.getCreatedDate());
             }
         } else {
-            logger.warn("No YamlNode available from apex-core for: {}", filePath);
+            logger.warn("No Node available from apex-core for: {}", filePath);
         }
 
         if (visited.contains(filePath)) {
@@ -414,7 +414,7 @@ public class DependencyAnalysisService {
             indent, node.getName(), node.getDepth(), node.getChildCount());
 
         if (node.getContentSummary() != null) {
-            YamlContentSummary summary = node.getContentSummary();
+            ContentSummary summary = node.getContentSummary();
             nodeInfo += String.format(" [type=%s, rules=%d, enrichments=%d]",
                 summary.getFileType(), summary.getRuleCount(), summary.getEnrichmentCount());
         }
@@ -481,11 +481,11 @@ public class DependencyAnalysisService {
     }
 
     /**
-     * Create YamlContentSummary from apex-core YamlNode data.
+     * Create ContentSummary from apex-core Node data.
      * TODO: This is a temporary adapter - apex-core should be enhanced to read YAML metadata properly.
      */
-    private YamlContentSummary createSummaryFromYamlNode(YamlNode yamlNode) {
-        YamlContentSummary summary = new YamlContentSummary(yamlNode.getFilePath());
+    private ContentSummary createSummaryFromYamlNode(Node yamlNode) {
+        ContentSummary summary = new ContentSummary(yamlNode.getFilePath());
 
         // Try to get more accurate file type by reading YAML metadata if file exists and is valid
         String fileType = "unknown";
@@ -494,7 +494,7 @@ public class DependencyAnalysisService {
                 // Temporarily use contentAnalyzer to get accurate metadata until apex-core is enhanced
                 if (contentAnalyzer != null) {
                     String fullPath = resolveFullPath(yamlNode.getFilePath());
-                    YamlContentSummary tempSummary = contentAnalyzer.analyzYamlContent(fullPath);
+                    ContentSummary tempSummary = contentAnalyzer.analyzYamlContent(fullPath);
                     if (tempSummary != null && tempSummary.getFileType() != null) {
                         fileType = tempSummary.getFileType();
                         // Also copy other metadata
@@ -539,7 +539,7 @@ public class DependencyAnalysisService {
         summary.addContentCount("file-exists", yamlNode.exists() ? 1 : 0);
         summary.addContentCount("yaml-valid", yamlNode.isYamlValid() ? 1 : 0);
 
-        logger.debug("Created summary from YamlNode: path={}, type={}, exists={}, valid={}",
+        logger.debug("Created summary from Node: path={}, type={}, exists={}, valid={}",
             yamlNode.getFilePath(), summary.getFileType(), yamlNode.exists(), yamlNode.isYamlValid());
 
         return summary;

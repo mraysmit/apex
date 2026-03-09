@@ -1,4 +1,4 @@
-![APEX System Logo](APEX%20System%20logo.png)
+<img src="APEX%20System%20logo.png" alt="APEX System Logo" width="200">
 # APEX YAML Syntax Reference Guide
 
 **Version:** 2.4 (Dual Format Support - APEX 2.2+)
@@ -74,9 +74,10 @@ This section provides a definitive reference for APEX YAML keywords based on act
 | **last-modified** | Metadata | No | String | Last modification timestamp (ISO 8601) |
 | **lookup-config** | Enrichment | No | Map | Configuration for lookup-enrichment type |
 | **mapping-rules** | Enrichment | No | List | Complex mapping rule definitions |
-| **message** | Rule | No | String | Message displayed when rule is triggered |
+| **message** | Rule | No | String | Message displayed when rule is triggered (condition=true). Supports `{{#expr}}` and `#{expr}` placeholders |
 | **metadata** | Document | Yes | Map | Document metadata section |
 | **name** | Metadata | No | String | Human-readable name for the configuration |
+| **no-match-message** | Rule | No | String | Message displayed when rule does not match (condition=false). If omitted, uses `message`. Supports same placeholders as `message` |
 | **operations** | DataSource | No | Map | Operation definitions for REST APIs |
 | **operator** | RuleGroup | No | String | Logical operator for rule group (AND/OR) |
 | **override-priority** | RuleReference | No | Integer | Override priority for rule within group |
@@ -1746,7 +1747,8 @@ rules:
 | `id` | Yes | Unique rule identifier | "trade-id-required" |
 | `name` | Yes | Human-readable rule name | "Trade ID Required" |
 | `condition` | Yes | SpEL expression that must be true | "#field != null" |
-| `message` | Yes | Error/warning message | "Field is required" |
+| `message` | Yes | Message for match (condition=true) | "Field is valid" |
+| `no-match-message` | No | Message for no-match (condition=false). Falls back to `message` if omitted | "Field is required" |
 | `severity` | Yes | ERROR, WARNING, INFO | "ERROR" |
 | `priority` | No | Execution priority (1 = highest) | 1 |
 | `result-field` | No | Field name to store rule result (boolean) | "isHighValue" |
@@ -1843,6 +1845,35 @@ rules:
 - Only configure `result-field` when you need to use the result in subsequent rules
 - Access stored results using SpEL syntax: `#fieldName` or `#nested['fieldName']`
 - Results are boolean values: `true` (rule matched) or `false` (rule did not match)
+
+#### No-Match Message
+
+The `no-match-message` property allows configuring a separate message for when a rule's condition evaluates to `false` (NO_MATCH). This is useful when you want to communicate different information for pass versus fail outcomes.
+
+**Behavior:**
+- When condition is `true` (MATCH): the `message` property is used
+- When condition is `false` (NO_MATCH): the `no-match-message` property is used if present, otherwise falls back to `message`
+- Supports the same placeholder formats as `message`: `{{#expression}}` (Handlebars) and `#{expression}` (SpEL template)
+- All placeholders are resolved against the evaluation context (facts map)
+
+**Example:**
+
+```yaml
+rules:
+  - id: "age-check"
+    name: "Age Validation"
+    condition: "#age != null && #age >= 18"
+    message: "Age {{#age}} is valid (18 or older)"
+    no-match-message: "Age {{#age}} does not meet minimum requirement of 18"
+    severity: "INFO"
+
+  - id: "amount-threshold"
+    name: "Amount Threshold Check"
+    condition: "#amount > 10000"
+    message: "Amount {{#amount}} exceeds reporting threshold"
+    no-match-message: "Amount {{#amount}} is within normal range"
+    severity: "WARNING"
+```
 
 #### Complex Validation Examples
 

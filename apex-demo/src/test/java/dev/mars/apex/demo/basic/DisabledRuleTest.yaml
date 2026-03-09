@@ -1,0 +1,38 @@
+# Test YAML for disabled rule processing
+# Verifies that rules with enabled: false are skipped during evaluation
+metadata:
+  id: "disabled-rule-test"
+  name: "Disabled Rule Test"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Tests that disabled rules are not processed"
+  author: "APEX Demo"
+
+rules:
+  - id: "enabled-rule"
+    name: "Enabled Rule"
+    condition: "#age >= 18"
+    message: "Age is 18 or older"
+    severity: "INFO"
+    enabled: true
+
+  - id: "disabled-rule"
+    name: "Disabled Rule"
+    condition: "#age >= 18"
+    message: "This should never appear"
+    severity: "ERROR"
+    enabled: false
+
+  - id: "another-enabled-rule"
+    name: "Another Enabled Rule"
+    condition: "#name != null"
+    message: "Name is provided"
+    severity: "INFO"
+    enabled: true
+
+  - id: "implicit-enabled-rule"
+    name: "Implicit Enabled Rule"
+    condition: "#age > 0"
+    message: "Age is positive"
+    severity: "INFO"
+    # enabled is omitted - should default to true

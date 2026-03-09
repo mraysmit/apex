@@ -18,7 +18,7 @@ package dev.mars.apex.playground.model;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.mars.apex.core.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.ExecutionStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;

@@ -1,8 +1,18 @@
 package dev.mars.apex.core.config.yaml;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -16,11 +26,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Implicit Constant Validation Tests")
 class ImplicitConstantValidationTest {
 
-    private YamlConfigurationLoader configurationLoader;
+    private ConfigurationLoader configurationLoader;
 
     @BeforeEach
     void setUp() {
-        configurationLoader = new YamlConfigurationLoader();
+        configurationLoader = new ConfigurationLoader();
     }
 
     @Test
@@ -112,7 +122,7 @@ class ImplicitConstantValidationTest {
                   - target-field: "status"
             """;
         
-        YamlConfigurationException ex = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException ex = assertThrows(ConfigurationException.class, () -> {
             InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(is);
         });
@@ -136,7 +146,7 @@ class ImplicitConstantValidationTest {
                     expression: ""
             """;
         
-        YamlConfigurationException ex = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException ex = assertThrows(ConfigurationException.class, () -> {
             InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(is);
         });
@@ -161,7 +171,7 @@ class ImplicitConstantValidationTest {
                     default-value: "PENDING"
             """;
         
-        YamlConfigurationException ex = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException ex = assertThrows(ConfigurationException.class, () -> {
             InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
             configurationLoader.loadFromStream(is);
         });

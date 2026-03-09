@@ -143,7 +143,7 @@ public class RestApiDataSourceDirectTest {
         System.out.println("Result map keys: " + resultMap.keySet());
         System.out.println("Result map: " + resultMap);
 
-        System.out.println("✓ Direct queryForObject test passed!");
+        System.out.println("[OK] Direct queryForObject test passed!");
     }
 
     @Test
@@ -192,7 +192,7 @@ public class RestApiDataSourceDirectTest {
         assertNotNull(result, "JSON result should not be null");
         assertTrue(result instanceof Map, "JSON result should be a Map");
 
-        System.out.println("✓ Simple JSON response test passed!");
+        System.out.println("[OK] Simple JSON response test passed!");
     }
 }
 

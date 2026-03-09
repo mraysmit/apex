@@ -9,7 +9,7 @@ import java.util.Map;
  * Defines the complete workflow including steps, execution settings, and transformations.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-05
  */
 public class PipelineConfiguration {
     

@@ -18,9 +18,9 @@ package dev.mars.apex.core.service.data.external.config;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlDataSourceLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.core.config.loader.DataSourceLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.manager.DataSourceManager;
@@ -49,7 +49,7 @@ import java.util.concurrent.ConcurrentMap;
  * - Hot reloading support
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class DataSourceConfigurationService implements DataSourceManagerListener {
@@ -61,7 +61,7 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
     private static final Object LOCK = new Object();
     
     // Core components
-    private final YamlDataSourceLoader yamlLoader;
+    private final DataSourceLoader yamlLoader;
     private final DataSourceManager dataSourceManager;
     private final DataSourceRegistry dataSourceRegistry;
     
@@ -78,7 +78,7 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
     private DataSourceConfigurationService() {
         this.dataSourceManager = new DataSourceManager();
         this.dataSourceRegistry = DataSourceRegistry.getInstance();
-        this.yamlLoader = new YamlDataSourceLoader(dataSourceManager);
+        this.yamlLoader = new DataSourceLoader(dataSourceManager);
         
         // Register as a manager listener
         dataSourceManager.addListener(this);
@@ -125,7 +125,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             notifyListeners(DataSourceConfigurationEvent.initialized(configurations.size()));
             
         } catch (DataSourceException e) {
-            LOGGER.error("Failed to initialize DataSourceConfigurationService", e);
+            LOGGER.error("Failed to initialize DataSourceConfigurationService: {}", e.getMessage());
+            LOGGER.debug("Stack trace for DataSourceConfigurationService initialization failure:", e);
             throw e;
         }
     }
@@ -157,7 +158,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             notifyListeners(DataSourceConfigurationEvent.configurationAdded(name, configuration));
             
         } catch (DataSourceException e) {
-            LOGGER.error("Failed to add data source configuration '{}'", name, e);
+            LOGGER.error("Failed to add data source configuration '{}': {}", name, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw e;
         }
     }
@@ -192,7 +194,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             return removed;
             
         } catch (Exception e) {
-            LOGGER.error("Error removing data source configuration '{}'", name, e);
+            LOGGER.error("Error removing data source configuration '{}': {}", name, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return false;
         }
     }
@@ -260,7 +263,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             notifyListeners(DataSourceConfigurationEvent.reloaded(configurations.size()));
             
         } catch (DataSourceException e) {
-            LOGGER.error("Failed to reload data source configurations from YAML", e);
+            LOGGER.error("Failed to reload data source configurations from YAML: {}", e.getMessage());
+            LOGGER.debug("Stack trace for data source configuration reload failure:", e);
             throw e;
         }
     }
@@ -415,7 +419,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             try {
                 listener.onConfigurationEvent(event);
             } catch (Exception e) {
-                LOGGER.error("Error notifying configuration listener", e);
+                LOGGER.error("Error notifying configuration listener: {}", e.getMessage());
+                LOGGER.debug("Configuration listener error stack trace:", e);
             }
         }
     }

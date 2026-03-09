@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.OrderedYamlConfiguration;
-import dev.mars.apex.core.config.yaml.OrderedYamlParser;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration;
+import dev.mars.apex.core.config.sequential.OrderedYamlParser;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Compatibility with existing YamlRuleConfiguration structure
  * - Edge cases and error handling
  * 
- * @author APEX Sequential Processing Implementation - Phase 1
+ * @author Mark Andrew Ray-Smith Cityline Ltd  - Phase 1
  */
 class OrderedYamlParserTest {
     
@@ -41,7 +41,7 @@ class OrderedYamlParserTest {
     
     @Test
     @DisplayName("🎯 CORE TEST: Should preserve section order from YAML document")
-    void testSectionOrderPreservation() throws YamlConfigurationException {
+    void testSectionOrderPreservation() throws ConfigurationException {
         LOGGER.info("Testing section order preservation...");
         
         // YAML with intentional section order: enrichments BEFORE rules
@@ -49,7 +49,6 @@ class OrderedYamlParserTest {
             metadata:
               name: "Order Preservation Test"
               type: "test-config"
-              processing-mode: "sequential"
             
             enrichments:
               - id: "enrich-customer-data"
@@ -102,7 +101,7 @@ class OrderedYamlParserTest {
     
     @Test
     @DisplayName("🎯 CORE TEST: Should handle rules BEFORE enrichments order")
-    void testRulesBeforeEnrichmentsOrder() throws YamlConfigurationException {
+    void testRulesBeforeEnrichmentsOrder() throws ConfigurationException {
         LOGGER.info("Testing rules before enrichments order...");
         
         // YAML with rules BEFORE enrichments (validate-then-enrich pattern)
@@ -143,7 +142,7 @@ class OrderedYamlParserTest {
     
     @Test
     @DisplayName("🎯 EDGE CASE: Should handle empty sections gracefully")
-    void testEmptySectionsHandling() throws YamlConfigurationException {
+    void testEmptySectionsHandling() throws ConfigurationException {
         LOGGER.info("Testing empty sections handling...");
         
         String yaml = """
@@ -186,17 +185,17 @@ class OrderedYamlParserTest {
                 condition: "#invalid syntax here [[[
             """;
         
-        // Should throw YamlConfigurationException for invalid YAML
-        assertThrows(YamlConfigurationException.class, () -> {
+        // Should throw ConfigurationException for invalid YAML
+        assertThrows(ConfigurationException.class, () -> {
             parser.parseYamlString(invalidYaml);
-        }, "Invalid YAML should throw YamlConfigurationException");
+        }, "Invalid YAML should throw ConfigurationException");
         
         LOGGER.info("Invalid YAML handling test PASSED");
     }
     
     @Test
     @DisplayName("🎯 COMPATIBILITY: Should maintain full compatibility with YamlRuleConfiguration")
-    void testYamlRuleConfigurationCompatibility() throws YamlConfigurationException {
+    void testYamlRuleConfigurationCompatibility() throws ConfigurationException {
         LOGGER.info("Testing YamlRuleConfiguration compatibility...");
         
         String yaml = """

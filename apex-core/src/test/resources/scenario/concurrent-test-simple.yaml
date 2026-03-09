@@ -6,7 +6,7 @@ metadata:
   version: 1.0.0
   description: Minimal configuration for testing concurrent scenario execution
   type: rule-config
-  author: APEX Test Team
+  author: Mark Andrew Ray-Smith Cityline Ltd 
   created: '2026-01-09'
   tags:
     - test

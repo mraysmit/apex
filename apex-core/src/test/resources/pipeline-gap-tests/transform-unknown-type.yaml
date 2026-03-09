@@ -1,0 +1,53 @@
+# ============================================================================
+# Transform Step - Unknown Type Test
+# ============================================================================
+# Tests transform step with unknown transformation type.
+# Exercises the default case in applyTransformation() switch.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "transform-unknown-type-test"
+  name: "Transform Unknown Type Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests transform step with unknown type"
+
+data-sources:
+  - name: "validation-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:validation_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, customer_name, status FROM validation_source"
+
+pipeline:
+  name: "transform-unknown-type-pipeline"
+  description: "Pipeline with unknown transform type"
+
+  execution:
+    mode: "sequential"
+    max-retries: 0
+
+  steps:
+    - name: "extract-for-unknown"
+      type: "extract"
+      source: "validation-source"
+      operation: "getAllRecords"
+      description: "Extract records"
+
+    - name: "unknown-transform"
+      type: "transform"
+      description: "Test unknown transformation type"
+      depends-on: ["extract-for-unknown"]
+      transformations:
+        - name: "unknown-operation"
+          type: "totally-unknown-type"
+          field: "some_field"

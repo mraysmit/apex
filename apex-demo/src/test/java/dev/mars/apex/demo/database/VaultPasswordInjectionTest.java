@@ -15,10 +15,10 @@
  */
 package dev.mars.apex.demo.database;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
@@ -103,7 +103,7 @@ class VaultPasswordInjectionTest {
             .withUsername("vaultuser")
             .withPassword("vaultsecret");
 
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
     private DataSourceFactory factory;
     private ExternalDataSource postgresSource;
 
@@ -111,7 +111,7 @@ class VaultPasswordInjectionTest {
     void setUp() throws Exception {
         logger.info("Setting up Vault Password Injection Test with Testcontainers");
 
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
         factory = DataSourceFactory.getInstance();
 
         // Get Vault connection details
@@ -254,11 +254,11 @@ class VaultPasswordInjectionTest {
                    "Should contain Vault-retrieved username");
         
         logger.info("Vault password injection test completed successfully");
-        logger.info("  ✓ Vault container started and accessible");
-        logger.info("  ✓ Secrets retrieved from Vault KV store");
-        logger.info("  ✓ Vault secrets injected into system properties");
-        logger.info("  ✓ YAML configuration resolved with Vault credentials");
-        logger.info("  ✓ Database connection validated using Vault-retrieved credentials");
+        logger.info("  [OK] Vault container started and accessible");
+        logger.info("  [OK] Secrets retrieved from Vault KV store");
+        logger.info("  [OK] Vault secrets injected into system properties");
+        logger.info("  [OK] YAML configuration resolved with Vault credentials");
+        logger.info("  [OK] Database connection validated using Vault-retrieved credentials");
         logger.info("=================================================================");
     }
 
@@ -350,8 +350,8 @@ class VaultPasswordInjectionTest {
             secrets.put("password", password);
             
             logger.info("Successfully retrieved secrets from Vault:");
-            logger.info("  ✓ Username: {}", username);
-            logger.info("  ✓ Password: [MASKED]");
+            logger.info("  [OK] Username: {}", username);
+            logger.info("  [OK] Password: [MASKED]");
         } else {
             throw new RuntimeException("Failed to retrieve secrets from Vault");
         }

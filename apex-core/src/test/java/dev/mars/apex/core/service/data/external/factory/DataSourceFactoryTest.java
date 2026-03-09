@@ -20,8 +20,13 @@ package dev.mars.apex.core.service.data.external.factory;
 import dev.mars.apex.core.config.datasource.*;
 import dev.mars.apex.core.service.data.external.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -46,7 +51,24 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class DataSourceFactoryTest {
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(DataSourceFactoryTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] DataSourceFactoryTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(DataSourceFactoryTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: invalid data source configs, unsupported types, factory errors");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(DataSourceFactoryTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] DataSourceFactoryTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceFactoryTest.class);
 
@@ -135,7 +157,9 @@ class DataSourceFactoryTest {
     @Test
     @DisplayName("Should throw exception when configuration is null")
     void testCreateDataSourceWithNullConfiguration() {
+        LOGGER.info("========== START OF INTENTIONAL ERROR TEST ==========");
         DataSourceException exception = assertThrows(DataSourceException.class, () -> factory.createDataSource(null));
+        LOGGER.info("========== END OF INTENTIONAL ERROR TEST ===========");
         
         assertEquals(DataSourceException.ErrorType.CONFIGURATION_ERROR, exception.getErrorType());
         assertTrue(exception.getMessage().contains("Configuration cannot be null"));
@@ -144,7 +168,9 @@ class DataSourceFactoryTest {
     @Test
     @DisplayName("Should throw exception when configuration is invalid")
     void testCreateDataSourceWithInvalidConfiguration() {
+        LOGGER.info("========== START OF INTENTIONAL ERROR TEST ==========");
         DataSourceException exception = assertThrows(DataSourceException.class, () -> factory.createDataSource(invalidConfig));
+        LOGGER.info("========== END OF INTENTIONAL ERROR TEST ===========");
         
         assertEquals(DataSourceException.ErrorType.CONFIGURATION_ERROR, exception.getErrorType());
         assertTrue(exception.getMessage().contains("Invalid configuration"));
@@ -153,11 +179,13 @@ class DataSourceFactoryTest {
     @Test
     @DisplayName("Should validate configuration before creating data source")
     void testConfigurationValidation() {
+        LOGGER.info("========== START OF INTENTIONAL ERROR TEST ==========");
         // Test with configuration missing name
         DataSourceConfiguration configMissingName = new DataSourceConfiguration();
         configMissingName.setType("cache");
         
         DataSourceException exception = assertThrows(DataSourceException.class, () -> factory.createDataSource(configMissingName));
+        LOGGER.info("========== END OF INTENTIONAL ERROR TEST ===========");
         
         assertTrue(exception.getMessage().contains("name is required") || 
                   exception.getMessage().contains("Invalid configuration"));
@@ -201,6 +229,7 @@ class DataSourceFactoryTest {
     @Test
     @DisplayName("Should create database data source with valid configuration")
     void testCreateDatabaseDataSource() {
+        LOGGER.info("========== START OF INTENTIONAL ERROR TEST ==========");
         DataSourceConfiguration dbConfig = createDatabaseConfig("test-db", "h2");
 
         // For this test, we'll just verify that the configuration is valid
@@ -208,6 +237,7 @@ class DataSourceFactoryTest {
         // (actual database connection testing should be in integration tests)
         DataSourceException exception = assertThrows(DataSourceException.class,
             () -> factory.createDataSource(dbConfig));
+        LOGGER.info("========== END OF INTENTIONAL ERROR TEST ===========");
 
         // We expect this to fail due to missing database driver or connection,
         // but the error should be related to database connectivity, not configuration
@@ -219,6 +249,7 @@ class DataSourceFactoryTest {
     @Test
     @DisplayName("Should throw exception for database config without connection")
     void testCreateDatabaseDataSourceWithoutConnection() {
+        LOGGER.info("========== START OF INTENTIONAL ERROR TEST ==========");
         DataSourceConfiguration dbConfig = new DataSourceConfiguration();
         dbConfig.setName("test-db");
         dbConfig.setType("database");
@@ -226,6 +257,7 @@ class DataSourceFactoryTest {
         
         DataSourceException exception = assertThrows(DataSourceException.class, 
             () -> factory.createDataSource(dbConfig));
+        LOGGER.info("========== END OF INTENTIONAL ERROR TEST ===========");
         
         assertTrue(exception.getMessage().contains("Connection configuration is required") ||
                   exception.getMessage().contains("Invalid configuration"));

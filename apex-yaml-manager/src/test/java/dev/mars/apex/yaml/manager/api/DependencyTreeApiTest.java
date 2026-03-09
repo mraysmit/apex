@@ -78,8 +78,8 @@ class DependencyTreeApiTest {
     @Test
     void coreAnalyzerSeesDependencies() throws Exception {
         String base = Paths.get("src/test/resources/apex-yaml-samples").toAbsolutePath().toString();
-        dev.mars.apex.core.util.YamlDependencyAnalyzer analyzer = new dev.mars.apex.core.util.YamlDependencyAnalyzer(base);
-        dev.mars.apex.core.util.YamlDependencyGraph graph = analyzer.analyzeYamlDependencies("scenario-registry.yaml");
+        dev.mars.apex.core.util.DependencyAnalyzer analyzer = new dev.mars.apex.core.util.DependencyAnalyzer(base);
+        dev.mars.apex.core.util.DependencyGraph graph = analyzer.analyzeYamlDependencies("scenario-registry.yaml");
         System.out.println("CORE ANALYZER totalFiles=" + graph.getTotalFiles() + ", maxDepth=" + graph.getMaxDepth());
         System.out.println("CORE ANALYZER files=" + graph.getAllReferencedFiles());
         org.junit.jupiter.api.Assertions.assertTrue(graph.getTotalFiles() >= 2, "Expected at least root + 1 dependency");
@@ -87,7 +87,7 @@ class DependencyTreeApiTest {
     @Test
     void loaderSeesRuleConfigurationsKey() throws Exception {
         String abs = Paths.get("src/test/resources/apex-yaml-samples/scenario-registry.yaml").toAbsolutePath().toString();
-        dev.mars.apex.core.config.yaml.YamlConfigurationLoader loader = new dev.mars.apex.core.config.yaml.YamlConfigurationLoader();
+        dev.mars.apex.core.config.loader.ConfigurationLoader loader = new dev.mars.apex.core.config.loader.ConfigurationLoader();
         java.util.Map<String, Object> map = loader.loadAsMap(abs);
         System.out.println("MAP KEYS=" + map.keySet());
         org.junit.jupiter.api.Assertions.assertTrue(map.containsKey("rule-configurations"), "YAML should contain 'rule-configurations' key");

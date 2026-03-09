@@ -15,12 +15,12 @@
  */
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -59,12 +59,12 @@ public class BasicYamlRuleGroupProcessingATest {
 
     private static final Logger logger = LoggerFactory.getLogger(BasicYamlRuleGroupProcessingATest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for basic rule group processing tests...");
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
         logger.info(" APEX services initialized successfully");
     }
 
@@ -112,7 +112,7 @@ public class BasicYamlRuleGroupProcessingATest {
             
             logger.info(" All combined configuration tests passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load or process configuration: {}", e.getMessage());
             fail("Failed to load or process configuration: " + e.getMessage());
         }
@@ -171,7 +171,7 @@ public class BasicYamlRuleGroupProcessingATest {
             
             logger.info(" All separate files tests passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load or process separate configurations: {}", e.getMessage());
             fail("Failed to load or process separate configurations: " + e.getMessage());
         }
@@ -361,7 +361,7 @@ public class BasicYamlRuleGroupProcessingATest {
             logger.info(" All RuleResult API methods working correctly for rule groups");
             logger.info(" APEX system provides complete programmatic access to rule group results");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load or process configuration: {}", e.getMessage());
             fail("Failed to load or process configuration: " + e.getMessage());
         }

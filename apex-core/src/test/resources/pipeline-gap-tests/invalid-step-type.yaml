@@ -1,0 +1,28 @@
+# ============================================================================
+# Invalid Step Type Test
+# ============================================================================
+# Tests error handling for an unknown/invalid step type.
+# Exercises error path in executeStep() dispatch.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "invalid-step-type-test"
+  name: "Invalid Step Type Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests error handling for invalid step type"
+
+pipeline:
+  name: "invalid-type-pipeline"
+  description: "Pipeline with invalid step type"
+
+  execution:
+    mode: "sequential"
+    max-retries: 0
+
+  steps:
+    - name: "invalid-step"
+      type: "unknown-type"
+      description: "This step has an invalid type"
