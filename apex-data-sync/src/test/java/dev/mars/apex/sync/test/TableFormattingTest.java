@@ -15,6 +15,7 @@
  */
 package dev.mars.apex.sync.test;
 
+import dev.mars.apex.sync.SyncTestBase;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 import org.testcontainers.containers.GenericContainer;
@@ -50,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2.1.0
  */
 @Testcontainers
-public class TableFormattingTest {
+public class TableFormattingTest extends SyncTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(TableFormattingTest.class);
     private static final DockerImageName POSTGRES_IMAGE = 
@@ -69,7 +70,7 @@ public class TableFormattingTest {
     private static String jdbcUrl;
     
     @BeforeAll
-    public static void setUp() {
+    public static void setUpClass() {
         jdbcUrl = "jdbc:postgresql://" + postgres.getHost() + ":" 
             + postgres.getMappedPort(5432) + "/testdb";
         logger.info("PostgreSQL container started: {}", jdbcUrl);

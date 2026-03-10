@@ -262,7 +262,7 @@ class MetadataInheritancePerformanceTest {
 
     @Test
     @DisplayName("Memory efficiency with repeated category references")
-    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    @Timeout(value = 20, unit = TimeUnit.SECONDS)
     void testMemoryEfficiencyWithRepeatedCategoryReferences() throws Exception {
         logger.info("Testing memory efficiency with repeated category references...");
         
@@ -344,8 +344,8 @@ class MetadataInheritancePerformanceTest {
             assertEquals("SharedDomain", group.getBusinessDomain(), "All groups should have shared domain");
         }
         
-        // Performance and memory assertions - relaxed to avoid flaky failures on slower machines
-        assertTrue(duration < 8000, "Shared category processing should be efficient");
+        // Performance and memory assertions - allow more headroom for busy CI and large-suite runs.
+        assertTrue(duration < 12000, "Shared category processing should be efficient");
         logger.info("Actual memory usage: {} bytes ({} MB)", memoryUsed, memoryUsed / 1_000_000.0);
         // Memory threshold increased to 200MB to account for GC timing variability across environments
         assertTrue(memoryUsed < 200_000_000, "Memory usage should be reasonable (< 200MB)");

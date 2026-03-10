@@ -15,6 +15,7 @@
  */
 package dev.mars.apex.sync.test;
 
+import dev.mars.apex.sync.SyncTestBase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mars.apex.engine.core.RulesEngine;
@@ -56,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2.1.0
  */
 @Testcontainers
-public class JsonEdgeCasesTest {
+public class JsonEdgeCasesTest extends SyncTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonEdgeCasesTest.class);
     private static final DockerImageName POSTGRES_IMAGE = 
@@ -76,7 +77,7 @@ public class JsonEdgeCasesTest {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     
     @BeforeAll
-    public static void setUp() {
+    public static void setUpClass() {
         jdbcUrl = "jdbc:postgresql://" + postgres.getHost() + ":" 
             + postgres.getMappedPort(5432) + "/testdb";
         logger.info("PostgreSQL container started: {}", jdbcUrl);

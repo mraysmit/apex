@@ -15,6 +15,7 @@
  */
 package dev.mars.apex.sync.test;
 
+import dev.mars.apex.sync.SyncTestBase;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -49,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2.1.0
  */
 @Testcontainers
-public class MultiTableMarkdownTest {
+public class MultiTableMarkdownTest extends SyncTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(MultiTableMarkdownTest.class);
     
@@ -62,7 +63,7 @@ public class MultiTableMarkdownTest {
     private static String jdbcUrl;
     
     @BeforeAll
-    public static void setUp() {
+    public static void setUpClass() {
         jdbcUrl = postgres.getJdbcUrl();
         logger.info("PostgreSQL container started: {}", jdbcUrl);
         
