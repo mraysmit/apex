@@ -69,7 +69,7 @@ public class YamlImportPhase1FullTest extends BaseYamlImportSeleniumTest {
         
         int blockCount = getBlockCount();
         assertTrue(blockCount > 0, "Should have imported blocks from global-settings-test.yaml");
-        verifyBlockExists("apex_rule_config", 1, "Should have Rule Configuration block");
+        verifyBlockExists("apex_configuration", 1, "Should have Configuration block");
     }
 
     @Test
