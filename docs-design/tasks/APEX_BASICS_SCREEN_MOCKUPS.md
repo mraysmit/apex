@@ -19,6 +19,8 @@ Design goals:
 - Configuration bundle intent and file targeting (Screen 1)
 - External data source config — all 6 source types, standalone and embedded modes (Screen 2)
 - Dataset contract definition with field dictionary (Screen 3)
+- Process dataset profile and runtime semantics (Screen 3A)
+- Process dataset test bench and stage snapshots (Screen 3B)
 - Lookup mapping — inline, embedded query, and external query ref (Screen 4)
 - Enrichment builder — all 4 types: lookup, calculation, field, conditional-mapping (Screen 5)
 - Artifact preview, ref integrity, and approval gate (Screen 6)
@@ -31,8 +33,7 @@ Design goals:
 - Enrichment group builder — AND/OR grouping, cross-group references (Screen 11)
 - Transformation builder — conditional transformations, actions-true/false, nesting (Screen 12)
 - Error recovery configuration — severity policies, 4 recovery strategies (Screen 13)
-- Pipeline / ETL orchestration — steps, dependencies, monitoring (Screen 14)
-- Data sink configuration — all 6 sink types (Screen 15)
+- ETL orchestration section — pipeline orchestration and sink configuration (Screens 14–15)
 - Category management — hierarchy, labels, governance metadata (Screen 16)
 
 ### Screen Navigation
@@ -43,15 +44,74 @@ All screens share the Artifact Preview (Screen 6) for validation and YAML genera
 
 ```text
 Screen 0 (Catalog)
-├── Wizard Flow: 1 → 2 → 3 → 4 → 5 → 6 → 7
+├── Wizard Flow: 1 → 2 → 3 → 3A → 3B → 4 → 5 → 6 → 7
 ├── Rule Authoring: 8 → 9 → 10 → 6
 ├── Enrichment Groups: 11 → 6
 ├── Transformations: 12 → 6
 ├── Error Recovery: 13 → 6
-├── Pipeline / ETL: 14 → 6
-├── Data Sinks: 15 → 6
+├── ETL Orchestration: 14 → 15 → 6
 └── Categories: 16 → 6
 ```
+
+### Non-Technical First Interaction Model
+
+Design intent: default authoring paths should not require users to write SpEL manually.
+
+1. **Basic Mode (default)**
+  - User selects Field → Operator → Value from dropdowns.
+  - UI generates the expression automatically.
+  - UI shows a plain-language sentence preview.
+
+2. **Advanced Mode (optional)**
+  - Raw expression editor for expert users.
+  - Round-trip supported: switching back to Basic keeps equivalent logic where possible.
+
+3. **Live Test Panel (always visible on condition screens)**
+  - Test input sample.
+  - Condition result (`true` / `false`).
+  - Computed lookup key / parameters.
+  - Matched row preview (for lookups).
+
+4. **Guardrail Behavior**
+  - Non-blocking warnings for uncommon patterns.
+  - Blocking errors only for invalid syntax, unresolved refs, or incompatible types.
+
+5. **Starter Templates**
+  - Is present
+  - Equals
+  - Greater than / Less than
+  - In list
+  - Starts with / Contains
+  - All of / Any of (AND/OR)
+
+### Process Dataset Contract and Lifecycle (Cross-Cutting)
+
+APEX evaluates rules and enrichments against a runtime process dataset (map-like context). This contract is central and applies to every screen.
+
+1. **Dataset Shape Contract**
+  - Authoring tools declare expected fields, types, aliases, and nullability.
+  - Screen 3 is the canonical place to define logical field names used by Basic and Advanced expression builders.
+
+2. **Evaluation Context Contract**
+  - Expressions resolve against a single process context with both root fields and aliases.
+  - Example: `#user.age > 18` requires `user.age` to exist and be type-compatible at evaluation time.
+
+3. **Type and Null Semantics**
+  - Missing path, null value, and type coercion behavior are validated during authoring tests and again at pre-write integrity checks.
+  - Unsafe coercions and ambiguous paths are surfaced as warnings or hard failures based on policy.
+
+4. **Mutation Lifecycle**
+  - Rules may emit result fields; enrichments may add/overwrite mapped fields; transformations may rewrite values.
+  - Each stage contributes to an evolving dataset snapshot consumed by subsequent stages.
+
+5. **Validation Lifecycle**
+  - On-screen tests validate local logic against sample payloads.
+  - Screen 6 re-validates full cross-screen dataset assumptions before write.
+  - Composition in Screen 7 confirms dataset compatibility across files/components/scenarios.
+
+6. **Traceability Contract**
+  - Every screen records which dataset fields it reads and writes.
+  - Preview and validation views show before/after snapshots for critical fields where available.
 
 ---
 
@@ -61,6 +121,7 @@ Screen 0 (Catalog)
 +------------------------------------------------------------------------------------------------------------------+
 | APEX Config Type             | Create | Edit | Validate | Ref Resolve | Preview YAML | Compose | Screens        |
 +-----------------------------+--------+------+----------+-------------+--------------+---------+----------------+
+| process-dataset-contract    |   Y    |  Y   |    Y     |      -      |      Y       |    Y    | 3, 3A, 3B, 6   |
 | external-data-config        |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 2, 6           |
 | enrichment (lookup)         |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 4, 5, 6        |
 | enrichment (calculation)    |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 5, 6           |
@@ -74,8 +135,8 @@ Screen 0 (Catalog)
 | scenario-registry           |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 7              |
 | transformation              |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 12, 6          |
 | pipeline-config             |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 14, 6          |
-| data-sinks                  |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 15, 6          |
-| categories                  |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 16             |
+| data-sinks (section)        |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 15, 6          |
+| categories (section)        |   Y    |  Y   |    Y     |      Y      |      Y       |    Y    | 16             |
 | error-recovery              |   Y    |  Y   |    Y     |      -      |      Y       |    -    | 13             |
 +-----------------------------+--------+------+----------+-------------+--------------+---------+----------------+
 | Y = covered in this document                                                                                     |
@@ -102,8 +163,9 @@ Base required fields for **all** document types (enforced by `MetadataValidator`
 | component                  | (none beyond base 5)                                                 |
 | transformation-config      | (none beyond base 5)                                                 |
 +----------------------------+----------------------------------------------------------------------+
-| All types also support: tags, created, last-modified, processing-mode, environment,             |
-| business-domain, business-owner, display-name, documentation-url, criticality, sla-ms          |
+| Common metadata fields: tags, created, last-modified                                            |
+| Type-specific schemas may additionally support governance fields such as                         |
+| business-domain, business-owner, display-name, criticality, sla-ms                              |
 +----------------------------+----------------------------------------------------------------------+
 ```
 
@@ -140,6 +202,12 @@ Base required fields for **all** document types (enforced by `MetadataValidator`
 +------------------------------------------------------------------------------------------------+
 ```
 
+Notes:
+- Process dataset behavior: this screen indexes dataset read/write usage metadata per artifact so downstream screens can warn about missing fields before runtime.
+- Reference behavior: this screen is the source of truth for resolver status and symbol discovery used by all downstream selectors.
+- `Refs In` and `Refs Out` are computed from parsed YAML plus pending wizard draft artifacts.
+- Any item shown as MISSING, AMBIGUOUS, or TYPE-MISMATCH here is surfaced inline on dependent screens and blocks write on hard-fail policy.
+
 ---
 
 ## Screen 1: Configuration Intent and File Targets
@@ -148,7 +216,7 @@ Base required fields for **all** document types (enforced by `MetadataValidator`
 +------------------------------------------------------------------------------------------------+
 | New Configuration Bundle                                                                        |
 +------------------------------------------------------------------------------------------------+
-| Step 1 of 7                                                                                     |
+| Step 1 of 9                                                                                     |
 |                                                                                                |
 | Bundle Name*              [ Customer Settlement Baseline                                      ] |
 | Environment*              [ local-dev v ]                                                       |
@@ -189,6 +257,7 @@ Notes:
 - Author and Business Domain are propagated into generated `metadata:` blocks per artifact.
 - Data Source References become the `data-source-refs:` section in business logic YAML files.
 - Ref status is validated against the catalog: RESOLVED, MISSING, or AMBIGUOUS.
+- Process dataset behavior: this screen defines the initial dataset intent for the bundle (expected business object scope, naming conventions, and processing mode assumptions used by all later validation).
 
 ---
 
@@ -209,7 +278,7 @@ Supports all 6 APEX source types: `database`, `rest-api`, `file-system`, `cache`
 +------------------------------------------------------------------------------------------------+
 | External Data Source Builder                                                                    |
 +------------------------------------------------------------------------------------------------+
-| Step 2 of 7                                                                                     |
+| Step 2 of 9                                                                                     |
 | Artifact: external-data-config -> data-sources/customer-db.yaml                                 |
 |                                                                                                |
 | Config Mode*              (o) Standalone External Config    ( ) Embedded in Business File       |
@@ -316,7 +385,7 @@ Real examples: `H2SimpleDatabaseConnectivityTest.yaml`, `SimpleDatabaseDataSourc
 +------------------------------------------------------------------------------------------------+
 | Embedded Data Source Builder                                                                    |
 +------------------------------------------------------------------------------------------------+
-| Step 2 of 7                                                                                     |
+| Step 2 of 9                                                                                     |
 | Artifact: embedded in enrichments/customer-tier-enrichment.yaml                                  |
 |                                                                                                |
 | Config Mode*              ( ) Standalone External Config    (o) Embedded in Business File       |
@@ -366,6 +435,12 @@ Business file references via:                       lookup-dataset:
   query-ref: "getCustomerTier"                        query: "SELECT ... WHERE id = :id"
 ```
 
+Notes:
+- Process dataset behavior: this screen defines where process dataset records originate and what source-level shape is expected before mapping into logical fields.
+- Reference behavior: standalone mode publishes `data-source` names and named queries/operations into the catalog so Screens 1, 4, and 5 can resolve `data-source-ref` and `query-ref`.
+- Embedded mode does not publish cross-file refs; it only exposes `connection-name` inside the current document context.
+- Resolution timing: connection/query symbol validation runs on `Test Connection`, `Save & Next`, and full validation.
+
 ---
 
 ## Screen 3: Dataset Contract Builder
@@ -374,7 +449,7 @@ Business file references via:                       lookup-dataset:
 +------------------------------------------------------------------------------------------------+
 | Dataset Contract Builder                                                                         |
 +------------------------------------------------------------------------------------------------+
-| Step 3 of 7                                                                                     |
+| Step 3 of 9                                                                                     |
 | Source: customer-database / public.customer_profile_vw                                           |
 |                                                                                                |
 | Dataset ID*                [ customer-profile-dataset                                          ] |
@@ -398,6 +473,156 @@ Business file references via:                       lookup-dataset:
 +------------------------------------------------------------------------------------------------+
 ```
 
+Notes:
+- Process dataset behavior: this is the canonical dataset contract screen for logical field names, type expectations, and alias mappings consumed by expressions in later screens.
+- Reference behavior: this screen defines local logical fields and aliases consumed by SpEL builders in Screens 4, 5, 8, and 12.
+- No external reference is created here; scope is the current artifact unless explicitly exported through composition in Screen 7.
+
+---
+
+## Screen 3A: Process Dataset Profile and Runtime Semantics
+
+```text
++------------------------------------------------------------------------------------------------+
+| Process Dataset Profile                                                                         |
++------------------------------------------------------------------------------------------------+
+| Step 4 of 9                                                                                    |
+| Context: Dataset contract from Screen 3                                                        |
+|                                                                                                |
+| Dataset Root Alias*         [ user v ]   (user | trade | root | custom)                       |
+| Dataset Mode*               [ strict-schema v ]  (strict-schema | permissive-schema)          |
+| Missing Path Policy*        [ error v ]  (error | warn-and-null | default-value)              |
+| Type Coercion Policy*       [ safe-only v ]  (none | safe-only | aggressive)                  |
+| Null Handling*              [ explicit-null v ] (explicit-null | empty-as-null)               |
+|                                                                                                |
+| Runtime Field Semantics                                                                         |
+| +----+----------------------+------------+------------+----------------+---------------------+ |
+| | #  | Field Path            | Type       | Nullable   | Missing Action | Default (optional)  | |
+| +----+----------------------+------------+------------+----------------+---------------------+ |
+| | 1  | user.age              | integer    | [ ] no     | error          | --                  | |
+| | 2  | user.countryCode      | string     | [x] yes    | warn-and-null  | --                  | |
+| | 3  | user.status           | string     | [x] yes    | default-value  | "UNKNOWN"           | |
+| +----+----------------------+------------+------------+----------------+---------------------+ |
+| [ + Add Field Semantics ]                                                                        |
+|                                                                                                |
+| Expression Probe                                                                                |
+| Expression                [ #user.age > 18                                                    ] |
+| Required Paths            [ user.age ]                                                         |
+| Type Check               [ PASS ] user.age => integer                                          |
+| Null Safety              [ PASS ] policy requires non-null                                     |
+|                                                                                                |
+| Dataset Compatibility Summary                                                                    |
+| [PASS] All required paths declared                                                              |
+| [WARN] 2 optional fields have no defaults                                                       |
+| [PASS] No unsafe coercion paths detected                                                        |
+|                                                                                                |
+| [ Validate Semantics ] [ Preview Contract YAML ]              [ < Back ] [ Save & Next > ]    |
++------------------------------------------------------------------------------------------------+
+```
+
+Notes:
+- Process dataset behavior: this screen defines runtime semantics for path resolution, coercion, and null/missing handling that govern expression evaluation across all authoring screens.
+- Output from this screen is consumed by on-screen test panels (Screens 4, 5, 8, 10, 12) and by final integrity validation (Screen 6).
+
+### Screen 3A UI to YAML Mapping
+
+| UI Field | YAML Key | Example |
+|----------|----------|---------|
+| Dataset Root Alias | `process-dataset.root-alias` | `"user"` |
+| Dataset Mode | `process-dataset.mode` | `"strict-schema"` |
+| Missing Path Policy | `process-dataset.runtime.missing-path-policy` | `"error"` |
+| Type Coercion Policy | `process-dataset.runtime.type-coercion-policy` | `"safe-only"` |
+| Null Handling | `process-dataset.runtime.null-handling` | `"explicit-null"` |
+| Field Path | `process-dataset.runtime.field-semantics[].path` | `"user.age"` |
+| Field Type | `process-dataset.runtime.field-semantics[].type` | `"integer"` |
+| Nullable | `process-dataset.runtime.field-semantics[].nullable` | `false` |
+| Missing Action | `process-dataset.runtime.field-semantics[].missing-action` | `"error"` |
+| Default Value | `process-dataset.runtime.field-semantics[].default-value` | `"UNKNOWN"` |
+
+### Screen 3A API Contract
+
+| Action | Method + Path | Purpose |
+|--------|----------------|---------|
+| Validate semantics | `POST /api/v1/process-datasets/validate-semantics` | Validate path existence, nullability, and coercion rules. |
+| Probe expression | `POST /api/v1/process-datasets/probe-expression` | Evaluate a single expression against profile + sample payload. |
+| Save profile | `PUT /api/v1/process-datasets/{datasetId}/profile` | Persist runtime semantics for a dataset contract. |
+| Get profile | `GET /api/v1/process-datasets/{datasetId}/profile` | Load saved dataset profile for editing. |
+
+---
+
+## Screen 3B: Process Dataset Test Bench and Stage Snapshots
+
+```text
++------------------------------------------------------------------------------------------------+
+| Process Dataset Test Bench                                                                      |
++------------------------------------------------------------------------------------------------+
+| Step 5 of 9                                                                                    |
+| Profile: strict-schema / missing=error / coercion=safe-only                                   |
+|                                                                                                |
+| Test Payload Library                                                                            |
+| +----+---------------------------+-------------------------------+----------------------------+ |
+| | #  | Payload Name              | Purpose                       | Expected Result            | |
+| +----+---------------------------+-------------------------------+----------------------------+ |
+| | 1  | adult-us-user             | baseline pass                 | #user.age > 18 => true     | |
+| | 2  | minor-user                | baseline fail                 | #user.age > 18 => false    | |
+| | 3  | missing-age               | required-path failure         | missing path error         | |
+| +----+---------------------------+-------------------------------+----------------------------+ |
+| [ + Add Payload ] [ Import JSON ]                                                             |
+|                                                                                                |
+| Payload Editor (selected: adult-us-user)                                                       |
+| {                                                                                              |
+|   "user": {                                                                                   |
+|     "id": "U-1001",                                                                         |
+|     "age": 27,                                                                               |
+|     "countryCode": "US",                                                                    |
+|     "status": "ACTIVE"                                                                      |
+|   }                                                                                            |
+| }                                                                                              |
+|                                                                                                |
+| Stage Snapshot Timeline                                                                         |
+| [Input] -> [After Rules] -> [After Enrichments] -> [After Transformations]                    |
+|                                                                                                |
+| Snapshot Diff (Input vs After Rules)                                                           |
+| +--------------------------+-----------------------+-----------------------+                    |
+| | Field                    | Before                | After                 |                    |
+| +--------------------------+-----------------------+-----------------------+                    |
+| | user.age                 | 27                    | 27                    |                    |
+| | requiredFieldsValid      | --                    | true                  |                    |
+| | customerTier             | --                    | --                    |                    |
+| +--------------------------+-----------------------+-----------------------+                    |
+|                                                                                                |
+| Evaluation Results                                                                              |
+| [PASS] #user.age > 18 => true                                                                  |
+| [PASS] #user.countryCode == 'US' => true                                                       |
+| [WARN] customerTier unavailable until enrichment stage                                          |
+|                                                                                                |
+| [ Run Full Dataset Simulation ] [ Save Fixtures ]             [ < Back ] [ Save & Next > ]    |
++------------------------------------------------------------------------------------------------+
+```
+
+Notes:
+- Process dataset behavior: this screen makes dataset lifecycle observable with stage-by-stage snapshots and expression outcomes before users proceed to lookup/rule/enrichment authoring.
+- Fixture payloads created here are reused by condition test panels in later screens and by regression validation in Screen 6.
+
+### Screen 3B UI to YAML Mapping
+
+| UI Field | YAML Key | Example |
+|----------|----------|---------|
+| Payload Name | `process-dataset.fixtures[].name` | `"adult-us-user"` |
+| Payload Body | `process-dataset.fixtures[].payload` | `{ "user": { "age": 27 } }` |
+| Purpose | `process-dataset.fixtures[].purpose` | `"baseline pass"` |
+| Expected Result | `process-dataset.fixtures[].expected[]` | `"#user.age > 18 => true"` |
+| Snapshot Stage | `process-dataset.snapshot-stages[]` | `"after-rules"` |
+
+### Screen 3B API Contract
+
+| Action | Method + Path | Purpose |
+|--------|----------------|---------|
+| Save fixture | `PUT /api/v1/process-datasets/{datasetId}/fixtures/{fixtureName}` | Create or update a named test payload fixture. |
+| List fixtures | `GET /api/v1/process-datasets/{datasetId}/fixtures` | Load fixture library for test bench. |
+| Run simulation | `POST /api/v1/process-datasets/{datasetId}/simulate` | Execute rule/enrichment/transformation pipeline and return staged snapshots. |
+| Diff snapshots | `POST /api/v1/process-datasets/{datasetId}/snapshot-diff` | Compute field-level before/after diff between two stages. |
+
 ---
 
 ## Screen 4: Lookup Mapping Builder (Ref-Aware)
@@ -406,11 +631,13 @@ Business file references via:                       lookup-dataset:
 +------------------------------------------------------------------------------------------------+
 | Lookup Mapping Builder                                                                           |
 +------------------------------------------------------------------------------------------------+
-| Step 4 of 7                                                                                     |
+| Step 6 of 9                                                                                     |
 |                                                                                                |
 | Mapping ID*                [ get-customer-tier                                                 ] |
 | Lookup Enrichment ID*      [ customer-tier-lookup                                               ] |
-| Condition (SpEL)*          [ #customerId != null ]                                               |
+| Condition*                 [ Basic Builder v ]  (Basic Builder | Advanced Expression)          |
+| Condition Preview          [ Run lookup when customerId is present ]                            |
+| Generated Expression       [ #customerId != null ]                                               |
 | Lookup Key (SpEL)*         [ #customerId ]                                                       |
 |                                                                                                |
 | Dataset Mode*              ( ) Inline      ( ) Embedded Query      (o) External Query Ref      |
@@ -467,9 +694,19 @@ Business file references via:                       lookup-dataset:
 |                 lookup-config.lookup-dataset.key-field = "code"                                 |
 |                 lookup-config.lookup-dataset.data = [ ... ]                                     |
 |                                                                                                |
+| Condition Test (sample record)                                                                   |
+| Input:  { "customerId": "C12345" }                                                            |
+| Result: condition = true, lookup-key = "C12345", rows matched = 1                              |
+|                                                                                                |
 | [ Resolve Refs ] [ Validate Mapping ]                       [ < Back ] [ Save & Next > ]       |
 +------------------------------------------------------------------------------------------------+
 ```
+
+Notes:
+- Process dataset behavior: parameter value sources and field mappings explicitly map from process dataset input fields to lookup outputs, making read/write field flow visible.
+- Reference behavior: `data-source-ref` options come from Screen 1 bundle refs plus catalog-discovered external-data-config artifacts.
+- `query-ref` options are filtered by selected `data-source-ref` and source type; incompatible query/operation types are marked TYPE-MISMATCH.
+- Failure behavior: missing or ambiguous refs block `Save & Next` when resolver policy is hard-fail; warn-only policy permits draft save but blocks final write in Screens 6/7.
 
 ---
 
@@ -479,13 +716,15 @@ Business file references via:                       lookup-dataset:
 +------------------------------------------------------------------------------------------------+
 | Enrichment Builder                                                                               |
 +------------------------------------------------------------------------------------------------+
-| Step 5 of 7                                                                                     |
+| Step 7 of 9                                                                                     |
 |                                                                                                |
 | Enrichment ID*             [ customer-tier-lookup                                              ] |
 | Enrichment Type*           [ lookup-enrichment v ]                                               |
 |                            (lookup-enrichment | calculation-enrichment |                         |
 |                             field-enrichment | conditional-mapping-enrichment)                   |
-| Condition (SpEL)           [ #customerId != null ]                                               |
+| Condition                  [ Basic Builder v ]  (Basic Builder | Advanced Expression)           |
+| Condition Preview          [ Run enrichment when customerId is present ]                         |
+| Generated Expression       [ #customerId != null ]                                               |
 | Result Field               [ tierLookupResult ]  (stores enrichment outcome in data map)        |
 | Success Code               [ TIER_FOUND ]                                                        |
 | Error Code                 [ TIER_LOOKUP_FAILED ]                                                |
@@ -554,10 +793,17 @@ Business file references via:                       lookup-dataset:
 | [x] SpEL syntax valid in all expressions                                                         |
 | [x] target fields valid                                                                          |
 | [x] referenced data sources / queries resolved                                                   |
+| [x] condition test passed on sample input                                                        |
 |                                                                                                |
 | [ Validate Enrichment ]                                  [ < Back ] [ Save & Next > ]          |
 +------------------------------------------------------------------------------------------------+
 ```
+
+Notes:
+- Process dataset behavior: this screen is a primary dataset mutation point where target fields are created/updated and result fields are materialized for downstream rules/groups/chains.
+- Reference behavior: in lookup mode, this screen reuses the same dataset resolution contract as Screen 4 (external `data-source-ref`/`query-ref`, embedded `connection-name`, or inline data).
+- Enrichment IDs authored here are published as local symbols for Screen 11 and as file-level symbols for Screen 7 composition.
+- Renaming an enrichment ID triggers dependent reference updates in current draft and flags cross-file usages for confirmation.
 
 ---
 
@@ -567,7 +813,7 @@ Business file references via:                       lookup-dataset:
 +------------------------------------------------------------------------------------------------+
 | Generated Artifact Preview                                                                       |
 +------------------------------------------------------------------------------------------------+
-| Step 6 of 7                                                                                     |
+| Step 8 of 9                                                                                     |
 | Change Set: CS-2026-03-10-001                                                                    |
 |                                                                                                |
 | Tabs: [Bundle Summary] [Ref Integrity] [Generated YAML] [Validation] [Diff]                     |
@@ -606,6 +852,12 @@ Business file references via:                       lookup-dataset:
 +------------------------------------------------------------------------------------------------+
 ```
 
+Notes:
+- Process dataset behavior: this screen validates end-to-end dataset assumptions (required inputs, type compatibility, and produced fields) across all generated artifacts in the change set.
+- Reference behavior: this is the authoritative pre-write integrity gate; all refs are re-resolved against current catalog + draft change set snapshot.
+- Approval freezes resolved symbol bindings for the change set to prevent drift between preview and file write.
+- Any unresolved hard failures must be fixed before moving to composition/write.
+
 ---
 
 ## Screen 7: Compose into Component / Scenario / Registry
@@ -614,7 +866,7 @@ Business file references via:                       lookup-dataset:
 +------------------------------------------------------------------------------------------------+
 | Composition Builder                                                                              |
 +------------------------------------------------------------------------------------------------+
-| Step 7 of 7                                                                                     |
+| Step 9 of 9                                                                                     |
 |                                                                                                |
 | Create Component?         [x] yes                                                                |
 | Component ID*             [ customer-settlement-component                                       ] |
@@ -675,6 +927,12 @@ Business file references via:                       lookup-dataset:
 +------------------------------------------------------------------------------------------------+
 ```
 
+Notes:
+- Process dataset behavior: composition validates dataset contract compatibility across included rule/enrichment/component/scenario files so stage handoffs do not break at runtime.
+- Reference behavior: `config-file`, `enrichment-ref`, and `component-ref` selectors are catalog-backed and type-filtered.
+- Cross-file references are validated for existence, type compatibility, depth rules, and cycle safety before `Finish and Write Files`.
+- New component/scenario/registry IDs become immediately discoverable in Screen 0 after write.
+
 ---
 
 ## Screen 8: Rule Builder
@@ -698,7 +956,9 @@ Business file references via:                       lookup-dataset:
 | Rule Detail (selected: required-fields-check)                                                    |
 | Rule ID*                 [ required-fields-check                                               ] |
 | Rule Name                [ Required Fields Validation                                          ] |
-| Condition (SpEL)*        [ #tradeId != null && #counterpartyName != null && #amount != null    ] |
+| Condition*               [ Basic Builder v ]  (Basic Builder | Advanced Expression)            |
+| Condition Preview        [ Rule matches when tradeId, counterpartyName, and amount are present ] |
+| Generated Expression     [ #tradeId != null && #counterpartyName != null && #amount != null    ] |
 | Message*                 [ Trade ID, counterparty, and amount are required fields              ] |
 | No-Match Message         [ All required fields present                                         ] |
 | Severity*                [ ERROR v ]    (CRITICAL | ERROR | WARNING | INFO)                     |
@@ -713,6 +973,7 @@ Business file references via:                       lookup-dataset:
 | [x] SpEL syntax valid                                                                            |
 | [x] Severity recognized                                                                          |
 | [x] No duplicate rule IDs                                                                        |
+| [x] condition test passed on sample input                                                        |
 |                                                                                                |
 | [ Validate Rules ]  [ Preview YAML ]                       [ < Back ] [ Save & Next > ]        |
 +------------------------------------------------------------------------------------------------+
@@ -723,6 +984,9 @@ Notes:
 - `no-match-message` is displayed when the condition evaluates to `false` (complement of `message`).
 - `success-code` / `error-code` enable business-level result tracking across rules and enrichments.
 - Rules execute in document order by default; `priority` overrides when `processing-mode: "priority-order"`.
+- Process dataset behavior: rule conditions read from the current process dataset snapshot, and `result-field` writes a deterministic boolean output for downstream consumers.
+- Reference behavior: rule IDs defined here are the primary local symbol source for Screen 9 (`rule-ids` and structured `rule-references`).
+- Rename/delete behavior: local group memberships are auto-updated in draft; cross-file refs are marked for explicit confirmation.
 
 ---
 
@@ -783,6 +1047,9 @@ Notes:
 - `rule-references` is the structured form with `rule-id`, `sequence`, `enabled`, `override-priority`.
 - `rule-group-references` imports rule groups defined in other YAML files.
 - `rule-refs` is the top-level section for importing entire rule configurations from external files.
+- Process dataset behavior: group execution does not introduce a new dataset schema; it orchestrates evaluation order and error semantics over rules that read/write the existing process dataset context.
+- Reference behavior: `+ Add Rule ID` resolves only against local rules (Screen 8 in the same file), while `+ Add Rule Reference`/`rule-refs` resolve through the catalog and imported files.
+- Resolution order: local symbols first, then explicitly imported `rule-refs`; ambiguous external matches require source-file disambiguation before save.
 
 ---
 
@@ -876,6 +1143,9 @@ Notes:
 - `accumulative-chaining`: Weighted rules accumulate a score; decision rule evaluates the total.
 - `complex-workflow`: Combination of the above patterns for multi-path workflows.
 - `fluent-builder`: Builder pattern with on-success/on-failure callbacks.
+- Process dataset behavior: chain patterns model dataset evolution step-by-step, where each selected rule/stage may consume fields produced by previous steps.
+- Reference behavior: trigger/stage/route rule selectors resolve from local rules and imported rule refs, using the same ambiguity rules as Screen 9.
+- Failure behavior: unresolved chain members block chain validation and prevent `Save & Next`.
 
 ---
 
@@ -924,6 +1194,9 @@ Notes:
 - Enrichment groups mirror rule groups: `AND` requires all to succeed, `OR` requires at least one.
 - `stop-on-first-failure` provides short-circuit evaluation for AND groups.
 - `enrichment-group-references` (plural) and `enrichment-group` (singular) both enable hierarchical composition.
+- Process dataset behavior: group members execute against the shared process dataset and can apply cumulative field mutations based on member order and failure policy.
+- Reference behavior: `+ Add Enrichment ID` resolves only local enrichment IDs (from Screen 5 in this file); reference modes resolve via catalog/imported symbols.
+- Failure behavior: missing enrichment refs are non-runnable errors and block group validation/write.
 
 ---
 
@@ -988,6 +1261,8 @@ Notes:
 - `actions-false` is an alias for `else-actions` (both work identically).
 - Nested conditional-transformations enable multi-level branching (if/else-if/else pattern).
 - Multiple sibling transformation-rules execute independently (all conditions evaluated).
+- Process dataset behavior: transformations are explicit dataset rewrite steps; each action defines target-field mutations on the current snapshot.
+- Reference behavior: transformation expressions may reference current data fields and prior rule/enrichment result fields from the same processing context; no new cross-file reference type is introduced here.
 
 ---
 
@@ -1006,14 +1281,14 @@ Notes:
 |                             RETRY_WITH_SAFE_EXPRESSION | SKIP_RULE)                             |
 |                                                                                                |
 | Severity Policies                                                                                |
-| +----------+-----------+-------------------------------+-----------+-----------+-----------+     |
-| | Severity | Recovery  | Strategy                       | Max Retry | Delay(ms)| Backoff   |     |
-| +----------+-----------+-------------------------------+-----------+-----------+-----------+     |
-| | CRITICAL | [ ] off   | FAIL_FAST                      | --        | --        | --        |     |
-| | ERROR    | [ ] off   | FAIL_FAST                      | --        | --        | --        |     |
-| | WARNING  | [x] on    | CONTINUE_WITH_DEFAULT           | 1         | 100       | --        |     |
-| | INFO     | [x] on    | CONTINUE_WITH_DEFAULT           | 0         | --        | --        |     |
-| +----------+-----------+-------------------------------+-----------+-----------+-----------+     |
+| +----------+-----------+-------------------------------+-----------+-----------+            |
+| | Severity | Recovery  | Strategy                       | Max Retry | Delay(ms)|            |
+| +----------+-----------+-------------------------------+-----------+-----------+            |
+| | CRITICAL | [ ] off   | FAIL_FAST                      | --        | --        |            |
+| | ERROR    | [ ] off   | FAIL_FAST                      | --        | --        |            |
+| | WARNING  | [x] on    | CONTINUE_WITH_DEFAULT           | 1         | 100       |            |
+| | INFO     | [x] on    | CONTINUE_WITH_DEFAULT           | 0         | --        |            |
+| +----------+-----------+-------------------------------+-----------+-----------+            |
 |                                                                                                |
 | Policy Detail (selected: WARNING)                                                                |
 | Severity                 WARNING                                                                 |
@@ -1021,24 +1296,12 @@ Notes:
 | Strategy*                [ CONTINUE_WITH_DEFAULT v ]                                             |
 | Max Retries              [ 1 ]                                                                   |
 | Retry Delay (ms)         [ 100 ]                                                                 |
-| Backoff Multiplier       [ -- ]  (for exponential backoff; blank = no backoff)                   |
-| Max Delay (ms)           [ -- ]                                                                  |
-| Fallback Value           [ null ]  (value used when CONTINUE_WITH_DEFAULT applies)              |
 |                                                                                                |
 | Strategy Reference:                                                                              |
 |  FAIL_FAST                 — Immediately fail; no recovery attempted                             |
 |  CONTINUE_WITH_DEFAULT     — Log error, continue with safe default values                       |
 |  RETRY_WITH_SAFE_EXPRESSION — Retry with simplified expression                                  |
 |  SKIP_RULE                 — Skip failed rule entirely, continue processing                     |
-|                                                                                                |
-| Environment Overrides                                                                            |
-| +----------+-------------------------------+-----------------------------------------+           |
-| | Env       | Override                       | Value                                   |           |
-| +----------+-------------------------------+-----------------------------------------+           |
-| | dev       | default-strategy               | CONTINUE_WITH_DEFAULT                    |           |
-| | prod      | default-strategy               | FAIL_FAST                                |           |
-| +----------+-------------------------------+-----------------------------------------+           |
-| [ + Add Override ]                                                                               |
 |                                                                                                |
 | Concept: ResultType vs Severity                                                                  |
 |  ResultType (system): MATCH, NO_MATCH, ERROR, ENRICHMENT_FAILURE                                |
@@ -1053,12 +1316,30 @@ Notes:
 Notes:
 - Error recovery is a cross-cutting concern applied to the entire YAML configuration.
 - Severity policies override the default strategy per severity level.
-- Environment overrides allow different error handling behavior per deployment environment.
 - The ResultType vs Severity distinction is critical: ResultType is system-level (MATCH/NO_MATCH/ERROR), Severity is business-level classification.
+- Process dataset behavior: recovery strategy determines how dataset state is handled after rule/enrichment failures (preserve current snapshot, apply defaults, retry, or skip mutation).
+- Reference behavior: no explicit symbol refs are authored here; settings apply transitively to referenced rules, groups, chains, and enrichments at runtime.
+
+### Screen 13 UI to YAML Mapping
+
+| UI Field | YAML Key | Example |
+|----------|----------|---------|
+| Error Recovery Enabled | `error-recovery.enabled` | `true` |
+| Log Recovery Attempts | `error-recovery.log-recovery-attempts` | `true` |
+| Default Strategy | `error-recovery.default-strategy` | `"CONTINUE_WITH_DEFAULT"` |
+| Severity (row key) | `error-recovery.severity-policies.<SEVERITY>` | `WARNING` |
+| Recovery Enabled (policy) | `error-recovery.severity-policies.<SEVERITY>.recovery-enabled` | `true` |
+| Strategy (policy) | `error-recovery.severity-policies.<SEVERITY>.strategy` | `"CONTINUE_WITH_DEFAULT"` |
+| Max Retries (policy) | `error-recovery.severity-policies.<SEVERITY>.max-retries` | `1` |
+| Retry Delay (ms) (policy) | `error-recovery.severity-policies.<SEVERITY>.retry-delay` | `100` |
 
 ---
 
-## Screen 14: Pipeline / ETL Orchestration
+## ETL Orchestration
+
+This section covers pipeline authoring and sink configuration for end-to-end ETL flows.
+
+### Screen 14: Pipeline Orchestration
 
 ```text
 +------------------------------------------------------------------------------------------------+
@@ -1068,34 +1349,43 @@ Notes:
 |                                                                                                |
 | Pipeline Metadata                                                                                |
 | Pipeline Name*           [ Settlement Data Pipeline                                            ] |
-| Type*                    [ pipeline-config ]                                                     |
+| Type*                    [ pipeline v ]  (pipeline | pipeline-config)                           |
 | Description              [ Extract, transform, and load settlement data                        ] |
 |                                                                                                |
 | Pipeline Steps                                                                                   |
-| +----+---------------------+-----------+-------------------+-------------------+---------+      |
-| | #  | Step ID              | Type      | Depends On        | Execution Order   | Enabled |      |
-| +----+---------------------+-----------+-------------------+-------------------+---------+      |
-| | 1  | extract-trades       | extract   | --                | 1                 | [x]     |      |
-| | 2  | validate-data        | transform | extract-trades    | 2                 | [x]     |      |
-| | 3  | enrich-settlement    | transform | validate-data     | 3                 | [x]     |      |
-| | 4  | load-downstream      | load      | enrich-settlement | 4                 | [x]     |      |
-| | 5  | audit-trail          | audit     | load-downstream   | 5                 | [x]     |      |
-| +----+---------------------+-----------+-------------------+-------------------+---------+      |
+| +----+---------------------+-----------+-------------------+-------------------+                 |
+| | #  | Step Name            | Type      | Depends On        | Operation          |                 |
+| +----+---------------------+-----------+-------------------+-------------------+                 |
+| | 1  | extract-trades       | extract   | --                | getAllTrades       |                 |
+| | 2  | validate-data        | transform | extract-trades    | validateTrades     |                 |
+| | 3  | enrich-settlement    | transform | validate-data     | enrichSettlement   |                 |
+| | 4  | load-downstream      | load      | enrich-settlement | writeSettlement    |                 |
+| | 5  | audit-trail          | audit     | load-downstream   | writeAuditTrail    |                 |
+| +----+---------------------+-----------+-------------------+-------------------+                 |
 | [ + Add Step ]                                                                                   |
 |                                                                                                |
 | Step Detail (selected: extract-trades)                                                           |
-| Step ID*                 [ extract-trades                                                      ] |
+| Step Name*               [ extract-trades                                                      ] |
 | Step Type*               [ extract v ]  (extract | transform | load | audit | read-schema | schema-diff) |
 | Description              [ Extract raw trade data from source system                           ] |
 | Depends On               [ -- v ]  (select predecessor step or -- for none)                     |
-| Config File              [ config/extract/trade-extract.yaml ]                                   |
-| Execution Order          [ 1 ]                                                                   |
-| Enabled                  [x]                                                                     |
+| Source                   [ settlement-input v ]   (required for extract)                         |
+| Sink                     [ -- v ]                  (required for load)                            |
+| Operation                [ getAllTrades ]                                                       |
+| Condition (SpEL)         [ -- ]                                                                  |
+| Optional                 [ ]  (if enabled, step failure does not stop pipeline)                  |
+|                                                                                                |
+| Step Retry                                                                                       |
+| Max Attempts             [ 3 ]                                                                   |
+| Delay (ms)               [ 1000 ]                                                                |
+| Backoff Multiplier       [ 2.0 ]                                                                 |
+| Max Delay (ms)           [ 30000 ]                                                               |
 |                                                                                                |
 | Execution Configuration                                                                          |
 | Mode*                    [ sequential v ]  (sequential | parallel)                               |
-| Timeout (ms)             [ 30000 ]                                                               |
-| Retry Count              [ 2 ]                                                                   |
+| Error Handling           [ stop-on-error v ]  (stop-on-error | continue-on-error)               |
+| Max Retries              [ 3 ]                                                                   |
+| Retry Delay (ms)         [ 1000 ]                                                                |
 | Log Progress             [x]                                                                     |
 | Collect Metrics          [x]                                                                     |
 |                                                                                                |
@@ -1112,14 +1402,43 @@ Notes:
 ```
 
 Notes:
-- Pipeline steps declare explicit dependencies via `depends-on` for execution ordering.
-- Step types map to YAML sections: `extract` (read-schema), `transform`, `load`, `audit`, plus `read-schema` and `schema-diff` for data-sync pipelines.
+- Pipeline steps declare explicit dependencies via `depends-on`.
+- Step schema aligns with `name`, `type`, `source`/`sink`, `operation`, `depends-on`, `condition`, `optional`, and `retry`.
+- Step types include `extract`, `transform`, `load`, `audit`, `read-schema`.
 - Monitoring configuration enables SLA tracking and failure alerting per pipeline.
 - The data flow preview is auto-generated from the step dependency graph.
+- Process dataset behavior: each step declares dataset inputs/outputs so field availability can be validated along dependency edges before execution.
+- Reference behavior: `source` and `sink` selectors resolve against catalog symbols from data-source/data-sink configs (Screens 2 and 15); missing symbols fail pipeline validation.
+
+#### Screen 14 UI to YAML Mapping
+
+| UI Field | YAML Key | Example |
+|----------|----------|---------|
+| Pipeline Name | `pipeline.name` | `"customer-etl-pipeline"` |
+| Pipeline Description | `pipeline.description` | `"Extract, transform, and load"` |
+| Step Name | `pipeline.steps[].name` | `"extract-trades"` |
+| Step Type | `pipeline.steps[].type` | `"extract"` |
+| Depends On | `pipeline.steps[].depends-on` | `["extract-trades"]` |
+| Source | `pipeline.steps[].source` | `"settlement-input"` |
+| Sink | `pipeline.steps[].sink` | `"settlement-output"` |
+| Operation | `pipeline.steps[].operation` | `"getAllTrades"` |
+| Condition (SpEL) | `pipeline.steps[].condition` | `"#region == 'US'"` |
+| Optional | `pipeline.steps[].optional` | `false` |
+| Retry Max Attempts | `pipeline.steps[].retry.max-attempts` | `3` |
+| Retry Delay (ms) | `pipeline.steps[].retry.delay-ms` | `1000` |
+| Retry Backoff Multiplier | `pipeline.steps[].retry.backoff-multiplier` | `2.0` |
+| Retry Max Delay (ms) | `pipeline.steps[].retry.max-delay-ms` | `30000` |
+| Execution Mode | `pipeline.execution.mode` | `"sequential"` |
+| Execution Error Handling | `pipeline.execution.error-handling` | `"stop-on-error"` |
+| Execution Max Retries | `pipeline.execution.max-retries` | `3` |
+| Execution Retry Delay (ms) | `pipeline.execution.retry-delay-ms` | `1000` |
+| Monitoring Log Progress | `pipeline.monitoring.log-progress` | `true` |
+| Monitoring Collect Metrics | `pipeline.monitoring.collect-metrics` | `true` |
+| Monitoring Alert on Failure | `pipeline.monitoring.alert-on-failure` | `true` |
 
 ---
 
-## Screen 15: Data Sink Configuration
+### Screen 15: Data Sink Configuration
 
 ```text
 +------------------------------------------------------------------------------------------------+
@@ -1184,6 +1503,8 @@ Notes:
 - Data sinks mirror data source types (database, file-system, rest-api, cache, message-queue, custom).
 - Sinks are configured in the `data-sinks` YAML section, separate from data sources.
 - The `output-format` keyword controls serialization format for non-database sinks.
+- Process dataset behavior: sink mappings define final projection of process dataset fields to external outputs and are validated for missing required fields.
+- Reference behavior: sink names defined here are exported to the catalog and become selectable in Screen 14 step `sink` fields.
 
 ---
 
@@ -1261,6 +1582,8 @@ Notes:
 - Enterprise governance fields (`business-domain`, `business-owner`, `created-by`, `effective-date`, `expiration-date`) enable lifecycle management.
 - `priority` controls execution ordering; `stop-on-first-failure` and `parallel-execution` control rule execution within the category.
 - The hierarchy preview is auto-generated from parent-category relationships.
+- Process dataset behavior: categories do not change dataset shape directly, but they govern which dataset-affecting rules/enrichments run and in what priority context.
+- Reference behavior: category names authored here are catalog symbols consumed by category selectors in rule/enrichment authoring; renames require dependent assignment updates.
 
 ---
 
@@ -1277,6 +1600,7 @@ Notes:
 - Source type / enrichment type / chain pattern panels swap dynamically based on selector.
 - Rule chain patterns show only the relevant configuration panel for the selected pattern.
 - Error recovery and categories are cross-cutting — changes propagate to dependent configs.
+- Process dataset lifecycle is cross-cutting — every screen must declare dataset reads/writes and participate in pre-write dataset contract validation.
 ```
 
 ## Mobile Notes (Revised)
@@ -1289,3 +1613,86 @@ Notes:
 - Standalone screens (8–16) use bottom tab navigation from the catalog.
 - Transformation nesting and rule chain patterns collapse to summary cards on mobile.
 ```
+
+---
+
+## Appendix B: Missing apex-api Endpoints for YAML Authoring Screens
+
+Scope: This appendix covers only YAML authoring requirements from Screens 0-16. Runtime-only operations are intentionally excluded.
+
+### 1. Catalog and Discovery
+
+| Endpoint | Method | Required By | Purpose |
+|----------|--------|-------------|---------|
+| `/api/catalog/workspaces` | GET | Screen 0 | List registered scan roots/workspaces available to the authoring UI. |
+| `/api/catalog/workspaces` | POST | Screen 0 | Register a new scan root/workspace (name, root path, include/exclude patterns, environment). |
+| `/api/catalog/workspaces/{workspaceId}` | PATCH | Screen 0 | Update workspace root and scan options without redeploying service. |
+| `/api/catalog/workspaces/{workspaceId}` | DELETE | Screen 0 | Remove a workspace registration from catalog scanning. |
+| `/api/catalog/configurations` | GET | Screen 0 | List filterable YAML artifacts across workspace (type, owner, domain, health, refs). |
+| `/api/catalog/scan` | POST | Screen 0 | Trigger full or incremental workspace scan for catalog refresh. |
+| `/api/catalog/resolver-queue` | GET | Screen 0 | Return unresolved, ambiguous, and type-mismatch references for resolver queue. |
+| `/api/catalog/dependency-graph` | GET | Screen 0 | Provide graph model for cross-file dependency visualization. |
+| `/api/catalog/snapshot` | GET | Screen 0 | Export point-in-time catalog snapshot. |
+
+Catalog workspace scoping rules:
+- All catalog read/scan endpoints should be workspace-scoped.
+- Workspace context must be explicit on every request by either:
+  - path parameter where applicable, or
+  - `workspaceId` query parameter, or
+  - `X-APEX-Workspace-Id` request header.
+- If no workspace context is provided, return `400 Bad Request`.
+- Do not rely on implicit active-workspace state for production APIs.
+- For service-to-service/background automation, always send explicit `workspaceId`.
+
+Optional UX convenience (not recommended as required API contract):
+- `POST /api/catalog/workspaces/{workspaceId}/activate` can exist as a UI-only default selector.
+- If implemented, it must be caller-local scope only and never global state.
+
+### 2. Bundle Authoring Lifecycle
+
+| Endpoint | Method | Required By | Purpose |
+|----------|--------|-------------|---------|
+| `/api/authoring/bundles` | POST | Screen 1 | Create draft bundle from selected artifacts and metadata intent. |
+| `/api/authoring/bundles/{bundleId}` | PATCH | Screens 1-7 | Save incremental edits while moving through wizard steps. |
+| `/api/authoring/bundles/{bundleId}/validate-plan` | POST | Screen 1 | Validate plan before generation (naming, refs, required metadata). |
+| `/api/authoring/bundles/{bundleId}/render` | POST | Screens 2-16 | Render generated YAML preview from current UI state without writing files. |
+| `/api/authoring/bundles/{bundleId}/diff` | GET | Screen 6 | Show generated change diff before approval. |
+| `/api/authoring/bundles/{bundleId}/approve` | POST | Screen 6 | Record approval gate for generated artifacts. |
+| `/api/authoring/bundles/{bundleId}/export` | GET | Screen 6 | Export full bundle payload for review or handoff. |
+| `/api/authoring/bundles/{bundleId}/write-files` | POST | Screen 7 | Persist approved generated artifacts to target files. |
+
+### 3. Reference Resolution and Integrity
+
+| Endpoint | Method | Required By | Purpose |
+|----------|--------|-------------|---------|
+| `/api/refs/resolve` | POST | Screens 0, 4, 5 | Resolve `data-source-ref`, `query-ref`, `rule-ref`, and related cross-file refs. |
+| `/api/refs/validate-integrity` | POST | Screen 6 | Validate full ref integrity across bundle and referenced files. |
+| `/api/refs/suggest` | POST | Screens 0, 4 | Suggest likely ref targets for missing or ambiguous references. |
+
+### 4. Data Source Authoring Gaps
+
+| Endpoint | Method | Required By | Purpose |
+|----------|--------|-------------|---------|
+| `/api/datasources` | POST | Screen 2A | Create new external data source definitions via authoring workflow. |
+| `/api/datasources/{name}` | PUT | Screen 2A | Update existing external data source definitions. |
+| `/api/datasources/{name}` | DELETE | Screen 2A | Remove external data source definitions from authoring set. |
+| `/api/datasources/{name}/discover-schema` | POST | Screen 2A | Discover source schema for field mapping and dataset contract scaffolding. |
+| `/api/datasources/{name}/named-queries` | GET | Screen 4 | Retrieve named query list for `query-ref` selection. |
+
+### 5. Composition Authoring Gaps
+
+| Endpoint | Method | Required By | Purpose |
+|----------|--------|-------------|---------|
+| `/api/authoring/compose/component` | POST | Screen 7 | Build component config from selected rule configs, enrichment refs, and component refs. |
+| `/api/authoring/compose/scenario` | POST | Screen 7 | Build scenario config with classification, stages, and failure policy. |
+| `/api/authoring/compose/scenario-registry` | POST | Screen 7 | Add or update scenario entries in a registry document. |
+| `/api/authoring/compose/validate` | POST | Screen 7 | Validate cycles, depth limits, stage order uniqueness, and ref consistency. |
+
+### Existing Endpoints Already Covering Part of Authoring
+
+- Configuration load/upload/validate is already available under `/api/config`.
+- Dependency analysis primitives are already available under `/api/dependencies`.
+- Expression validation/evaluation is already available under `/api/expressions`.
+- Basic data source read/test/lookup is already available under `/api/datasources`.
+
+Note: This appendix intentionally does not include runtime orchestration endpoints unrelated to YAML authoring UI flows.
