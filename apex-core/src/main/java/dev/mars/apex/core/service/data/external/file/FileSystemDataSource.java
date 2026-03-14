@@ -100,6 +100,9 @@ public class FileSystemDataSource implements ExternalDataSource {
     public void initialize(DataSourceConfiguration config) throws DataSourceException {
         this.configuration = config;
         this.connectionStatus = ConnectionStatus.connecting();
+        LOGGER.info("Initializing file system data source '{}': basePath='{}', filePattern='{}', pollingInterval={}s",
+            sourceName(), configuredBasePath(), configuredFilePattern(),
+            config.getConnection() != null ? config.getConnection().getPollingInterval() : null);
         
         try {
             // Validate base path exists
@@ -124,10 +127,14 @@ public class FileSystemDataSource implements ExternalDataSource {
             loadInitialData();
             
             this.connectionStatus = ConnectionStatus.connected("File system data source initialized");
-            LOGGER.info("File system data source '{}' initialized successfully", config.getName());
+            LOGGER.info("File system data source '{}' initialized successfully: basePath='{}', filePattern='{}'",
+                sourceName(), configuredBasePath(), configuredFilePattern());
             
         } catch (Exception e) {
             this.connectionStatus = ConnectionStatus.error("Initialization failed", e);
+            LOGGER.error("Failed to initialize file system data source '{}': basePath='{}', filePattern='{}', error={}",
+                sourceName(), configuredBasePath(), configuredFilePattern(), e.getMessage());
+            LOGGER.debug("File system initialization failure for '{}':", sourceName(), e);
             throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                 "Failed to initialize file system data source", e, config.getName(), "initialize", false);
         }
@@ -183,6 +190,8 @@ public class FileSystemDataSource implements ExternalDataSource {
     @SuppressWarnings("unchecked")
     public <T> T getData(String dataType, Object... parameters) {
         long startTime = System.currentTimeMillis();
+        LOGGER.debug("File system getData start for '{}': dataType='{}', parameters={}",
+            sourceName(), dataType, Arrays.toString(parameters));
         
         try {
             // Check cache first if enabled
@@ -192,9 +201,11 @@ public class FileSystemDataSource implements ExternalDataSource {
                 if (cached != null) {
                     metrics.recordCacheHit();
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+                    LOGGER.debug("File system cache hit for '{}': cacheKey='{}'", sourceName(), cacheKey);
                     return (T) cached;
                 }
                 metrics.recordCacheMiss();
+                LOGGER.debug("File system cache miss for '{}': cacheKey='{}'", sourceName(), cacheKey);
             }
 
             // Load data from file
@@ -204,15 +215,19 @@ public class FileSystemDataSource implements ExternalDataSource {
             if (cacheManager.isEnabled() && result != null) {
                 String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
                 cacheManager.put(cacheKey, result);
+                LOGGER.debug("Cached file system result for '{}': cacheKey='{}'", sourceName(), cacheKey);
             }
 
             metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+            LOGGER.debug("File system getData completed for '{}': dataType='{}', resultType='{}'",
+                sourceName(), dataType, result != null ? result.getClass().getSimpleName() : "null");
             return (T) result;
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from file system: {}", e.getMessage());
-            LOGGER.debug("Stack trace for file system data retrieval failure:", e);
+            LOGGER.error("Failed to get data from file system '{}': dataType='{}', parameters={}, error={}",
+                sourceName(), dataType, Arrays.toString(parameters), e.getMessage());
+            LOGGER.debug("File system getData failure for '{}':", sourceName(), e);
             return null;
         }
     }
@@ -220,11 +235,11 @@ public class FileSystemDataSource implements ExternalDataSource {
     @Override
     public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
         try {
-            LOGGER.info("Executing query '{}' on file system data source '{}'", query, getName());
+            LOGGER.debug("Executing file system query for '{}': query='{}', parameters={}", sourceName(), query, parameters);
 
             // First, check if this is a named query from configuration
             String actualQuery = resolveNamedQuery(query);
-            LOGGER.info("Resolved query '{}' to '{}'", query, actualQuery);
+            LOGGER.debug("Resolved file system query for '{}': query='{}', resolved='{}'", sourceName(), query, actualQuery);
 
             // If it's a JSONPath query, execute it against loaded data
             if (actualQuery.startsWith("$.") || actualQuery.startsWith("$[")) {
@@ -234,7 +249,7 @@ public class FileSystemDataSource implements ExternalDataSource {
 
             // If it's a SQL-like query for CSV, execute it against loaded data
             if (actualQuery.toUpperCase().startsWith("SELECT")) {
-                LOGGER.info("Executing as CSV SQL query: {}", actualQuery);
+                LOGGER.debug("Executing file system query as CSV SQL for '{}': {}", sourceName(), actualQuery);
                 return executeCsvQuery(actualQuery, parameters);
             }
             // Otherwise, treat it as a file pattern
@@ -248,9 +263,14 @@ public class FileSystemDataSource implements ExternalDataSource {
             }
 
             metrics.recordRecordsProcessed(results.size());
+            LOGGER.debug("File system query completed for '{}': query='{}', matchedFiles={}, results={}",
+                sourceName(), actualQuery, matchingFiles.size(), results.size());
             return results;
 
         } catch (IOException e) {
+            LOGGER.error("File system query failed for '{}': query='{}', parameters={}, error={}",
+                sourceName(), query, parameters, e.getMessage());
+            LOGGER.debug("File system query failure for '{}':", sourceName(), e);
             throw DataSourceException.executionError("File system query failed", e, "query");
         }
     }
@@ -294,6 +314,9 @@ public class FileSystemDataSource implements ExternalDataSource {
 
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
+            LOGGER.error("File system batch update failed for '{}': updates={}, error={}",
+                sourceName(), updates.size(), e.getMessage());
+            LOGGER.debug("File system batch update failure for '{}':", sourceName(), e);
             throw DataSourceException.executionError("File system batch update failed", e, "batchUpdate");
         }
     }
@@ -305,6 +328,8 @@ public class FileSystemDataSource implements ExternalDataSource {
     
     @Override
     public void refresh() throws DataSourceException {
+        LOGGER.info("Refreshing file system data source '{}': basePath='{}', filePattern='{}'",
+            sourceName(), configuredBasePath(), configuredFilePattern());
         // Clear cache
         cacheManager.clear();
 
@@ -316,6 +341,8 @@ public class FileSystemDataSource implements ExternalDataSource {
     
     @Override
     public void shutdown() {
+        LOGGER.info("Shutting down file system data source '{}': monitoring={}, trackedFiles={}",
+            sourceName(), monitoring, fileModificationTimes.size());
         // Stop file monitoring
         stopFileMonitoring();
         
@@ -323,7 +350,7 @@ public class FileSystemDataSource implements ExternalDataSource {
         cacheManager.clear();
         
         connectionStatus = ConnectionStatus.shutdown();
-        LOGGER.info("File system data source '{}' shut down", getName());
+        LOGGER.info("File system data source '{}' shut down", sourceName());
     }
     
     /**
@@ -355,8 +382,9 @@ public class FileSystemDataSource implements ExternalDataSource {
             }
             
         } catch (Exception e) {
-            LOGGER.error("Failed to load initial data for file system data source '{}': {}", getName(), e.getMessage());
-            LOGGER.debug("Full exception details:", e);
+            LOGGER.error("Failed to load initial data for file system data source '{}': basePath='{}', filePattern='{}', error={}",
+                sourceName(), configuredBasePath(), configuredFilePattern(), e.getMessage());
+            LOGGER.debug("Initial file load failure for '{}':", sourceName(), e);
         }
     }
     
@@ -400,13 +428,7 @@ public class FileSystemDataSource implements ExternalDataSource {
         
         if (mostRecentFile != null) {
             List<Object> fileData = loadDataFromFile(mostRecentFile);
-            
-            // Cache the data
-            if (cacheManager.isEnabled()) {
-                String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
-                cacheManager.put(cacheKey, fileData);
-            }
-            
+
             // Find specific data based on parameters
             return findDataInList(fileData, parameters);
         }
@@ -444,15 +466,16 @@ public class FileSystemDataSource implements ExternalDataSource {
                     FileTime lastModified = Files.getLastModifiedTime(filePath);
                     fileModificationTimes.put(cacheKey, lastModified.toInstant());
                 } catch (IOException e) {
-                    LOGGER.debug("Failed to get modification time for file: {} - {}", filePath, e.getMessage());
+                    LOGGER.debug("Failed to read modification time for '{}': file='{}', error={}",
+                        sourceName(), filePath, e.getMessage());
                 }
             }
             
-            LOGGER.debug("Loaded and cached file: {}", filePath);
+            LOGGER.debug("Loaded and cached file for '{}': file='{}', records={}", sourceName(), filePath, data.size());
             
         } catch (Exception e) {
-            LOGGER.error("Failed to load file '{}': {}", filePath, e.getMessage());
-            LOGGER.debug("Full exception details:", e);
+            LOGGER.error("Failed to load file for '{}': file='{}', error={}", sourceName(), filePath, e.getMessage());
+            LOGGER.debug("File load failure for '{}':", sourceName(), e);
         }
     }
     
@@ -461,6 +484,7 @@ public class FileSystemDataSource implements ExternalDataSource {
      */
     private void startFileMonitoring() {
         if (monitoring) {
+            LOGGER.debug("File monitoring already active for '{}'", sourceName());
             return;
         }
         
@@ -481,7 +505,7 @@ public class FileSystemDataSource implements ExternalDataSource {
         
         monitoring = true;
         LOGGER.info("Started file monitoring for '{}' with interval {}s", 
-            configuration.getName(), pollingInterval);
+            sourceName(), pollingInterval);
     }
     
     /**
@@ -489,6 +513,7 @@ public class FileSystemDataSource implements ExternalDataSource {
      */
     private void stopFileMonitoring() {
         if (!monitoring) {
+            LOGGER.debug("File monitoring already stopped for '{}'", sourceName());
             return;
         }
         
@@ -496,16 +521,19 @@ public class FileSystemDataSource implements ExternalDataSource {
             fileMonitorExecutor.shutdown();
             try {
                 if (!fileMonitorExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    LOGGER.info("File monitor executor for '{}' did not stop gracefully; forcing shutdown", sourceName());
                     fileMonitorExecutor.shutdownNow();
                 }
             } catch (InterruptedException e) {
                 fileMonitorExecutor.shutdownNow();
                 Thread.currentThread().interrupt();
+                LOGGER.error("Interrupted while stopping file monitoring for '{}': {}", sourceName(), e.getMessage());
+                LOGGER.debug("File monitoring stop interruption for '{}':", sourceName(), e);
             }
         }
         
         monitoring = false;
-        LOGGER.info("Stopped file monitoring for '{}'", configuration.getName());
+        LOGGER.info("Stopped file monitoring for '{}': trackedFiles={}", sourceName(), fileModificationTimes.size());
     }
     
     /**
@@ -514,11 +542,11 @@ public class FileSystemDataSource implements ExternalDataSource {
     private String resolveNamedQuery(String query) {
         if (configuration.getQueries() != null && configuration.getQueries().containsKey(query)) {
             String resolvedQuery = configuration.getQueries().get(query);
-            LOGGER.info("Resolved named query '{}' to '{}'", query, resolvedQuery);
+            LOGGER.debug("Resolved named file query for '{}': query='{}', resolved='{}'", sourceName(), query, resolvedQuery);
             return resolvedQuery;
         }
 
-        LOGGER.info("No named query found for '{}', using as literal query", query);
+        LOGGER.debug("No named file query found for '{}': query='{}', using literal value", sourceName(), query);
         return query; // Return as-is if not found in named queries
     }
 
@@ -575,9 +603,15 @@ public class FileSystemDataSource implements ExternalDataSource {
                 results.addAll((List<T>) fileData);
             }
 
+            LOGGER.debug("JSONPath query completed for '{}': query='{}', file='{}', results={}",
+                sourceName(), processedQuery, mostRecentFile, results.size());
+
             return results;
 
         } catch (IOException e) {
+            LOGGER.error("JSONPath query failed for '{}': query='{}', parameters={}, error={}",
+                sourceName(), jsonPathQuery, parameters, e.getMessage());
+            LOGGER.debug("JSONPath query failure for '{}':", sourceName(), e);
             throw DataSourceException.executionError("JSONPath query execution failed", e, "query");
         }
     }
@@ -661,9 +695,9 @@ public class FileSystemDataSource implements ExternalDataSource {
             }
 
             // Load and parse the file
-            LOGGER.debug("Loading data from file for CSV query: {}", mostRecentFile);
+            LOGGER.debug("Loading file for CSV query on '{}': file='{}'", sourceName(), mostRecentFile);
             List<Object> fileData = loadDataFromFile(mostRecentFile);
-            LOGGER.debug("Loaded {} records from file for CSV query", fileData.size());
+            LOGGER.debug("Loaded {} records from file for CSV query on '{}'", fileData.size(), sourceName());
 
             // Apply SQL-like filtering (simplified implementation)
             List<T> results = new ArrayList<>();
@@ -680,9 +714,15 @@ public class FileSystemDataSource implements ExternalDataSource {
             metrics.recordSuccessfulRequest(0); // We don't track time here
             metrics.recordRecordsProcessed(results.size());
 
+            LOGGER.debug("CSV query completed for '{}': query='{}', file='{}', results={}",
+                sourceName(), sqlQuery, mostRecentFile, results.size());
+
             return results;
 
         } catch (IOException e) {
+            LOGGER.error("CSV query failed for '{}': query='{}', parameters={}, error={}",
+                sourceName(), sqlQuery, parameters, e.getMessage());
+            LOGGER.debug("CSV query failure for '{}':", sourceName(), e);
             throw DataSourceException.executionError("CSV query execution failed", e, "query");
         }
     }
@@ -747,16 +787,18 @@ public class FileSystemDataSource implements ExternalDataSource {
 
                     if (cachedModTime == null || cachedModTime.isBefore(lastModified.toInstant())) {
                         loadAndCacheFile(file);
-                        LOGGER.debug("Reloaded modified file: {}", file);
+                        LOGGER.debug("Reloaded modified file for '{}': file='{}'", sourceName(), file);
                     }
                 } catch (IOException e) {
-                    LOGGER.debug("Failed to check modification time for file: {} - {}", file, e.getMessage());
+                    LOGGER.debug("Failed to inspect file modification time for '{}': file='{}', error={}",
+                        sourceName(), file, e.getMessage());
                 }
             }
             
         } catch (Exception e) {
-            LOGGER.error("Error during file change check: {}", e.getMessage());
-            LOGGER.debug("Stack trace for file change check error:", e);
+            LOGGER.error("Error during file change check for '{}': basePath='{}', filePattern='{}', error={}",
+                sourceName(), configuredBasePath(), configuredFilePattern(), e.getMessage());
+            LOGGER.debug("File change check failure for '{}':", sourceName(), e);
         }
     }
     
@@ -842,7 +884,7 @@ public class FileSystemDataSource implements ExternalDataSource {
                 throw new IOException("Unsupported file operation: " + operation);
         }
 
-        LOGGER.debug("Processed file update: {} on {}", operation, filename);
+        LOGGER.debug("Processed file update for '{}': operation='{}', file='{}'", sourceName(), operation, filename);
     }
 
     /**
@@ -899,5 +941,15 @@ public class FileSystemDataSource implements ExternalDataSource {
         }
     }
 
+    private String sourceName() {
+        return configuration != null && configuration.getName() != null ? configuration.getName() : "file-system-source";
+    }
 
+    private String configuredBasePath() {
+        return configuration != null && configuration.getConnection() != null ? configuration.getConnection().getBasePath() : null;
+    }
+
+    private String configuredFilePattern() {
+        return configuration != null && configuration.getConnection() != null ? configuration.getConnection().getFilePattern() : null;
+    }
 }

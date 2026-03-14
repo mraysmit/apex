@@ -16,6 +16,7 @@
 package dev.mars.apex.engine.execution;
 
 import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.engine.core.MapPropertyAccessor;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleGroup;
@@ -96,7 +97,13 @@ public class RuleGroupEvaluationService {
         boolean groupResult;
 
         if (group.isParallelExecution() && group.getRules().size() > 1) {
-            individualResults = evaluateParallel(group, context);
+            if (canCreateIsolatedContexts(context)) {
+                individualResults = evaluateParallel(group, context);
+            } else {
+                logger.warn("Parallel execution requested for group '{}' but the evaluation context cannot be isolated safely; falling back to sequential execution",
+                        group.getName());
+                individualResults = evaluateSequential(group, context);
+            }
         } else {
             individualResults = evaluateSequential(group, context);
         }
@@ -200,7 +207,7 @@ public class RuleGroupEvaluationService {
                 continue;
             }
             activeRules.add(rule);
-            tasks.add(() -> unifiedRuleEvaluator.evaluateRule(rule, context));
+            tasks.add(() -> unifiedRuleEvaluator.evaluateRule(rule, createIsolatedContext(context)));
         }
 
         if (tasks.isEmpty()) {
@@ -215,7 +222,10 @@ public class RuleGroupEvaluationService {
             List<Future<RuleResult>> futures = executor.invokeAll(tasks);
             for (int i = 0; i < futures.size(); i++) {
                 try {
-                    results.add(futures.get(i).get());
+                    RuleResult ruleResult = futures.get(i).get();
+                    Rule rule = activeRules.get(i);
+                    propagateResultField(rule, ruleResult, context);
+                    results.add(ruleResult);
                 } catch (Exception e) {
                     Rule rule = activeRules.get(i);
                     logger.error("Error getting result for rule '{}' in group '{}': {}",
@@ -240,6 +250,34 @@ public class RuleGroupEvaluationService {
         }
 
         return results;
+    }
+
+    private boolean canCreateIsolatedContexts(StandardEvaluationContext context) {
+        return context != null && context.getRootObject() != null && context.getRootObject().getValue() != null;
+    }
+
+    private StandardEvaluationContext createIsolatedContext(StandardEvaluationContext originalContext) {
+        Object rootObject = originalContext.getRootObject().getValue();
+        StandardEvaluationContext isolatedContext = new StandardEvaluationContext(rootObject);
+        isolatedContext.addPropertyAccessor(new MapPropertyAccessor());
+
+        if (rootObject instanceof Map<?, ?> rootMap) {
+            for (Map.Entry<?, ?> entry : rootMap.entrySet()) {
+                if (entry.getKey() instanceof String key) {
+                    isolatedContext.setVariable(key, entry.getValue());
+                }
+            }
+        }
+
+        return isolatedContext;
+    }
+
+    private void propagateResultField(Rule rule, RuleResult ruleResult, StandardEvaluationContext targetContext) {
+        if (rule.getResultField() == null || rule.getResultField().trim().isEmpty()) {
+            return;
+        }
+
+        targetContext.setVariable(rule.getResultField(), ruleResult.isTriggered());
     }
 
     // =========================================================================

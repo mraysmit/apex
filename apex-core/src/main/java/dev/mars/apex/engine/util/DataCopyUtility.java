@@ -72,6 +72,35 @@ public final class DataCopyUtility {
     }
 
     /**
+     * Deeply merges the source map into the target map.
+     *
+     * <p>When both maps contain a nested map for the same key, the nested maps are
+     * merged recursively. For all other value types, the source value replaces the
+     * target value. Source values are deep-copied before being written so callers do
+     * not retain shared mutable references after the merge.</p>
+     *
+     * @param target The map to update
+     * @param source The map whose values should be merged into the target
+     */
+    @SuppressWarnings("unchecked")
+    public static void deepMergeInto(Map<String, Object> target, Map<String, Object> source) {
+        if (target == null || source == null) {
+            return;
+        }
+
+        for (Map.Entry<String, Object> entry : source.entrySet()) {
+            Object existingValue = target.get(entry.getKey());
+            Object incomingValue = entry.getValue();
+
+            if (existingValue instanceof Map && incomingValue instanceof Map) {
+                deepMergeInto((Map<String, Object>) existingValue, (Map<String, Object>) incomingValue);
+            } else {
+                target.put(entry.getKey(), deepCopyValue(incomingValue));
+            }
+        }
+    }
+
+    /**
      * Deep copies a single value, handling Maps, Lists, and other types.
      * 
      * <p>This method provides recursive deep copying for complex nested structures

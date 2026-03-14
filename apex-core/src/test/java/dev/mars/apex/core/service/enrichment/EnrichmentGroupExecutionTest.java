@@ -3,7 +3,10 @@ package dev.mars.apex.core.service.enrichment;
 import dev.mars.apex.core.cache.ApexCacheManager;
 import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.engine.execution.EnrichmentGroupExecutor;
 import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.EnrichmentGroup;
+import dev.mars.apex.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -158,6 +162,57 @@ class EnrichmentGroupExecutionTest {
         assertTrue(result.isSuccess(), "OR group should succeed when any enrichment succeeds");
         assertNotNull(result.getEnrichedData());
     }
+
+      @Test
+      @DisplayName("Parallel enrichment group should preserve nested updates from all enrichments")
+      void testParallelGroupPreservesNestedUpdates() {
+        Map<String, Object> leftAudit = new HashMap<>();
+        leftAudit.put("left", "value-a");
+        Map<String, Object> leftTrade = new HashMap<>();
+        leftTrade.put("audit", leftAudit);
+        Map<String, Object> leftData = new HashMap<>();
+        leftData.put("trade", leftTrade);
+
+        Map<String, Object> rightAudit = new HashMap<>();
+        rightAudit.put("right", "value-b");
+        Map<String, Object> rightTrade = new HashMap<>();
+        rightTrade.put("audit", rightAudit);
+        Map<String, Object> rightData = new HashMap<>();
+        rightData.put("trade", rightTrade);
+
+        RuleResult leftResult = RuleResult.enrichmentSuccess(leftData);
+        RuleResult rightResult = RuleResult.enrichmentSuccess(rightData);
+
+        EnrichmentGroup group = new EnrichmentGroup("g_parallel_nested").setName("G Parallel Nested");
+        EnrichmentGroupExecutor executor = new EnrichmentGroupExecutor(null) {
+          @Override
+          public EnrichmentGroupResult processEnrichmentGroup(EnrichmentGroup requestedGroup, Object targetObject,
+                                    YamlRuleConfiguration yamlConfig) {
+            return EnrichmentGroupResult.of(
+              requestedGroup.getId(),
+              true,
+              "Enrichment group succeeded",
+              List.of(leftResult, rightResult),
+              0L
+            );
+          }
+        };
+
+        RuleResult result = executor.executeEnrichmentGroupsList(List.of(group), new HashMap<>(), null);
+
+        assertTrue(result.isSuccess(), "Parallel enrichment group should succeed");
+        assertNotNull(result.getEnrichedData(), "Enriched data should be present");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> enrichedTrade = (Map<String, Object>) result.getEnrichedData().get("trade");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> enrichedAudit = (Map<String, Object>) enrichedTrade.get("audit");
+
+        assertNotNull(enrichedTrade, "Nested trade map should be present");
+        assertNotNull(enrichedAudit, "Nested audit map should be present");
+        assertEquals("value-a", enrichedAudit.get("left"), "Left nested field should be preserved");
+        assertEquals("value-b", enrichedAudit.get("right"), "Right nested field should be preserved");
+      }
 }
 
 

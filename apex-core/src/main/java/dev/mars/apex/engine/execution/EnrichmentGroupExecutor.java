@@ -101,7 +101,7 @@ public class EnrichmentGroupExecutor {
                 if (groupResult.getEnrichmentResults() != null) {
                     for (RuleResult enrichmentResult : groupResult.getEnrichmentResults()) {
                         if (enrichmentResult.getEnrichedData() != null) {
-                            enrichedData.putAll(enrichmentResult.getEnrichedData());
+                            DataCopyUtility.deepMergeInto(enrichedData, enrichmentResult.getEnrichedData());
                         }
                     }
                 }

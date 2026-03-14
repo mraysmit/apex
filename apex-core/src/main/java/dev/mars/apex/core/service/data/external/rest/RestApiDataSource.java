@@ -86,6 +86,8 @@ public class RestApiDataSource implements ExternalDataSource {
     public void initialize(DataSourceConfiguration config) throws DataSourceException {
         this.configuration = config;
         this.connectionStatus = ConnectionStatus.connecting();
+        LOGGER.info("Initializing REST API data source '{}': baseUrl='{}', timeout={}ms, circuitBreakerEnabled={}",
+            sourceName(), configuredBaseUrl(), configuredTimeout(), circuitBreaker != null);
 
         try {
             // Validate configuration first
@@ -97,14 +99,15 @@ public class RestApiDataSource implements ExternalDataSource {
             // Initialize successfully without testing connection during initialization
             // Connection testing will be done on-demand when testConnection() is called
             this.connectionStatus = ConnectionStatus.connected("REST API data source initialized");
-            LOGGER.info("REST API data source '{}' initialized successfully", config.getName());
+            LOGGER.info("REST API data source '{}' initialized successfully: baseUrl='{}'", sourceName(), configuredBaseUrl());
         } catch (DataSourceException e) {
             // Re-throw configuration errors
             throw e;
         } catch (Exception e) {
             this.connectionStatus = ConnectionStatus.error("Initialization failed", e);
-            LOGGER.warn("REST API data source '{}' initialized but encountered error during connection test: {}", config.getName(), e.getMessage());
-            LOGGER.debug("Full exception details:", e);
+            LOGGER.warn("REST API data source '{}' initialized with warning: baseUrl='{}', error={}",
+                sourceName(), configuredBaseUrl(), e.getMessage());
+            LOGGER.debug("REST API initialization warning for '{}':", sourceName(), e);
         }
     }
     
@@ -132,31 +135,34 @@ public class RestApiDataSource implements ExternalDataSource {
     public boolean testConnection() {
         try {
             String healthEndpoint = getHealthEndpoint();
+            LOGGER.debug("Testing REST API connection for '{}': endpoint='{}'", sourceName(), healthEndpoint);
             HttpRequest request = buildHttpRequest(healthEndpoint, "GET", null);
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            LOGGER.debug("REST API connection test completed for '{}': endpoint='{}', status={}",
+                sourceName(), healthEndpoint, response.statusCode());
             return response.statusCode() >= 200 && response.statusCode() < 300;
 
         } catch (java.net.http.HttpConnectTimeoutException e) {
-            LOGGER.warn("REST API connection test timed out for '{}': {}", configuration.getName(), e.getMessage());
-            LOGGER.debug("REST API timeout stack trace:", e);
+            LOGGER.warn("REST API connection test timed out for '{}': baseUrl='{}', error={}", sourceName(), configuredBaseUrl(), e.getMessage());
+            LOGGER.debug("REST API timeout stack trace for '{}':", sourceName(), e);
             return false;
         } catch (java.net.ConnectException e) {
-            LOGGER.warn("REST API connection test failed to connect for '{}': {}", configuration.getName(), e.getMessage());
-            LOGGER.debug("REST API connection error stack trace:", e);
+            LOGGER.warn("REST API connection test failed to connect for '{}': baseUrl='{}', error={}", sourceName(), configuredBaseUrl(), e.getMessage());
+            LOGGER.debug("REST API connection error stack trace for '{}':", sourceName(), e);
             return false;
         } catch (java.io.IOException e) {
-            LOGGER.warn("REST API connection test failed with IO error for '{}': {}", configuration.getName(), e.getMessage());
-            LOGGER.debug("REST API IO error stack trace:", e);
+            LOGGER.warn("REST API connection test failed with IO error for '{}': baseUrl='{}', error={}", sourceName(), configuredBaseUrl(), e.getMessage());
+            LOGGER.debug("REST API IO error stack trace for '{}':", sourceName(), e);
             return false;
         } catch (InterruptedException e) {
-            LOGGER.warn("REST API connection test was interrupted for '{}': {}", configuration.getName(), e.getMessage());
-            LOGGER.debug("REST API interrupted stack trace:", e);
+            LOGGER.warn("REST API connection test was interrupted for '{}': baseUrl='{}', error={}", sourceName(), configuredBaseUrl(), e.getMessage());
+            LOGGER.debug("REST API interrupted stack trace for '{}':", sourceName(), e);
             Thread.currentThread().interrupt();
             return false;
         } catch (Exception e) {
-            LOGGER.warn("REST API connection test failed for '{}': {}", configuration.getName(), e.getMessage());
-            LOGGER.debug("REST API general error stack trace:", e);
+            LOGGER.warn("REST API connection test failed for '{}': baseUrl='{}', error={}", sourceName(), configuredBaseUrl(), e.getMessage());
+            LOGGER.debug("REST API general error stack trace for '{}':", sourceName(), e);
             return false;
         }
     }
@@ -181,6 +187,8 @@ public class RestApiDataSource implements ExternalDataSource {
     @SuppressWarnings("unchecked")
     public <T> T getData(String dataType, Object... parameters) {
         long startTime = System.currentTimeMillis();
+        LOGGER.debug("REST API getData start for '{}': dataType='{}', parameters={}",
+            sourceName(), dataType, Arrays.toString(parameters));
         
         try {
             // Check cache first if enabled
@@ -190,9 +198,11 @@ public class RestApiDataSource implements ExternalDataSource {
                 if (cached != null) {
                     metrics.recordCacheHit();
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+                    LOGGER.debug("REST API cache hit for '{}': cacheKey='{}'", sourceName(), cacheKey);
                     return (T) cached;
                 }
                 metrics.recordCacheMiss();
+                LOGGER.debug("REST API cache miss for '{}': cacheKey='{}'", sourceName(), cacheKey);
             }
 
             // Execute API call with circuit breaker if enabled
@@ -207,15 +217,19 @@ public class RestApiDataSource implements ExternalDataSource {
             if (cacheManager.isEnabled() && result != null) {
                 String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
                 cacheManager.put(cacheKey, result);
+                LOGGER.debug("Cached REST API response for '{}': cacheKey='{}'", sourceName(), cacheKey);
             }
 
             metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+            LOGGER.debug("REST API getData completed for '{}': dataType='{}', resultType='{}'",
+                sourceName(), dataType, result != null ? result.getClass().getSimpleName() : "null");
             return (T) result;
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from REST API: {}", e.getMessage());
-            LOGGER.debug("Stack trace for REST API data retrieval failure:", e);
+            LOGGER.error("Failed to get data from REST API '{}': dataType='{}', parameters={}, error={}",
+                sourceName(), dataType, Arrays.toString(parameters), e.getMessage());
+            LOGGER.debug("REST API getData failure for '{}':", sourceName(), e);
             return null;
         }
     }
@@ -226,45 +240,42 @@ public class RestApiDataSource implements ExternalDataSource {
         long startTime = System.currentTimeMillis();
 
         try {
-            LOGGER.debug("RestApiDataSource.query called with query='{}', parameters={}", query, parameters);
+            LOGGER.debug("Executing REST API query for '{}': query='{}', parameters={}", sourceName(), query, parameters);
             // First, resolve named query from configuration
             String actualQuery = resolveNamedQuery(query);
-            LOGGER.debug("query='{}', actualQuery='{}', parameters={}", query, actualQuery, parameters);
+            LOGGER.debug("Resolved REST API query for '{}': query='{}', resolved='{}'", sourceName(), query, actualQuery);
             String endpoint = buildEndpoint(actualQuery, parameters);
-            LOGGER.debug("Final endpoint URL: {}", endpoint);
-            LOGGER.debug("About to build HTTP request...");
+            LOGGER.debug("Built REST API endpoint for '{}': endpoint='{}'", sourceName(), endpoint);
             HttpRequest request = buildHttpRequest(endpoint, "GET", null);
-            LOGGER.debug("HTTP request built successfully");
 
-            LOGGER.debug("About to send HTTP request...");
             HttpResponse<String> response;
             try {
                 response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                LOGGER.debug("HTTP response status: {}", response.statusCode());
-                LOGGER.debug("HTTP response body length: {}", response.body().length());
-                LOGGER.debug("HTTP response body: {}", response.body());
+                LOGGER.debug("REST API response received for '{}': endpoint='{}', status={}, bodyLength={}",
+                    sourceName(), endpoint, response.statusCode(), response.body().length());
             } catch (Exception e) {
-                LOGGER.error("HTTP request failed for endpoint '{}': {}", endpoint, e.getMessage());
-                LOGGER.debug("HTTP request exception detail:", e);
+                LOGGER.error("HTTP request failed for REST API '{}': endpoint='{}', error={}", sourceName(), endpoint, e.getMessage());
+                LOGGER.debug("HTTP request failure for REST API '{}':", sourceName(), e);
                 throw e;
             }
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                LOGGER.debug("HTTP response successful, about to parse response");
                 try {
                     List<T> result = parseResponseToList(response.body());
-                    LOGGER.debug("Parsed result: {}", result);
-                    LOGGER.debug("Parsed result size: {}", result != null ? result.size() : "null");
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+                    LOGGER.debug("REST API query completed for '{}': query='{}', endpoint='{}', results={}",
+                        sourceName(), query, endpoint, result != null ? result.size() : 0);
                     return result;
                 } catch (Exception e) {
-                    LOGGER.error("Response parsing failed for query '{}': {}", query, e.getMessage());
-                    LOGGER.debug("Response parsing exception detail:", e);
+                    LOGGER.error("Response parsing failed for REST API '{}': query='{}', endpoint='{}', error={}",
+                        sourceName(), query, endpoint, e.getMessage());
+                    LOGGER.debug("Response parsing failure for REST API '{}':", sourceName(), e);
                     throw e;
                 }
             } else {
-                LOGGER.error("REST API call failed for query '{}': HTTP status {}", query, response.statusCode());
-                LOGGER.debug("Failed response body: {}", response.body());
+                LOGGER.error("REST API call failed for '{}': query='{}', endpoint='{}', status={}",
+                    sourceName(), query, endpoint, response.statusCode());
+                LOGGER.debug("Failed REST API response body for '{}': {}", sourceName(), response.body());
                 metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
                 throw new DataSourceException(DataSourceException.ErrorType.EXECUTION_ERROR,
                     "API call failed with status: " + response.statusCode(), null,
@@ -272,8 +283,8 @@ public class RestApiDataSource implements ExternalDataSource {
             }
 
         } catch (IOException | InterruptedException e) {
-            LOGGER.error("REST API call failed for query '{}': {}", query, e.getMessage());
-            LOGGER.debug("REST API call exception detail:", e);
+            LOGGER.error("REST API call failed for '{}': query='{}', error={}", sourceName(), query, e.getMessage());
+            LOGGER.debug("REST API query failure for '{}':", sourceName(), e);
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
             throw DataSourceException.executionError("REST API call failed", e, "query");
         } catch (DataSourceException e) {
@@ -285,17 +296,17 @@ public class RestApiDataSource implements ExternalDataSource {
     
     @Override
     public <T> T queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
-        LOGGER.debug("queryForObject called with query='{}', parameters={}", query, parameters);
+        LOGGER.debug("Executing REST API queryForObject for '{}': query='{}', parameters={}", sourceName(), query, parameters);
         try {
             List<T> results = query(query, parameters);
-            LOGGER.debug("queryForObject got results: {}", results);
+            LOGGER.debug("REST API queryForObject completed for '{}': query='{}', resultCount={}", sourceName(), query, results.size());
             return results.isEmpty() ? null : results.get(0);
         } catch (DataSourceException e) {
             // Already logged at ERROR in query() — just propagate
             throw e;
         } catch (Exception e) {
-            LOGGER.error("queryForObject failed for query '{}': {}", query, e.getMessage());
-            LOGGER.debug("queryForObject exception detail:", e);
+            LOGGER.error("REST API queryForObject failed for '{}': query='{}', error={}", sourceName(), query, e.getMessage());
+            LOGGER.debug("REST API queryForObject failure for '{}':", sourceName(), e);
             throw e;
         }
     }
@@ -339,6 +350,8 @@ public class RestApiDataSource implements ExternalDataSource {
     
     @Override
     public void refresh() throws DataSourceException {
+        LOGGER.info("Refreshing REST API data source '{}': baseUrl='{}', circuitBreakerEnabled={}",
+            sourceName(), configuredBaseUrl(), circuitBreaker != null);
         // Clear cache
         cacheManager.clear();
 
@@ -357,6 +370,8 @@ public class RestApiDataSource implements ExternalDataSource {
     
     @Override
     public void shutdown() {
+        LOGGER.info("Shutting down REST API data source '{}': baseUrl='{}', circuitBreakerEnabled={}",
+            sourceName(), configuredBaseUrl(), circuitBreaker != null);
         cacheManager.clear();
         if (circuitBreaker != null) {
             circuitBreaker.shutdown();
@@ -370,6 +385,7 @@ public class RestApiDataSource implements ExternalDataSource {
      */
     private Object executeApiCall(String dataType, Object... parameters) throws Exception {
         String endpoint = buildEndpoint(dataType, parameters);
+        LOGGER.debug("Executing REST API call for '{}': dataType='{}', endpoint='{}'", sourceName(), dataType, endpoint);
         HttpRequest request = buildHttpRequest(endpoint, "GET", null);
         
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -428,20 +444,20 @@ public class RestApiDataSource implements ExternalDataSource {
      * Build endpoint URL from query and parameters.
      */
     private String buildEndpoint(String query, Map<String, Object> parameters) {
-        LOGGER.info("DEBUG: buildEndpoint called with query='{}', parameters={}", query, parameters);
+        LOGGER.debug("Building REST API endpoint for '{}': query='{}', parameters={}", sourceName(), query, parameters);
         String endpoint = query;
 
         // Replace named parameters
         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
             String placeholder = "{" + entry.getKey() + "}";
             endpoint = endpoint.replace(placeholder, entry.getValue().toString());
-            LOGGER.info("DEBUG: Replaced '{}' with '{}' in endpoint: {}", placeholder, entry.getValue(), endpoint);
+            LOGGER.debug("Applied REST API path parameter for '{}': placeholder='{}', value='{}'", sourceName(), placeholder, entry.getValue());
         }
 
         // Ensure it's a complete URL
         if (!endpoint.startsWith("http")) {
             String baseUrl = configuration.getConnection().getBaseUrl();
-            LOGGER.info("DEBUG: Building complete URL - baseUrl='{}', endpoint='{}'", baseUrl, endpoint);
+            LOGGER.debug("Joining REST API base URL for '{}': baseUrl='{}', endpoint='{}'", sourceName(), baseUrl, endpoint);
             if (baseUrl.endsWith("/") && endpoint.startsWith("/")) {
                 endpoint = baseUrl + endpoint.substring(1);
             } else if (!baseUrl.endsWith("/") && !endpoint.startsWith("/")) {
@@ -451,7 +467,7 @@ public class RestApiDataSource implements ExternalDataSource {
             }
         }
 
-        LOGGER.info("DEBUG: Final complete endpoint URL: {}", endpoint);
+        LOGGER.debug("Built REST API endpoint for '{}': endpoint='{}'", sourceName(), endpoint);
         return endpoint;
     }
 
@@ -460,25 +476,23 @@ public class RestApiDataSource implements ExternalDataSource {
      * Checks both queries and endpoints maps for the query name.
      */
     private String resolveNamedQuery(String query) {
-        LOGGER.debug("resolveNamedQuery called with query='{}'", query);
-        LOGGER.debug("Available queries: {}", configuration.getQueries());
-        LOGGER.debug("Available endpoints: {}", configuration.getEndpoints());
+        LOGGER.debug("Resolving REST API named query for '{}': query='{}'", sourceName(), query);
 
         // First check queries map (for backward compatibility)
         if (configuration.getQueries() != null && configuration.getQueries().containsKey(query)) {
             String result = configuration.getQueries().get(query);
-            LOGGER.debug("Found query '{}' in queries map: '{}'", query, result);
+            LOGGER.debug("Resolved REST API named query from queries map for '{}': query='{}', resolved='{}'", sourceName(), query, result);
             return result;
         }
 
         // Then check endpoints map (for REST API endpoint names)
         if (configuration.getEndpoints() != null && configuration.getEndpoints().containsKey(query)) {
             String result = configuration.getEndpoints().get(query);
-            LOGGER.debug("Found query '{}' in endpoints map: '{}'", query, result);
+            LOGGER.debug("Resolved REST API named query from endpoints map for '{}': query='{}', resolved='{}'", sourceName(), query, result);
             return result;
         }
 
-        LOGGER.debug("Query '{}' not found in queries or endpoints, returning as-is", query);
+        LOGGER.debug("REST API named query not found for '{}': query='{}', using literal value", sourceName(), query);
         return query; // Return as-is if not found in named queries or endpoints
     }
 
@@ -600,18 +614,14 @@ public class RestApiDataSource implements ExternalDataSource {
      */
     @SuppressWarnings("unchecked")
     private <T> List<T> parseResponseToList(String responseBody) {
-        LOGGER.debug("parseResponseToList called with: {}", responseBody);
         Object parsed = parseResponse(responseBody);
-        LOGGER.debug("parseResponse returned: {}", parsed);
-        LOGGER.debug("parseResponse type: {}", parsed != null ? parsed.getClass().getName() : "null");
+        LOGGER.debug("Parsed REST API response for '{}': parsedType='{}'", sourceName(), parsed != null ? parsed.getClass().getName() : "null");
 
         if (parsed instanceof List) {
-            LOGGER.debug("Parsed result is a List, returning as-is");
             return (List<T>) parsed;
         } else {
-            LOGGER.debug("Parsed result is not a List, wrapping in singletonList");
             List<T> result = Collections.singletonList((T) parsed);
-            LOGGER.debug("Wrapped result: {}", result);
+            LOGGER.debug("Wrapped non-list REST API response for '{}': resultSize={}", sourceName(), result.size());
             return result;
         }
     }
@@ -620,18 +630,16 @@ public class RestApiDataSource implements ExternalDataSource {
      * Simple JSON object parsing (placeholder implementation).
      */
     private Map<String, Object> parseJsonObject(String json) {
-        LOGGER.debug("parseJsonObject called with: {}", json);
-
         // Use Jackson ObjectMapper for proper JSON parsing
         try {
             ObjectMapper mapper = new ObjectMapper();
             @SuppressWarnings("unchecked")
             Map<String, Object> result = mapper.readValue(json, Map.class);
-            LOGGER.debug("parseJsonObject returning: {}", result);
+            LOGGER.debug("Parsed JSON object response for '{}': keys={}", sourceName(), result.keySet());
             return result;
         } catch (Exception e) {
-            LOGGER.error("JSON parsing failed for REST API response: {}", e.getMessage());
-            LOGGER.debug("JSON parsing exception detail:", e);
+            LOGGER.error("JSON parsing failed for REST API '{}': error={}", sourceName(), e.getMessage());
+            LOGGER.debug("JSON parsing failure for REST API '{}':", sourceName(), e);
             // Fallback to raw JSON if parsing fails
             Map<String, Object> result = new HashMap<>();
             result.put("raw", json);
@@ -657,5 +665,17 @@ public class RestApiDataSource implements ExternalDataSource {
             return configuration.getConnection().getTimeout();
         }
         return 30000L; // Default 30 seconds
+    }
+
+    private String sourceName() {
+        return configuration != null && configuration.getName() != null ? configuration.getName() : "rest-api-source";
+    }
+
+    private String configuredBaseUrl() {
+        return configuration != null && configuration.getConnection() != null ? configuration.getConnection().getBaseUrl() : null;
+    }
+
+    private Integer configuredTimeout() {
+        return configuration != null && configuration.getConnection() != null ? configuration.getConnection().getTimeout() : null;
     }
 }

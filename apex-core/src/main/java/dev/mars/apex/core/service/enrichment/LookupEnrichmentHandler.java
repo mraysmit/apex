@@ -27,7 +27,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Handles lookup-based enrichments: resolving lookup services, performing single-row
@@ -47,7 +46,6 @@ public class LookupEnrichmentHandler {
     private final ApexCacheManager cacheManager;
     private final LookupServiceRegistry serviceRegistry;
     private final Map<String, ExternalDataSource> dataSourceRegistry;
-    private final Supplier<YamlRuleConfiguration> configurationSupplier;
 
     /**
      * @param fieldAccessor         Field accessor for value read/write and expression compilation
@@ -55,20 +53,17 @@ public class LookupEnrichmentHandler {
      * @param cacheManager          Unified cache manager
      * @param serviceRegistry       Registry for resolving named lookup services
      * @param dataSourceRegistry    Registry of external data sources
-     * @param configurationSupplier Supplies the current YAML configuration (may change between evaluations)
      */
     public LookupEnrichmentHandler(FieldAccessor fieldAccessor,
                                    Function<Object, StandardEvaluationContext> contextFactory,
                                    ApexCacheManager cacheManager,
                                    LookupServiceRegistry serviceRegistry,
-                                   Map<String, ExternalDataSource> dataSourceRegistry,
-                                   Supplier<YamlRuleConfiguration> configurationSupplier) {
+                                   Map<String, ExternalDataSource> dataSourceRegistry) {
         this.fieldAccessor = fieldAccessor;
         this.contextFactory = contextFactory;
         this.cacheManager = cacheManager;
         this.serviceRegistry = serviceRegistry;
         this.dataSourceRegistry = dataSourceRegistry;
-        this.configurationSupplier = configurationSupplier;
     }
 
     // ─── Main Lookup Processing ──────────────────────────────────────────
@@ -80,7 +75,8 @@ public class LookupEnrichmentHandler {
      * @param targetObject The target object
      * @return The enriched object
      */
-    public Object processLookupEnrichment(YamlEnrichment enrichment, Object targetObject) {
+    public Object processLookupEnrichment(YamlEnrichment enrichment, Object targetObject,
+                                          YamlRuleConfiguration configuration) {
         YamlEnrichment.LookupConfig lookupConfig = enrichment.getLookupConfig();
         if (lookupConfig == null) {
             logger.warn("Lookup enrichment '" + enrichment.getId() + "' has no lookup configuration");
@@ -88,7 +84,7 @@ public class LookupEnrichmentHandler {
         }
 
         // 1. Resolve lookup service
-        LookupService lookupService = resolveLookupService(enrichment.getId(), lookupConfig);
+        LookupService lookupService = resolveLookupService(enrichment.getId(), lookupConfig, configuration);
 
         logger.debug("Processing lookup enrichment with service: " + lookupService.getName());
 
@@ -260,7 +256,8 @@ public class LookupEnrichmentHandler {
     /**
      * Resolve lookup service from either service registry or dataset configuration.
      */
-    LookupService resolveLookupService(String enrichmentId, YamlEnrichment.LookupConfig lookupConfig) {
+    LookupService resolveLookupService(String enrichmentId, YamlEnrichment.LookupConfig lookupConfig,
+                                       YamlRuleConfiguration configuration) {
         // Priority 1: External service
         if (lookupConfig.getLookupService() != null) {
             String serviceName = lookupConfig.getLookupService();
@@ -277,9 +274,8 @@ public class LookupEnrichmentHandler {
         // Priority 2: Dataset configuration with caching
         if (lookupConfig.getLookupDataset() != null) {
             YamlEnrichment.LookupDataset dataset = lookupConfig.getLookupDataset();
-            YamlRuleConfiguration currentConfig = configurationSupplier.get();
 
-            DatasetSignature signature = DatasetSignature.from(dataset, currentConfig);
+            DatasetSignature signature = DatasetSignature.from(dataset, configuration);
             String cacheKey = signature.toString();
 
             Object cached = cacheManager.get(ApexCacheManager.DATASET_CACHE, cacheKey);
@@ -292,7 +288,7 @@ public class LookupEnrichmentHandler {
 
             try {
                 DatasetLookupService datasetService = DatasetLookupServiceFactory
-                    .createDatasetLookupService(datasetServiceName, dataset, currentConfig, this.dataSourceRegistry);
+                    .createDatasetLookupService(datasetServiceName, dataset, configuration, this.dataSourceRegistry);
 
                 cacheManager.put(ApexCacheManager.DATASET_CACHE, cacheKey, datasetService);
 

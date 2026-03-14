@@ -17,6 +17,7 @@ package dev.mars.apex.engine.core;
  */
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
@@ -351,6 +352,124 @@ class RulesEngineConcurrentEvaluationTest {
 
     @Test
     @Order(4)
+        @DisplayName("Should isolate nested input state during concurrent scenario evaluation")
+        void testConcurrentScenarioEvaluationIsolatesNestedInput() throws Exception {
+                logger.info("=".repeat(80));
+                logger.info("TEST: Concurrent scenario evaluation nested input isolation");
+                logger.info("=".repeat(80));
+
+                Path stageFile = tempDir.resolve("scenario-stage-rules.yaml");
+                Files.writeString(stageFile, String.join(System.lineSeparator(),
+                        "metadata:",
+                        "  name: \"Scenario Stage Rules\"",
+                        "  version: \"1.0\"",
+                        "  type: \"rule-config\"",
+                        "",
+                        "rules:",
+                        "  - id: \"always-match\"",
+                        "    name: \"Always Match\"",
+                        "    condition: \"true\"",
+                        "    message: \"Stage executed\"",
+                        "    severity: \"INFO\"",
+                        "",
+                        "enrichments:",
+                        "  - id: \"copy-thread-id\"",
+                        "    name: \"Copy Thread Id\"",
+                        "    type: \"field-enrichment\"",
+                        "    condition: \"true\"",
+                        "    field-mappings:",
+                        "      - source-field: \"threadId\"",
+                        "        target-field: \"#trade.audit.values.threadId\"",
+                        "  - id: \"copy-iteration\"",
+                        "    name: \"Copy Iteration\"",
+                        "    type: \"field-enrichment\"",
+                        "    condition: \"true\"",
+                        "    field-mappings:",
+                        "      - source-field: \"iteration\"",
+                        "        target-field: \"#trade.audit.values.iteration\""
+                ));
+
+                String normalizedStagePath = stageFile.toAbsolutePath().toString().replace('\\', '/');
+                Path scenarioFile = tempDir.resolve("concurrent-scenario.yaml");
+                Files.writeString(scenarioFile, String.join(System.lineSeparator(),
+                        "metadata:",
+                        "  id: \"concurrent-scenario\"",
+                        "  name: \"Concurrent Scenario\"",
+                        "  version: \"1.0.0\"",
+                        "  type: \"scenario\"",
+                        "",
+                        "scenario:",
+                        "  scenario-id: \"concurrent-scenario\"",
+                        "  name: \"Concurrent Scenario\"",
+                        "  processing-stages:",
+                        "    - stage-name: \"audit-stage\"",
+                        "      config-file: \"" + normalizedStagePath + "\"",
+                        "      execution-order: 1",
+                        "      failure-policy: \"terminate\""
+                ));
+
+                RulesEngine engine = RulesEngine.fromFile(scenarioFile.toString());
+
+                Map<String, Object> sharedTrade = new HashMap<>();
+                sharedTrade.put("status", "NEW");
+                Map<String, Object> sharedAudit = new HashMap<>();
+                sharedAudit.put("values", new HashMap<String, Object>());
+                sharedTrade.put("audit", sharedAudit);
+
+                int threadCount = 8;
+                ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+                CountDownLatch startLatch = new CountDownLatch(1);
+                List<Future<ScenarioExecutionResult>> futures = new ArrayList<>();
+
+                try {
+                        for (int i = 0; i < threadCount; i++) {
+                                final int threadId = i;
+                                futures.add(executor.submit(() -> {
+                                        startLatch.await();
+
+                                        Map<String, Object> inputData = new HashMap<>();
+                                        inputData.put("threadId", threadId);
+                                        inputData.put("iteration", threadId * 10);
+                                        inputData.put("trade", sharedTrade);
+
+                                        return engine.evaluateScenario(inputData);
+                                }));
+                        }
+
+                        startLatch.countDown();
+
+                        for (int i = 0; i < threadCount; i++) {
+                                ScenarioExecutionResult result = futures.get(i).get(30, TimeUnit.SECONDS);
+                                assertTrue(result.isSuccessful(), "Concurrent scenario execution should succeed");
+
+                                Map<String, Object> stageOutputs = result.getStageResult("audit-stage").getStageOutputs();
+
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> trade = (Map<String, Object>) stageOutputs.get("trade");
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> audit = (Map<String, Object>) trade.get("audit");
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> values = (Map<String, Object>) audit.get("values");
+
+                                assertNotNull(audit, "Each evaluation should have its own nested audit output");
+                                assertNotNull(values, "Each evaluation should preserve the nested values map");
+                                assertEquals(i, values.get("threadId"), "Thread id should remain isolated per evaluation");
+                                assertEquals(i * 10, values.get("iteration"), "Iteration should remain isolated per evaluation");
+                        }
+
+                        assertEquals("NEW", sharedTrade.get("status"), "Shared nested input should keep its original state");
+
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> sharedAuditValues = (Map<String, Object>) ((Map<String, Object>) sharedTrade.get("audit")).get("values");
+                            assertTrue(sharedAuditValues.isEmpty(), "Shared nested input must not be mutated by scenario execution");
+                } finally {
+                        executor.shutdownNow();
+                        engine.shutdown();
+                }
+        }
+
+        @Test
+        @Order(5)
     @DisplayName("Should verify dataSources map is ConcurrentHashMap")
     void testDataSourcesMapIsConcurrent() throws Exception {
         logger.info("=".repeat(80));
@@ -397,7 +516,7 @@ class RulesEngineConcurrentEvaluationTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     @DisplayName("Should handle rapid sequential evaluations without issues")
     void testRapidSequentialEvaluations() throws Exception {
         logger.info("=".repeat(80));

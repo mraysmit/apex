@@ -91,8 +91,8 @@ public class InMemoryCacheManager implements CacheManager {
         }
         
         this.running = true;
-        LOGGER.debug("Cache '{}' initialized: maxSize={}, ttl={}s", 
-            configuration.getName(), maxSize, defaultTtlSeconds);
+        LOGGER.info("Initialized in-memory cache '{}': maxSize={}, defaultTtl={}s, cleanupEnabled={}",
+            cacheName(), maxSize, defaultTtlSeconds, enableCleanup);
     }
     
     @Override
@@ -103,6 +103,7 @@ public class InMemoryCacheManager implements CacheManager {
     @Override
     public void put(String key, Object value, long ttlSeconds) {
         if (key == null) {
+            LOGGER.debug("Ignoring cache put for '{}' because key is null", cacheName());
             return;
         }
 
@@ -143,20 +144,24 @@ public class InMemoryCacheManager implements CacheManager {
 
                 statistics.recordPut();
                 statistics.recordLoadTime(System.nanoTime() - startTime);
+                LOGGER.debug("Stored cache entry in '{}': key='{}', ttl={}s, replacedExisting={}, size={}",
+                    cacheName(), key, ttlSeconds, previous != null, currentSize.get());
 
             } finally {
                 evictionLock.readLock().unlock();
             }
 
         } catch (Exception e) {
-            LOGGER.error("Failed to put value in cache for key '{}': {}", key, e.getMessage());
-            LOGGER.debug("Full exception details:", e);
+            LOGGER.error("Failed to put value in cache '{}': key='{}', ttl={}s, size={}, error={}",
+                cacheName(), key, ttlSeconds, currentSize.get(), e.getMessage());
+            LOGGER.debug("Put failure stack trace for cache '{}' and key '{}':", cacheName(), key, e);
         }
     }
     
     @Override
     public Object get(String key) {
         if (key == null) {
+            LOGGER.debug("Ignoring cache get for '{}' because key is null", cacheName());
             return null;
         }
         
@@ -167,6 +172,7 @@ public class InMemoryCacheManager implements CacheManager {
             
             if (entry == null) {
                 statistics.recordMiss();
+                LOGGER.debug("Cache miss in '{}': key='{}', size={}", cacheName(), key, currentSize.get());
                 return null;
             }
             
@@ -178,6 +184,8 @@ public class InMemoryCacheManager implements CacheManager {
                 }
                 statistics.recordMiss();
                 statistics.recordEviction();
+                LOGGER.debug("Expired cache entry removed from '{}': key='{}', size={}",
+                    cacheName(), key, currentSize.get());
                 return null;
             }
             
@@ -186,12 +194,14 @@ public class InMemoryCacheManager implements CacheManager {
             
             statistics.recordHit();
             statistics.recordLoadTime(System.nanoTime() - startTime);
+            LOGGER.debug("Cache hit in '{}': key='{}', size={}", cacheName(), key, currentSize.get());
             
             return entry.getValue();
             
         } catch (Exception e) {
-            LOGGER.error("Failed to get value from cache for key '{}': {}", key, e.getMessage());
-            LOGGER.debug("Full exception details:", e);
+            LOGGER.error("Failed to get value from cache '{}': key='{}', size={}, error={}",
+                cacheName(), key, currentSize.get(), e.getMessage());
+            LOGGER.debug("Get failure stack trace for cache '{}' and key '{}':", cacheName(), key, e);
             statistics.recordMiss();
             return null;
         }
@@ -200,6 +210,7 @@ public class InMemoryCacheManager implements CacheManager {
     @Override
     public boolean remove(String key) {
         if (key == null) {
+            LOGGER.debug("Ignoring cache remove for '{}' because key is null", cacheName());
             return false;
         }
 
@@ -208,13 +219,18 @@ public class InMemoryCacheManager implements CacheManager {
             if (removed != null) {
                 currentSize.decrementAndGet();
                 statistics.recordRemoval();
+                LOGGER.debug("Removed cache entry from '{}': key='{}', size={}",
+                    cacheName(), key, currentSize.get());
                 return true;
             }
+            LOGGER.debug("Cache remove found no entry in '{}': key='{}', size={}",
+                cacheName(), key, currentSize.get());
             return false;
 
         } catch (Exception e) {
-            LOGGER.error("Failed to remove value from cache for key '{}': {}", key, e.getMessage());
-            LOGGER.debug("Full exception details:", e);
+            LOGGER.error("Failed to remove value from cache '{}': key='{}', size={}, error={}",
+                cacheName(), key, currentSize.get(), e.getMessage());
+            LOGGER.debug("Remove failure stack trace for cache '{}' and key '{}':", cacheName(), key, e);
             return false;
         }
     }
@@ -222,12 +238,14 @@ public class InMemoryCacheManager implements CacheManager {
     @Override
     public boolean containsKey(String key) {
         if (key == null) {
+            LOGGER.debug("Ignoring containsKey for '{}' because key is null", cacheName());
             return false;
         }
         
         try {
             CacheEntry entry = cache.get(key);
             if (entry == null) {
+                LOGGER.debug("containsKey miss in '{}': key='{}', size={}", cacheName(), key, currentSize.get());
                 return false;
             }
             
@@ -238,14 +256,19 @@ public class InMemoryCacheManager implements CacheManager {
                     currentSize.decrementAndGet();
                 }
                 statistics.recordEviction();
+                LOGGER.debug("containsKey removed expired entry from '{}': key='{}', size={}",
+                    cacheName(), key, currentSize.get());
                 return false;
             }
+
+            LOGGER.debug("containsKey hit in '{}': key='{}', size={}", cacheName(), key, currentSize.get());
             
             return true;
             
         } catch (Exception e) {
-            LOGGER.error("Failed to check key existence in cache for key '{}': {}", key, e.getMessage());
-            LOGGER.debug("Full exception details:", e);
+            LOGGER.error("Failed to check key existence in cache '{}': key='{}', size={}, error={}",
+                cacheName(), key, currentSize.get(), e.getMessage());
+            LOGGER.debug("containsKey failure stack trace for cache '{}' and key '{}':", cacheName(), key, e);
             return false;
         }
     }
@@ -264,17 +287,22 @@ public class InMemoryCacheManager implements CacheManager {
             
             Pattern compiledPattern = Pattern.compile(regexPattern);
             
-            return cache.keySet().stream()
+            List<String> matchingKeys = cache.keySet().stream()
                 .filter(key -> compiledPattern.matcher(key).matches())
                 .filter(key -> {
                     CacheEntry entry = cache.get(key);
                     return entry != null && !entry.isExpired();
                 })
                 .collect(Collectors.toList());
+
+            LOGGER.debug("Pattern lookup in '{}': pattern='{}', matches={}, size={}",
+                cacheName(), pattern, matchingKeys.size(), currentSize.get());
+            return matchingKeys;
                 
         } catch (Exception e) {
-            LOGGER.error("Failed to get keys by pattern '{}': {}", pattern, e.getMessage());
-            LOGGER.debug("Full exception details:", e);
+            LOGGER.error("Failed to get keys by pattern in cache '{}': pattern='{}', size={}, error={}",
+                cacheName(), pattern, currentSize.get(), e.getMessage());
+            LOGGER.debug("Pattern lookup failure stack trace for cache '{}' and pattern '{}':", cacheName(), pattern, e);
             return Collections.emptyList();
         }
     }
@@ -282,16 +310,21 @@ public class InMemoryCacheManager implements CacheManager {
     @Override
     public List<String> getAllKeys() {
         try {
-            return cache.keySet().stream()
+            List<String> keys = cache.keySet().stream()
                 .filter(key -> {
                     CacheEntry entry = cache.get(key);
                     return entry != null && !entry.isExpired();
                 })
                 .collect(Collectors.toList());
+
+            LOGGER.debug("Collected all live keys from '{}': count={}, size={}",
+                cacheName(), keys.size(), currentSize.get());
+            return keys;
                 
         } catch (Exception e) {
-            LOGGER.error("Failed to get all keys from cache: {}", e.getMessage());
-            LOGGER.debug("Stack trace for cache key retrieval failure:", e);
+            LOGGER.error("Failed to get all keys from cache '{}': size={}, error={}",
+                cacheName(), currentSize.get(), e.getMessage());
+            LOGGER.debug("Key retrieval failure stack trace for cache '{}':", cacheName(), e);
             return Collections.emptyList();
         }
     }
@@ -303,14 +336,19 @@ public class InMemoryCacheManager implements CacheManager {
     
     @Override
     public void clear() {
+        evictionLock.writeLock().lock();
         try {
+            int previousSize = currentSize.get();
             cache.clear();
             currentSize.set(0);
-            LOGGER.debug("Cache '{}' cleared", configuration.getName());
+            LOGGER.info("Cleared cache '{}': removedEntries={}", cacheName(), previousSize);
 
         } catch (Exception e) {
-            LOGGER.error("Failed to clear cache '{}': {}", configuration.getName(), e.getMessage());
-            LOGGER.debug("Full exception details:", e);
+            LOGGER.error("Failed to clear cache '{}': size={}, error={}",
+                cacheName(), currentSize.get(), e.getMessage());
+            LOGGER.debug("Clear failure stack trace for cache '{}':", cacheName(), e);
+        } finally {
+            evictionLock.writeLock().unlock();
         }
     }
     
@@ -321,11 +359,8 @@ public class InMemoryCacheManager implements CacheManager {
             long currentTime = System.currentTimeMillis();
             int evictedCount = 0;
 
-            Iterator<Map.Entry<String, CacheEntry>> iterator = cache.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, CacheEntry> entry = iterator.next();
-                if (entry.getValue().isExpired(currentTime)) {
-                    iterator.remove();
+            for (Map.Entry<String, CacheEntry> entry : cache.entrySet()) {
+                if (entry.getValue().isExpired(currentTime) && cache.remove(entry.getKey(), entry.getValue())) {
                     currentSize.decrementAndGet();
                     evictedCount++;
                     statistics.recordEviction();
@@ -333,13 +368,17 @@ public class InMemoryCacheManager implements CacheManager {
             }
 
             if (evictedCount > 0) {
-                LOGGER.debug("Evicted {} expired entries from cache '{}'",
-                    evictedCount, configuration.getName());
+                LOGGER.info("Evicted expired entries from cache '{}': evictedCount={}, size={}",
+                    cacheName(), evictedCount, currentSize.get());
+            } else {
+                LOGGER.debug("Expired-entry eviction completed for '{}': evictedCount=0, size={}",
+                    cacheName(), currentSize.get());
             }
 
         } catch (Exception e) {
-            LOGGER.error("Failed to evict expired entries: {}", e.getMessage());
-            LOGGER.debug("Stack trace for cache eviction failure:", e);
+            LOGGER.error("Failed to evict expired entries from cache '{}': size={}, error={}",
+                cacheName(), currentSize.get(), e.getMessage());
+            LOGGER.debug("Expired-entry eviction failure stack trace for cache '{}':", cacheName(), e);
         } finally {
             evictionLock.writeLock().unlock();
         }
@@ -358,22 +397,33 @@ public class InMemoryCacheManager implements CacheManager {
     @Override
     public void shutdown() {
         running = false;
+        LOGGER.info("Shutting down cache '{}': size={}, cleanupEnabled={}",
+            cacheName(), currentSize.get(), enableCleanup);
         
         if (cleanupExecutor != null) {
             cleanupExecutor.shutdown();
             try {
                 if (!cleanupExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    LOGGER.info("Cleanup executor for cache '{}' did not stop gracefully; forcing shutdown", cacheName());
                     cleanupExecutor.shutdownNow();
                 }
             } catch (InterruptedException e) {
                 cleanupExecutor.shutdownNow();
                 Thread.currentThread().interrupt();
+                LOGGER.error("Interrupted while shutting down cleanup executor for cache '{}': {}",
+                    cacheName(), e.getMessage());
+                LOGGER.debug("Cleanup executor shutdown interruption for cache '{}':", cacheName(), e);
             }
         }
         
-        cache.clear();
-        currentSize.set(0);
-        LOGGER.debug("Cache '{}' shut down", configuration.getName());
+        evictionLock.writeLock().lock();
+        try {
+            cache.clear();
+            currentSize.set(0);
+        } finally {
+            evictionLock.writeLock().unlock();
+        }
+        LOGGER.info("Cache '{}' shut down: size={}", cacheName(), currentSize.get());
     }
 
     /**
@@ -394,7 +444,8 @@ public class InMemoryCacheManager implements CacheManager {
             TimeUnit.MINUTES
         );
 
-        LOGGER.debug("Started background cleanup for cache '{}'", configuration.getName());
+        LOGGER.info("Started background cleanup for cache '{}': initialDelay={}m, interval={}m",
+            cacheName(), 5, 5);
     }
 
     /**
@@ -420,16 +471,26 @@ public class InMemoryCacheManager implements CacheManager {
             }
 
             if (lruKey != null) {
-                cache.remove(lruKey);
-                currentSize.decrementAndGet();
-                statistics.recordEviction();
-                LOGGER.debug("Evicted LRU entry with key: {}", lruKey);
+                CacheEntry removed = cache.remove(lruKey);
+                if (removed != null) {
+                    currentSize.decrementAndGet();
+                    statistics.recordEviction();
+                    LOGGER.debug("Evicted LRU entry from '{}': key='{}', size={}",
+                        cacheName(), lruKey, currentSize.get());
+                }
             }
 
         } catch (Exception e) {
-            LOGGER.error("Failed to evict LRU entry: {}", e.getMessage());
-            LOGGER.debug("Stack trace for LRU eviction failure:", e);
+            LOGGER.error("Failed to evict LRU entry from cache '{}': size={}, error={}",
+                cacheName(), currentSize.get(), e.getMessage());
+            LOGGER.debug("LRU eviction failure stack trace for cache '{}':", cacheName(), e);
         }
+    }
+
+    private String cacheName() {
+        return configuration != null && configuration.getName() != null
+            ? configuration.getName()
+            : "unnamed-cache";
     }
 
     /**
