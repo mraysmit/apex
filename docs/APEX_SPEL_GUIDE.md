@@ -1,7 +1,7 @@
 # APEX SpEL (Spring Expression Language) Guide
 
-**Version:** 2.3
-**Last Updated:** 2025-10-13
+**Version:** 2.4
+**Last Updated:** 2025-07-25
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 ---
 
@@ -10,6 +10,7 @@
 - [Overview](#overview)
 - [SpEL in APEX Features](#spel-in-apex-features)
 - [Field Mapping SpEL Support](#field-mapping-spel-support)
+- [Runtime Script Bridge (`#script`)](#runtime-script-bridge-script)
 - [Basic Syntax](#basic-syntax)
 - [Safe Navigation](#safe-navigation)
 - [Array and Collection Access](#array-and-collection-access)
@@ -46,6 +47,7 @@ SpEL is now supported consistently across ALL APEX features:
 | **Lookup Keys** | Yes | `lookup-key: '#symbol'` |
 | **Calculations** | Yes | `expression: '#amount * 0.01'` |
 | **Field Mappings** | **NEW (v2.3)** | `source-field: '#currency'` |
+| **Runtime Scripts** | **NEW (v2.4)** | `expression: "#script('risk-score', #root)"` |
 
 ### The `#` Prefix Convention
 
@@ -151,6 +153,109 @@ field-mappings:
   - source-field: "#currency"
     target-field: "buy_currency"
 ```
+
+---
+
+## Runtime Script Bridge (`#script`)
+
+**New in Version 2.4:** APEX can call externally defined Groovy scripts from any SpEL expression using the `#script(...)` bridge function. This allows complex business logic to live in `.groovy` files while being invoked seamlessly from YAML-driven rules and enrichments.
+
+### Quick Start
+
+1. **Define a Groovy script** (`risk-score.groovy`):
+```groovy
+def run(Map data) {
+    def notional = data.notionalAmount as BigDecimal
+    if (notional > 10_000_000) return 'HIGH'
+    if (notional > 1_000_000)  return 'MEDIUM'
+    return 'LOW'
+}
+```
+
+2. **Register it in YAML**:
+```yaml
+runtime-scripts:
+  script-locations:
+    - directory: "scripts/groovy"
+      pattern: "*.groovy"
+  allowlist:
+    - "risk-score"
+  execution-timeout-ms: 5000
+```
+
+3. **Call from any SpEL expression**:
+```yaml
+enrichments:
+  - id: "compute-risk"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "#script('risk-score', #root)"
+      result-field: "riskLevel"
+```
+
+### `#script` Function Signature
+
+```
+#script(scriptId, arg1, arg2, ...)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `scriptId` | String | Name of the script (filename without `.groovy` extension) |
+| `arg1..N` | Any | Arguments passed to the script's `run()` method as `Object[]` |
+
+**Return value:** Whatever the Groovy `run()` method returns (String, Number, Map, etc.)
+
+### How It Works
+
+1. RulesEngine reads `runtime-scripts` from YAML and initializes a `RuntimeScriptRegistry`
+2. Groovy files are compiled once by `GroovyScriptCompiler` and cached
+3. The `#script` SpEL function is registered via `ScriptBridge` (ThreadLocal, thread-safe)
+4. Each `#script(...)` call invokes `ScriptExecutor` which runs the script's `run()` method with a configurable timeout
+5. If the script exceeds the timeout, a `ScriptTimeoutException` is thrown
+
+### Calling Specific Methods
+
+By default, `#script` invokes the `run()` method. To call a different method, use `#scriptMethod`:
+
+```yaml
+expression: "#script('risk-score', #root)"               # calls run(data)
+```
+
+### Security: Script Allowlist
+
+Only scripts explicitly listed in the `allowlist` can be executed. Any attempt to invoke an unlisted script throws `ScriptNotAllowedException`:
+
+```yaml
+runtime-scripts:
+  allowlist:
+    - "risk-score"
+    - "margin-calc"
+  # Only risk-score.groovy and margin-calc.groovy can be called
+```
+
+### Error Recovery
+
+Script errors integrate with APEX's standard error recovery system. If error recovery is enabled, a failing script expression is handled the same way as any failing SpEL expression:
+
+```yaml
+error-recovery:
+  enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+```
+
+With this configuration, a script that throws an exception will log the error and continue processing with a default value rather than failing the entire evaluation.
+
+### Hot Reload
+
+When `polling-interval-ms` is set to a positive value, APEX polls for script file changes and recompiles automatically:
+
+```yaml
+runtime-scripts:
+  polling-interval-ms: 5000   # Check every 5 seconds (0 = disabled)
+```
+
+If a recompiled script fails to compile, the previous good version is retained (use-last-good policy).
 
 ---
 

@@ -47,6 +47,9 @@ module dev.mars.apex.core {
     requires handlebars;
     requires org.yaml.snakeyaml;
 
+    // Groovy scripting engine
+    requires org.apache.groovy;
+
     // Enable automatic JDBC driver loading
     uses java.sql.Driver;
 
@@ -119,4 +122,7 @@ module dev.mars.apex.core {
 
     // Pipeline configuration exports
     exports dev.mars.apex.core.config.pipeline;
+
+    // Runtime script exports
+    exports dev.mars.apex.core.script;
 }

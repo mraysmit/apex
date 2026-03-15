@@ -1,0 +1,46 @@
+metadata:
+  name: "Runtime Script Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates runtime Groovy script invocation from SpEL expressions
+    using the #script(...) bridge function.
+
+runtime-scripts:
+  enabled: true
+  locations:
+    - "${scriptDir}"
+  engine: "groovy"
+  polling-interval-ms: 0
+  execution-timeout-ms: 5000
+
+enrichments:
+  - id: "compute-risk-level"
+    name: "Compute Risk Level"
+    type: "calculation-enrichment"
+    description: "Compute risk level from notional and counterparty rating"
+    calculation-config:
+      expression: "#script('RuntimeScriptDemoTest-risk-score', #root)"
+      result-field: "riskLevel"
+    field-mappings:
+      - source-field: "riskLevel"
+        target-field: "riskLevel"
+
+rules:
+  - id: "high-risk-alert"
+    name: "High Risk Alert"
+    condition: "riskLevel == 'HIGH'"
+    message: "Trade classified as HIGH risk — requires senior approval"
+    severity: "WARNING"
+
+  - id: "medium-risk-alert"
+    name: "Medium Risk Alert"
+    condition: "riskLevel == 'MEDIUM'"
+    message: "Trade classified as MEDIUM risk — standard review required"
+    severity: "INFO"
+
+  - id: "low-risk-pass"
+    name: "Low Risk Pass"
+    condition: "riskLevel == 'LOW'"
+    message: "Trade classified as LOW risk — auto-approved"
+    severity: "INFO"

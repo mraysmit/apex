@@ -1,8 +1,10 @@
 package dev.mars.apex.engine.core;
 
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
+import dev.mars.apex.core.config.model.YamlRuntimeScriptConfig;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.*;
+import dev.mars.apex.core.script.*;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.loader.*;
@@ -38,6 +40,10 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -135,6 +141,12 @@ public class RulesEngine {
     private volatile LifecycleState lifecycleState = LifecycleState.ACTIVE;
     private final AtomicInteger activeEvaluations = new AtomicInteger();
 
+    // Runtime script system components (null when runtime-scripts not configured)
+    private final ScriptBridge scriptBridge;
+    private final ScriptReloadManager scriptReloadManager;
+    private final GroovyScriptCompiler scriptCompiler;
+    private final ScriptExecutor scriptExecutor;
+
     /**
      * Create a new RulesEngine with the specified configuration.
      * This is the public constructor for RulesEngine.
@@ -173,6 +185,55 @@ public class RulesEngine {
         this.yamlConfig = yamlConfig;
         this.scenarioRegistry = freezeScenarioRegistry(scenarioRegistry);
         this.evaluatorService = new ExpressionEvaluatorService(SpelParserHolder.INSTANCE);
+
+        // Initialize runtime script system if configured
+        ScriptBridge bridge = null;
+        ScriptReloadManager reloader = null;
+        GroovyScriptCompiler compiler = null;
+        ScriptExecutor executor = null;
+        if (yamlConfig != null && yamlConfig.getRuntimeScripts() != null
+                && yamlConfig.getRuntimeScripts().isEnabled()) {
+            YamlRuntimeScriptConfig scriptConfig = yamlConfig.getRuntimeScripts();
+            try {
+                List<Path> locations = resolveScriptLocations(scriptConfig);
+                if (locations.isEmpty()) {
+                    logger.warn("Runtime scripts configured but no valid filesystem locations were resolved");
+                    throw new IllegalArgumentException("No valid runtime script locations configured");
+                }
+                RuntimeScriptRegistry scriptRegistry = new RuntimeScriptRegistry(
+                        locations, scriptConfig.getAllowlist());
+                scriptRegistry.loadScripts();
+
+                compiler = new GroovyScriptCompiler(
+                        scriptConfig.getFailMode());
+                executor = new ScriptExecutor();
+
+                bridge = new ScriptBridge(scriptRegistry, compiler, executor,
+                        scriptConfig.getExecutionTimeoutMs());
+                this.evaluatorService.enableScriptBridge(bridge);
+
+                if (scriptConfig.getPollingIntervalMs() > 0) {
+                    reloader = new ScriptReloadManager(
+                            scriptRegistry, compiler, scriptConfig.getPollingIntervalMs());
+                    reloader.start();
+                }
+                logger.info("Runtime script system initialized with {} location(s)", locations.size());
+            } catch (Exception e) {
+                logger.error("Failed to initialize runtime script system", e);
+                if (executor != null) {
+                    executor.shutdown();
+                }
+                if (compiler != null) {
+                    compiler.close();
+                }
+                throw new IllegalStateException("Failed to initialize runtime script system", e);
+            }
+        }
+        this.scriptBridge = bridge;
+        this.scriptReloadManager = reloader;
+        this.scriptCompiler = compiler;
+        this.scriptExecutor = executor;
+
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
         this.scenarioParser = new ScenarioParser();  // Initialize scenario parser
@@ -243,6 +304,51 @@ public class RulesEngine {
         logger.debug("Using error recovery config: enabled={}, default-strategy={}",errorRecoveryConfig.isEnabled(), errorRecoveryConfig.getDefaultStrategy());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
         logger.debug("Using enrichment processor: {}", enrichmentProcessor != null ? enrichmentProcessor.getClass().getSimpleName() : "none");
+    }
+
+    private List<Path> resolveScriptLocations(YamlRuntimeScriptConfig scriptConfig) {
+        if (scriptConfig.getLocations() == null || scriptConfig.getLocations().isEmpty()) {
+            return List.of();
+        }
+
+        List<Path> resolved = new ArrayList<>();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+        for (String rawLocation : scriptConfig.getLocations()) {
+            if (rawLocation == null || rawLocation.trim().isEmpty()) {
+                continue;
+            }
+
+            String location = rawLocation.trim();
+            try {
+                if (location.startsWith("classpath:")) {
+                    String classpathRef = location.substring("classpath:".length());
+                    while (classpathRef.startsWith("/")) {
+                        classpathRef = classpathRef.substring(1);
+                    }
+
+                    URL url = classLoader.getResource(classpathRef);
+                    if (url == null) {
+                        logger.warn("Runtime script classpath location not found: {}", location);
+                        continue;
+                    }
+                    if (!"file".equalsIgnoreCase(url.getProtocol())) {
+                        logger.warn("Runtime script classpath location '{}' uses unsupported protocol '{}' (filesystem paths only)",
+                                location, url.getProtocol());
+                        continue;
+                    }
+
+                    URI uri = url.toURI();
+                    resolved.add(Path.of(uri).toAbsolutePath().normalize());
+                } else {
+                    resolved.add(Path.of(location).toAbsolutePath().normalize());
+                }
+            } catch (IllegalArgumentException | URISyntaxException ex) {
+                logger.warn("Ignoring invalid runtime script location '{}': {}", location, ex.getMessage());
+            }
+        }
+
+        return resolved;
     }
 
     private static Map<String, ScenarioConfiguration> freezeScenarioRegistry(
@@ -950,6 +1056,29 @@ public class RulesEngine {
         dataSources.clear();
         dataSinks.clear();
 
+        // Shutdown runtime script system
+        if (scriptReloadManager != null) {
+            try {
+                scriptReloadManager.stop();
+            } catch (Exception e) {
+                logger.warn("Error shutting down script reload manager: {}", e.getMessage());
+            }
+        }
+        if (scriptExecutor != null) {
+            try {
+                scriptExecutor.shutdown();
+            } catch (Exception e) {
+                logger.warn("Error shutting down script executor: {}", e.getMessage());
+            }
+        }
+        if (scriptCompiler != null) {
+            try {
+                scriptCompiler.close();
+            } catch (Exception e) {
+                logger.warn("Error shutting down script compiler: {}", e.getMessage());
+            }
+        }
+
         synchronized (lifecycleMonitor) {
             lifecycleState = LifecycleState.SHUT_DOWN;
             lifecycleMonitor.notifyAll();
@@ -960,6 +1089,9 @@ public class RulesEngine {
 
     private <T> T runWhileEngineActive(String operationName, Callable<T> action) {
         beginEvaluation(operationName);
+        if (scriptBridge != null) {
+            scriptBridge.activate();
+        }
         try {
             return action.call();
         } catch (RuntimeException e) {
@@ -967,6 +1099,9 @@ public class RulesEngine {
         } catch (Exception e) {
             throw new IllegalStateException("Unexpected checked exception during " + operationName, e);
         } finally {
+            if (scriptBridge != null) {
+                scriptBridge.deactivate();
+            }
             endEvaluation();
         }
     }
