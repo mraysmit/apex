@@ -31,7 +31,7 @@ Primary goals:
 | WP-4 | COMPLETE | `RulesEngine` shutdown now coordinates with in-flight evaluations. |
 | WP-5 | COMPLETE | Mutable registry and scenario exposures were hardened or made immutable-by-default. |
 | WP-6 | COMPLETE | Enrichment-group aggregation now deep-merges nested results; scenario concurrency regressions cover nested shared input isolation. |
-| WP-7 | COMPLETE | A repeatable `apex-core` benchmark now covers both inline and H2-backed lookup profiles, uses median-based sampling, and includes current-branch versus `master` comparison data. |
+| WP-7 | COMPLETE | A repeatable `apex-core` benchmark now covers both inline and H2-backed lookup profiles, uses median-based sampling, and includes a captured 2026-03-15 comparison of `refactor/rules-engine-decomposition` versus `master`. |
 
 ---
 
@@ -321,9 +321,9 @@ Performance work before concurrency correctness is fixed risks benchmarking the 
 - Those steady-state success-path logs are now `DEBUG`, and the dataset cache messages use parameterized logging so string formatting is skipped unless debug logging is enabled.
 - The resulting benchmark jump indicates the prior medians were still strongly influenced by logger overhead at the default test logging level, not just core engine work.
 
-**2026-03-15 current branch vs `master` comparison**
+**2026-03-15 `refactor/rules-engine-decomposition` vs `master` comparison**
 
-Using the median-based harness, the current branch is now ahead of `master` in all four measured combinations.
+Using the median-based harness, the 2026-03-15 optimized branch snapshot from `refactor/rules-engine-decomposition` is ahead of `master` in all four measured combinations.
 
 | Profile | Concurrency | Current Throughput (ops/s) | Master Throughput (ops/s) | Throughput Delta | Current p95 (ms) | Master p95 (ms) | p95 Delta |
 |---------|-------------|----------------------------|---------------------------|------------------|------------------|-----------------|-----------|
@@ -335,7 +335,7 @@ Using the median-based harness, the current branch is now ahead of `master` in a
 Interpretation:
 
 - The correctness remediation work remains in place and the benchmark still covers both in-memory and controlled local database-backed lookup paths.
-- The original single-run comparison overstated noise; once the harness moved to median-based sampling, the lifecycle fast path removed per-call monitor contention, `SequentialProcessor` stopped rebuilding per-evaluation processing indexes, and steady-state `INFO` logging was removed from the hot path, the current branch outperformed `master` across all four combinations.
+- The original single-run comparison overstated noise; once the harness moved to median-based sampling, the lifecycle fast path removed per-call monitor contention, `SequentialProcessor` stopped rebuilding per-evaluation processing indexes, and steady-state `INFO` logging was removed from the hot path, the captured `refactor/rules-engine-decomposition` snapshot outperformed `master` across all four combinations.
 - The largest gains in the latest pass came from demoting per-evaluation success-path logging, which means the earlier benchmark still reflected logger overhead under the default test logging configuration.
 - The current benchmark is a better measure of engine and lookup-path overhead, but production behavior will still depend on the effective logging level used in the deployment environment.
 

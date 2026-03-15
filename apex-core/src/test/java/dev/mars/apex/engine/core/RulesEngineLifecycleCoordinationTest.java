@@ -5,6 +5,7 @@ import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.engine.model.metadata.RuleMetadata;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(ColoredTestOutputExtension.class)
 @DisplayName("RulesEngine lifecycle coordination")
