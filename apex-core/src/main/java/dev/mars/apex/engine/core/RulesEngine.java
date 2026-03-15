@@ -37,6 +37,7 @@ import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -131,8 +132,8 @@ public class RulesEngine {
     private final Map<String, ExternalDataSource> dataSources;
     private final Map<String, DataSink> dataSinks;
     private final Object lifecycleMonitor = new Object();
-    private LifecycleState lifecycleState = LifecycleState.ACTIVE;
-    private int activeEvaluations;
+    private volatile LifecycleState lifecycleState = LifecycleState.ACTIVE;
+    private final AtomicInteger activeEvaluations = new AtomicInteger();
 
     /**
      * Create a new RulesEngine with the specified configuration.
@@ -699,7 +700,7 @@ public class RulesEngine {
     }
 
     private RuleResult evaluateInternal(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData) {
-        logger.info("Starting unified evaluation with enrichments and rules");
+        logger.debug("Starting unified evaluation with enrichments and rules");
 
         // Check for initialization errors first
         if (!initializationErrors.isEmpty()) {
@@ -971,20 +972,27 @@ public class RulesEngine {
     }
 
     private void beginEvaluation(String operationName) {
-        synchronized (lifecycleMonitor) {
-            if (lifecycleState != LifecycleState.ACTIVE) {
-                throw new IllegalStateException(
-                    "RulesEngine is shutting down or has already shut down; cannot start " + operationName);
-            }
+        if (lifecycleState != LifecycleState.ACTIVE) {
+            throw new IllegalStateException(
+                "RulesEngine is shutting down or has already shut down; cannot start " + operationName);
+        }
 
-            activeEvaluations++;
+        activeEvaluations.incrementAndGet();
+
+        if (lifecycleState != LifecycleState.ACTIVE) {
+            notifyEvaluationCompleted(activeEvaluations.decrementAndGet());
+            throw new IllegalStateException(
+                "RulesEngine is shutting down or has already shut down; cannot start " + operationName);
         }
     }
 
     private void endEvaluation() {
-        synchronized (lifecycleMonitor) {
-            activeEvaluations--;
-            if (activeEvaluations == 0) {
+        notifyEvaluationCompleted(activeEvaluations.decrementAndGet());
+    }
+
+    private void notifyEvaluationCompleted(int remainingEvaluations) {
+        if (remainingEvaluations == 0 && lifecycleState != LifecycleState.ACTIVE) {
+            synchronized (lifecycleMonitor) {
                 lifecycleMonitor.notifyAll();
             }
         }
@@ -1011,7 +1019,7 @@ public class RulesEngine {
 
             lifecycleState = LifecycleState.SHUTTING_DOWN;
 
-            while (activeEvaluations > 0) {
+            while (activeEvaluations.get() > 0) {
                 try {
                     lifecycleMonitor.wait();
                 } catch (InterruptedException e) {

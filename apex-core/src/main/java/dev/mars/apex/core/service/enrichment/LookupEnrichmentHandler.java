@@ -280,7 +280,7 @@ public class LookupEnrichmentHandler {
 
             Object cached = cacheManager.get(ApexCacheManager.DATASET_CACHE, cacheKey);
             if (cached instanceof DatasetLookupService) {
-                logger.info("Dataset cache HIT for signature: " + signature.toShortString());
+                logger.debug("Dataset cache HIT for signature: {}", signature.toShortString());
                 return (DatasetLookupService) cached;
             }
 
@@ -292,9 +292,11 @@ public class LookupEnrichmentHandler {
 
                 cacheManager.put(ApexCacheManager.DATASET_CACHE, cacheKey, datasetService);
 
-                logger.info("Dataset cache MISS - Created and cached dataset lookup service: " + datasetServiceName +
-                           " (type: " + dataset.getType() + ", records: " +
-                           datasetService.getAllRecords().size() + ", signature: " + signature.toShortString() + ")");
+                logger.debug("Dataset cache MISS - Created and cached dataset lookup service: {} (type: {}, records: {}, signature: {})",
+                    datasetServiceName,
+                    dataset.getType(),
+                    datasetService.getAllRecords().size(),
+                    signature.toShortString());
 
                 return datasetService;
             } catch (Exception e) {

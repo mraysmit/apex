@@ -1,7 +1,7 @@
 # APEX Concurrency Remediation Plan
 
-**Status:** Proposed execution plan  
-**Last Updated:** 2026-03-14  
+**Status:** WP-1 through WP-7 baseline complete  
+**Last Updated:** 2026-03-15  
 **Scope:** Remediation work for concurrency risks identified in `apex-core`.
 
 ---
@@ -18,6 +18,20 @@ Primary goals:
 2. Make concurrent behavior explicit and test-backed.
 3. Prevent unsupported concurrency modes from being mistaken for production-safe features.
 4. Preserve the existing external-data-source concurrency baseline while improving the rest of the engine.
+
+---
+
+## 1.1 Execution Status
+
+| Work Package | Status | Notes |
+|--------------|--------|-------|
+| WP-1 | COMPLETE | Parallel rule-group evaluation now isolates evaluation context per task and has regression coverage. |
+| WP-2 | COMPLETE | `EnrichmentProcessor` no longer relies on shared request-scoped YAML configuration state. |
+| WP-3 | COMPLETE | Pipeline execution state is isolated per run instead of reusing mutable executor state. |
+| WP-4 | COMPLETE | `RulesEngine` shutdown now coordinates with in-flight evaluations. |
+| WP-5 | COMPLETE | Mutable registry and scenario exposures were hardened or made immutable-by-default. |
+| WP-6 | COMPLETE | Enrichment-group aggregation now deep-merges nested results; scenario concurrency regressions cover nested shared input isolation. |
+| WP-7 | COMPLETE | A repeatable `apex-core` benchmark now covers both inline and H2-backed lookup profiles, uses median-based sampling, and includes current-branch versus `master` comparison data. |
 
 ---
 
@@ -271,6 +285,63 @@ Performance work before concurrency correctness is fixed risks benchmarking the 
 
 - Capacity claims are evidence-based and traceable to benchmark runs.
 
+**2026-03-15 benchmark status**
+
+- Benchmark test: `apex-core/src/test/java/dev/mars/apex/core/performance/RulesEngineConcurrencyBenchmarkTest.java`
+- Generated report: `apex-core/target/benchmark-reports/rules-engine-concurrency-benchmark.md`
+- Comparison report: `apex-core/target/benchmark-reports/rules-engine-concurrency-branch-vs-master-comparison.md`
+- Workloads:
+	- shared `RulesEngine` instance with document-order rules plus inline lookup and calculation enrichments
+	- shared `RulesEngine` instance with document-order rules plus H2-backed lookup and calculation enrichments
+- Sampling note: each profile/concurrency pair now runs three measured samples and the report summarizes the median values so branch comparisons are less sensitive to single-run noise.
+- Scope note: the benchmark now covers both core in-memory lookup behavior and a controlled local database-backed lookup path. It still does not model remote network latency distributions.
+
+| Profile | Concurrency | Samples | Operations | Median Throughput (ops/s) | Median Avg (ms) | Median p50 (ms) | Median p95 (ms) | Median p99 (ms) | Median Max (ms) | Median Heap Delta (bytes) | Median Max Queue Depth | Failures |
+|---------|-------------|---------|------------|---------------------------|-----------------|-----------------|-----------------|-----------------|-----------------|---------------------------|------------------------|----------|
+| inline-lookup-baseline | 1 | 3 | 600 | 3,461.299 | 0.266 | 0.237 | 0.407 | 0.649 | 5.085 | 2,269,592 | 599 | 0 |
+| inline-lookup-baseline | 8 | 3 | 600 | 13,836.904 | 0.558 | 0.457 | 0.826 | 4.647 | 4.916 | 2,138,904 | 592 | 0 |
+| h2-database-lookup | 1 | 3 | 600 | 4,617.239 | 0.198 | 0.168 | 0.413 | 0.535 | 0.770 | 45,858,456 | 599 | 0 |
+| h2-database-lookup | 8 | 3 | 600 | 19,158.740 | 0.403 | 0.370 | 0.666 | 1.019 | 1.213 | 50,331,768 | 592 | 0 |
+
+**2026-03-15 lifecycle fast-path optimization**
+
+- `RulesEngine` lifecycle coordination still blocks shutdown until in-flight work completes and still rejects new work once shutdown begins.
+- The hot path no longer takes the lifecycle monitor on every evaluation begin/end.
+- `activeEvaluations` now uses atomic accounting and only notifies the lifecycle monitor when shutdown is actually in progress and the last active evaluation exits.
+
+**2026-03-15 prepared processing-state cache**
+
+- `SequentialProcessor` now caches prepared rule, rule-group, enrichment-group, enrichment, and transformation indexes per `YamlRuleConfiguration` instance instead of rebuilding them on every evaluation.
+- The steady-state path now uses a lock-free fast path for the primary config, so shared-engine workloads avoid both repeated rule construction and per-request cache synchronization.
+- This specifically removes the repeated `RuleFactory.createRuleIndex(...)` and `createRuleGroupIndex(...)` work that was showing up in benchmark logs during document-order evaluation.
+
+**2026-03-15 hot-path logging reduction**
+
+- The shared-engine benchmark was still paying for per-evaluation `INFO` logs in `RulesEngine`, `SequentialProcessor`, and dataset lookup cache resolution.
+- Those steady-state success-path logs are now `DEBUG`, and the dataset cache messages use parameterized logging so string formatting is skipped unless debug logging is enabled.
+- The resulting benchmark jump indicates the prior medians were still strongly influenced by logger overhead at the default test logging level, not just core engine work.
+
+**2026-03-15 current branch vs `master` comparison**
+
+Using the median-based harness, the current branch is now ahead of `master` in all four measured combinations.
+
+| Profile | Concurrency | Current Throughput (ops/s) | Master Throughput (ops/s) | Throughput Delta | Current p95 (ms) | Master p95 (ms) | p95 Delta |
+|---------|-------------|----------------------------|---------------------------|------------------|------------------|-----------------|-----------|
+| inline-lookup-baseline | 1 | 3,461.299 | 1,295.650 | +167.15% | 0.407 | 1.229 | -66.88% |
+| inline-lookup-baseline | 8 | 13,836.904 | 5,134.700 | +169.47% | 0.826 | 2.149 | -61.56% |
+| h2-database-lookup | 1 | 4,617.239 | 1,749.264 | +163.95% | 0.413 | 0.860 | -51.98% |
+| h2-database-lookup | 8 | 19,158.740 | 5,273.168 | +263.32% | 0.666 | 2.153 | -69.07% |
+
+Interpretation:
+
+- The correctness remediation work remains in place and the benchmark still covers both in-memory and controlled local database-backed lookup paths.
+- The original single-run comparison overstated noise; once the harness moved to median-based sampling, the lifecycle fast path removed per-call monitor contention, `SequentialProcessor` stopped rebuilding per-evaluation processing indexes, and steady-state `INFO` logging was removed from the hot path, the current branch outperformed `master` across all four combinations.
+- The largest gains in the latest pass came from demoting per-evaluation success-path logging, which means the earlier benchmark still reflected logger overhead under the default test logging configuration.
+- The current benchmark is a better measure of engine and lookup-path overhead, but production behavior will still depend on the effective logging level used in the deployment environment.
+
+- Authoritative command: `mvn -pl apex-core clean -Dtest=RulesEngineConcurrencyBenchmarkTest test`
+- Comparison command for `master`: `git worktree add .worktrees/master-benchmark master` followed by `mvn -pl apex-core -Dtest=RulesEngineConcurrencyBenchmarkTest test` inside that worktree
+
 ---
 
 ## 4. Suggested PR Sequence
@@ -330,12 +401,10 @@ The remediation program is complete when all of the following are true:
 
 ## 7. Immediate Next Action
 
-Start with `WP-1` and `WP-2`.
+Use the current median-based comparison report as the starting point for any follow-on optimization work.
 
 Reason:
 
-- They address the clearest shared-state hazards in live execution paths.
-- They reduce the risk of subtle cross-request contamination.
-- They improve the safety of both normal concurrent evaluation and any future parallel features.
-
-If concurrent pipelines are already used in the application layer, promote `WP-3` into the same sprint.
+- The correctness remediation work is now in place and has direct before/after evidence against `master`.
+- The benchmark now uses median-based sampling across both in-memory and controlled local database-backed lookup paths.
+- The lifecycle fast path recovered the hot-path overhead introduced by shutdown coordination, so the next optimization steps should focus on other measured bottlenecks rather than the lifecycle guard itself.

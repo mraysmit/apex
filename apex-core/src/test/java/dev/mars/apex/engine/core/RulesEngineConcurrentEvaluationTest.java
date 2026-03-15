@@ -16,12 +16,17 @@ package dev.mars.apex.engine.core;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
-import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
-import org.junit.jupiter.api.*;
+import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
@@ -29,20 +34,32 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for RulesEngine thread-safety with ConcurrentHashMap for dataSources registry.
- * 
+ *
  * Validates the fix for race conditions in parallel scenario evaluation:
  * - DataSources registry is thread-safe (ConcurrentHashMap)
  * - Parallel evaluate() calls don't cause race conditions
  * - Consistent behavior under concurrent access
- * 
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-12-01
  * @version 1.0
@@ -58,7 +75,6 @@ class RulesEngineConcurrentEvaluationTest {
 
     @BeforeEach
     void setUp() {
-        // Clear caches for test isolation
         dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance().clearCache();
         logger.info("DataSourceFactory cache cleared for test isolation");
     }
@@ -68,10 +84,6 @@ class RulesEngineConcurrentEvaluationTest {
         dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance().clearCache();
     }
 
-    // ========================================
-    // Concurrent Evaluation Tests
-    // ========================================
-
     @Test
     @Order(1)
     @DisplayName("Should handle concurrent evaluate() calls safely")
@@ -80,7 +92,6 @@ class RulesEngineConcurrentEvaluationTest {
         logger.info("TEST: Concurrent evaluate() calls");
         logger.info("=".repeat(80));
 
-        // Create a simple YAML configuration
         String yamlContent = """
                 metadata:
                   name: "Concurrent Test Configuration"
@@ -97,12 +108,33 @@ class RulesEngineConcurrentEvaluationTest {
                     condition: "#score >= 80"
                     message: "High score"
                     priority: 90
+
+                enrichments:
+                  - id: "capture-thread-id"
+                    name: "Capture Thread Id"
+                    type: "calculation-enrichment"
+                    condition: "true"
+                    calculation-config:
+                      expression: "#threadId"
+                      result-field: "observedThreadId"
+                    field-mappings:
+                      - source-field: "observedThreadId"
+                        target-field: "observedThreadId"
+                  - id: "capture-iteration"
+                    name: "Capture Iteration"
+                    type: "calculation-enrichment"
+                    condition: "true"
+                    calculation-config:
+                      expression: "#iteration"
+                      result-field: "observedIteration"
+                    field-mappings:
+                      - source-field: "observedIteration"
+                        target-field: "observedIteration"
                 """;
 
         Path yamlFile = tempDir.resolve("concurrent-test.yaml");
         Files.writeString(yamlFile, yamlContent);
 
-        // Create engine
         RulesEngine engine = RulesEngine.fromFile(yamlFile.toString());
         assertNotNull(engine, "Engine should be created");
 
@@ -111,19 +143,17 @@ class RulesEngineConcurrentEvaluationTest {
         final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         final AtomicInteger successCount = new AtomicInteger(0);
         final AtomicInteger failureCount = new AtomicInteger(0);
-        final List<Exception> errors = new CopyOnWriteArrayList<>();
+        final List<Throwable> errors = new CopyOnWriteArrayList<>();
         final CountDownLatch startLatch = new CountDownLatch(1);
         final CountDownLatch completionLatch = new CountDownLatch(threadCount);
 
-        // Create tasks that evaluate rules concurrently
         for (int t = 0; t < threadCount; t++) {
             final int threadNum = t;
             executor.submit(() -> {
                 try {
-                    startLatch.await(); // Wait for synchronized start
-                    
+                    startLatch.await();
+
                     for (int i = 0; i < evaluationsPerThread; i++) {
-                        // Create unique input data for each evaluation
                         Map<String, Object> inputData = new HashMap<>();
                         inputData.put("age", 20 + (threadNum % 10));
                         inputData.put("score", 75 + (i % 30));
@@ -131,14 +161,20 @@ class RulesEngineConcurrentEvaluationTest {
                         inputData.put("iteration", i);
 
                         RuleResult result = engine.evaluate(inputData);
-                        
-                        if (result != null) {
+
+                        if (result != null
+                                && result.isTriggered()
+                                && result.getChildResults().size() == 2
+                                && ((Number) result.getEnrichedData().get("observedThreadId")).intValue() == threadNum
+                                && ((Number) result.getEnrichedData().get("observedIteration")).intValue() == i) {
                             successCount.incrementAndGet();
                         } else {
                             failureCount.incrementAndGet();
+                            errors.add(new AssertionError("Concurrent evaluation returned inconsistent result for thread="
+                                    + threadNum + ", iteration=" + i + ": " + result));
                         }
                     }
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     logger.error("Thread {} failed: {}", threadNum, e.getMessage(), e);
                     errors.add(e);
                     failureCount.addAndGet(evaluationsPerThread);
@@ -148,18 +184,15 @@ class RulesEngineConcurrentEvaluationTest {
             });
         }
 
-        // Release all threads simultaneously
         logger.info("Releasing {} threads for concurrent evaluation...", threadCount);
         startLatch.countDown();
 
-        // Wait for completion
-        assertTrue(completionLatch.await(60, TimeUnit.SECONDS), 
-            "All threads should complete within timeout");
+        assertTrue(completionLatch.await(60, TimeUnit.SECONDS),
+                "All threads should complete within timeout");
 
         executor.shutdown();
         executor.awaitTermination(10, TimeUnit.SECONDS);
 
-        // Report results
         int totalEvaluations = threadCount * evaluationsPerThread;
         logger.info("Concurrent evaluation results:");
         logger.info("  Total threads: {}", threadCount);
@@ -169,15 +202,15 @@ class RulesEngineConcurrentEvaluationTest {
         logger.info("  Failed: {}", failureCount.get());
         logger.info("  Errors: {}", errors.size());
 
-        // Verify results
-        assertTrue(errors.isEmpty(), "No exceptions should occur during concurrent evaluation: " + 
-            (errors.isEmpty() ? "" : errors.get(0).getMessage()));
-        assertEquals(totalEvaluations, successCount.get(), 
-            "All evaluations should succeed");
-        assertEquals(0, failureCount.get(), 
-            "No evaluations should fail");
+        assertTrue(errors.isEmpty(), "No exceptions should occur during concurrent evaluation: " +
+                (errors.isEmpty() ? "" : errors.get(0).getMessage()));
+        assertEquals(totalEvaluations, successCount.get(),
+                "All evaluations should succeed with isolated, correct outputs");
+        assertEquals(0, failureCount.get(),
+                "No evaluations should fail");
 
         logger.info("TEST PASSED: Concurrent evaluate() calls handled safely");
+        engine.shutdown();
     }
 
     @Test
@@ -188,7 +221,6 @@ class RulesEngineConcurrentEvaluationTest {
         logger.info("TEST: Concurrent result consistency");
         logger.info("=".repeat(80));
 
-        // Create a deterministic YAML configuration
         String yamlContent = """
                 metadata:
                   name: "Consistency Test Configuration"
@@ -214,7 +246,6 @@ class RulesEngineConcurrentEvaluationTest {
         final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         final CountDownLatch completionLatch = new CountDownLatch(threadCount);
 
-        // All threads evaluate with value=42, should all get MATCH
         for (int t = 0; t < threadCount; t++) {
             executor.submit(() -> {
                 try {
@@ -223,7 +254,7 @@ class RulesEngineConcurrentEvaluationTest {
                         inputData.put("value", 42);
 
                         RuleResult result = engine.evaluate(inputData);
-                        
+
                         if (result != null && result.isTriggered()) {
                             matchCount.incrementAndGet();
                         } else {
@@ -245,13 +276,13 @@ class RulesEngineConcurrentEvaluationTest {
         logger.info("  Matches (expected): {}", matchCount.get());
         logger.info("  No matches (unexpected): {}", noMatchCount.get());
 
-        // All evaluations with value=42 should match
-        assertEquals(totalEvaluations, matchCount.get(), 
-            "All evaluations with value=42 should match");
-        assertEquals(0, noMatchCount.get(), 
-            "No evaluations should fail to match");
+        assertEquals(totalEvaluations, matchCount.get(),
+                "All evaluations with value=42 should match");
+        assertEquals(0, noMatchCount.get(),
+                "No evaluations should fail to match");
 
         logger.info("TEST PASSED: Concurrent results are consistent");
+        engine.shutdown();
     }
 
     @Test
@@ -262,7 +293,6 @@ class RulesEngineConcurrentEvaluationTest {
         logger.info("TEST: Mixed concurrent operations");
         logger.info("=".repeat(80));
 
-        // Create multiple YAML configurations
         String yamlContent1 = """
                 metadata:
                   name: "Config 1"
@@ -274,6 +304,18 @@ class RulesEngineConcurrentEvaluationTest {
                     condition: "#type == 'A'"
                     message: "Type A"
                     priority: 100
+
+                enrichments:
+                  - id: "engine-1-marker"
+                    name: "Engine 1 Marker"
+                    type: "calculation-enrichment"
+                    condition: "true"
+                    calculation-config:
+                      expression: "'ENGINE_A'"
+                      result-field: "engineMarker"
+                    field-mappings:
+                      - source-field: "engineMarker"
+                        target-field: "engineMarker"
                 """;
 
         String yamlContent2 = """
@@ -287,6 +329,18 @@ class RulesEngineConcurrentEvaluationTest {
                     condition: "#type == 'B'"
                     message: "Type B"
                     priority: 100
+
+                enrichments:
+                  - id: "engine-2-marker"
+                    name: "Engine 2 Marker"
+                    type: "calculation-enrichment"
+                    condition: "true"
+                    calculation-config:
+                      expression: "'ENGINE_B'"
+                      result-field: "engineMarker"
+                    field-mappings:
+                      - source-field: "engineMarker"
+                        target-field: "engineMarker"
                 """;
 
         Path yamlFile1 = tempDir.resolve("config1.yaml");
@@ -294,7 +348,6 @@ class RulesEngineConcurrentEvaluationTest {
         Files.writeString(yamlFile1, yamlContent1);
         Files.writeString(yamlFile2, yamlContent2);
 
-        // Create two separate engines
         RulesEngine engine1 = RulesEngine.fromFile(yamlFile1.toString());
         RulesEngine engine2 = RulesEngine.fromFile(yamlFile2.toString());
 
@@ -302,15 +355,15 @@ class RulesEngineConcurrentEvaluationTest {
         final int evaluationsPerThread = 20;
         final AtomicInteger engine1Success = new AtomicInteger(0);
         final AtomicInteger engine2Success = new AtomicInteger(0);
-        final List<Exception> errors = new CopyOnWriteArrayList<>();
+        final List<Throwable> errors = new CopyOnWriteArrayList<>();
         final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         final CountDownLatch completionLatch = new CountDownLatch(threadCount);
 
-        // Half threads use engine1, half use engine2
         for (int t = 0; t < threadCount; t++) {
             final int threadNum = t;
             final RulesEngine engine = (t % 2 == 0) ? engine1 : engine2;
             final String type = (t % 2 == 0) ? "A" : "B";
+            final String expectedMarker = (t % 2 == 0) ? "ENGINE_A" : "ENGINE_B";
             final AtomicInteger counter = (t % 2 == 0) ? engine1Success : engine2Success;
 
             executor.submit(() -> {
@@ -320,12 +373,18 @@ class RulesEngineConcurrentEvaluationTest {
                         inputData.put("type", type);
 
                         RuleResult result = engine.evaluate(inputData);
-                        
-                        if (result != null && result.isTriggered()) {
+
+                        if (result != null
+                                && result.isTriggered()
+                                && expectedMarker.equals(result.getEnrichedData().get("engineMarker"))
+                                && result.getChildResults().size() == 1) {
                             counter.incrementAndGet();
+                        } else {
+                            errors.add(new AssertionError("Mixed concurrent evaluation returned inconsistent result for thread="
+                                    + threadNum + ": " + result));
                         }
                     }
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     logger.error("Thread {} failed: {}", threadNum, e.getMessage());
                     errors.add(e);
                 } finally {
@@ -348,135 +407,137 @@ class RulesEngineConcurrentEvaluationTest {
         assertEquals(expectedPerEngine, engine2Success.get(), "All engine2 evaluations should succeed");
 
         logger.info("TEST PASSED: Mixed concurrent operations handled safely");
+
+        engine1.shutdown();
+        engine2.shutdown();
     }
 
     @Test
     @Order(4)
-        @DisplayName("Should isolate nested input state during concurrent scenario evaluation")
-        void testConcurrentScenarioEvaluationIsolatesNestedInput() throws Exception {
-                logger.info("=".repeat(80));
-                logger.info("TEST: Concurrent scenario evaluation nested input isolation");
-                logger.info("=".repeat(80));
+    @DisplayName("Should isolate nested input state during concurrent scenario evaluation")
+    void testConcurrentScenarioEvaluationIsolatesNestedInput() throws Exception {
+        logger.info("=".repeat(80));
+        logger.info("TEST: Concurrent scenario evaluation nested input isolation");
+        logger.info("=".repeat(80));
 
-                Path stageFile = tempDir.resolve("scenario-stage-rules.yaml");
-                Files.writeString(stageFile, String.join(System.lineSeparator(),
-                        "metadata:",
-                        "  name: \"Scenario Stage Rules\"",
-                        "  version: \"1.0\"",
-                        "  type: \"rule-config\"",
-                        "",
-                        "rules:",
-                        "  - id: \"always-match\"",
-                        "    name: \"Always Match\"",
-                        "    condition: \"true\"",
-                        "    message: \"Stage executed\"",
-                        "    severity: \"INFO\"",
-                        "",
-                        "enrichments:",
-                        "  - id: \"copy-thread-id\"",
-                        "    name: \"Copy Thread Id\"",
-                        "    type: \"field-enrichment\"",
-                        "    condition: \"true\"",
-                        "    field-mappings:",
-                        "      - source-field: \"threadId\"",
-                        "        target-field: \"#trade.audit.values.threadId\"",
-                        "  - id: \"copy-iteration\"",
-                        "    name: \"Copy Iteration\"",
-                        "    type: \"field-enrichment\"",
-                        "    condition: \"true\"",
-                        "    field-mappings:",
-                        "      - source-field: \"iteration\"",
-                        "        target-field: \"#trade.audit.values.iteration\""
-                ));
+        Path stageFile = tempDir.resolve("scenario-stage-rules.yaml");
+        Files.writeString(stageFile, String.join(System.lineSeparator(),
+                "metadata:",
+                "  name: \"Scenario Stage Rules\"",
+                "  version: \"1.0\"",
+                "  type: \"rule-config\"",
+                "",
+                "rules:",
+                "  - id: \"always-match\"",
+                "    name: \"Always Match\"",
+                "    condition: \"true\"",
+                "    message: \"Stage executed\"",
+                "    severity: \"INFO\"",
+                "",
+                "enrichments:",
+                "  - id: \"copy-thread-id\"",
+                "    name: \"Copy Thread Id\"",
+                "    type: \"field-enrichment\"",
+                "    condition: \"true\"",
+                "    field-mappings:",
+                "      - source-field: \"threadId\"",
+                "        target-field: \"#trade.audit.values.threadId\"",
+                "  - id: \"copy-iteration\"",
+                "    name: \"Copy Iteration\"",
+                "    type: \"field-enrichment\"",
+                "    condition: \"true\"",
+                "    field-mappings:",
+                "      - source-field: \"iteration\"",
+                "        target-field: \"#trade.audit.values.iteration\""
+        ));
 
-                String normalizedStagePath = stageFile.toAbsolutePath().toString().replace('\\', '/');
-                Path scenarioFile = tempDir.resolve("concurrent-scenario.yaml");
-                Files.writeString(scenarioFile, String.join(System.lineSeparator(),
-                        "metadata:",
-                        "  id: \"concurrent-scenario\"",
-                        "  name: \"Concurrent Scenario\"",
-                        "  version: \"1.0.0\"",
-                        "  type: \"scenario\"",
-                        "",
-                        "scenario:",
-                        "  scenario-id: \"concurrent-scenario\"",
-                        "  name: \"Concurrent Scenario\"",
-                        "  processing-stages:",
-                        "    - stage-name: \"audit-stage\"",
-                        "      config-file: \"" + normalizedStagePath + "\"",
-                        "      execution-order: 1",
-                        "      failure-policy: \"terminate\""
-                ));
+        String normalizedStagePath = stageFile.toAbsolutePath().toString().replace('\\', '/');
+        Path scenarioFile = tempDir.resolve("concurrent-scenario.yaml");
+        Files.writeString(scenarioFile, String.join(System.lineSeparator(),
+                "metadata:",
+                "  id: \"concurrent-scenario\"",
+                "  name: \"Concurrent Scenario\"",
+                "  version: \"1.0.0\"",
+                "  type: \"scenario\"",
+                "",
+                "scenario:",
+                "  scenario-id: \"concurrent-scenario\"",
+                "  name: \"Concurrent Scenario\"",
+                "  processing-stages:",
+                "    - stage-name: \"audit-stage\"",
+                "      config-file: \"" + normalizedStagePath + "\"",
+                "      execution-order: 1",
+                "      failure-policy: \"terminate\""
+        ));
 
-                RulesEngine engine = RulesEngine.fromFile(scenarioFile.toString());
+        RulesEngine engine = RulesEngine.fromFile(scenarioFile.toString());
 
-                Map<String, Object> sharedTrade = new HashMap<>();
-                sharedTrade.put("status", "NEW");
-                Map<String, Object> sharedAudit = new HashMap<>();
-                sharedAudit.put("values", new HashMap<String, Object>());
-                sharedTrade.put("audit", sharedAudit);
+        Map<String, Object> sharedTrade = new HashMap<>();
+        sharedTrade.put("status", "NEW");
+        Map<String, Object> sharedAudit = new HashMap<>();
+        sharedAudit.put("values", new HashMap<String, Object>());
+        sharedTrade.put("audit", sharedAudit);
 
-                int threadCount = 8;
-                ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-                CountDownLatch startLatch = new CountDownLatch(1);
-                List<Future<ScenarioExecutionResult>> futures = new ArrayList<>();
+        int threadCount = 8;
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        List<Future<ScenarioExecutionResult>> futures = new ArrayList<>();
 
-                try {
-                        for (int i = 0; i < threadCount; i++) {
-                                final int threadId = i;
-                                futures.add(executor.submit(() -> {
-                                        startLatch.await();
+        try {
+            for (int i = 0; i < threadCount; i++) {
+                final int threadId = i;
+                futures.add(executor.submit(() -> {
+                    startLatch.await();
 
-                                        Map<String, Object> inputData = new HashMap<>();
-                                        inputData.put("threadId", threadId);
-                                        inputData.put("iteration", threadId * 10);
-                                        inputData.put("trade", sharedTrade);
+                    Map<String, Object> inputData = new HashMap<>();
+                    inputData.put("threadId", threadId);
+                    inputData.put("iteration", threadId * 10);
+                    inputData.put("trade", sharedTrade);
 
-                                        return engine.evaluateScenario(inputData);
-                                }));
-                        }
+                    return engine.evaluateScenario(inputData);
+                }));
+            }
 
-                        startLatch.countDown();
+            startLatch.countDown();
 
-                        for (int i = 0; i < threadCount; i++) {
-                                ScenarioExecutionResult result = futures.get(i).get(30, TimeUnit.SECONDS);
-                                assertTrue(result.isSuccessful(), "Concurrent scenario execution should succeed");
+            for (int i = 0; i < threadCount; i++) {
+                ScenarioExecutionResult result = futures.get(i).get(30, TimeUnit.SECONDS);
+                assertTrue(result.isSuccessful(), "Concurrent scenario execution should succeed");
 
-                                Map<String, Object> stageOutputs = result.getStageResult("audit-stage").getStageOutputs();
+                Map<String, Object> stageOutputs = result.getStageResult("audit-stage").getStageOutputs();
 
-                                @SuppressWarnings("unchecked")
-                                Map<String, Object> trade = (Map<String, Object>) stageOutputs.get("trade");
-                                @SuppressWarnings("unchecked")
-                                Map<String, Object> audit = (Map<String, Object>) trade.get("audit");
-                                @SuppressWarnings("unchecked")
-                                Map<String, Object> values = (Map<String, Object>) audit.get("values");
+                @SuppressWarnings("unchecked")
+                Map<String, Object> trade = (Map<String, Object>) stageOutputs.get("trade");
+                @SuppressWarnings("unchecked")
+                Map<String, Object> audit = (Map<String, Object>) trade.get("audit");
+                @SuppressWarnings("unchecked")
+                Map<String, Object> values = (Map<String, Object>) audit.get("values");
 
-                                assertNotNull(audit, "Each evaluation should have its own nested audit output");
-                                assertNotNull(values, "Each evaluation should preserve the nested values map");
-                                assertEquals(i, values.get("threadId"), "Thread id should remain isolated per evaluation");
-                                assertEquals(i * 10, values.get("iteration"), "Iteration should remain isolated per evaluation");
-                        }
+                assertNotNull(audit, "Each evaluation should have its own nested audit output");
+                assertNotNull(values, "Each evaluation should preserve the nested values map");
+                assertEquals(i, values.get("threadId"), "Thread id should remain isolated per evaluation");
+                assertEquals(i * 10, values.get("iteration"), "Iteration should remain isolated per evaluation");
+            }
 
-                        assertEquals("NEW", sharedTrade.get("status"), "Shared nested input should keep its original state");
+            assertEquals("NEW", sharedTrade.get("status"), "Shared nested input should keep its original state");
 
-                            @SuppressWarnings("unchecked")
-                            Map<String, Object> sharedAuditValues = (Map<String, Object>) ((Map<String, Object>) sharedTrade.get("audit")).get("values");
-                            assertTrue(sharedAuditValues.isEmpty(), "Shared nested input must not be mutated by scenario execution");
-                } finally {
-                        executor.shutdownNow();
-                        engine.shutdown();
-                }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> sharedAuditValues = (Map<String, Object>) ((Map<String, Object>) sharedTrade.get("audit")).get("values");
+            assertTrue(sharedAuditValues.isEmpty(), "Shared nested input must not be mutated by scenario execution");
+        } finally {
+            executor.shutdownNow();
+            engine.shutdown();
         }
+    }
 
-        @Test
-        @Order(5)
+    @Test
+    @Order(5)
     @DisplayName("Should verify dataSources map is ConcurrentHashMap")
     void testDataSourcesMapIsConcurrent() throws Exception {
         logger.info("=".repeat(80));
         logger.info("TEST: DataSources map is ConcurrentHashMap");
         logger.info("=".repeat(80));
 
-        // Create a simple engine
         String yamlContent = """
                 metadata:
                   name: "DataSources Test"
@@ -495,23 +556,21 @@ class RulesEngineConcurrentEvaluationTest {
 
         RulesEngine engine = RulesEngine.fromFile(yamlFile.toString());
 
-        // Use reflection to verify the dataSources field is ConcurrentHashMap
         try {
             java.lang.reflect.Field dataSourcesField = RulesEngine.class.getDeclaredField("dataSources");
             dataSourcesField.setAccessible(true);
             Object dataSources = dataSourcesField.get(engine);
 
             assertNotNull(dataSources, "dataSources field should not be null");
-            
-            // Verify it's a ConcurrentHashMap
-            assertTrue(dataSources instanceof ConcurrentHashMap, 
-                "dataSources should be ConcurrentHashMap but was " + dataSources.getClass().getName());
+            assertTrue(dataSources instanceof ConcurrentHashMap,
+                    "dataSources should be ConcurrentHashMap but was " + dataSources.getClass().getName());
 
             logger.info("DataSources map type: {}", dataSources.getClass().getName());
             logger.info("TEST PASSED: dataSources is ConcurrentHashMap");
-
         } catch (NoSuchFieldException | IllegalAccessException e) {
             fail("Could not access dataSources field: " + e.getMessage());
+        } finally {
+            engine.shutdown();
         }
     }
 
@@ -565,7 +624,8 @@ class RulesEngineConcurrentEvaluationTest {
         logger.info("  Average time per evaluation: {:.2f} ms", avgTime);
 
         assertEquals(iterations, successCount, "All evaluations should succeed");
-        
+
         logger.info("TEST PASSED: Rapid sequential evaluations completed successfully");
+        engine.shutdown();
     }
 }

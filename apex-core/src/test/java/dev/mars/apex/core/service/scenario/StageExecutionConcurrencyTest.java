@@ -63,9 +63,9 @@ public class StageExecutionConcurrencyTest {
     class SetStageOutputsNonAtomicityTests {
 
         @RepeatedTest(5)
-        @DisplayName("Should detect race condition: concurrent setStageOutputs calls")
+        @DisplayName("Should keep setStageOutputs snapshots atomic under concurrent writers")
         void testSetStageOutputsNonAtomicity() throws InterruptedException {
-            logger.info("TEST: Concurrent setStageOutputs non-atomicity detection");
+            logger.info("TEST: Concurrent setStageOutputs atomicity");
             
             StageExecutionResult result = StageExecutionResult.success("test-stage", null);
             int iterations = 5000;
@@ -159,31 +159,31 @@ public class StageExecutionConcurrencyTest {
             assertEquals(2, finalOutputs.size(), 
                 "Final outputs should have exactly 2 elements");
 
-            // Log observations for analysis
-            logger.info("Empty observations (race window): {}", emptyObservations.get());
-            logger.info("Partial observations (inconsistent): {}", partialObservations.get());
-            
-            // This test documents the race condition risk - observations may vary by run
-            if (emptyObservations.get() > 0 || partialObservations.get() > 0) {
-                logger.warn(" Race condition detected: {} empty, {} partial observations",
-                    emptyObservations.get(), partialObservations.get());
-            } else {
-                logger.info("[OK] No race condition observed in this run (may be timing dependent)");
-            }
+            logger.info("Empty observations: {}", emptyObservations.get());
+            logger.info("Partial observations: {}", partialObservations.get());
+
+            assertEquals(0, emptyObservations.get(),
+                "Concurrent snapshots should never observe an empty map during setStageOutputs");
+            assertEquals(0, partialObservations.get(),
+                "Concurrent snapshots should never observe partial setStageOutputs state");
+            assertTrue(finalOutputs.equals(map1) || finalOutputs.equals(map2),
+                "Final outputs should match one complete replacement map");
         }
 
         @Test
-        @DisplayName("Should lose addStageOutput when concurrent setStageOutputs clears")
+        @DisplayName("Should keep replacement outputs internally consistent during concurrent add and set")
         void testAddStageOutputLostDuringSetStageOutputs() throws InterruptedException {
-            logger.info("TEST: addStageOutput lost during concurrent setStageOutputs");
+            logger.info("TEST: concurrent addStageOutput with setStageOutputs consistency");
             
             StageExecutionResult result = StageExecutionResult.success("test-stage", null);
             int iterations = 10000;
             ExecutorService executor = Executors.newFixedThreadPool(3);
             CountDownLatch startLatch = new CountDownLatch(1);
             CountDownLatch doneLatch = new CountDownLatch(3);
-            AtomicInteger addedCount = new AtomicInteger(0);
-            AtomicInteger lostCount = new AtomicInteger(0);
+            AtomicInteger inconsistentReplacementSnapshots = new AtomicInteger(0);
+            AtomicInteger emptySnapshots = new AtomicInteger(0);
+            AtomicInteger errors = new AtomicInteger(0);
+            Map<String, Object> replacementOutputs = Map.of("set_key_a", "set_value_a", "set_key_b", "set_value_b");
 
             // Thread that continuously adds individual outputs
             Runnable adder = () -> {
@@ -192,44 +192,53 @@ public class StageExecutionConcurrencyTest {
                     for (int i = 0; i < iterations; i++) {
                         String key = "added_" + i;
                         result.addStageOutput(key, i);
-                        addedCount.incrementAndGet();
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    errors.incrementAndGet();
                 } finally {
                     doneLatch.countDown();
                 }
             };
 
-            // Thread that calls setStageOutputs, potentially clearing the added values
+            // Thread that replaces the entire output map atomically.
             Runnable setter = () -> {
                 try {
                     startLatch.await();
                     for (int i = 0; i < iterations / 10; i++) {
-                        result.setStageOutputs(Map.of("set_key", "set_value"));
-                        Thread.yield(); // Give adder chance to run
+                        result.setStageOutputs(replacementOutputs);
+                        Thread.yield();
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    errors.incrementAndGet();
                 } finally {
                     doneLatch.countDown();
                 }
             };
 
-            // Observer that checks for inconsistencies
+            // Observer that checks for partial replacement snapshots.
             Runnable checker = () -> {
                 try {
                     startLatch.await();
                     for (int i = 0; i < iterations; i++) {
                         Map<String, Object> snapshot = result.getStageOutputs();
-                        // Count how many "added_" keys survived
-                        long addedKeys = snapshot.keySet().stream()
-                            .filter(k -> k.startsWith("added_"))
-                            .count();
-                        // If addedKeys < expected, some were lost
+                        if (snapshot.isEmpty()) {
+                            emptySnapshots.incrementAndGet();
+                        }
+
+                        boolean hasFirstReplacementKey = snapshot.containsKey("set_key_a");
+                        boolean hasSecondReplacementKey = snapshot.containsKey("set_key_b");
+                        if (hasFirstReplacementKey != hasSecondReplacementKey) {
+                            inconsistentReplacementSnapshots.incrementAndGet();
+                        }
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    errors.incrementAndGet();
                 } finally {
                     doneLatch.countDown();
                 }
@@ -243,17 +252,11 @@ public class StageExecutionConcurrencyTest {
             assertTrue(doneLatch.await(30, TimeUnit.SECONDS), "All threads should complete");
             executor.shutdown();
 
-            Map<String, Object> finalOutputs = result.getStageOutputs();
-            long survivingAddedKeys = finalOutputs.keySet().stream()
-                .filter(k -> k.startsWith("added_"))
-                .count();
-            
-            logger.info("Added {} keys, {} survived in final state", 
-                addedCount.get(), survivingAddedKeys);
-            
-            // This demonstrates the risk - many added keys may be lost
-            // The exact count depends on timing, but demonstrates the issue
-            logger.info("[OK] Test completed - demonstrates addStageOutput can be lost during setStageOutputs");
+            assertEquals(0, errors.get(), "Concurrent add/set/get operations should not throw");
+            assertEquals(0, emptySnapshots.get(),
+                "Concurrent snapshots should never observe an empty map during setStageOutputs");
+            assertEquals(0, inconsistentReplacementSnapshots.get(),
+                "Concurrent snapshots should never observe a partially applied replacement map");
         }
     }
 
@@ -502,6 +505,7 @@ public class StageExecutionConcurrencyTest {
                                 // Read operations
                                 scenarioResult.getStageResults();
                                 scenarioResult.getWarnings();
+                                scenarioResult.getScenarioOutputs();
                                 scenarioResult.isSuccessful();
                             } catch (Exception e) {
                                 errors.incrementAndGet();
@@ -526,14 +530,95 @@ public class StageExecutionConcurrencyTest {
             // Verify expected counts
             int expectedStages = threadCount * operationsPerThread;
             int expectedWarnings = threadCount * operationsPerThread;
+            int expectedScenarioOutputs = threadCount * operationsPerThread;
             
             assertEquals(expectedStages, scenarioResult.getStageResults().size(),
                 "All stage results should be recorded");
             assertEquals(expectedWarnings, scenarioResult.getWarnings().size(),
                 "All warnings should be recorded");
+            assertEquals(expectedScenarioOutputs, scenarioResult.getScenarioOutputs().size(),
+                "All scenario outputs should be recorded");
             
-            logger.info("[OK] ScenarioExecutionResult concurrent safety verified: {} stages, {} warnings",
-                scenarioResult.getStageResults().size(), scenarioResult.getWarnings().size());
+            logger.info("[OK] ScenarioExecutionResult concurrent safety verified: {} stages, {} warnings, {} outputs",
+                scenarioResult.getStageResults().size(), scenarioResult.getWarnings().size(), scenarioResult.getScenarioOutputs().size());
+        }
+
+        @RepeatedTest(5)
+        @DisplayName("Should keep scenario output snapshots atomic during concurrent replace and read")
+        void testScenarioOutputSnapshotsRemainAtomicDuringConcurrentSetAndRead() throws InterruptedException {
+            logger.info("TEST: ScenarioExecutionResult scenarioOutputs atomicity");
+
+            ScenarioExecutionResult scenarioResult = new ScenarioExecutionResult("scenario-output-atomicity");
+            int iterations = 4000;
+            ExecutorService executor = Executors.newFixedThreadPool(4);
+            CountDownLatch startLatch = new CountDownLatch(1);
+            CountDownLatch doneLatch = new CountDownLatch(4);
+            AtomicInteger emptyObservations = new AtomicInteger(0);
+            AtomicInteger partialObservations = new AtomicInteger(0);
+
+            Map<String, Object> outputsA = Map.of("left", "A", "right", "B");
+            Map<String, Object> outputsB = Map.of("left", "C", "right", "D");
+
+            Runnable writerA = () -> {
+                try {
+                    startLatch.await();
+                    for (int i = 0; i < iterations; i++) {
+                        scenarioResult.setScenarioOutputs(outputsA);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    doneLatch.countDown();
+                }
+            };
+
+            Runnable writerB = () -> {
+                try {
+                    startLatch.await();
+                    for (int i = 0; i < iterations; i++) {
+                        scenarioResult.setScenarioOutputs(outputsB);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    doneLatch.countDown();
+                }
+            };
+
+            Runnable observer = () -> {
+                try {
+                    startLatch.await();
+                    for (int i = 0; i < iterations * 2; i++) {
+                        Map<String, Object> snapshot = scenarioResult.getScenarioOutputs();
+                        if (snapshot.isEmpty()) {
+                            emptyObservations.incrementAndGet();
+                        } else if (snapshot.size() != 2) {
+                            partialObservations.incrementAndGet();
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    doneLatch.countDown();
+                }
+            };
+
+            executor.submit(writerA);
+            executor.submit(writerB);
+            executor.submit(observer);
+            executor.submit(observer);
+
+            startLatch.countDown();
+            assertTrue(doneLatch.await(30, TimeUnit.SECONDS), "All threads should complete");
+            executor.shutdown();
+
+            Map<String, Object> finalOutputs = scenarioResult.getScenarioOutputs();
+            assertEquals(0, emptyObservations.get(),
+                "Concurrent scenario output snapshots should never observe an empty map");
+            assertEquals(0, partialObservations.get(),
+                "Concurrent scenario output snapshots should never observe partial replacement state");
+            assertTrue(finalOutputs.equals(outputsA) || finalOutputs.equals(outputsB),
+                "Final scenario outputs should match one complete replacement map");
         }
     }
 

@@ -69,6 +69,9 @@ public class SequentialProcessor {
     private final RuleChainExecutor ruleChainExecutor;
     private final RuleFactory ruleFactory;
     private final TransformationProcessor transformationProcessor;
+    private final Map<YamlRuleConfiguration, PreparedProcessingState> processingStateCache;
+    private volatile YamlRuleConfiguration primaryProcessingConfig;
+    private volatile PreparedProcessingState primaryProcessingState;
 
     /**
      * Constructs a new SequentialProcessor with required dependencies.
@@ -98,6 +101,7 @@ public class SequentialProcessor {
         this.ruleChainExecutor = ruleChainExecutor;
         this.ruleFactory = new RuleFactory();
         this.transformationProcessor = new TransformationProcessor(evaluatorService);
+        this.processingStateCache = Collections.synchronizedMap(new IdentityHashMap<>());
     }
 
     /**
@@ -138,7 +142,7 @@ public class SequentialProcessor {
             if (itemOrder == null || itemOrder.isEmpty()) {
                 itemOrder = synthesizeItemOrder(yamlConfig);
                 if (!itemOrder.isEmpty()) {
-                    logger.info("Synthesized item order with {} items from config sections", itemOrder.size());
+                    logger.debug("Synthesized item order with {} items from config sections", itemOrder.size());
                 }
             }
 
@@ -174,14 +178,14 @@ public class SequentialProcessor {
 
             // Return comprehensive result
             if (overallSuccess) {
-                logger.info("Sequential evaluation completed successfully with {} individual rule results", individualRuleResults.size());
+                logger.debug("Sequential evaluation completed successfully with {} individual rule results", individualRuleResults.size());
                 logger.debug("Final enriched data keys (success): {}", enrichedData.keySet());
                 logger.debug("Execution path summary: {} steps executed", executionPath.size());
                 RuleResult result = RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully", individualRuleResults)
                         .toBuilder().executionPath(executionPath).build();
                 return result;
             } else {
-                logger.info("Sequential evaluation completed with {} failures", failureMessages.size());
+                logger.debug("Sequential evaluation completed with {} failures", failureMessages.size());
                 logger.debug("Final enriched data keys (failure): {}", enrichedData.keySet());
                 logger.debug("Failure messages: {}", failureMessages);
                 RuleResult result = RuleResult.builder()
@@ -275,7 +279,7 @@ public class SequentialProcessor {
             Function<RuleExecutionContext, RuleResult> executeRule,
             Function<Map<String, Object>, org.springframework.expression.spel.support.StandardEvaluationContext> createContext) {
 
-        logger.info("Processing {} items in document order", itemOrder.size());
+        logger.debug("Processing {} items in document order", itemOrder.size());
         logger.debug("Item order details: {}", itemOrder.stream()
                     .map(i -> i.getItemId() + "(" + i.getSectionType() + ")")
                     .toList());
@@ -285,28 +289,10 @@ public class SequentialProcessor {
             enrichmentProcessor.clearRuleResults();
         }
 
-        // Phase 4 optimisation: build lookup maps once for O(1) access during item processing
-        Map<String, Rule> ruleIndex = ruleFactory.createRuleIndex(yamlConfig);
-        Map<String, RuleGroup> groupIndex;
-        try {
-            RulesEngineConfiguration tempConfig = new RulesEngineConfiguration();
-            for (Rule r : ruleIndex.values()) {
-                tempConfig.registerRule(r);
-            }
-            groupIndex = ruleFactory.createRuleGroupIndex(yamlConfig, tempConfig);
-        } catch (ConfigurationException e) {
-            logger.error("[APEX-CFG-003] Failed to build rule-group index: {}", e.getMessage());
-            logger.debug("Full exception details for rule-group index build failure:", e);
-            failureMessages.add("[APEX-CFG-003] Rule-group index build failed: " + e.getMessage());
-            groupIndex = Map.of();
+        PreparedProcessingState processingState = getProcessingState(yamlConfig);
+        if (processingState.getPreparationFailureMessage() != null) {
+            failureMessages.add(processingState.getPreparationFailureMessage());
         }
-
-        // Phase 7 optimisation: build enrichment group, enrichment, and transformation
-        // index maps once for O(1) access — eliminates O(n×m) EnrichmentGroupFactory rebuilds
-        // and O(n) linear scans per item lookup
-        Map<String, EnrichmentGroup> enrichmentGroupIndex = buildEnrichmentGroupIndex(yamlConfig);
-        Map<String, YamlEnrichment> enrichmentIndex = buildEnrichmentIndex(yamlConfig);
-        Map<String, YamlTransformation> transformationIndex = buildTransformationIndex(yamlConfig);
 
         for (ProcessingItem item : itemOrder) {
             logger.debug("Processing item: {} ({})", item.getItemId(), item.getSectionType());
@@ -314,7 +300,11 @@ public class SequentialProcessor {
 
             long start = System.currentTimeMillis();
             RuleResult itemResult = processItem(item, yamlConfig, enrichedData, executeRule, createContext,
-                    ruleIndex, groupIndex, enrichmentGroupIndex, enrichmentIndex, transformationIndex);
+                    processingState.getRuleIndex(),
+                    processingState.getGroupIndex(),
+                    processingState.getEnrichmentGroupIndex(),
+                    processingState.getEnrichmentIndex(),
+                    processingState.getTransformationIndex());
             long duration = System.currentTimeMillis() - start;
 
             logger.debug("Item '{}' completed in {}ms - success: {}, resultType: {}", 
@@ -649,6 +639,147 @@ public class SequentialProcessor {
         }
         logger.debug("Built transformation index with {} entries", index.size());
         return index;
+    }
+
+    private PreparedProcessingState getProcessingState(YamlRuleConfiguration yamlConfig) {
+        if (yamlConfig == null) {
+            return PreparedProcessingState.empty();
+        }
+
+        PreparedProcessingState fastPathState = primaryProcessingState;
+        if (yamlConfig == primaryProcessingConfig && fastPathState != null) {
+            return fastPathState;
+        }
+
+        synchronized (processingStateCache) {
+            PreparedProcessingState cachedState = processingStateCache.get(yamlConfig);
+            if (cachedState != null) {
+                if (primaryProcessingConfig == null) {
+                    primaryProcessingConfig = yamlConfig;
+                    primaryProcessingState = cachedState;
+                }
+                return cachedState;
+            }
+        }
+
+        PreparedProcessingState preparedState = prepareProcessingState(yamlConfig);
+
+        synchronized (processingStateCache) {
+            PreparedProcessingState cachedState = processingStateCache.get(yamlConfig);
+            if (cachedState != null) {
+                if (primaryProcessingConfig == null) {
+                    primaryProcessingConfig = yamlConfig;
+                    primaryProcessingState = cachedState;
+                }
+                return cachedState;
+            }
+            processingStateCache.put(yamlConfig, preparedState);
+            if (primaryProcessingConfig == null) {
+                primaryProcessingConfig = yamlConfig;
+                primaryProcessingState = preparedState;
+            }
+            return preparedState;
+        }
+    }
+
+    private PreparedProcessingState prepareProcessingState(YamlRuleConfiguration yamlConfig) {
+        Map<String, Rule> ruleIndex = ruleFactory.createRuleIndex(yamlConfig);
+        Map<String, RuleGroup> groupIndex;
+        String preparationFailureMessage = null;
+
+        try {
+            RulesEngineConfiguration tempConfig = new RulesEngineConfiguration();
+            for (Rule rule : ruleIndex.values()) {
+                tempConfig.registerRule(rule);
+            }
+            groupIndex = ruleFactory.createRuleGroupIndex(yamlConfig, tempConfig);
+        } catch (ConfigurationException e) {
+            logger.error("[APEX-CFG-003] Failed to build rule-group index: {}", e.getMessage());
+            logger.debug("Full exception details for rule-group index build failure:", e);
+            preparationFailureMessage = "[APEX-CFG-003] Rule-group index build failed: " + e.getMessage();
+            groupIndex = Map.of();
+        }
+
+        Map<String, EnrichmentGroup> enrichmentGroupIndex = buildEnrichmentGroupIndex(yamlConfig);
+        Map<String, YamlEnrichment> enrichmentIndex = buildEnrichmentIndex(yamlConfig);
+        Map<String, YamlTransformation> transformationIndex = buildTransformationIndex(yamlConfig);
+
+        logger.debug(
+                "Prepared processing state for config {} with {} rules, {} rule groups, {} enrichment groups, {} enrichments, {} transformations",
+                System.identityHashCode(yamlConfig),
+                ruleIndex.size(),
+                groupIndex.size(),
+                enrichmentGroupIndex.size(),
+                enrichmentIndex.size(),
+                transformationIndex.size());
+
+        return new PreparedProcessingState(
+                Collections.unmodifiableMap(new LinkedHashMap<>(ruleIndex)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(groupIndex)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(enrichmentGroupIndex)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(enrichmentIndex)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(transformationIndex)),
+                preparationFailureMessage);
+    }
+
+    private static final class PreparedProcessingState {
+        private static final PreparedProcessingState EMPTY = new PreparedProcessingState(
+                Map.of(),
+                Map.of(),
+                Map.of(),
+                Map.of(),
+                Map.of(),
+                null);
+
+        private final Map<String, Rule> ruleIndex;
+        private final Map<String, RuleGroup> groupIndex;
+        private final Map<String, EnrichmentGroup> enrichmentGroupIndex;
+        private final Map<String, YamlEnrichment> enrichmentIndex;
+        private final Map<String, YamlTransformation> transformationIndex;
+        private final String preparationFailureMessage;
+
+        private PreparedProcessingState(
+                Map<String, Rule> ruleIndex,
+                Map<String, RuleGroup> groupIndex,
+                Map<String, EnrichmentGroup> enrichmentGroupIndex,
+                Map<String, YamlEnrichment> enrichmentIndex,
+                Map<String, YamlTransformation> transformationIndex,
+                String preparationFailureMessage) {
+            this.ruleIndex = ruleIndex;
+            this.groupIndex = groupIndex;
+            this.enrichmentGroupIndex = enrichmentGroupIndex;
+            this.enrichmentIndex = enrichmentIndex;
+            this.transformationIndex = transformationIndex;
+            this.preparationFailureMessage = preparationFailureMessage;
+        }
+
+        private static PreparedProcessingState empty() {
+            return EMPTY;
+        }
+
+        private Map<String, Rule> getRuleIndex() {
+            return ruleIndex;
+        }
+
+        private Map<String, RuleGroup> getGroupIndex() {
+            return groupIndex;
+        }
+
+        private Map<String, EnrichmentGroup> getEnrichmentGroupIndex() {
+            return enrichmentGroupIndex;
+        }
+
+        private Map<String, YamlEnrichment> getEnrichmentIndex() {
+            return enrichmentIndex;
+        }
+
+        private Map<String, YamlTransformation> getTransformationIndex() {
+            return transformationIndex;
+        }
+
+        private String getPreparationFailureMessage() {
+            return preparationFailureMessage;
+        }
     }
 
     // ===================================
