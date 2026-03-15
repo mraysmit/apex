@@ -1,5 +1,6 @@
 package dev.mars.apex.engine.core;
 
+import dev.mars.apex.core.script.ScriptBridge;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.engine.core.MapPropertyAccessor;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /*
@@ -46,6 +48,7 @@ import java.util.Map;
 public class ExpressionEvaluatorService {
     private static final Logger logger = LoggerFactory.getLogger(ExpressionEvaluatorService.class);
     private final ExpressionParser parser;
+    private volatile Method scriptBridgeMethod;
 
     /**
      * Create a new ExpressionEvaluatorService with the default parser.
@@ -63,6 +66,20 @@ public class ExpressionEvaluatorService {
         logger.info("Initializing ExpressionEvaluatorService with enhanced context creation");
         this.parser = parser;
         logger.debug("Using parser: {}", this.parser.getClass().getSimpleName());
+    }
+
+    /**
+     * Enable the #script(...) SpEL bridge function for runtime script invocation.
+     * When enabled, all evaluation contexts created by this service will have the
+     * {@code #script(scriptId, ...)} function registered.
+     *
+     * @param bridge The ScriptBridge instance to use
+     */
+    public void enableScriptBridge(ScriptBridge bridge) {
+        if (bridge != null) {
+            this.scriptBridgeMethod = ScriptBridge.getInvokeMethod();
+            logger.info("Script bridge enabled — #script(...) function registered in SpEL contexts");
+        }
     }
 
     /**
@@ -206,6 +223,15 @@ public class ExpressionEvaluatorService {
             Map<String, Object> map = (Map<String, Object>) rootObject;
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 context.setVariable(entry.getKey(), entry.getValue());
+            }
+        }
+
+        // Register #script(...) bridge function when runtime scripts are configured
+        if (scriptBridgeMethod != null) {
+            try {
+                context.registerFunction("script", scriptBridgeMethod);
+            } catch (Exception e) {
+                logger.warn("Failed to register #script function: {}", e.getMessage());
             }
         }
 

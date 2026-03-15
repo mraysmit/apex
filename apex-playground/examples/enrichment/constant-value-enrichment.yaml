@@ -103,7 +103,7 @@ enrichments:
     name: "Assign Constants to Nested Fields"
     type: "field-enrichment"
     description: "Demonstrates constant assignment to nested fields using #metadata.field notation"
-    enabled: true
+    enabled: false
     field-mappings:
       - source-field: "constant"
         target-field: "#metadata.validationStatus"

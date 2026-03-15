@@ -46,4 +46,4 @@ rules:
     no-match-message: "Age {{#age}} is above minimum required age of 18"
     severity: "WARNING"
     priority: 2
-    enabled: false
+    enabled: true

@@ -1,7 +1,7 @@
 # APEX SpEL (Spring Expression Language) Guide
 
-**Version:** 2.3
-**Last Updated:** 2025-10-13
+**Version:** 2.4
+**Last Updated:** 2025-07-25
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 ---
 
@@ -10,6 +10,7 @@
 - [Overview](#overview)
 - [SpEL in APEX Features](#spel-in-apex-features)
 - [Field Mapping SpEL Support](#field-mapping-spel-support)
+- [Runtime Script Bridge (`#script`)](#runtime-script-bridge-script)
 - [Basic Syntax](#basic-syntax)
 - [Safe Navigation](#safe-navigation)
 - [Array and Collection Access](#array-and-collection-access)
@@ -45,7 +46,8 @@ SpEL is now supported consistently across ALL APEX features:
 | **Transformations** | Yes | `expression: '#currency'` |
 | **Lookup Keys** | Yes | `lookup-key: '#symbol'` |
 | **Calculations** | Yes | `expression: '#amount * 0.01'` |
-| **Field Mappings** | **NEW (v2.3)** | `source-field: '#currency'` |
+| **Field Mappings** | Yes | `source-field: '#currency'` |
+| **Runtime Scripts** | Yes | `expression: "#script('risk-score', #root)"` |
 
 ### The `#` Prefix Convention
 
@@ -64,27 +66,16 @@ source-field: "currency"
 
 ## Field Mapping SpEL Support
 
-**New in Version 2.3:** Field mappings now support SpEL expressions in both `source-field` and `target-field`.
+Field mappings support SpEL expressions in both `source-field` and `target-field`.
 
-### Problem Solved
+### Example
 
-**Before v2.3:**
 ```yaml
 enrichments:
   - id: "field-enrichment-demo"
-    condition: "#currency != null"  # Works
+    condition: "#currency != null"
     field-mappings:
-      - source-field: "currency"          # Fails - can't access nested
-        target-field: "buy_currency"
-```
-
-**After v2.3 (SOLVED!):**
-```yaml
-enrichments:
-  - id: "field-enrichment-demo"
-    condition: "#currency != null"  # Works
-    field-mappings:
-      - source-field: "#currency"   # NOW WORKS!
+      - source-field: "#currency"
         target-field: "buy_currency"
 ```
 
@@ -137,20 +128,205 @@ field-mappings:
     expression: "#value * 1.1"
 ```
 
-### Backward Compatibility
+### Compatibility
 
-**100% Backward Compatible** - Existing configurations work unchanged:
+Existing configurations continue to work unchanged:
 
 ```yaml
 field-mappings:
-  # Old style - still works
+  # Simple field lookup
   - source-field: "currency"
     target-field: "currency_code"
 
-  # New style - also works
+  # Equivalent SpEL form
   - source-field: "#currency"
     target-field: "buy_currency"
 ```
+
+---
+
+## Runtime Script Bridge (`#script`)
+
+APEX can call externally defined Groovy scripts from any SpEL expression using the `#script(...)` bridge function. This allows complex business logic to live in `.groovy` files while being invoked seamlessly from YAML-driven rules and enrichments.
+
+### Quick Start
+
+1. **Define a Groovy script** (`risk-score.groovy`):
+```groovy
+def run(Map data) {
+    def notional = data.notionalAmount as BigDecimal
+    if (notional > 10_000_000) return 'HIGH'
+    if (notional > 1_000_000)  return 'MEDIUM'
+    return 'LOW'
+}
+```
+
+2. **Register it in YAML**:
+```yaml
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  allowlist:
+    - "risk-score"
+  execution-timeout-ms: 5000
+  polling-interval-ms: 5000
+  fail-mode: "use-last-good"
+```
+
+3. **Call from any SpEL expression**:
+```yaml
+enrichments:
+  - id: "compute-risk"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "#script('risk-score', #root)"
+      result-field: "riskLevel"
+```
+
+### `#script` Function Signature
+
+```
+#script(scriptId, arg1, arg2, ...)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `scriptId` | String | Name of the script (filename without `.groovy` extension) |
+| `arg1..N` | Any | Arguments passed to the script's `run()` method as `Object[]` |
+
+**Return value:** Whatever the Groovy `run()` method returns (String, Number, Map, etc.)
+
+### Runtime Scripts Configuration Reference
+
+The `runtime-scripts` block controls discovery, execution, and reload behavior.
+
+```yaml
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+    - "./config/scripts"
+  engine: "groovy"
+  polling-interval-ms: 5000
+  execution-timeout-ms: 200
+  allowlist:
+    - "risk-score"
+    - "eligibility-check"
+  fail-mode: "use-last-good"
+```
+
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `enabled` | No | `true` | Turns runtime scripting on or off for this configuration. |
+| `locations` | Yes (when enabled) | — | List of script directories to scan. Supports filesystem paths and `classpath:` references. |
+| `engine` | No | `groovy` | Script engine identifier. Current implementation uses Groovy. |
+| `polling-interval-ms` | No | `5000` | Reload polling interval in milliseconds. Use `0` to disable polling. |
+| `execution-timeout-ms` | No | `200` | Maximum runtime for each script invocation before timeout failure. |
+| `allowlist` | No | empty (allow all discovered scripts) | List of script IDs allowed to execute. Script ID = filename without `.groovy`. |
+| `fail-mode` | No | `use-last-good` | Compile failure behavior during reload: keep previous compiled version (`use-last-good`) or fail immediately (`fail-fast`). |
+
+### Location Rules and Path Handling
+
+Use `locations` entries that match your deployment model:
+
+1. Classpath locations (recommended for packaged apps and tests):
+```yaml
+locations:
+  - "classpath:dev/mars/apex/demo/scripts/groovy"
+```
+
+2. Filesystem locations (recommended for externalized runtime updates):
+```yaml
+locations:
+  - "./config/scripts"
+  - "/etc/apex/scripts"
+```
+
+Resolution notes:
+- `classpath:` locations are accepted when they resolve to a filesystem-backed resource path.
+- Invalid or missing locations are logged and skipped.
+- If no valid location is resolved while scripting is enabled, runtime script initialization fails.
+
+### Recommended Configuration Profiles
+
+1. Development profile (fast feedback):
+```yaml
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  polling-interval-ms: 2000
+  execution-timeout-ms: 1000
+  fail-mode: "use-last-good"
+```
+
+2. Production profile (controlled and stable):
+```yaml
+runtime-scripts:
+  enabled: true
+  locations:
+    - "/opt/apex/scripts"
+  allowlist:
+    - "risk-score"
+    - "margin-calc"
+    - "eligibility-check"
+  polling-interval-ms: 10000
+  execution-timeout-ms: 300
+  fail-mode: "use-last-good"
+```
+
+### How It Works
+
+1. RulesEngine reads `runtime-scripts` from YAML and initializes a `RuntimeScriptRegistry`
+2. Groovy files are compiled once by `GroovyScriptCompiler` and cached
+3. The `#script` SpEL function is registered via `ScriptBridge` (ThreadLocal, thread-safe)
+4. Each `#script(...)` call invokes `ScriptExecutor` which runs the script's `run()` method with a configurable timeout
+5. If the script exceeds the timeout, a `ScriptTimeoutException` is thrown
+
+### Calling Specific Methods
+
+By default, `#script` invokes the `run()` method. To call a different method, pass the method name as the second argument:
+
+```yaml
+expression: "#script('risk-score', #root)"                          # calls run(data)
+expression: "#script('risk-score', 'riskAdjustedNotional', #notional, #riskLevel)"
+```
+
+### Security: Script Allowlist
+
+Only scripts explicitly listed in the `allowlist` can be executed. Any attempt to invoke an unlisted script throws `ScriptNotAllowedException`:
+
+```yaml
+runtime-scripts:
+  allowlist:
+    - "risk-score"
+    - "margin-calc"
+  # Only risk-score.groovy and margin-calc.groovy can be called
+```
+
+### Error Recovery
+
+Script errors integrate with APEX's standard error recovery system. If error recovery is enabled, a failing script expression is handled the same way as any failing SpEL expression:
+
+```yaml
+error-recovery:
+  enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+```
+
+With this configuration, a script that throws an exception will log the error and continue processing with a default value rather than failing the entire evaluation.
+
+### Hot Reload
+
+When `polling-interval-ms` is set to a positive value, APEX polls for script file changes and recompiles automatically:
+
+```yaml
+runtime-scripts:
+  polling-interval-ms: 5000   # Check every 5 seconds (0 = disabled)
+```
+
+If a recompiled script fails to compile, the previous good version is retained (use-last-good policy).
 
 ---
 
@@ -620,7 +796,7 @@ condition: "#trade.legs.?[currency != null].size() == #trade.legs.size()"
 1. **Consistency:** SpEL is now used across ALL APEX features including field mappings
 2. **Safety First:** Always use safe navigation (`?.`) and bounds checking
 3. **Readability:** Prefer simple, step-by-step expressions over complex one-liners
-4. **Backward Compatible:** Existing configurations continue to work unchanged
+4. **Compatible:** Existing configurations continue to work unchanged
 5. **Powerful:** Full SpEL capabilities for nested fields, arrays, and complex expressions
 
 ### The `#` Prefix Rule
@@ -642,14 +818,14 @@ condition: "#trade.legs.?[currency != null].size() == #trade.legs.size()"
 
 **Version 2.3 Changes:**
 - Added SpEL support to `source-field` and `target-field` in field mappings
-- Modified `getFieldValue()` and `setFieldValue()` methods in `YamlEnrichmentProcessor.java`
-- 100% backward compatible with existing configurations
+- Modified `getFieldValue()` and `setFieldValue()` methods in `EnrichmentProcessor.java`
+- Existing configurations continue to work unchanged
 - Comprehensive test coverage (15 tests, all passing)
 - No new dependencies required
 - Graceful error handling (logs warnings, doesn't throw exceptions)
 
 **Files Modified:**
-- `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java`
+- `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/EnrichmentProcessor.java`
 
 **Test Files Created:**
 - `apex-core/src/test/java/dev/mars/apex/core/service/enrichment/SpelFieldMappingTest.java`

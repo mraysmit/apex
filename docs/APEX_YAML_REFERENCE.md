@@ -103,6 +103,7 @@ This section provides a definitive reference for APEX YAML keywords based on act
 | **rule-references** | RuleGroup | No | List | Detailed rule references with metadata |
 | **rule-refs** | Document | No | List | References to external rule configurations |
 | **rules** | Document | No | List | Rule definitions |
+| **runtime-scripts** | Document | No | Map | Runtime Groovy script configuration (script locations, allowlist, timeouts, hot reload) |
 | **sasl-mechanism** | DataSource | No | String | SASL mechanism for Kafka authentication (connection-level) |
 | **scenario-id** | Scenario | Yes | String | Unique identifier for the scenario |
 | **security-protocol** | DataSource | No | String | Security protocol for Kafka connections (connection-level) |
@@ -5613,6 +5614,79 @@ rules:
 4. **Reduce logging in production**: Set `log-recovery-attempts: false` to reduce noise
 5. **Monitor metrics**: Always enable `metrics-enabled: true` for production monitoring
 6. **Test without recovery**: Disable error recovery in test environments to validate error handling
+
+---
+
+## 13.5 Runtime Scripts Configuration
+
+**New in Version 2.4:** The `runtime-scripts` block enables calling externally defined Groovy scripts from SpEL expressions via the `#script(...)` bridge function.
+
+### 13.5.1 Configuration Structure
+
+```yaml
+runtime-scripts:
+  script-locations:
+    - directory: "scripts/groovy"         # Directory containing .groovy files
+      pattern: "*.groovy"                 # File glob pattern (default: *.groovy)
+  allowlist:                              # Required: only listed scripts can execute
+    - "risk-score"
+    - "margin-calc"
+  execution-timeout-ms: 5000             # Per-invocation timeout (default: 5000ms)
+  polling-interval-ms: 5000             # Hot-reload polling interval (0 = disabled)
+```
+
+### 13.5.2 Properties
+
+| Property | Required | Type | Default | Description |
+|----------|----------|------|---------|-------------|
+| `script-locations` | Yes | List | — | Directories to scan for Groovy scripts |
+| `script-locations[].directory` | Yes | String | — | Path to scripts directory (supports `${...}` placeholders) |
+| `script-locations[].pattern` | No | String | `*.groovy` | File glob pattern |
+| `allowlist` | Yes | List | — | Script IDs permitted to execute (filename without extension) |
+| `execution-timeout-ms` | No | Integer | `5000` | Maximum milliseconds per script invocation |
+| `polling-interval-ms` | No | Integer | `0` | Interval for hot-reload polling (0 = disabled) |
+
+### 13.5.3 Groovy Script Convention
+
+Scripts must define a `run()` method. The script ID is the filename without the `.groovy` extension:
+
+```groovy
+// risk-score.groovy → script ID: "risk-score"
+def run(Map data) {
+    def notional = data.notionalAmount as BigDecimal
+    if (notional > 10_000_000) return 'HIGH'
+    if (notional > 1_000_000)  return 'MEDIUM'
+    return 'LOW'
+}
+```
+
+### 13.5.4 Using `#script(...)` in SpEL Expressions
+
+The `#script` function can be used anywhere a SpEL expression is accepted:
+
+```yaml
+# In calculation enrichments
+enrichments:
+  - id: "compute-risk"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "#script('risk-score', #root)"
+      result-field: "riskLevel"
+
+# In rule conditions
+rules:
+  - id: "high-risk-check"
+    condition: "#script('risk-score', #root) == 'HIGH'"
+    message: "Trade flagged as high risk"
+```
+
+### 13.5.5 Security
+
+Only scripts on the `allowlist` can be invoked. Attempting to call an unlisted script throws `ScriptNotAllowedException`. This prevents unauthorized code execution from user-supplied expressions.
+
+### 13.5.6 Hot Reload
+
+When `polling-interval-ms > 0`, APEX periodically checks for script file changes and recompiles them. If a recompiled script has compilation errors, the previous good version is retained (use-last-good policy).
 
 ---
 

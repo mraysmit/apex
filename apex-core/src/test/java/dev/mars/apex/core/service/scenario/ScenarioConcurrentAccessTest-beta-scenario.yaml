@@ -1,0 +1,17 @@
+metadata:
+  id: "beta-scenario"
+  name: "Beta Scenario"
+  version: "1.0.0"
+  description: "Beta scenario for concurrent scenario-id isolation"
+  type: "scenario"
+  created-by: "APEX Test Suite"
+
+scenario:
+  scenario-id: "beta-scenario"
+  name: "Beta Scenario"
+  description: "Writes the BETA marker into stage outputs"
+  processing-stages:
+    - stage-name: "beta-stage"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioConcurrentAccessTest-beta-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"

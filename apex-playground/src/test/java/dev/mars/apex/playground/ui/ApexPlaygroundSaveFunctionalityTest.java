@@ -102,12 +102,14 @@ class ApexPlaygroundSaveFunctionalityTest {
         WebElement loadExampleBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("loadExampleBtn")));
         loadExampleBtn.click();
         
-        // Wait for modal and click the first example (assuming at least one exists)
-        // Note: This depends on the example structure. We might need to be more specific.
-        // For now, we'll try to find an example item.
-        WebElement exampleItem = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".example-item")));
-        String exampleName = exampleItem.findElement(By.tagName("h6")).getText();
+        // Select first available example card in the modal
+        WebElement exampleItem = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".example-card")));
+        String exampleName = exampleItem.findElement(By.cssSelector(".example-name")).getText();
         exampleItem.click();
+
+        // Confirm loading of selected example
+        WebElement loadSelectedBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("loadSelectedExampleBtn")));
+        loadSelectedBtn.click();
         
         // Wait for editors to be populated
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("yamlRulesEditor")));
@@ -141,9 +143,12 @@ class ApexPlaygroundSaveFunctionalityTest {
         WebElement loadExampleBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("loadExampleBtn")));
         loadExampleBtn.click();
         
-        WebElement exampleItem = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".example-item")));
-        String exampleName = exampleItem.findElement(By.tagName("h6")).getText();
+        WebElement exampleItem = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".example-card")));
+        String exampleName = exampleItem.findElement(By.cssSelector(".example-name")).getText();
         exampleItem.click();
+
+        WebElement loadSelectedBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("loadSelectedExampleBtn")));
+        loadSelectedBtn.click();
         
         // Wait for editors to be populated
         WebElement sourceDataEditor = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("sourceDataEditor")));

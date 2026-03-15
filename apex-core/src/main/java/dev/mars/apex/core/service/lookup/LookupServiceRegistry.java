@@ -2,8 +2,11 @@ package dev.mars.apex.core.service.lookup;
 
 import dev.mars.apex.core.service.NamedService;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -31,13 +34,18 @@ import java.util.Map;
  * @version 1.0
  */
 public class LookupServiceRegistry {
-    private final Map<String, NamedService> services = new HashMap<>();
+    private final Map<String, NamedService> services = new ConcurrentHashMap<>();
     
     public void registerService(NamedService service) {
-        services.put(service.getName(), service);
+        NamedService validatedService = Objects.requireNonNull(service, "service");
+        services.put(Objects.requireNonNull(validatedService.getName(), "service name"), validatedService);
     }
     
     public <T extends NamedService> T getService(String name, Class<T> type) {
+        Objects.requireNonNull(type, "type");
+        if (name == null) {
+            return null;
+        }
         NamedService service = services.get(name);
         if (service != null && type.isInstance(service)) {
             return type.cast(service);
@@ -52,9 +60,17 @@ public class LookupServiceRegistry {
      * @return Array of service names
      */
     public <T extends NamedService> String[] getServiceNames(Class<T> type) {
+        if (type == null) {
+            return new String[0];
+        }
         return services.entrySet().stream()
             .filter(entry -> type.isInstance(entry.getValue()))
             .map(Map.Entry::getKey)
+            .sorted()
             .toArray(String[]::new);
+    }
+
+    public Map<String, NamedService> getRegisteredServices() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(services));
     }
 }

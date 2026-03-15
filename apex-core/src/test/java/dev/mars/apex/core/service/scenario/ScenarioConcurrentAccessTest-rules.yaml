@@ -1,36 +1,32 @@
 metadata:
-  id: "concurrent-access-test-rules"
-  name: "Concurrent Access Test Rules"
+  id: "concurrent-audit-rules"
+  name: "Concurrent Audit Rules"
   version: "1.0.0"
-  description: "Rules for testing concurrent scenario execution"
+  description: "Rules for shared-engine concurrent stage-output isolation"
   type: "rule-config"
-  author: "APEX Test Suite"
+  created-by: "APEX Test Suite"
 
 rules:
-  - id: "otc-classification-rule"
-    name: "OTC Trade Classification"
-    condition: "#type == 'OTC'"
-    message: "Trade classified as OTC"
+  - id: "always-match"
+    name: "Always Match"
+    condition: "true"
+    message: "Stage executed"
     severity: "INFO"
-    enabled: true
 
 enrichments:
-  - id: "add-processed-type"
-    name: "Add Processed Type"
+  - id: "copy-thread-id"
+    name: "Copy Thread Id"
     type: "field-enrichment"
     condition: "true"
     field-mappings:
-      - source-field: "type"
-        target-field: "processedType"
+      - source-field: "threadId"
+        target-field: "#trade.audit.values.threadId"
 
-  - id: "calculate-risk-score"
-    name: "Calculate Risk Score"
-    type: "calculation-enrichment"
+  - id: "copy-iteration"
+    name: "Copy Iteration"
+    type: "field-enrichment"
     condition: "true"
-    calculation-config:
-      expression: "#containsKey('notional') && #notional > 5000000 ? 'HIGH' : (#containsKey('notional') && #notional > 1000000 ? 'MEDIUM' : 'LOW')"
-      result-field: "riskScore"
     field-mappings:
-      - source-field: "riskScore"
-        target-field: "riskScore"
+      - source-field: "iteration"
+        target-field: "#trade.audit.values.iteration"
 

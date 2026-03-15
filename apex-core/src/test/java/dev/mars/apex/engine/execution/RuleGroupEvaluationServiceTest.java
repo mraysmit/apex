@@ -1,6 +1,7 @@
 package dev.mars.apex.engine.execution;
 
 import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.engine.core.MapPropertyAccessor;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import dev.mars.apex.engine.model.Category;
 import dev.mars.apex.engine.model.Rule;
@@ -64,7 +65,8 @@ class RuleGroupEvaluationServiceTest {
     // =========================================================================
 
     private StandardEvaluationContext createContext(Map<String, Object> facts) {
-        StandardEvaluationContext context = new StandardEvaluationContext();
+        StandardEvaluationContext context = new StandardEvaluationContext(facts);
+        context.addPropertyAccessor(new MapPropertyAccessor());
         if (facts != null) {
             facts.forEach(context::setVariable);
         }
@@ -321,5 +323,30 @@ class RuleGroupEvaluationServiceTest {
     @DisplayName("Constructor rejects null UnifiedRuleEvaluator")
     void testConstructorRejectsNull() {
         assertThrows(NullPointerException.class, () -> new RuleGroupEvaluationService(null));
+    }
+
+    @Test
+    @DisplayName("Parallel rule group isolates worker contexts and merges result fields safely")
+    void testParallelExecutionUsesIsolatedContexts() {
+        Rule rule1 = new Rule("r1", Set.of(new Category("test", 1)),
+                "first-check", "#amount > 0", "First rule", "Description", 1, SeverityConstants.INFO,
+                null, null, null, null, null, "firstResult", null, true);
+        Rule rule2 = new Rule("r2", Set.of(new Category("test", 1)),
+                "second-check", "#currency == 'USD'", "Second rule", "Description", 1, SeverityConstants.INFO,
+                null, null, null, null, null, "secondResult", null, true);
+
+        RuleGroup group = new RuleGroup("g-par", "test", "parallel-group", "Parallel group", 1,
+                true, true, true, false);
+        group.addRule(rule1, 1);
+        group.addRule(rule2, 2);
+
+        StandardEvaluationContext context = createContext(Map.of("amount", 100, "currency", "USD"));
+
+        RuleGroupEvaluationResult result = service.evaluateWithDetails(group, context);
+
+        assertTrue(result.isGroupResult());
+        assertEquals(2, result.getIndividualResults().size());
+        assertEquals(Boolean.TRUE, context.lookupVariable("firstResult"));
+        assertEquals(Boolean.TRUE, context.lookupVariable("secondResult"));
     }
 }

@@ -1,0 +1,17 @@
+metadata:
+  id: "alpha-scenario"
+  name: "Alpha Scenario"
+  version: "1.0.0"
+  description: "Alpha scenario for concurrent scenario-id isolation"
+  type: "scenario"
+  created-by: "APEX Test Suite"
+
+scenario:
+  scenario-id: "alpha-scenario"
+  name: "Alpha Scenario"
+  description: "Writes the ALPHA marker into stage outputs"
+  processing-stages:
+    - stage-name: "alpha-stage"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioConcurrentAccessTest-alpha-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"

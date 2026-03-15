@@ -52,13 +52,20 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
         logger.info("Validating that result-field has minimal overhead (< {}%)", MAX_OVERHEAD_PERCENT);
         
         try {
-            // Load configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile(
+            // Load baseline configuration (without result-field)
+            YamlRuleConfiguration baselineConfig = yamlLoader.loadFromFile(
+                "src/test/java/dev/mars/apex/demo/basic/RuleResultFieldPerformanceTest-baseline.yaml"
+            );
+            assertNotNull(baselineConfig, "Baseline configuration should not be null");
+
+            // Load feature configuration (with result-field)
+            YamlRuleConfiguration resultFieldConfig = yamlLoader.loadFromFile(
                 "src/test/java/dev/mars/apex/demo/basic/RuleResultFieldPerformanceTest.yaml"
             );
-            assertNotNull(config, "Configuration should not be null");
+            assertNotNull(resultFieldConfig, "Result-field configuration should not be null");
 
-            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RulesEngine baselineEngine = RulesEngine.fromYamlConfig(baselineConfig);
+            RulesEngine resultFieldEngine = RulesEngine.fromYamlConfig(resultFieldConfig);
             
             // Prepare test data
             Map<String, Object> testData = createTestData();
@@ -66,7 +73,8 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
             // Warmup phase
             logger.info("\n--- Warmup Phase ({} iterations) ---", WARMUP_ITERATIONS);
             for (int i = 0; i < WARMUP_ITERATIONS; i++) {
-                engine.evaluate(config, testData);
+                baselineEngine.evaluate(baselineConfig, testData);
+                resultFieldEngine.evaluate(resultFieldConfig, testData);
             }
             logger.info("[OK] Warmup completed");
             
@@ -76,7 +84,7 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
             
             for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
                 long startTime = System.nanoTime();
-                RuleResult result = engine.evaluate(config, testData);
+                RuleResult result = baselineEngine.evaluate(baselineConfig, testData);
                 long executionTime = System.nanoTime() - startTime;
                 baselineTimes.add(executionTime);
                 
@@ -98,7 +106,7 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
             
             for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
                 long startTime = System.nanoTime();
-                RuleResult result = engine.evaluate(config, testData);
+                RuleResult result = resultFieldEngine.evaluate(resultFieldConfig, testData);
                 long executionTime = System.nanoTime() - startTime;
                 resultFieldTimes.add(executionTime);
                 
@@ -117,36 +125,39 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
             logger.info("  Max:     {}", formatTime(resultFieldStats.max));
             logger.info("  StdDev:  {}", formatTime(resultFieldStats.stdDev));
             
-            // Calculate overhead
-            double overheadPercent = calculateOverheadPercent(baselineStats.average, resultFieldStats.average);
+            // Calculate overhead using both average and median.
+            // Median is the primary signal for this test because averages are highly sensitive to outliers.
+            double averageOverheadPercent = calculateOverheadPercent(baselineStats.average, resultFieldStats.average);
+            double medianOverheadPercent = calculateOverheadPercent(baselineStats.median, resultFieldStats.median);
             
             logger.info("\n--- Performance Analysis ---");
             logger.info("Baseline average:      {}", formatTime(baselineStats.average));
             logger.info("Baseline median:       {}", formatTime(baselineStats.median));
             logger.info("Result-field average:  {}", formatTime(resultFieldStats.average));
             logger.info("Result-field median:   {}", formatTime(resultFieldStats.median));
-            logger.info("Overhead (average):    {}%", String.format("%.3f", overheadPercent));
+            logger.info("Overhead (average):    {}%", String.format("%.3f", averageOverheadPercent));
+            logger.info("Overhead (median):     {}%", String.format("%.3f", medianOverheadPercent));
             logger.info("Overhead threshold:    {}%", MAX_OVERHEAD_PERCENT);
             logger.info("");
             logger.info("Note: Median times are more representative of typical performance.");
             logger.info("      Average can be skewed by JVM warmup and GC pauses.");
 
             // Validate overhead is within acceptable range
-            if (overheadPercent < 0) {
+            if (medianOverheadPercent < 0) {
                 logger.info("[OK] Result-field is FASTER than baseline ({}% improvement)",
-                    String.format("%.3f", Math.abs(overheadPercent)));
-            } else if (overheadPercent <= MAX_OVERHEAD_PERCENT) {
+                    String.format("%.3f", Math.abs(medianOverheadPercent)));
+            } else if (medianOverheadPercent <= MAX_OVERHEAD_PERCENT) {
                 logger.info("[OK] Overhead is within acceptable range: {}% <= {}%",
-                    String.format("%.3f", overheadPercent), MAX_OVERHEAD_PERCENT);
+                    String.format("%.3f", medianOverheadPercent), MAX_OVERHEAD_PERCENT);
             } else {
                 logger.warn("⚠ Overhead exceeds threshold: {}% > {}%",
-                    String.format("%.3f", overheadPercent), MAX_OVERHEAD_PERCENT);
+                    String.format("%.3f", medianOverheadPercent), MAX_OVERHEAD_PERCENT);
             }
 
-            // Assert performance requirement
-            assertTrue(overheadPercent <= MAX_OVERHEAD_PERCENT,
-                String.format("result-field overhead (%.3f%%) should be <= %.1f%%",
-                    overheadPercent, MAX_OVERHEAD_PERCENT));
+            // Assert performance requirement using median overhead (robust to outliers).
+            assertTrue(medianOverheadPercent <= MAX_OVERHEAD_PERCENT,
+                String.format("result-field median overhead (%.3f%%) should be <= %.1f%%",
+                    medianOverheadPercent, MAX_OVERHEAD_PERCENT));
 
             logger.info("\n[OK] Performance validation PASSED: result-field overhead is minimal");
             

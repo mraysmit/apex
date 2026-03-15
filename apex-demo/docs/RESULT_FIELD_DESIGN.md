@@ -117,7 +117,7 @@ enrichments:
 **Implementation Pattern:**
 
 ```java
-// YamlEnrichmentProcessor.processCalculationEnrichment()
+// EnrichmentProcessor.processCalculationEnrichment()
 Object result = calcExpr.getValue(context);
 
 // Store the result field
@@ -636,7 +636,7 @@ public void setResultField(String resultField) {
 **Files Modified:**
 1. `apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlEnrichment.java` - Added `resultField` property
 2. `apex-core/src/main/java/dev/mars/apex/core/engine/model/Enrichment.java` - Added `resultField` to model
-3. `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java` - Added result-field storage logic for all three enrichment types
+3. `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/EnrichmentProcessor.java` - Added result-field storage logic for all three enrichment types
 
 **Tests Created:**
 - `apex-demo/src/test/java/dev/mars/apex/demo/basic/EnrichmentResultFieldTest.java` - Comprehensive test covering all three enrichment types with 4 test methods
@@ -653,7 +653,7 @@ public void setResultField(String resultField) {
 - `README.md` - Added "Enrichment Chaining" to core capabilities
 
 **Implementation Notes:**
-- **Critical Bug Fixed:** field-enrichment result-field was not being stored when condition didn't match because the enrichment was skipped entirely. Fixed by moving result-field storage logic to the main enrichment processing loop (lines 158-180 in YamlEnrichmentProcessor.java).
+- **Critical Bug Fixed:** field-enrichment result-field was not being stored when condition didn't match because the enrichment was skipped entirely. Fixed by moving result-field storage logic to the main enrichment processing loop (lines 158-180 in EnrichmentProcessor.java).
 - **Pattern Consistency:** All three enrichment types follow the same pattern as Rules - store boolean result in named field accessible via SpEL.
 - **Performance:** Minimal overhead (sub-millisecond per enrichment), consistent with Phase 1 performance characteristics.
 
@@ -1064,7 +1064,7 @@ The `result-field` design is compatible with:
 
 - `apex-core/src/main/java/dev/mars/apex/core/engine/model/Rule.java`
 - `apex-core/src/main/java/dev/mars/apex/core/service/engine/UnifiedRuleEvaluator.java`
-- `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java`
+- `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/EnrichmentProcessor.java`
 
 ### Related Tests
 

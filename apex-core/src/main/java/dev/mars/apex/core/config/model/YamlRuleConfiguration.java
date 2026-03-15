@@ -84,6 +84,9 @@ public class YamlRuleConfiguration {
     @JsonProperty("error-recovery")
     private YamlErrorRecoveryConfig errorRecovery;
 
+    @JsonProperty("runtime-scripts")
+    private YamlRuntimeScriptConfig runtimeScripts;
+
     @JsonProperty("scenario")
     private Object scenarioData;
 
@@ -252,6 +255,14 @@ public class YamlRuleConfiguration {
 
     public void setErrorRecovery(YamlErrorRecoveryConfig errorRecovery) {
         this.errorRecovery = errorRecovery;
+    }
+
+    public YamlRuntimeScriptConfig getRuntimeScripts() {
+        return runtimeScripts;
+    }
+
+    public void setRuntimeScripts(YamlRuntimeScriptConfig runtimeScripts) {
+        this.runtimeScripts = runtimeScripts;
     }
 
     public Object getScenarioData() {

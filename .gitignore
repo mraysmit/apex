@@ -60,6 +60,7 @@ test-suite-output*.txt
 compile-errors.txt
 test-markers-output.txt
 test-with-markers.txt
+__yaml_analysis.txt
 # Add these case variations
 *.LOG
 *.Log

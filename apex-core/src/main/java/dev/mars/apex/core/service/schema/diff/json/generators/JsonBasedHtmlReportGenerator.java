@@ -38,6 +38,7 @@ import java.nio.file.Paths;
 public class JsonBasedHtmlReportGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonBasedHtmlReportGenerator.class);
+    private static final String REPORT_DIR = "target/reports";
     private final Handlebars handlebars;
     private Template compiledTemplate;
 
@@ -65,13 +66,26 @@ public class JsonBasedHtmlReportGenerator {
         logger.info("[SchemaDiff.HTML] Generating HTML report: {}", outputPath);
         
         String html = compiledTemplate.apply(report);
-        
-        Path path = Paths.get(outputPath);
-        Files.createDirectories(path.getParent());
+
+        Path path = resolveReportPath(outputPath);
+        if (path.getParent() != null) {
+            Files.createDirectories(path.getParent());
+        }
         Files.writeString(path, html);
         
         logger.info("[SchemaDiff.HTML] HTML report generated successfully: {}", path.toAbsolutePath());
         return path.toAbsolutePath().toString();
+    }
+
+    /**
+     * Resolve report path using default report directory when only a filename is provided.
+     */
+    private Path resolveReportPath(String reportPath) {
+        Path path = Paths.get(reportPath);
+        if (path.getParent() == null) {
+            return Paths.get(REPORT_DIR, reportPath);
+        }
+        return path;
     }
 
     /**

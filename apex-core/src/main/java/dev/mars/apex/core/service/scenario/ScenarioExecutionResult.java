@@ -112,7 +112,7 @@ public class ScenarioExecutionResult {
         return executionStartTime;
     }
     
-    public Map<String, Object> getScenarioOutputs() {
+    public synchronized Map<String, Object> getScenarioOutputs() {
         return new HashMap<>(scenarioOutputs);
     }
 
@@ -241,18 +241,18 @@ public class ScenarioExecutionResult {
     
     // Output management methods
     
-    public void addScenarioOutput(String key, Object value) {
+    public synchronized void addScenarioOutput(String key, Object value) {
         scenarioOutputs.put(key, value);
     }
     
-    public void setScenarioOutputs(Map<String, Object> outputs) {
+    public synchronized void setScenarioOutputs(Map<String, Object> outputs) {
         this.scenarioOutputs.clear();
         if (outputs != null) {
             this.scenarioOutputs.putAll(outputs);
         }
     }
     
-    public Object getScenarioOutput(String key) {
+    public synchronized Object getScenarioOutput(String key) {
         return scenarioOutputs.get(key);
     }
     

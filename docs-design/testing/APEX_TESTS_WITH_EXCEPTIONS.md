@@ -188,7 +188,7 @@ Each test needs individual verification to determine proper classification.
 - **🐛 REAL BUGS FIXED** (5 code bugs):
   1. **CacheDataSource.getData()** - Fixed null cacheManager handling (Tests #5-6)
   2. **DataTypeScenarioService.loadScenarios()** - Fixed empty scenario-id validation (Test #17)
-  3. **YamlEnrichmentProcessor** - Changed ERROR logs from stack traces to clean messages (Test #20)
+  3. **EnrichmentProcessor** - Changed ERROR logs from stack traces to clean messages (Test #20)
   4. **ScenarioStageExecutor** - Added RuleResult attachment to failed stages (Tests #21-22)
   5. **DataTypeScenarioService.loadIndividualScenario()** - Changed ERROR logs from stack traces to clean messages (Test #23)
 

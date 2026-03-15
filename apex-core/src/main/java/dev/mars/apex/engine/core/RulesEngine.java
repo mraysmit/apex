@@ -1,8 +1,10 @@
 package dev.mars.apex.engine.core;
 
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
+import dev.mars.apex.core.config.model.YamlRuntimeScriptConfig;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.*;
+import dev.mars.apex.core.script.*;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.loader.*;
@@ -37,6 +39,11 @@ import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -88,6 +95,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class RulesEngine {
     private static final Logger logger = LoggerFactory.getLogger(RulesEngine.class);
+
+    private enum LifecycleState {
+        ACTIVE,
+        SHUTTING_DOWN,
+        SHUT_DOWN
+    }
+
     private final ExpressionEvaluatorService evaluatorService;
     private final RulesEngineConfiguration configuration;
     private final ErrorRecoveryService errorRecoveryService;
@@ -123,6 +137,15 @@ public class RulesEngine {
     private final PipelineExecutionManager pipelineExecutionManager;
     private final Map<String, ExternalDataSource> dataSources;
     private final Map<String, DataSink> dataSinks;
+    private final Object lifecycleMonitor = new Object();
+    private volatile LifecycleState lifecycleState = LifecycleState.ACTIVE;
+    private final AtomicInteger activeEvaluations = new AtomicInteger();
+
+    // Runtime script system components (null when runtime-scripts not configured)
+    private final ScriptBridge scriptBridge;
+    private final ScriptReloadManager scriptReloadManager;
+    private final GroovyScriptCompiler scriptCompiler;
+    private final ScriptExecutor scriptExecutor;
 
     /**
      * Create a new RulesEngine with the specified configuration.
@@ -160,18 +183,67 @@ public class RulesEngine {
                        Map<String, ScenarioConfiguration> scenarioRegistry) {
         this.configuration = configuration;
         this.yamlConfig = yamlConfig;
-        this.scenarioRegistry = scenarioRegistry;
+        this.scenarioRegistry = freezeScenarioRegistry(scenarioRegistry);
         this.evaluatorService = new ExpressionEvaluatorService(SpelParserHolder.INSTANCE);
+
+        // Initialize runtime script system if configured
+        ScriptBridge bridge = null;
+        ScriptReloadManager reloader = null;
+        GroovyScriptCompiler compiler = null;
+        ScriptExecutor executor = null;
+        if (yamlConfig != null && yamlConfig.getRuntimeScripts() != null
+                && yamlConfig.getRuntimeScripts().isEnabled()) {
+            YamlRuntimeScriptConfig scriptConfig = yamlConfig.getRuntimeScripts();
+            try {
+                List<Path> locations = resolveScriptLocations(scriptConfig);
+                if (locations.isEmpty()) {
+                    logger.warn("Runtime scripts configured but no valid filesystem locations were resolved");
+                    throw new IllegalArgumentException("No valid runtime script locations configured");
+                }
+                RuntimeScriptRegistry scriptRegistry = new RuntimeScriptRegistry(
+                        locations, scriptConfig.getAllowlist());
+                scriptRegistry.loadScripts();
+
+                compiler = new GroovyScriptCompiler(
+                        scriptConfig.getFailMode());
+                executor = new ScriptExecutor();
+
+                bridge = new ScriptBridge(scriptRegistry, compiler, executor,
+                        scriptConfig.getExecutionTimeoutMs());
+                this.evaluatorService.enableScriptBridge(bridge);
+
+                if (scriptConfig.getPollingIntervalMs() > 0) {
+                    reloader = new ScriptReloadManager(
+                            scriptRegistry, compiler, scriptConfig.getPollingIntervalMs());
+                    reloader.start();
+                }
+                logger.info("Runtime script system initialized with {} location(s)", locations.size());
+            } catch (Exception e) {
+                logger.error("Failed to initialize runtime script system", e);
+                if (executor != null) {
+                    executor.shutdown();
+                }
+                if (compiler != null) {
+                    compiler.close();
+                }
+                throw new IllegalStateException("Failed to initialize runtime script system", e);
+            }
+        }
+        this.scriptBridge = bridge;
+        this.scriptReloadManager = reloader;
+        this.scriptCompiler = compiler;
+        this.scriptExecutor = executor;
+
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
         this.scenarioParser = new ScenarioParser();  // Initialize scenario parser
         this.scenarioRegistryManager = new ScenarioRegistryManager(
-            scenarioRegistry,
+            this.scenarioRegistry,
             this.evaluatorService
         );
         this.scenarioEvaluationManager = new ScenarioEvaluationManager(
             yamlConfig,
-            scenarioRegistry,
+            this.scenarioRegistry,
             this.scenarioParser,
             new ScenarioLookupStrategyImpl()
         );
@@ -232,6 +304,59 @@ public class RulesEngine {
         logger.debug("Using error recovery config: enabled={}, default-strategy={}",errorRecoveryConfig.isEnabled(), errorRecoveryConfig.getDefaultStrategy());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
         logger.debug("Using enrichment processor: {}", enrichmentProcessor != null ? enrichmentProcessor.getClass().getSimpleName() : "none");
+    }
+
+    private List<Path> resolveScriptLocations(YamlRuntimeScriptConfig scriptConfig) {
+        if (scriptConfig.getLocations() == null || scriptConfig.getLocations().isEmpty()) {
+            return List.of();
+        }
+
+        List<Path> resolved = new ArrayList<>();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+        for (String rawLocation : scriptConfig.getLocations()) {
+            if (rawLocation == null || rawLocation.trim().isEmpty()) {
+                continue;
+            }
+
+            String location = rawLocation.trim();
+            try {
+                if (location.startsWith("classpath:")) {
+                    String classpathRef = location.substring("classpath:".length());
+                    while (classpathRef.startsWith("/")) {
+                        classpathRef = classpathRef.substring(1);
+                    }
+
+                    URL url = classLoader.getResource(classpathRef);
+                    if (url == null) {
+                        logger.warn("Runtime script classpath location not found: {}", location);
+                        continue;
+                    }
+                    if (!"file".equalsIgnoreCase(url.getProtocol())) {
+                        logger.warn("Runtime script classpath location '{}' uses unsupported protocol '{}' (filesystem paths only)",
+                                location, url.getProtocol());
+                        continue;
+                    }
+
+                    URI uri = url.toURI();
+                    resolved.add(Path.of(uri).toAbsolutePath().normalize());
+                } else {
+                    resolved.add(Path.of(location).toAbsolutePath().normalize());
+                }
+            } catch (IllegalArgumentException | URISyntaxException ex) {
+                logger.warn("Ignoring invalid runtime script location '{}': {}", location, ex.getMessage());
+            }
+        }
+
+        return resolved;
+    }
+
+    private static Map<String, ScenarioConfiguration> freezeScenarioRegistry(
+            Map<String, ScenarioConfiguration> scenarioRegistry) {
+        if (scenarioRegistry == null) {
+            return null;
+        }
+        return Collections.unmodifiableMap(new LinkedHashMap<>(scenarioRegistry));
     }
 
     /**
@@ -555,7 +680,7 @@ public class RulesEngine {
      * This is only populated when the engine is created via 
      * {@link #fromScenarioRegistry(String)}.</p>
      *
-     * @return The scenario registry map, or null if not a scenario-based engine
+     * @return An unmodifiable scenario registry snapshot, or null if not a scenario-based engine
      * @since 2025-11-03
      */
     public Map<String, ScenarioConfiguration> getScenarioRegistry() {
@@ -583,6 +708,10 @@ public class RulesEngine {
      * @return The result of the rule evaluation, indicating whether it matched or not
      */
     public RuleResult executeRule(Rule rule, Map<String, Object> facts) {
+        return runWhileEngineActive("executeRule", () -> executeRuleInternal(rule, facts));
+    }
+
+    private RuleResult executeRuleInternal(Rule rule, Map<String, Object> facts) {
         // Delegate to the unified evaluator for consistent behavior
         // Note: result-field storage is handled by UnifiedRuleEvaluator.evaluateRule(Rule, Map)
         // which supports nested field paths and enrichedData population
@@ -597,6 +726,10 @@ public class RulesEngine {
      * @return The result of the first rule that matches, or a default result if no rules match
      */
     public RuleResult executeRulesList(List<Rule> rules, Map<String, Object> facts) {
+        return runWhileEngineActive("executeRulesList", () -> executeRulesListInternal(rules, facts));
+    }
+
+    private RuleResult executeRulesListInternal(List<Rule> rules, Map<String, Object> facts) {
         // Delegate to the unified evaluator for consistent behavior
         return unifiedEvaluator.evaluateRules(rules, facts);
     }
@@ -610,6 +743,10 @@ public class RulesEngine {
      * @return The result of the first rule group that matches, or a default result if no rule groups match
      */
     public RuleResult executeRuleGroupsList(List<RuleGroup> ruleGroups, Map<String, Object> facts) {
+        return runWhileEngineActive("executeRuleGroupsList", () -> executeRuleGroupsListInternal(ruleGroups, facts));
+    }
+
+    private RuleResult executeRuleGroupsListInternal(List<RuleGroup> ruleGroups, Map<String, Object> facts) {
         StandardEvaluationContext context = createContext(facts);
         return ruleGroupExecutor.executeRuleGroupsList(ruleGroups, facts, context);
     }
@@ -626,6 +763,10 @@ public class RulesEngine {
      * @return The result of the first rule that matches, or a default result if no rules match
      */
     public RuleResult executeRules(List<RuleBase> rules, Map<String, Object> facts) {
+        return runWhileEngineActive("executeRules", () -> executeRulesInternal(rules, facts));
+    }
+
+    private RuleResult executeRulesInternal(List<RuleBase> rules, Map<String, Object> facts) {
         StandardEvaluationContext context = createContext(facts);
         return ruleGroupExecutor.executeRules(rules, facts, context);
     }
@@ -638,10 +779,14 @@ public class RulesEngine {
      * @return The result of the first rule that matches, or a default result if no rules match
      */
     public RuleResult executeRulesForCategory(String category, Map<String, Object> facts) {
+        return runWhileEngineActive("executeRulesForCategory", () -> executeRulesForCategoryInternal(category, facts));
+    }
+
+    private RuleResult executeRulesForCategoryInternal(String category, Map<String, Object> facts) {
         logger.info("Executing rules for category: {}", category);
         List<RuleBase> rules = configuration.getRulesForCategory(category);
         logger.debug("Found {} rules/rule groups in category: {}", rules.size(), category);
-        return executeRules(rules, facts);
+        return executeRulesInternal(rules, facts);
     }
 
 
@@ -657,7 +802,11 @@ public class RulesEngine {
      * @return A comprehensive RuleResult containing success status, enriched data, and failure messages
      */
     public RuleResult evaluate(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData) {
-        logger.info("Starting unified evaluation with enrichments and rules");
+        return runWhileEngineActive("evaluate", () -> evaluateInternal(yamlConfig, inputData));
+    }
+
+    private RuleResult evaluateInternal(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData) {
+        logger.debug("Starting unified evaluation with enrichments and rules");
 
         // Check for initialization errors first
         if (!initializationErrors.isEmpty()) {
@@ -686,7 +835,7 @@ public class RulesEngine {
         return sequentialProcessor.evaluateSequential(
             yamlConfig,
             inputData,
-            ctx -> executeRule(ctx.getRule(), ctx.getData()),
+            ctx -> executeRuleInternal(ctx.getRule(), ctx.getData()),
             ctx -> executePipeline(ctx.getPipeline(), ctx.getData()),
             this::createContext
         );
@@ -708,6 +857,10 @@ public class RulesEngine {
      * @throws IllegalStateException if this engine was not created with a YAML configuration
      */
     public RuleResult evaluate(Map<String, Object> inputData) {
+        return runWhileEngineActive("evaluate", () -> evaluateStoredConfiguration(inputData));
+    }
+
+    private RuleResult evaluateStoredConfiguration(Map<String, Object> inputData) {
         if (this.yamlConfig == null) {
             logger.error("[APEX-CFG-999] Cannot use simplified evaluate(Map) method - engine was not created with a YAML configuration");
             List<String> failureMessages = new ArrayList<>();
@@ -718,7 +871,7 @@ public class RulesEngine {
                 "evaluation", "Engine not configured with YAML configuration", SeverityConstants.ERROR);
         }
 
-        return evaluate(this.yamlConfig, inputData);
+        return evaluateInternal(this.yamlConfig, inputData);
     }
 
     // ========================================
@@ -754,7 +907,7 @@ public class RulesEngine {
      * @since 2025-11-03
      */
     public ScenarioExecutionResult evaluateScenario(Map<String, Object> inputData) {
-        return scenarioEvaluationManager.evaluateScenario(inputData);
+        return runWhileEngineActive("evaluateScenario", () -> scenarioEvaluationManager.evaluateScenario(inputData));
     }
 
     /**
@@ -785,7 +938,7 @@ public class RulesEngine {
      * @since 2025-11-03
      */
     public ScenarioExecutionResult evaluateScenario(String scenarioId, Map<String, Object> inputData) {
-        return scenarioEvaluationManager.evaluateScenario(scenarioId, inputData);
+        return runWhileEngineActive("evaluateScenario", () -> scenarioEvaluationManager.evaluateScenario(scenarioId, inputData));
     }
 
     /**
@@ -820,7 +973,8 @@ public class RulesEngine {
      * @since 2025-11-03
      */
     public ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
-        return scenarioEvaluationManager.evaluateWithClassification(inputData);
+        return runWhileEngineActive("evaluateWithClassification",
+            () -> scenarioEvaluationManager.evaluateWithClassification(inputData));
     }
 
     // ========================================
@@ -857,7 +1011,14 @@ public class RulesEngine {
      * @see ScenarioEvaluator
      */
     public ScenarioEvaluationManager.ScenarioEvaluator asScenario() {
-        return scenarioEvaluationManager.asScenario();
+        if (this.yamlConfig == null && this.scenarioRegistry == null) {
+            throw new IllegalStateException(
+                "Cannot use asScenario() method - this RulesEngine was not created with a scenario configuration or registry. " +
+                "Use RulesEngine.fromFile() or RulesEngine.fromScenarioRegistry() to create the engine."
+            );
+        }
+
+        return new LifecycleAwareScenarioEvaluator();
     }
 
     /**
@@ -867,6 +1028,8 @@ public class RulesEngine {
      */
     public void shutdown() {
         logger.info("Shutting down RulesEngine");
+
+        waitForInFlightEvaluationsToDrain();
 
         // Shutdown data sources
         for (Map.Entry<String, ExternalDataSource> entry : dataSources.entrySet()) {
@@ -893,7 +1056,134 @@ public class RulesEngine {
         dataSources.clear();
         dataSinks.clear();
 
+        // Shutdown runtime script system
+        if (scriptReloadManager != null) {
+            try {
+                scriptReloadManager.stop();
+            } catch (Exception e) {
+                logger.warn("Error shutting down script reload manager: {}", e.getMessage());
+            }
+        }
+        if (scriptExecutor != null) {
+            try {
+                scriptExecutor.shutdown();
+            } catch (Exception e) {
+                logger.warn("Error shutting down script executor: {}", e.getMessage());
+            }
+        }
+        if (scriptCompiler != null) {
+            try {
+                scriptCompiler.close();
+            } catch (Exception e) {
+                logger.warn("Error shutting down script compiler: {}", e.getMessage());
+            }
+        }
+
+        synchronized (lifecycleMonitor) {
+            lifecycleState = LifecycleState.SHUT_DOWN;
+            lifecycleMonitor.notifyAll();
+        }
+
         logger.info("RulesEngine shutdown complete");
+    }
+
+    private <T> T runWhileEngineActive(String operationName, Callable<T> action) {
+        beginEvaluation(operationName);
+        if (scriptBridge != null) {
+            scriptBridge.activate();
+        }
+        try {
+            return action.call();
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("Unexpected checked exception during " + operationName, e);
+        } finally {
+            if (scriptBridge != null) {
+                scriptBridge.deactivate();
+            }
+            endEvaluation();
+        }
+    }
+
+    private void beginEvaluation(String operationName) {
+        if (lifecycleState != LifecycleState.ACTIVE) {
+            throw new IllegalStateException(
+                "RulesEngine is shutting down or has already shut down; cannot start " + operationName);
+        }
+
+        activeEvaluations.incrementAndGet();
+
+        if (lifecycleState != LifecycleState.ACTIVE) {
+            notifyEvaluationCompleted(activeEvaluations.decrementAndGet());
+            throw new IllegalStateException(
+                "RulesEngine is shutting down or has already shut down; cannot start " + operationName);
+        }
+    }
+
+    private void endEvaluation() {
+        notifyEvaluationCompleted(activeEvaluations.decrementAndGet());
+    }
+
+    private void notifyEvaluationCompleted(int remainingEvaluations) {
+        if (remainingEvaluations == 0 && lifecycleState != LifecycleState.ACTIVE) {
+            synchronized (lifecycleMonitor) {
+                lifecycleMonitor.notifyAll();
+            }
+        }
+    }
+
+    private void waitForInFlightEvaluationsToDrain() {
+        boolean interrupted = false;
+
+        synchronized (lifecycleMonitor) {
+            while (lifecycleState == LifecycleState.SHUTTING_DOWN) {
+                try {
+                    lifecycleMonitor.wait();
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                }
+            }
+
+            if (lifecycleState == LifecycleState.SHUT_DOWN) {
+                if (interrupted) {
+                    Thread.currentThread().interrupt();
+                }
+                return;
+            }
+
+            lifecycleState = LifecycleState.SHUTTING_DOWN;
+
+            while (activeEvaluations.get() > 0) {
+                try {
+                    lifecycleMonitor.wait();
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                    logger.warn("Interrupted while waiting for in-flight evaluations to complete during shutdown");
+                }
+            }
+        }
+
+        if (interrupted) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private class LifecycleAwareScenarioEvaluator implements ScenarioEvaluationManager.ScenarioEvaluator {
+        @Override
+        public ScenarioExecutionResult evaluate(Map<String, Object> inputData) {
+            return RulesEngine.this.evaluateScenario(inputData);
+        }
+
+        @Override
+        public ScenarioExecutionResult evaluate(String scenarioId, Map<String, Object> inputData) {
+            return RulesEngine.this.evaluateScenario(scenarioId, inputData);
+        }
+
+        @Override
+        public ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
+            return RulesEngine.this.evaluateWithClassification(inputData);
+        }
     }
 
     // ========================================

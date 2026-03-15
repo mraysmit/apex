@@ -315,7 +315,7 @@ rules:
 - Add deprecation warning when `transformation` is used
 - Update unit tests
 
-**Task 1.2: Update YamlEnrichmentProcessor**
+**Task 1.2: Update EnrichmentProcessor**
 - Modify `applyFieldMappings()` to use new getter logic
 - Log deprecation warning when `transformation` property is detected
 - Ensure backward compatibility

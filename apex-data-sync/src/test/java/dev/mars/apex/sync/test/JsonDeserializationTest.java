@@ -15,6 +15,7 @@
  */
 package dev.mars.apex.sync.test;
 
+import dev.mars.apex.sync.SyncTestBase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mars.apex.engine.core.RulesEngine;
@@ -53,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2.1.0
  */
 @Testcontainers
-public class JsonDeserializationTest {
+public class JsonDeserializationTest extends SyncTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonDeserializationTest.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -67,7 +68,7 @@ public class JsonDeserializationTest {
     private static String jdbcUrl;
     
     @BeforeAll
-    public static void setUp() {
+    public static void setUpClass() {
         jdbcUrl = postgres.getJdbcUrl();
         logger.info("PostgreSQL container started: {}", jdbcUrl);
         

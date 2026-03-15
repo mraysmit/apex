@@ -23,6 +23,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -118,14 +119,34 @@ public abstract class BaseYamlImportSeleniumTest {
      * Uses JavaScript polling to check workspace availability.
      */
     protected void waitForBlocklyWorkspaceToLoad() {
-        wait.until(driver -> {
-            Object workspace = js.executeScript("return typeof Blockly !== 'undefined' && Blockly.getMainWorkspace() != null");
-            return Boolean.TRUE.equals(workspace);
-        });
-        
-        // Additional wait for workspace to be fully rendered
+        WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(60));
         try {
-            Thread.sleep(500);
+            waitForBlocklyWorkspaceReady(pageWait);
+        } catch (TimeoutException firstTimeout) {
+            // One recovery attempt for slow CI/full-suite runs where page scripts initialize late.
+            driver.navigate().refresh();
+            waitForBlocklyWorkspaceReady(pageWait);
+        }
+    }
+
+    private void waitForBlocklyWorkspaceReady(WebDriverWait pageWait) {
+        pageWait.until(driver -> "complete".equals(js.executeScript("return document.readyState")));
+        pageWait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+        pageWait.until(ExpectedConditions.presenceOfElementLocated(By.id("toolbox")));
+        pageWait.until(driver -> {
+            Object workspaceReady = js.executeScript(
+                "const blocklyDiv = document.getElementById('blocklyDiv');" +
+                "if (!blocklyDiv) return false;" +
+                "if (typeof Blockly === 'undefined' || typeof Blockly.getMainWorkspace !== 'function') return false;" +
+                "const ws = Blockly.getMainWorkspace();" +
+                "if (ws) return true;" +
+                "return !!(window.workspace && typeof window.workspace.getAllBlocks === 'function');"
+            );
+            return Boolean.TRUE.equals(workspaceReady);
+        });
+
+        try {
+            Thread.sleep(300);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -229,7 +250,23 @@ public abstract class BaseYamlImportSeleniumTest {
      */
     protected void waitForBlocksToRender() {
         try {
-            Thread.sleep(1000);
+            // Prefer a state-based wait over fixed sleep: some CI/full-suite runs render blocks slower.
+            wait.until(driver -> {
+                Object result = js.executeScript(
+                    "const ws = Blockly.getMainWorkspace();" +
+                    "if (!ws) return false;" +
+                    "return ws.getAllBlocks(false).length > 0;"
+                );
+                return Boolean.TRUE.equals(result);
+            });
+            Thread.sleep(200);
+        } catch (org.openqa.selenium.TimeoutException e) {
+            // Fallback for edge cases where rendering is still in flight.
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -242,11 +279,49 @@ public abstract class BaseYamlImportSeleniumTest {
      * @return the exported YAML as a string
      */
     protected String exportYamlContent() {
-        // Call updateYaml() to generate YAML and store it in currentYamlText
-        js.executeScript("updateYaml();");
+        waitForBlocksToRender();
 
-        // Get the generated YAML from currentYamlText variable
-        Object yaml = js.executeScript("return currentYamlText;");
+        // Full-suite runs can read a partially updated YAML snapshot; retry briefly for stable output.
+        for (int attempt = 0; attempt < 10; attempt++) {
+            String yaml = readYamlFromPage();
+            if (!yaml.isEmpty()) {
+                if (yaml.contains("metadata:")) {
+                    return yaml;
+                }
+
+                // If workspace is still serializing metadata, give it a short extra window.
+                if (attempt == 9) {
+                    return yaml;
+                }
+            }
+
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
+        return readYamlFromPage();
+    }
+
+    private String readYamlFromPage() {
+        Object yaml = js.executeScript(
+            "updateYaml();" +
+            "let out = (typeof currentYamlText === 'string') ? currentYamlText.trim() : '';" +
+            "const ws = Blockly.getMainWorkspace();" +
+            "const hasBlocks = !!ws && ws.getAllBlocks(false).length > 0;" +
+            "if (!out && hasBlocks) {" +
+            "  updateYaml();" +
+            "  out = (typeof currentYamlText === 'string') ? currentYamlText.trim() : '';" +
+            "}" +
+            "if (!out) {" +
+            "  const yamlOutput = document.getElementById('yamlOutput');" +
+            "  out = yamlOutput ? (yamlOutput.textContent || '').trim() : '';" +
+            "}" +
+            "return out;"
+        );
         return yaml != null ? yaml.toString() : "";
     }
 

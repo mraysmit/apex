@@ -23,8 +23,11 @@ import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -67,8 +70,7 @@ public class PipelineExecutionManager {
     private final List<String> initializationErrors;
     private final ExpressionEvaluatorService evaluatorService;
     private final RuleGroupEvaluationService ruleGroupEvaluationService;
-    
-    private PipelineExecutor pipelineExecutor; // Lazy-initialized
+
     private EnrichmentProcessor enrichmentProcessor; // Re-initialized with data sources
 
     /**
@@ -183,15 +185,7 @@ public class PipelineExecutionManager {
         try {
             logger.info("Executing pipeline: {}", pipeline.getName());
 
-            // Lazy-initialize pipeline executor
-            if (pipelineExecutor == null) {
-                pipelineExecutor = new PipelineExecutor(new DataSourceManagerAdapter());
-
-                // Add all data sinks to executor
-                for (Map.Entry<String, DataSink> entry : dataSinks.entrySet()) {
-                    pipelineExecutor.addDataSink(entry.getKey(), entry.getValue());
-                }
-            }
+            PipelineExecutor pipelineExecutor = createPipelineExecutor();
 
             // Execute pipeline - returns RuleResult directly with ExecutionSteps
             return pipelineExecutor.execute(pipeline);
@@ -209,7 +203,17 @@ public class PipelineExecutionManager {
      * @return Map of data source name to ExternalDataSource
      */
     public Map<String, ExternalDataSource> getDataSources() {
-        return dataSources;
+        return Collections.unmodifiableMap(new LinkedHashMap<>(dataSources));
+    }
+
+    private PipelineExecutor createPipelineExecutor() {
+        PipelineExecutor pipelineExecutor = new PipelineExecutor(new DataSourceManagerAdapter());
+
+        for (Entry<String, DataSink> entry : dataSinks.entrySet()) {
+            pipelineExecutor.addDataSink(entry.getKey(), entry.getValue());
+        }
+
+        return pipelineExecutor;
     }
 
     /**

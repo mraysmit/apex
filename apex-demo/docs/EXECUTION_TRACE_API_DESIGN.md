@@ -2915,7 +2915,7 @@ The scenario registry decision data captures:
 16. **EnrichmentService**: Capture enrichment group execution decisions and individual enrichment condition evaluations
 17. **ConditionalChainingExecutor**: Capture trigger rule decisions and path selections
 18. **ComplexWorkflowExecutor**: Capture conditional execution branch decisions
-19. **YamlEnrichmentProcessor**: Capture stop-on-first-match and priority-based decisions
+19. **EnrichmentProcessor**: Capture stop-on-first-match and priority-based decisions
 
 ### Decision Data Storage Strategy
 

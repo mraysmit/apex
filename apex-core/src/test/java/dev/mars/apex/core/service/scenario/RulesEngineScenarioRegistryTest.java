@@ -151,6 +151,19 @@ class RulesEngineScenarioRegistryTest {
         assertTrue(scenarioIds.contains("test-scenario-2"), "Should contain test-scenario-2");
     }
 
+    @Test
+    @DisplayName("Should expose scenario registry as an unmodifiable snapshot")
+    void testScenarioRegistryIsUnmodifiable() throws Exception {
+        String registryPath = createTestRegistryWithScenario();
+        RulesEngine engine = RulesEngine.fromScenarioRegistry(registryPath);
+
+        Map<String, ScenarioConfiguration> registry = engine.getScenarioRegistry();
+
+        assertThrows(UnsupportedOperationException.class,
+            () -> registry.put("other", registry.get("test-scenario")),
+            "Scenario registry must not be externally mutable");
+    }
+
     // ========================================
     // Error Handling Tests
     // ========================================
@@ -213,6 +226,9 @@ class RulesEngineScenarioRegistryTest {
         
         assertNotNull(result, "Result should not be null");
         assertEquals("test-scenario", result.getScenarioId(), "Should execute correct scenario");
+        assertTrue(result.isSuccessful(), "Happy-path scenario execution should succeed");
+        assertEquals(1, result.getStageResults().size(), "Scenario should execute exactly one stage");
+        assertTrue(result.getStageResults().get(0).isSuccessful(), "Validation stage should succeed");
     }
 
     @Test
@@ -265,20 +281,20 @@ class RulesEngineScenarioRegistryTest {
         Files.createDirectories(scenariosDir);
         
         // Create a validation rules file for the stage
-        String validationRulesContent = """
-            metadata:
-              id: "test-validation-rules"
-              name: "Test Validation Rules"
-              type: "rule-config"
-              version: "1.0.0"
-              category: "VALIDATION"
-            
-            rules:
-              - id: "test-rule-1"
-                condition: "true"
-                message: "Always passes"
-                severity: "INFO"
-            """;
+        String validationRulesContent = String.join(System.lineSeparator(),
+            "metadata:",
+            "  id: \"test-validation-rules\"",
+            "  name: \"Test Validation Rules\"",
+            "  type: \"rule-config\"",
+            "  version: \"1.0.0\"",
+            "  category: \"VALIDATION\"",
+            "",
+            "rules:",
+            "  - id: \"test-rule-1\"",
+            "    name: \"Test Rule 1\"",
+            "    condition: \"true\"",
+            "    message: \"Always passes\"",
+            "    severity: \"INFO\"");
         Path validationFile = scenariosDir.resolve("test-validation-rules.yaml");
         Files.writeString(validationFile, validationRulesContent);
         
@@ -333,20 +349,20 @@ class RulesEngineScenarioRegistryTest {
         Files.createDirectories(scenariosDir);
         
         // Create shared validation rules file
-        String validationRulesContent = """
-            metadata:
-              id: "test-validation-rules"
-              name: "Test Validation Rules"
-              type: "rule-config"
-              version: "1.0.0"
-              category: "VALIDATION"
-            
-            rules:
-              - id: "test-rule-1"
-                condition: "true"
-                message: "Always passes"
-                severity: "INFO"
-            """;
+        String validationRulesContent = String.join(System.lineSeparator(),
+            "metadata:",
+            "  id: \"test-validation-rules\"",
+            "  name: \"Test Validation Rules\"",
+            "  type: \"rule-config\"",
+            "  version: \"1.0.0\"",
+            "  category: \"VALIDATION\"",
+            "",
+            "rules:",
+            "  - id: \"test-rule-1\"",
+            "    name: \"Test Rule 1\"",
+            "    condition: \"true\"",
+            "    message: \"Always passes\"",
+            "    severity: \"INFO\"");
         Path validationFile = scenariosDir.resolve("test-validation-rules.yaml");
         Files.writeString(validationFile, validationRulesContent);
         

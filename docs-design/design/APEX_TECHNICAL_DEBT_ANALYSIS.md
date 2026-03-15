@@ -2,7 +2,7 @@
 
 **Date**: December 14, 2025  
 **Updated**: February 14, 2026  
-**Status**: 🟢 Complete — pipeline classes refactored, YamlDataSink implemented, YamlEnrichmentProcessor deprecated methods removed  
+**Status**: 🟢 Complete — pipeline classes refactored, YamlDataSink implemented, EnrichmentProcessor deprecated methods removed  
 **Priority**: MEDIUM — no functional impact, all deprecated code still works  
 **Related**: apex_architecture_and_code_review.md - Section 4: Technical Debt Inventory
 
@@ -18,12 +18,12 @@
 - ~~`@Deprecated(since = "3.0", forRemoval = true)`~~
 - ~~3 deprecation annotations (class + 2 constructors)~~
 
-#### 1.2 YamlEnrichmentProcessor
-**File**: `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java`
+#### 1.2 EnrichmentProcessor (formerly YamlEnrichmentProcessor)
+**File**: `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/EnrichmentProcessor.java`
 - **Status**: ✅ **DEPRECATED METHODS REMOVED** (Feb 14, 2026)
 - 8 deprecated methods deleted (314 lines removed, file 2090→1776 lines)
 - `processEnrichment(YamlEnrichment, Object)` un-deprecated and made `private` (called by non-deprecated `processEnrichmentsWithResult`)
-- 7 test methods removed from `YamlEnrichmentProcessorComprehensiveTest` (896→598 lines)
+- 7 test methods removed from `EnrichmentProcessorComprehensiveTest` (896→598 lines)
 - **Class retained**: Core infrastructure — constructor + 3 non-deprecated methods actively used by `RulesEngine`, `SequentialProcessor`, `EnrichmentGroupExecutor`, `PipelineExecutionManager`
 - **Removed methods**: `processEnrichments(2-arg)`, `processEnrichments(3-arg)`, `clearCache()`, `getCacheStatistics()`, `processEnrichmentsWithResult(2-arg)`, `processEnrichmentWithResult(2-arg)`, `processEnrichmentGroup()`, `processEnrichmentGroups()`
 
@@ -45,7 +45,7 @@
 **TODOs Found**:
 ```java
 Line 434: // TODO: Integrate with YamlDataSourceProcessor
-Line 449: // TODO: Integrate with YamlEnrichmentProcessor  
+Line 449: // TODO: Integrate with EnrichmentProcessor  
 Line 464: // TODO: Integrate with YamlRuleProcessor
 ```
 
@@ -81,7 +81,7 @@ Line 464: // TODO: Integrate with YamlRuleProcessor
 
 1. **Scan for Active Usage**:
    - Search all references to `DataTypeScenarioService`
-   - Search all references to `YamlEnrichmentProcessor`
+   - Search all references to `EnrichmentProcessor`
    - Search all references to deprecated pipeline classes
    - Document replacement classes/patterns
 
@@ -116,7 +116,7 @@ Line 464: // TODO: Integrate with YamlRuleProcessor
    - Update tests
    - **Impact**: May break code that still references it
 
-4. ✅ **YamlEnrichmentProcessor deprecated methods removed** (Feb 14, 2026):
+4. ✅ **EnrichmentProcessor deprecated methods removed** (Feb 14, 2026):
    - Active usage scan completed — class itself is core infrastructure (cannot delete)
    - 8 deprecated methods removed, 1 un-deprecated and made private
    - 7 test methods removed, 3 test methods updated (2-arg→3-arg)
@@ -138,7 +138,7 @@ Line 464: // TODO: Integrate with YamlRuleProcessor
 ### Files to Analyze (Deprecated)
 ```
 apex-core/src/main/java/dev/mars/apex/core/service/scenario/DataTypeScenarioService.java
-apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java
+apex-core/src/main/java/dev/mars/apex/core/service/enrichment/EnrichmentProcessor.java
 apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/DataPipelineEngine.java
 apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/DataPipelineException.java
 apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineStepResult.java
@@ -173,7 +173,7 @@ apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlDataSink.java (8 TODO
 1. ⏳ Remove TODO comments in SequentialYamlProcessor
 2. ⏳ Document YamlDataSink incomplete features
 3. ⏳ Remove DataTypeScenarioService (if no active usage)
-4. ✅ Remove YamlEnrichmentProcessor deprecated methods (Feb 14, 2026)
+4. ✅ Remove EnrichmentProcessor deprecated methods (Feb 14, 2026)
 5. ⏳ Remove pipeline deprecations (complex, needs careful planning)
 6. ⏳ Run full test suite after each removal
 7. ⏳ Update documentation
@@ -185,7 +185,7 @@ apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlDataSink.java (8 TODO
 ### DO NOT Remove Without Analysis:
 - Pipeline classes are still actively used (many deprecation warnings in logs)
 - `DataTypeScenarioService` has a subclass (`EnhancedDataTypeScenarioService`)
-- `YamlEnrichmentProcessor` confirmed to have active callers — class retained, deprecated methods removed
+- `EnrichmentProcessor` confirmed to have active callers — class retained, deprecated methods removed
 
 ### Safe to Clean Immediately:
 - TODO comments (can be removed or implemented)

@@ -1179,7 +1179,7 @@ Map<String, Object> enrichedTrade = result.getEnrichedData();
 #### Dataset Enrichment Components
 - **YamlConfigurationLoader**: Loads and parses YAML configuration
 - **DatasetLookupServiceFactory**: Creates in-memory lookup services from datasets
-- **YamlEnrichmentProcessor**: Processes enrichments with dataset support
+- **EnrichmentProcessor**: Processes enrichments with dataset support
 - **DatasetLookupService**: High-performance in-memory lookup implementation
 
 ## Advanced Features
@@ -1368,7 +1368,7 @@ The project includes comprehensive test coverage:
 - **25/25 tests passing** (100% success rate)
 - **DatasetLookupService**: 13/13 tests - Core dataset functionality
 - **YamlDatasetEnrichmentTest**: 6/6 tests - Dataset enrichment integration
-- **YamlEnrichmentProcessorTest**: 6/6 tests - Core enrichment processing
+- **EnrichmentProcessorComprehensiveTest**: Core enrichment processing
 
 ### Test Coverage
 - **Unit Test Coverage**: >95% for all external data source components

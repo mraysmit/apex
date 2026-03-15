@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -377,7 +379,9 @@ public class ScenarioStageExecutor {
         try {
             stageConfig = configLoader.loadFromFile(stage.getConfigFile());
         } catch (dev.mars.apex.core.config.exception.ConfigurationException e) {
-            // Fallback: treat path as classpath resource (tests/resources)
+            if (!shouldFallbackToClasspath(stage.getConfigFile(), e)) {
+                throw e;
+            }
             stageConfig = configLoader.loadFromClasspath(stage.getConfigFile());
         }
 
@@ -525,7 +529,9 @@ public class ScenarioStageExecutor {
         try {
             config = configLoader.loadFromFile(configFilePath);
         } catch (dev.mars.apex.core.config.exception.ConfigurationException e) {
-            // Fallback: treat path as classpath resource
+            if (!shouldFallbackToClasspath(configFilePath, e)) {
+                throw e;
+            }
             config = configLoader.loadFromClasspath(configFilePath);
         }
 
@@ -574,6 +580,20 @@ public class ScenarioStageExecutor {
         }
     }
     
+    private boolean shouldFallbackToClasspath(String configPath, ConfigurationException exception) {
+        if (configPath == null || configPath.isBlank()) {
+            return false;
+        }
+
+        Path path = Paths.get(configPath);
+        if (path.isAbsolute()) {
+            return false;
+        }
+
+        String message = exception.getMessage();
+        return message != null && message.startsWith("Configuration file not found:");
+    }
+
     /**
      * Creates the facts map for rule execution with original input key tracking.
      * 
@@ -586,6 +606,7 @@ public class ScenarioStageExecutor {
      */
     private FactsWithMetadata createFactsMap(Object data, ScenarioExecutionResult context) {
         Map<String, Object> facts = new HashMap<>();
+
         Set<String> originalInputKeys = new HashSet<>();
         
         // Capture original input keys BEFORE adding any scenario metadata

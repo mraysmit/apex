@@ -376,7 +376,7 @@ ApexCacheException.lookupFailed(cacheName, key, cause);
 **Completed Work (Feb 13, 2026) — Phase 2 (Deep Audit & Final Fixes):**
 - ✅ **Deep audit** of all catch blocks in 6 key files (49+ catch blocks catalogued)
 - ✅ **SequentialProcessor**: Rule-group index build failure now propagated to `failureMessages` with `[APEX-CFG-003]`; added `SeverityConstants.ERROR` to failure result builder; general catch uses `[APEX-RULE-999]` with `evaluationFailure()` + severity
-- ✅ **YamlEnrichmentProcessor**: `evaluateConditionRule()` now throws `EnrichmentException` with `[APEX-ENRICH-006]` instead of silently returning `false` — propagates to caller's catch for proper `RuleResult.errorWithCode()`
+- ✅ **EnrichmentProcessor**: `evaluateConditionRule()` now throws `EnrichmentException` with `[APEX-ENRICH-006]` instead of silently returning `false` — propagates to caller's catch for proper `RuleResult.errorWithCode()`
 - ✅ **YamlTransformationProcessor**: `processRules()` condition eval now throws `ApexTransformationException(ErrorType.CONDITION_ERROR)` with `[APEX-TRANS-006]` instead of setting `conditionMet = false` — propagates to `processTransformationsWithResult()` for proper error RuleResult
 - ✅ **RulesEngine**: Both `evaluateYaml()` and `evaluateYamlFile()` catch blocks now include `SeverityConstants.ERROR` and APEX error codes (`[APEX-CFG-001]`, `[APEX-RULE-999]`)
 - ✅ **UnifiedRuleEvaluator**: Elevated 3 catch blocks from WARN to ERROR level — `evaluateCode()` `[APEX-RULE-003]`, `applyFieldMappings()` `[APEX-RULE-004]`, `applyFieldMapping()` `[APEX-RULE-004]`
@@ -395,7 +395,7 @@ ApexCacheException.lookupFailed(cacheName, key, cause);
 - `RulesEngine.processEnrichments()` (lines 1220-1230 per guide)
 - `RulesEngine.processTransformations()` (lines 1370-1380 per guide)
 - `UnifiedRuleEvaluator.evaluateRule()`
-- `YamlEnrichmentProcessor.process()` (fail-fast pattern lines 1752-1760 per guide)
+- `EnrichmentProcessor.process()` (fail-fast pattern lines 1752-1760 per guide)
 - `YamlTransformationProcessor.processTransformation()` (fail-fast pattern lines 143-152 per guide)
 - `ScenarioStageExecutor.executeStage()`
 

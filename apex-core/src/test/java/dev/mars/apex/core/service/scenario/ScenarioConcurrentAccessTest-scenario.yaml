@@ -1,27 +1,18 @@
 metadata:
-  id: "concurrent-access-test-scenario"
-  name: "Concurrent Access Test Scenario"
+  id: "concurrent-scenario"
+  name: "Concurrent Scenario"
   version: "1.0.0"
-  description: "Scenario for testing concurrent execution"
+  description: "Scenario for shared-engine concurrent stage-output isolation"
   type: "scenario"
-  author: "APEX Test Suite"
+  created-by: "APEX Test Suite"
 
 scenario:
-  scenario-id: "concurrent-test-scenario"
-  name: "Concurrent Test Scenario"
-  description: "Tests concurrent scenario execution with multiple threads"
-  
-  classification-rule:
-    condition: "#type == 'OTC'"
-    description: "Classify OTC trades"
-  
+  scenario-id: "concurrent-scenario"
+  name: "Concurrent Scenario"
+  description: "Copies per-request values into nested trade audit outputs"
   processing-stages:
-    - stage-name: "validation"
+    - stage-name: "audit-stage"
       config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioConcurrentAccessTest-rules.yaml"
       execution-order: 1
-      failure-policy: "continue-with-warnings"
-      required: true
-      stage-metadata:
-        description: "Validate and enrich trade data"
-        sla-ms: 5000
+      failure-policy: "terminate"
 

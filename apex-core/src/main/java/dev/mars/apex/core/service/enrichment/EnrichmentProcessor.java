@@ -66,9 +66,6 @@ public class EnrichmentProcessor {
     // Rule group evaluation service for canonical evaluation path (Phase 2)
     private final RuleGroupEvaluationService ruleGroupEvaluationService;
 
-    // Current configuration context for database lookups
-    private dev.mars.apex.core.config.model.YamlRuleConfiguration currentConfiguration;
-
     // Rule result tracking for conditional mapping support (Phase 13 extraction)
     private final RuleResultTracker ruleResultTracker = new RuleResultTracker();
 
@@ -110,7 +107,7 @@ public class EnrichmentProcessor {
         this.conditionEvaluator = new EnrichmentConditionEvaluator(this.parser, this::createEvaluationContext);
         this.codeMappingProcessor = new CodeMappingProcessor(this.parser, this.evaluatorService, this.fieldAccessor);
         this.lookupHandler = new LookupEnrichmentHandler(this.fieldAccessor, this::createEvaluationContext,
-                this.cacheManager, this.serviceRegistry, this.dataSourceRegistry, () -> this.currentConfiguration);
+            this.cacheManager, this.serviceRegistry, this.dataSourceRegistry);
 
         logger.info("EnrichmentProcessor initialized with unified cache manager" + 
                    (dataSourceRegistry != null ? " and data source registry (" + dataSourceRegistry.size() + " data sources)" : "") +
@@ -124,7 +121,8 @@ public class EnrichmentProcessor {
      * @param targetObject The object to enrich
      * @return The enriched object
      */
-    private Object processEnrichment(YamlEnrichment enrichment, Object targetObject) {
+    private Object processEnrichment(YamlEnrichment enrichment, Object targetObject,
+                                     dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
         logger.debug("Processing enrichment: " + enrichment.getId() + " (type: " + enrichment.getType() + ")");
 
         // Note: condition check is performed by the caller (processEnrichmentsWithResult)
@@ -141,7 +139,7 @@ public class EnrichmentProcessor {
         Object result;
         switch (enrichment.getType()) {
             case "lookup-enrichment":
-                result = processLookupEnrichment(enrichment, targetObject);
+                result = processLookupEnrichment(enrichment, targetObject, configuration);
                 break;
             case "calculation-enrichment":
                 result = processCalculationEnrichment(enrichment, targetObject);
@@ -236,8 +234,9 @@ public class EnrichmentProcessor {
      * Process a lookup-based enrichment.
      * Delegates to {@link LookupEnrichmentHandler#processLookupEnrichment}.
      */
-    private Object processLookupEnrichment(YamlEnrichment enrichment, Object targetObject) {
-        return lookupHandler.processLookupEnrichment(enrichment, targetObject);
+    private Object processLookupEnrichment(YamlEnrichment enrichment, Object targetObject,
+                                           dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
+        return lookupHandler.processLookupEnrichment(enrichment, targetObject, configuration);
     }
 
     /**
@@ -578,14 +577,6 @@ public class EnrichmentProcessor {
     }
 
     /**
-     * Resolve lookup service from either service registry or dataset configuration.
-     * Delegates to {@link LookupEnrichmentHandler#resolveLookupService}.
-     */
-    private LookupService resolveLookupService(String enrichmentId, YamlEnrichment.LookupConfig lookupConfig) {
-        return lookupHandler.resolveLookupService(enrichmentId, lookupConfig);
-    }
-
-    /**
      * Clear rule results before starting a new evaluation pass.
      * Delegates to {@link RuleResultTracker}.
      */
@@ -735,9 +726,6 @@ public class EnrichmentProcessor {
         List<String> failureMessages = new ArrayList<>();
         boolean overallSuccess = true;
 
-        // Set current configuration for database lookups
-        this.currentConfiguration = configuration;
-
         if (enrichments == null || enrichments.isEmpty()) {
             logger.debug("processEnrichmentsWithResult() - no enrichments to process, returning success");
             Map<String, Object> resultData = convertToMap(targetObject);
@@ -760,7 +748,7 @@ public class EnrichmentProcessor {
                         enrichment.getId(), enrichment.getType(), enrichment.getPriority());
             try {
                 if (shouldProcessEnrichment(enrichment, enrichedObject)) {
-                    enrichedObject = processEnrichment(enrichment, enrichedObject);
+                    enrichedObject = processEnrichment(enrichment, enrichedObject, configuration);
                     logger.debug("Successfully processed enrichment: {} - data keys after: {}", 
                                 enrichment.getId(), 
                                 enrichedObject instanceof Map ? ((Map<?,?>)enrichedObject).keySet() : "N/A");

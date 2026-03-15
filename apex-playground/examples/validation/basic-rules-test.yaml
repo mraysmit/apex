@@ -8,16 +8,19 @@ metadata:
 
 rules:
   - id: "rule-001"
-    condition: "#cusip != null"
-    message: "CUSIP is required"
+    name: "CUSIP Required"
+    condition: "#customerId != null"
+    message: "Customer ID is required"
     severity: "ERROR"
   
   - id: "rule-002"
-    condition: "#quantity > 0"
-    message: "Quantity must be positive"
+    name: "Positive Quantity"
+    condition: "#amount > 0"
+    message: "Amount must be positive"
     severity: "WARNING"
   
   - id: "rule-003"
-    condition: "#price >= 0.01"
-    message: "Price must be at least 0.01"
+    name: "Minimum Price"
+    condition: "#currency != null"
+    message: "Currency must be present"
     severity: "INFO"

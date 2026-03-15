@@ -201,6 +201,26 @@ class LookupServiceRegistryTest {
         }, "Null type should be handled gracefully");
     }
 
+    @Test
+    @DisplayName("Should return unmodifiable snapshot of registered services")
+    void testGetRegisteredServicesReturnsUnmodifiableSnapshot() {
+        TestLookupService initialService = new TestLookupService("lookup1");
+        registry.registerService(initialService);
+
+        var snapshot = registry.getRegisteredServices();
+
+        assertEquals(1, snapshot.size(), "Snapshot should include registered services at capture time");
+        assertSame(initialService, snapshot.get("lookup1"), "Snapshot should contain the original service instance");
+        assertThrows(UnsupportedOperationException.class,
+            () -> snapshot.put("other", new TestLookupService("other")),
+            "Returned registry snapshot must be immutable");
+
+        registry.registerService(new TestLookupService("lookup2"));
+
+        assertEquals(1, snapshot.size(), "Snapshot should not reflect later registry mutations");
+        assertFalse(snapshot.containsKey("lookup2"), "Snapshot should be isolated from future registry changes");
+    }
+
     // ========================================
     // Integration and Complex Scenarios
     // ========================================

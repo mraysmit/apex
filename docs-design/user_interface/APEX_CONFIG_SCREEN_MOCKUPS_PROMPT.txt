@@ -1,0 +1,248 @@
+APEX CONFIG SCREEN MOCKUPS IMPLEMENTATION PROMPT
+
+You are implementing the specification in docs-design/tasks/APEX_BASICS_SCREEN_MOCKUPS.md as a standalone apex_config experience inside the apex-playground module.
+
+Your mission:
+Build a working APEX Config authoring UI that implements the screens and flows defined in APEX_BASICS_SCREEN_MOCKUPS.md, starting from a fresh home page and not embedded into the existing /playground page flow.
+
+SOURCE OF TRUTH
+1) Functional source of truth:
+- docs-design/tasks/APEX_BASICS_SCREEN_MOCKUPS.md
+2) Technical stack source of truth:
+- Spring Boot MVC + Thymeleaf conventions already used in apex-playground
+- Existing static asset conventions in apex-playground/src/main/resources/static/
+
+NON-NEGOTIABLE CONSTRAINTS
+1) Use the same stack as apex-playground:
+- Spring Boot MVC + Thymeleaf templates
+- Bootstrap 5.x
+- CodeMirror 5 for YAML/expression editors
+- Vanilla JavaScript (no React/Vue/Angular)
+- Font Awesome icons
+2) Start from a fresh apex_config home page and app shell (do not embed in existing /playground UI flow).
+3) Do not implement in apex_editor_main.html.
+4) Do not introduce a new frontend framework, bundler, or build pipeline.
+
+DELIVERABLES (FILES TO CREATE/EDIT)
+1) Create a fresh home page and authoring page:
+- template: apex-playground/src/main/resources/templates/apex_config_home.html
+- template: apex-playground/src/main/resources/templates/apex_config_screen_mockups.html
+- css: apex-playground/src/main/resources/static/css/apex_config_screen_mockups.css
+- js: apex-playground/src/main/resources/static/js/apex_config_screen_mockups.js
+2) Add controller route(s) in playground controller layer:
+- GET /apex_config/home -> apex_config_home template
+- GET /apex_config/authoring -> apex_config_screen_mockups template
+3) Optional helper endpoints for mocked behavior can be added under /apex_config/api if needed, but keep API shape aligned with APEX_BASICS_SCREEN_MOCKUPS.md mappings.
+4) Do not modify existing /playground navigation for this work.
+
+SCREEN COVERAGE REQUIREMENTS
+SCREEN ID CONVENTION (MANDATORY)
+1) Primary screen IDs must be semantic and human-readable.
+2) Numeric labels (Screen 0, 1, 2A...) are trace-only references to the mockups doc.
+3) Never use numeric labels as the primary code identifier for route/state/component names.
+4) Use this semantic naming style consistently across route state, JS handlers, and DOM data attributes.
+5) Example semantic IDs to follow:
+- CONFIG_HOME
+- WORKFLOW_MODE_SELECT
+- PROCESS_DATASET_CONTRACT
+- PROCESS_DATASET_POLICIES
+- PROCESS_DATASET_FIXTURE_BENCH
+- VALIDATION_PREVIEW_GATE
+
+Implement these screen intents and preserve behavior. Use semantic IDs as primary names and keep the Screen label as trace only:
+- CONFIG_HOME (trace: Screen 0)
+- WORKFLOW_MODE_SELECT (trace: Screen 1)
+- WORKFLOW_SETUP_CHOICE (trace: Screen 2)
+- WORKFLOW_SETUP_RULE_BASED (trace: Screen 2A)
+- WORKFLOW_SETUP_EXPRESSION_BASED (trace: Screen 2B)
+- PROCESS_DATASET_OVERVIEW (trace: Screen 3)
+- PROCESS_DATASET_CONTRACT (trace: Screen 3A)
+- PROCESS_DATASET_POLICIES (trace: Screen 3B)
+- ENRICHMENT_SELECTION (trace: Screen 4)
+- REFERENCE_BINDING (trace: Screen 5)
+- VALIDATION_PREVIEW_GATE (trace: Screen 6)
+- COMPOSITION_REVIEW_SUBMIT (trace: Screen 7)
+- RULE_ASSET_CATALOG (trace: Screen 8)
+- RULE_GROUP_AND_RULE_REFS_BUILDER (trace: Screen 9)
+- CHAIN_AND_EXECUTION_ORDER_BUILDER (trace: Screen 10)
+- ENRICHMENT_TARGET_MAPPING_BUILDER (trace: Screen 11)
+- EXTERNAL_DATA_SOURCE_BINDING (trace: Screen 12)
+- YAML_ACTION_MAPPING_RULES (trace: Screen 13)
+- YAML_ACTION_MAPPING_ENRICHMENTS (trace: Screen 14)
+- YAML_CONSOLIDATED_PREVIEW (trace: Screen 15)
+- YAML_EXPORT_AND_APPLY (trace: Screen 16)
+
+NAVIGATION/FLOW REQUIREMENTS
+0) Fresh home entry:
+- /apex_config/home page is the single entry point for this experience.
+- Home page must provide clear actions to start wizard and open standalone catalog flows.
+1) Wizard flow must match:
+- CONFIG_HOME -> WORKFLOW_MODE_SELECT -> WORKFLOW_SETUP_CHOICE -> PROCESS_DATASET_OVERVIEW -> PROCESS_DATASET_CONTRACT -> PROCESS_DATASET_POLICIES -> ENRICHMENT_SELECTION -> REFERENCE_BINDING -> VALIDATION_PREVIEW_GATE -> COMPOSITION_REVIEW_SUBMIT
+2) Standalone flows from catalog:
+- RULE_ASSET_CATALOG -> RULE_GROUP_AND_RULE_REFS_BUILDER -> CHAIN_AND_EXECUTION_ORDER_BUILDER -> VALIDATION_PREVIEW_GATE
+- ENRICHMENT_TARGET_MAPPING_BUILDER -> VALIDATION_PREVIEW_GATE
+- EXTERNAL_DATA_SOURCE_BINDING -> VALIDATION_PREVIEW_GATE
+- YAML_ACTION_MAPPING_RULES -> VALIDATION_PREVIEW_GATE
+- YAML_ACTION_MAPPING_ENRICHMENTS -> YAML_CONSOLIDATED_PREVIEW -> VALIDATION_PREVIEW_GATE
+- YAML_EXPORT_AND_APPLY -> VALIDATION_PREVIEW_GATE
+3) CONFIG_HOME is the mandatory entry/launcher for wizard and standalone catalog paths.
+4) Keep back/next actions and save semantics visible in UI.
+5) VALIDATION_PREVIEW_GATE is the shared pre-write validation/preview gate.
+6) Maintain a traceability mapping in code comments or config so each semantic screen ID maps to its legacy Screen label.
+
+LOOK AND FEEL REQUIREMENTS (FRESH HOME PAGE)
+1) Layout strategy:
+- Fresh app shell with clear home-to-authoring progression
+- Use bootstrap container-fluid + panel/card composition
+- Use split columns/grids where screen needs side-by-side content
+2) Styling behavior baseline:
+- Compact toolbar controls with grouped buttons
+- Card headers with small metadata rows
+- Monospace editors/results areas
+- Badges for status/health
+- Bootstrapped modals for confirm/load/validation dialogs
+3) Interaction style:
+- Button IDs and JS event binding pattern similar to apex_playground.js
+- Non-blocking alerts for warnings
+- Explicit hard-failure UI states for blocking validation
+4) Theme:
+- Support dark/light editor toggle behavior where editors are present.
+
+TECHNICAL IMPLEMENTATION RULES
+1) Keep JS modular and readable:
+- Organize by screen handlers and shared services:
+  - state store
+  - navigation service
+  - validation service
+  - reference resolver service
+  - yaml preview renderer
+2) Keep DOM IDs deterministic:
+- Prefix with apex-config- to avoid collisions with existing playground IDs.
+3) Primary naming in code must be semantic:
+- Good: PROCESS_DATASET_CONTRACT, VALIDATION_PREVIEW_GATE
+- Avoid as primary IDs: SCREEN_3A, S03A, 3A
+4) Editor use:
+- Use CodeMirror 5 for YAML and advanced expression fields.
+5) Modal reuse:
+- Reuse existing example modal patterns if applicable; avoid duplicate modal logic.
+6) Do not duplicate giant inline CSS/JS in template:
+- Keep css in dedicated stylesheet
+- Keep behavior in dedicated js file
+
+FUNCTIONAL REQUIREMENTS BY AREA
+1) Reference resolution:
+- Implement resolver status states:
+  - RESOLVED
+  - MISSING
+  - AMBIGUOUS
+  - TYPE-MISMATCH
+- Surface these statuses inline on selectors and summary panels.
+2) Process dataset lifecycle:
+- Implement Screen 3/3A/3B as first-class runtime contract management screens, not notes.
+- Include:
+  - field/type/nullability contract
+  - runtime policies (missing path/coercion/null handling)
+  - fixture payload test bench
+  - staged snapshot simulation display
+3) Rule/enrichment composition behavior:
+- Ensure local vs external references are represented clearly for rules, groups, chains, enrichments.
+4) Validation gates:
+- Local validation on each screen
+- Full integrity check at VALIDATION_PREVIEW_GATE (trace: Screen 6)
+- Composition checks at COMPOSITION_REVIEW_SUBMIT (trace: Screen 7)
+
+YAML/ACTION MAPPING
+1) Preserve and implement UI-to-YAML mapping sections defined in mockups doc:
+- YAML_ACTION_MAPPING_RULES (trace: Screen 13)
+- YAML_ACTION_MAPPING_ENRICHMENTS (trace: Screen 14)
+- PROCESS_DATASET_CONTRACT (trace: Screen 3A)
+- PROCESS_DATASET_POLICIES (trace: Screen 3B)
+2) Show generated YAML previews (read-only until approval step).
+
+API CONTRACT ALIGNMENT
+Where mockups define API contract sections (especially for process-dataset screens), honor those endpoint shapes in client-side calls or mocked adapters.
+If backend endpoint is not yet implemented, provide a thin client adapter with mock response mode, gate it behind an explicit dev-only flag, and mark TODO clearly.
+
+ACCESSIBILITY AND USABILITY
+1) Keep ARIA labels and role attributes for tabs/modals/progress bars.
+2) Preserve keyboard usability for tab switches and modal actions.
+3) Keep text contrast and button states consistent with bootstrap standards.
+
+RESPONSIVENESS
+1) Must work on desktop and tablet.
+2) Mobile fallback should stack panels and maintain action visibility.
+3) Avoid hardcoded dimensions that break small viewports.
+
+OUT OF SCOPE
+1) Do not migrate to visual editor architecture.
+2) Do not rewrite unrelated playground pages.
+3) Do not couple this experience to /playground navigation or /playground page lifecycle.
+
+ACCEPTANCE CHECKLIST
+1) Fresh config home route (/apex_config/home) works and loads.
+2) Authoring route (/apex_config/authoring) works and loads from home actions.
+3) All required screens are represented and navigable.
+4) Primary IDs in implementation are semantic/human-readable; numeric labels are trace-only.
+5) Wizard and standalone flows behave per spec.
+6) Process dataset screens 3/3A/3B are fully implemented.
+7) Reference statuses are visible and actionable.
+8) VALIDATION_PREVIEW_GATE (trace: Screen 6) is functional.
+9) No new frontend framework introduced.
+10) Existing /playground pages remain unchanged.
+
+IMPLEMENTATION ORDER (RECOMMENDED)
+1) Scaffold route + template shell + shared layout
+2) Implement state manager + navigation graph
+3) Implement wizard screens (CONFIG_HOME through COMPOSITION_REVIEW_SUBMIT)
+4) Implement standalone screens (RULE_ASSET_CATALOG through YAML_EXPORT_AND_APPLY)
+5) Wire validation/resolver services + YAML preview
+6) Polish responsive behavior + accessibility
+7) Run manual smoke checks across nav/actions/modals
+
+OUTPUT EXPECTATION FROM AGENT
+Return:
+1) List of files created/edited
+2) Summary of implemented screens and any partials
+3) Known gaps/TODOs
+4) Suggested next incremental improvements
+
+STRICT MODE ADDENDUM (MANDATORY)
+
+The following rules are mandatory for the new apex_config implementation:
+
+1) No inline CSS in new files
+- Do not add <style> blocks in apex_config_screen_mockups.html.
+- Do not add style="..." attributes for presentation in new markup.
+- All new styling must be in apex_config_screen_mockups.css.
+
+2) No inline event handlers in new files
+- Do not use onclick, oninput, onchange, onkeyup, or similar inline attributes in new markup.
+- Bind events exclusively in apex_config_screen_mockups.js using addEventListener.
+
+3) Separation of concerns
+- Template contains structure and semantic attributes only.
+- CSS contains visual concerns only.
+- JS contains behavior and state transitions only.
+
+4) Deterministic selector contract
+- Every interactive element must have a stable id or data-action attribute.
+- Use data-action and data-screen attributes for delegated event handling where practical.
+
+5) Quality gates before completion
+- Count check in new template must report:
+  - onclick=0
+  - oninput=0
+  - style=0 (no presentational inline styles allowed)
+- Validate that screen navigation graph works for all required flows.
+- Validate that VALIDATION_PREVIEW_GATE (trace: Screen 6) displays consolidated validation and reference integrity results.
+
+6) Compatibility guardrails
+- Keep compatibility with existing /playground CSS utility assumptions and Bootstrap behavior.
+- Do not alter existing apex_playground.html behavior while introducing /apex_config routes.
+
+7) Delivery proof
+- In final implementation report, include:
+  - New file list
+  - Event-binding strategy summary
+  - Confirmation of zero inline handlers/styles in new apex_config template
+  - Any explicit exceptions and why

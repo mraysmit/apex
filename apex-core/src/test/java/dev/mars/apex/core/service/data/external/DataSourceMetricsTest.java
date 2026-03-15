@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0.0
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
-class DataSourceMetricsTest {
+public class DataSourceMetricsTest {
 
     private DataSourceMetrics metrics;
 
@@ -518,6 +518,104 @@ class DataSourceMetricsTest {
         assertEquals(0, metrics.getCacheHits());
         assertEquals(0, metrics.getBytesRead());
         assertNotNull(metrics.getLastResetTime());
+    }
+
+    @RepeatedTest(3)
+    @DisplayName("Should preserve min and max under concurrent updates")
+    void testPreserveMinAndMaxUnderConcurrentUpdates() throws InterruptedException {
+        final int threadCount = 20;
+        final int operationsPerThread = 50;
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch completionLatch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            final int threadId = i;
+            Thread thread = new Thread(() -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < operationsPerThread; j++) {
+                        long responseTime = 1L + threadId + (j * 20L);
+                        metrics.recordSuccessfulRequest(responseTime);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    completionLatch.countDown();
+                }
+            });
+            thread.start();
+        }
+
+        startLatch.countDown();
+        assertTrue(completionLatch.await(15, TimeUnit.SECONDS));
+
+        assertEquals(threadCount * operationsPerThread, metrics.getTotalRequests());
+        assertEquals(1L, metrics.getMinResponseTime());
+        assertEquals(1000L, metrics.getMaxResponseTime());
+        assertTrue(metrics.getAverageResponseTime() > 0.0);
+    }
+
+    @RepeatedTest(3)
+    @DisplayName("Should remain usable during concurrent reset and updates")
+    void testRemainUsableDuringConcurrentResetAndUpdates() throws InterruptedException {
+        final int updaterThreads = 8;
+        final int updatesPerThread = 200;
+        final ExecutorService executor = Executors.newFixedThreadPool(updaterThreads + 1);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final ConcurrentLinkedQueue<Throwable> failures = new ConcurrentLinkedQueue<>();
+
+        try {
+            for (int i = 0; i < updaterThreads; i++) {
+                final int threadId = i;
+                executor.submit(() -> {
+                    try {
+                        startLatch.await();
+                        for (int j = 0; j < updatesPerThread; j++) {
+                            metrics.recordSuccessfulRequest(threadId + j + 1L);
+                            metrics.recordCacheHit();
+                            metrics.recordConnectionAttempt();
+                            metrics.recordSuccessfulConnection();
+                        }
+                    } catch (Throwable throwable) {
+                        failures.add(throwable);
+                    }
+                });
+            }
+
+            executor.submit(() -> {
+                try {
+                    startLatch.await();
+                    for (int i = 0; i < 100; i++) {
+                        metrics.reset();
+                    }
+                } catch (Throwable throwable) {
+                    failures.add(throwable);
+                }
+            });
+
+            startLatch.countDown();
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(20, TimeUnit.SECONDS));
+            assertTrue(failures.isEmpty(), () -> "Unexpected failures: " + failures);
+
+            assertTrue(metrics.getTotalRequests() >= 0);
+            assertTrue(metrics.getSuccessfulRequests() >= 0);
+            assertTrue(metrics.getFailedRequests() >= 0);
+            assertTrue(metrics.getCacheHits() >= 0);
+            assertTrue(metrics.getConnectionAttempts() >= 0);
+            assertNotNull(metrics.getLastResetTime());
+
+            metrics.reset();
+            metrics.recordFailedRequest(42L);
+
+            assertEquals(1, metrics.getTotalRequests());
+            assertEquals(0, metrics.getSuccessfulRequests());
+            assertEquals(1, metrics.getFailedRequests());
+            assertEquals(42L, metrics.getMinResponseTime());
+            assertEquals(42L, metrics.getMaxResponseTime());
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     // ========================================

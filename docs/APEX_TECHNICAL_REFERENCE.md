@@ -2704,8 +2704,7 @@ flowchart TD
     B --> B1[RuleBuilder]
     B --> B2[RulesEngineConfiguration]
     B --> B3[RuleSet API]
-    B --> B4[SimpleRulesEngine]
-    B --> B5[RuleGroupBuilder]
+    B --> B4[RuleGroupBuilder]
 
     C --> C1[Basic YAML Rules]
     C --> C2[Rule Groups YAML]
@@ -2721,7 +2720,6 @@ flowchart TD
     B2 --> E
     B3 --> E
     B4 --> E
-    B5 --> E
 
     C1 --> F[YAML Processor]
     C2 --> F
@@ -3488,92 +3486,90 @@ private boolean evaluateSequential(StandardEvaluationContext context) {
 
 ```java
 /**
- * Parallel evaluation using thread pool
- * Note: Disables short-circuiting to ensure all rules complete
+ * Parallel evaluation using isolated worker contexts.
+ * Each rule evaluates against its own StandardEvaluationContext so
+ * sibling workers do not mutate a shared context concurrently.
  */
-private boolean evaluateParallel(StandardEvaluationContext context) {
-    List<Integer> sequenceNumbers = new ArrayList<>(rulesBySequence.keySet());
-    sequenceNumbers.sort(Integer::compareTo);
+private List<RuleResult> evaluateParallel(RuleGroup group, StandardEvaluationContext context) {
+    List<Callable<RuleResult>> tasks = new ArrayList<>();
+    List<Rule> activeRules = new ArrayList<>();
 
-    // Create evaluation tasks
-    List<Callable<Boolean>> tasks = new ArrayList<>();
-    List<String> ruleNames = new ArrayList<>();
+    for (Rule rule : group.getRules()) {
+        if (rule == null || !EnabledFilter.isEnabled(rule)) {
+            continue;
+        }
 
-    for (Integer seq : sequenceNumbers) {
-        Rule rule = rulesBySequence.get(seq);
-        if (rule == null) continue;
-
-        ruleNames.add(rule.getName());
-        tasks.add(() -> {
-            try {
-                Expression exp = parser.parseExpression(rule.getCondition());
-                Boolean ruleResult = exp.getValue(context, Boolean.class);
-
-                if (ruleResult == null) ruleResult = false;
-
-                if (debugMode) {
-                    System.out.println("DEBUG: Rule '" + rule.getName() +
-                                     "' in group '" + name + "' (parallel) evaluated to: " + ruleResult);
-                }
-
-                return ruleResult;
-            } catch (Exception e) {
-                System.err.println("Error evaluating rule '" + rule.getName() +
-                                 "' in group '" + name + "' (parallel): " + e.getMessage());
-                return false;
-            }
-        });
+        activeRules.add(rule);
+        tasks.add(() -> unifiedRuleEvaluator.evaluateRule(rule, createIsolatedContext(context)));
     }
 
-    if (tasks.isEmpty()) return false;
+    if (tasks.isEmpty()) {
+        return List.of();
+    }
 
-    // Execute in parallel
     ExecutorService executor = Executors.newFixedThreadPool(
         Math.min(tasks.size(), Runtime.getRuntime().availableProcessors())
     );
 
     try {
-        List<Future<Boolean>> futures = executor.invokeAll(tasks);
-
-        // Collect and combine results
-        boolean finalResult = isAndOperator;
-        int passedCount = 0, failedCount = 0;
+        List<Future<RuleResult>> futures = executor.invokeAll(tasks);
+        List<RuleResult> results = new ArrayList<>();
 
         for (int i = 0; i < futures.size(); i++) {
             try {
-                Boolean result = futures.get(i).get();
-                if (result) passedCount++; else failedCount++;
-
-                if (isAndOperator) {
-                    finalResult = finalResult && result;
-                } else {
-                    finalResult = finalResult || result;
-                }
+                RuleResult ruleResult = futures.get(i).get();
+                Rule rule = activeRules.get(i);
+                propagateResultField(rule, ruleResult, context);
+                results.add(ruleResult);
             } catch (Exception e) {
-                System.err.println("Error getting result for rule '" + ruleNames.get(i) +
-                                 "' in group '" + name + "': " + e.getMessage());
-                failedCount++;
-                if (isAndOperator) finalResult = false;
+                Rule rule = activeRules.get(i);
+                results.add(RuleResult.error(rule.getName(),
+                        "Error getting result: " + e.getMessage(), SeverityConstants.ERROR));
             }
         }
 
-        if (debugMode) {
-            System.out.println("DEBUG: Group '" + name + "' parallel evaluation complete. " +
-                             "Total: " + futures.size() + ", Passed: " + passedCount +
-                             ", Failed: " + failedCount + ", Final result: " + finalResult);
-        }
-
-        return finalResult;
+        return results;
 
     } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
-        System.err.println("Parallel evaluation interrupted for group '" + name + "': " + e.getMessage());
-        return false;
+        return List.of();
     } finally {
         executor.shutdown();
     }
 }
+
+private StandardEvaluationContext createIsolatedContext(StandardEvaluationContext originalContext) {
+    Object rootObject = originalContext.getRootObject().getValue();
+    StandardEvaluationContext isolatedContext = new StandardEvaluationContext(rootObject);
+    isolatedContext.addPropertyAccessor(new MapPropertyAccessor());
+
+    if (rootObject instanceof Map<?, ?> rootMap) {
+        for (Map.Entry<?, ?> entry : rootMap.entrySet()) {
+            if (entry.getKey() instanceof String key) {
+                isolatedContext.setVariable(key, entry.getValue());
+            }
+        }
+    }
+
+    return isolatedContext;
+}
+
+private void propagateResultField(Rule rule, RuleResult ruleResult, StandardEvaluationContext targetContext) {
+    if (rule.getResultField() == null || rule.getResultField().trim().isEmpty()) {
+        return;
+    }
+
+    targetContext.setVariable(rule.getResultField(), ruleResult.isTriggered());
+}
 ```
+
+Current semantics:
+
+- Parallel worker threads do not share one mutable `StandardEvaluationContext` instance.
+- Each worker gets a fresh context rebuilt from the original root object and map variables.
+- Rule-local mutations stay inside the worker context during evaluation.
+- Only explicit `result-field` outcomes are merged back into the caller context after each worker completes.
+- Group-level AND/OR aggregation is computed from collected `RuleResult` objects after the parallel phase finishes.
 
 #### Configuration Properties
 

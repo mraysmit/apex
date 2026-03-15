@@ -1,0 +1,26 @@
+metadata:
+  id: "beta-rules"
+  name: "Beta Rules"
+  version: "1.0.0"
+  description: "Rules for the BETA scenario marker"
+  type: "rule-config"
+  created-by: "APEX Test Suite"
+
+rules:
+  - id: "always-match"
+    name: "Always Match"
+    condition: "true"
+    message: "Stage executed"
+    severity: "INFO"
+
+enrichments:
+  - id: "scenario-marker"
+    name: "Scenario Marker"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "'BETA'"
+      result-field: "scenarioMarker"
+    field-mappings:
+      - source-field: "scenarioMarker"
+        target-field: "scenarioMarker"

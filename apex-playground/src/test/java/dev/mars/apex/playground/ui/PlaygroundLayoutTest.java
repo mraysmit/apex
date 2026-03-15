@@ -120,27 +120,25 @@ class PlaygroundLayoutTest {
     void shouldHaveCorrectGridCoordinates() {
         driver.get(baseUrl + "/playground");
 
-        java.util.List<WebElement> panels = driver.findElements(By.className("playground-panel"));
-        assertEquals(4, panels.size(), "Should have 4 panels");
+        java.util.List<WebElement> columns = driver.findElements(By.className("playground-column"));
+        assertEquals(2, columns.size(), "Should have exactly 2 playground columns");
 
-        // Panel 1: Top Left
-        WebElement p1 = panels.get(0);
-        // Panel 2: Top Right
-        WebElement p2 = panels.get(1);
+        java.util.List<WebElement> leftPanels = columns.get(0).findElements(By.className("playground-panel"));
+        java.util.List<WebElement> rightPanels = columns.get(1).findElements(By.className("playground-panel"));
 
-        // In a 2-column grid, panel 2 should be to the right of panel 1
-        assertTrue(p2.getLocation().getX() > p1.getLocation().getX(),
-            "Panel 2 should be to the right of Panel 1");
+        assertEquals(2, leftPanels.size(), "Left column should have 2 panels");
+        assertEquals(2, rightPanels.size(), "Right column should have 2 panels");
 
-        // Panel 1 and 2 should be on the same row (similar Y)
-        assertTrue(Math.abs(p1.getLocation().getY() - p2.getLocation().getY()) < 50,
-            "Panel 1 and 2 should be on the same row");
+        WebElement topLeft = leftPanels.get(0);
+        WebElement bottomLeft = leftPanels.get(1);
+        WebElement topRight = rightPanels.get(0);
 
-        // Panel 3: Bottom Left
-        WebElement p3 = panels.get(2);
-        // Panel 3 should be below panel 1
-        assertTrue(p3.getLocation().getY() > p1.getLocation().getY(),
-            "Panel 3 should be below Panel 1");
+        assertTrue(topRight.getLocation().getX() > topLeft.getLocation().getX(),
+            "Top-right panel should be to the right of top-left panel");
+        assertTrue(Math.abs(topLeft.getLocation().getY() - topRight.getLocation().getY()) < 50,
+            "Top-left and top-right panels should be on the same row");
+        assertTrue(bottomLeft.getLocation().getY() > topLeft.getLocation().getY(),
+            "Bottom-left panel should be below top-left panel");
     }
 
     @Test
