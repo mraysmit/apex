@@ -9,7 +9,7 @@ metadata:
 runtime-scripts:
   enabled: true
   locations:
-    - "${scriptDir}"
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
   engine: "groovy"
   polling-interval-ms: 0
   execution-timeout-ms: 5000

@@ -25,8 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,12 +55,6 @@ public class RuntimeScriptDemoTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(RuntimeScriptDemoTest.class);
 
-    private String resolveScriptDir() {
-        Path scriptDir = Paths.get("src/test/java/dev/mars/apex/demo/scripts/groovy").toAbsolutePath().normalize();
-        assertTrue(scriptDir.toFile().exists(), "Groovy script directory must exist");
-        return scriptDir.toString().replace("\\", "/");
-    }
-
     @Test
     @Order(1)
     @DisplayName("HIGH risk: large notional trade triggers high risk classification")
@@ -71,13 +63,9 @@ public class RuntimeScriptDemoTest extends DemoTestBase {
         logger.info("TEST: High risk classification via Groovy script");
         logger.info("=".repeat(80));
 
-        // Set script directory as system property for YAML ${scriptDir} placeholder
-        String scriptDir = resolveScriptDir();
-        System.setProperty("scriptDir", scriptDir);
-
+        RulesEngine engine = RulesEngine.fromFile(
+            "src/test/java/dev/mars/apex/demo/scripts/RuntimeScriptDemoTest.yaml");
         try {
-            RulesEngine engine = RulesEngine.fromFile(
-                    "src/test/java/dev/mars/apex/demo/scripts/RuntimeScriptDemoTest.yaml");
 
             Map<String, Object> tradeData = new HashMap<>();
             tradeData.put("notional", 5000000);
@@ -88,15 +76,12 @@ public class RuntimeScriptDemoTest extends DemoTestBase {
             assertNotNull(result, "Result should not be null");
 
             Map<String, Object> enriched = result.getEnrichedData();
-            assertEquals("HIGH", enriched.get("riskLevel"),
-                    "Notional > 1M should classify as HIGH risk");
+            assertEquals("HIGH", enriched.get("riskLevel"), "Notional > 1M should classify as HIGH risk");
 
             logger.info("Risk level: {}", enriched.get("riskLevel"));
             logger.info("Result: {}", result);
-
-            engine.shutdown();
         } finally {
-            System.clearProperty("scriptDir");
+            engine.shutdown();
         }
     }
 
@@ -108,12 +93,9 @@ public class RuntimeScriptDemoTest extends DemoTestBase {
         logger.info("TEST: Medium risk classification via Groovy script");
         logger.info("=".repeat(80));
 
-        String scriptDir = resolveScriptDir();
-        System.setProperty("scriptDir", scriptDir);
-
+        RulesEngine engine = RulesEngine.fromFile(
+            "src/test/java/dev/mars/apex/demo/scripts/RuntimeScriptDemoTest.yaml");
         try {
-            RulesEngine engine = RulesEngine.fromFile(
-                    "src/test/java/dev/mars/apex/demo/scripts/RuntimeScriptDemoTest.yaml");
 
             Map<String, Object> tradeData = new HashMap<>();
             tradeData.put("notional", 500000);
@@ -127,10 +109,8 @@ public class RuntimeScriptDemoTest extends DemoTestBase {
                     "Notional between 100K and 1M should classify as MEDIUM risk");
 
             logger.info("Risk level: {}", enriched.get("riskLevel"));
-
-            engine.shutdown();
         } finally {
-            System.clearProperty("scriptDir");
+            engine.shutdown();
         }
     }
 
@@ -142,12 +122,9 @@ public class RuntimeScriptDemoTest extends DemoTestBase {
         logger.info("TEST: Low risk classification via Groovy script");
         logger.info("=".repeat(80));
 
-        String scriptDir = resolveScriptDir();
-        System.setProperty("scriptDir", scriptDir);
-
+        RulesEngine engine = RulesEngine.fromFile(
+            "src/test/java/dev/mars/apex/demo/scripts/RuntimeScriptDemoTest.yaml");
         try {
-            RulesEngine engine = RulesEngine.fromFile(
-                    "src/test/java/dev/mars/apex/demo/scripts/RuntimeScriptDemoTest.yaml");
 
             Map<String, Object> tradeData = new HashMap<>();
             tradeData.put("notional", 50000);
@@ -161,10 +138,8 @@ public class RuntimeScriptDemoTest extends DemoTestBase {
                     "Notional < 100K with good rating should classify as LOW risk");
 
             logger.info("Risk level: {}", enriched.get("riskLevel"));
-
-            engine.shutdown();
         } finally {
-            System.clearProperty("scriptDir");
+            engine.shutdown();
         }
     }
 
@@ -176,12 +151,9 @@ public class RuntimeScriptDemoTest extends DemoTestBase {
         logger.info("TEST: High risk from poor counterparty rating");
         logger.info("=".repeat(80));
 
-        String scriptDir = resolveScriptDir();
-        System.setProperty("scriptDir", scriptDir);
-
+        RulesEngine engine = RulesEngine.fromFile(
+            "src/test/java/dev/mars/apex/demo/scripts/RuntimeScriptDemoTest.yaml");
         try {
-            RulesEngine engine = RulesEngine.fromFile(
-                    "src/test/java/dev/mars/apex/demo/scripts/RuntimeScriptDemoTest.yaml");
 
             Map<String, Object> tradeData = new HashMap<>();
             tradeData.put("notional", 10000);  // Small notional
@@ -195,10 +167,8 @@ public class RuntimeScriptDemoTest extends DemoTestBase {
                     "CCC counterparty rating should classify as HIGH risk regardless of notional");
 
             logger.info("Risk level: {}", enriched.get("riskLevel"));
-
-            engine.shutdown();
         } finally {
-            System.clearProperty("scriptDir");
+            engine.shutdown();
         }
     }
 }

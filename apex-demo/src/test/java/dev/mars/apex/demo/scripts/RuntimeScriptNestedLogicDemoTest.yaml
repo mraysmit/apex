@@ -1,0 +1,52 @@
+metadata:
+  name: "Runtime Script Nested Logic Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates nested if/else Groovy logic invoked from SpEL via #script(...)
+    for trade and payment routing decisions.
+
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  engine: "groovy"
+  polling-interval-ms: 0
+  execution-timeout-ms: 5000
+
+enrichments:
+  - id: "compute-route-decision"
+    name: "Compute Route Decision"
+    type: "calculation-enrichment"
+    description: "Compute route decision from nested script logic"
+    calculation-config:
+      expression: "#script('RuntimeScriptNestedLogicDemoTest-trade-routing', #root)"
+      result-field: "routeDecision"
+    field-mappings:
+      - source-field: "routeDecision"
+        target-field: "routeDecision"
+
+rules:
+  - id: "manual-review"
+    name: "Manual Review Route"
+    condition: "routeDecision == 'MANUAL_REVIEW'"
+    message: "Route is MANUAL_REVIEW"
+    severity: "WARNING"
+
+  - id: "stp-deriv"
+    name: "Derivative STP Route"
+    condition: "routeDecision == 'STP_DERIV'"
+    message: "Route is STP_DERIV"
+    severity: "INFO"
+
+  - id: "compliance-review"
+    name: "Compliance Review Route"
+    condition: "routeDecision == 'COMPLIANCE_REVIEW'"
+    message: "Route is COMPLIANCE_REVIEW"
+    severity: "WARNING"
+
+  - id: "stp-payments"
+    name: "Payments STP Route"
+    condition: "routeDecision == 'STP_PAYMENTS'"
+    message: "Route is STP_PAYMENTS"
+    severity: "INFO"
