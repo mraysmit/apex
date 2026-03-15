@@ -1,0 +1,18 @@
+metadata:
+  id: "concurrency-registry"
+  name: "Concurrency Registry"
+  version: "1.0.0"
+  description: "Scenario registry for concurrent public-interface tests"
+  type: "scenario-registry"
+  created-by: "APEX Test Suite"
+
+scenarios:
+  - scenario-id: "alpha-scenario"
+    config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioConcurrentAccessTest-alpha-scenario.yaml"
+    enabled: true
+    description: "Alpha scenario for concurrent engine tests"
+
+  - scenario-id: "beta-scenario"
+    config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioConcurrentAccessTest-beta-scenario.yaml"
+    enabled: true
+    description: "Beta scenario for concurrent engine tests"

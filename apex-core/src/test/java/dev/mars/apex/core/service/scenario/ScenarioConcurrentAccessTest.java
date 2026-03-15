@@ -1,7 +1,5 @@
 package dev.mars.apex.core.service.scenario;
 
-import dev.mars.apex.engine.execution.ScenarioStageExecutor;
-
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -18,14 +16,10 @@ import dev.mars.apex.engine.execution.ScenarioStageExecutor;
  * limitations under the License.
  */
 
-import org.junit.jupiter.api.BeforeEach;
-
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import dev.mars.apex.engine.core.RulesEngine;
 import org.junit.jupiter.api.DisplayName;
-
-import org.junit.jupiter.api.Nested;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -36,291 +30,156 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Priority 3: Concurrent Access Testing
- * 
- * Validates that scenario execution is thread-safe and handles concurrent access
- * without race conditions or data corruption.
- * 
+ * Concurrency tests for scenario execution via RulesEngine public interfaces.
+ *
+ * <p>Tests verify that a shared {@link RulesEngine} instance correctly isolates
+ * concurrent scenario evaluations — both single-scenario stage-output isolation
+ * and multi-scenario registry-based routing isolation.</p>
+ *
+ * <p>All tests operate on checked-in YAML fixtures and use only public
+ * {@code RulesEngine} factory methods and evaluation APIs.</p>
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 3.0
+ * @see RulesEngine#fromFile(String)
+ * @see RulesEngine#fromScenarioRegistry(String)
+ * @see RulesEngine#evaluateScenario(Map)
+ * @see RulesEngine#evaluateScenario(String, Map)
  */
-@DisplayName("Priority 3: Concurrent Access Testing")
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
+@DisplayName("Scenario concurrent access via RulesEngine public interfaces")
 class ScenarioConcurrentAccessTest {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ScenarioConcurrentAccessTest.class);
-    
-    private ScenarioConfiguration scenario;
-    private ScenarioStageExecutor executor;
-    
-    @BeforeEach
-    void setUp() {
-        logger.info("TEST: Setting up concurrent access test");
-        scenario = new ScenarioConfiguration();
-        scenario.setScenarioId("concurrent-test-scenario");
-        executor = new ScenarioStageExecutor();
+
+    private static final String TEST_YAML_DIR = "src/test/java/dev/mars/apex/core/service/scenario/";
+    private static final String SCENARIO_FILE = TEST_YAML_DIR + "ScenarioConcurrentAccessTest-scenario.yaml";
+    private static final String REGISTRY_FILE = TEST_YAML_DIR + "ScenarioConcurrentAccessTest-registry.yaml";
+
+    @Test
+    @DisplayName("Shared RulesEngine evaluateScenario isolates concurrent stage outputs")
+    void sharedEngineEvaluateScenarioIsolatesStageOutputs() throws Exception {
+        RulesEngine engine = RulesEngine.fromFile(SCENARIO_FILE);
+
+        Map<String, Object> sharedTrade = new HashMap<>();
+        sharedTrade.put("status", "NEW");
+        Map<String, Object> sharedAudit = new HashMap<>();
+        sharedAudit.put("values", new HashMap<String, Object>());
+        sharedTrade.put("audit", sharedAudit);
+
+        int threadCount = 8;
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        List<Future<ScenarioExecutionResult>> futures = new ArrayList<>();
+
+        try {
+            for (int index = 0; index < threadCount; index++) {
+                final int threadId = index;
+                futures.add(executor.submit(() -> {
+                    startLatch.await();
+
+                    Map<String, Object> inputData = new HashMap<>();
+                    inputData.put("threadId", threadId);
+                    inputData.put("iteration", threadId * 10);
+                    inputData.put("trade", sharedTrade);
+
+                    return engine.evaluateScenario(inputData);
+                }));
+            }
+
+            startLatch.countDown();
+
+            for (int index = 0; index < threadCount; index++) {
+                ScenarioExecutionResult result = futures.get(index).get(30, TimeUnit.SECONDS);
+                assertTrue(result.isSuccessful(), "Concurrent scenario execution should succeed");
+
+                StageExecutionResult stageResult = result.getStageResult("audit-stage");
+                assertNotNull(stageResult, "Stage result should be present for each evaluation");
+
+                @SuppressWarnings("unchecked")
+                Map<String, Object> trade = (Map<String, Object>) stageResult.getStageOutputs().get("trade");
+                @SuppressWarnings("unchecked")
+                Map<String, Object> audit = (Map<String, Object>) trade.get("audit");
+                @SuppressWarnings("unchecked")
+                Map<String, Object> values = (Map<String, Object>) audit.get("values");
+
+                assertEquals(index, values.get("threadId"), "Thread id should remain isolated per evaluation");
+                assertEquals(index * 10, values.get("iteration"), "Iteration should remain isolated per evaluation");
+            }
+
+            assertEquals("NEW", sharedTrade.get("status"), "Shared nested input should retain original state");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> sharedValues = (Map<String, Object>) ((Map<String, Object>) sharedTrade.get("audit")).get("values");
+            assertTrue(sharedValues.isEmpty(), "Shared nested input must not be mutated by concurrent evaluation");
+        } finally {
+            executor.shutdownNow();
+            engine.shutdown();
+        }
     }
-    
-    // ========================================
-    // Concurrent Access Tests
-    // ========================================
-    
-    @Nested
-    @DisplayName("Concurrent Access Tests")
-    class ConcurrentAccessTests {
-        
-        @Test
-        @DisplayName("Should handle multiple threads executing scenarios concurrently")
-        void testMultiThreadedScenarioExecution() {
-            logger.info("TEST: Multi-threaded scenario execution");
 
-            // Given: Scenario with classification rule (using direct field access)
-            scenario.setClassificationRuleCondition("#type == 'OTC'");
-            
-            // Use standalone YAML without external database dependencies
-            ScenarioStage stage = new ScenarioStage("test-stage", "scenario/concurrent-test-simple.yaml", 1);
-            scenario.addProcessingStage(stage);
-            
-            // When: Execute from multiple threads
-            int threadCount = 10;
-            int executionsPerThread = 10;
-            ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-            List<Future<Integer>> futures = new ArrayList<>();
-            
-            try {
-                for (int t = 0; t < threadCount; t++) {
-                    final int threadId = t;
-                    futures.add(executorService.submit(() -> {
-                        int successCount = 0;
-                        for (int i = 0; i < executionsPerThread; i++) {
-                            Map<String, Object> testData = new HashMap<>();
-                            testData.put("type", "OTC");
-                            testData.put("threadId", threadId);
-                            testData.put("iteration", i);
-                            
-                            ScenarioExecutionResult result = executor.executeStages(scenario, testData);
-                            if (result.isSuccessful() || result.requiresReview()) {
-                                successCount++;
-                            }
+    @Test
+    @DisplayName("Shared RulesEngine evaluateScenario by id isolates concurrent scenario selection")
+    void sharedEngineEvaluateScenarioByIdIsolatesConcurrentRequests() throws Exception {
+        RulesEngine engine = RulesEngine.fromScenarioRegistry(REGISTRY_FILE);
+
+        int threadCount = 10;
+        int iterationsPerThread = 6;
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        List<Future<?>> futures = new ArrayList<>();
+        List<Throwable> errors = new CopyOnWriteArrayList<>();
+
+        try {
+            for (int index = 0; index < threadCount; index++) {
+                final boolean useAlpha = index % 2 == 0;
+                futures.add(executor.submit(() -> {
+                    try {
+                        startLatch.await();
+                        for (int iteration = 0; iteration < iterationsPerThread; iteration++) {
+                            String scenarioId = useAlpha ? "alpha-scenario" : "beta-scenario";
+                            String expectedMarker = useAlpha ? "ALPHA" : "BETA";
+
+                            Map<String, Object> inputData = new HashMap<>();
+                            inputData.put("requestId", scenarioId + "-" + iteration);
+
+                            ScenarioExecutionResult result = engine.evaluateScenario(scenarioId, inputData);
+                            assertTrue(result.isSuccessful(), "Scenario execution should succeed for " + scenarioId);
+
+                            StageExecutionResult stageResult = result.getStageResult(useAlpha ? "alpha-stage" : "beta-stage");
+                            assertNotNull(stageResult, "Expected stage result should exist for " + scenarioId);
+                            assertEquals(expectedMarker, stageResult.getStageOutputs().get("scenarioMarker"),
+                                    "Concurrent scenario execution must not bleed outputs across scenario ids");
                         }
-                        return successCount;
-                    }));
-                }
-                
-                // Then: Verify all executions completed successfully
-                int totalSuccess = 0;
-                for (Future<Integer> future : futures) {
-                    totalSuccess += future.get();
-                }
-                
-                int expectedTotal = threadCount * executionsPerThread;
-                assertEquals(expectedTotal, totalSuccess,
-                    "All concurrent executions should succeed");
-                
-                logger.info("[OK] Multi-threaded execution passed: {} threads, {} executions each, {} total success",
-                    threadCount, executionsPerThread, totalSuccess);
-                
-            } catch (Exception e) {
-                fail("Concurrent execution failed: " + e.getMessage());
-            } finally {
-                executorService.shutdown();
-            }
-        }
-        
-        @Test
-        @DisplayName("Should prevent race conditions in stage execution")
-        void testRaceConditionPrevention() {
-            logger.info("TEST: Race condition prevention");
-
-            // Given: Scenario with multiple stages (using direct field access)
-            scenario.setClassificationRuleCondition("#type == 'OTC'");
-            
-            ScenarioStage stage1 = new ScenarioStage("stage-1", "config/stage1.yaml", 1);
-            ScenarioStage stage2 = new ScenarioStage("stage-2", "config/stage2.yaml", 2);
-            stage2.addDependency("stage-1");
-            scenario.addProcessingStage(stage1);
-            scenario.addProcessingStage(stage2);
-            
-            // When: Execute concurrently with dependency chain
-            int concurrentExecutions = 20;
-            ExecutorService executorService = Executors.newFixedThreadPool(5);
-            List<Future<ScenarioExecutionResult>> futures = new ArrayList<>();
-            
-            try {
-                for (int i = 0; i < concurrentExecutions; i++) {
-                    final int index = i;
-                    futures.add(executorService.submit(() -> {
-                        Map<String, Object> testData = new HashMap<>();
-                        testData.put("type", "OTC");
-                        testData.put("id", index);
-                        return executor.executeStages(scenario, testData);
-                    }));
-                }
-                
-                // Then: Verify all results are valid and consistent
-                for (Future<ScenarioExecutionResult> future : futures) {
-                    ScenarioExecutionResult result = future.get();
-                    assertNotNull(result, "Result should not be null");
-                    assertNotNull(result.getStageResults(), "Stage results should not be null");
-                    
-                    // Verify dependency chain is respected
-                    if (result.getStageResults().size() >= 2) {
-                        // If stage-2 exists, stage-1 should also exist
-                        boolean hasStage1 = result.getStageResults().stream()
-                            .anyMatch(sr -> sr.getStageName().equals("stage-1"));
-                        assertTrue(hasStage1, "Stage-1 should exist when stage-2 is present");
+                    } catch (Throwable throwable) {
+                        errors.add(throwable);
                     }
-                }
-                
-                logger.info("[OK] Race condition prevention verified: {} concurrent executions",
-                    concurrentExecutions);
-                
-            } catch (Exception e) {
-                fail("Race condition test failed: " + e.getMessage());
-            } finally {
-                executorService.shutdown();
+                }));
             }
-        }
-        
-        @Test
-        @DisplayName("Should ensure results are isolated between threads")
-        void testResultIsolationBetweenThreads() {
-            logger.info("TEST: Result isolation between threads");
 
-            // Given: Scenario with classification rule (using direct field access)
-            scenario.setClassificationRuleCondition("#type == 'OTC'");
-            
-            // Use standalone YAML without external database dependencies
-            ScenarioStage stage = new ScenarioStage("test-stage", "scenario/concurrent-test-simple.yaml", 1);
-            scenario.addProcessingStage(stage);
-            
-            // When: Execute from multiple threads with different data
-            int threadCount = 5;
-            ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-            List<Future<Map<String, Object>>> futures = new ArrayList<>();
-            
-            try {
-                for (int t = 0; t < threadCount; t++) {
-                    final int threadId = t;
-                    futures.add(executorService.submit(() -> {
-                        Map<String, Object> testData = new HashMap<>();
-                        testData.put("type", "OTC");
-                        testData.put("threadId", threadId);
-                        testData.put("value", threadId * 100);
-                        
-                        ScenarioExecutionResult result = executor.executeStages(scenario, testData);
-                        
-                        // Return data to verify isolation
-                        Map<String, Object> resultData = new HashMap<>();
-                        resultData.put("threadId", threadId);
-                        resultData.put("success", result.isSuccessful() || result.requiresReview());
-                        resultData.put("executionTime", result.getTotalExecutionTimeMs());
-                        return resultData;
-                    }));
-                }
-                
-                // Then: Verify each thread got its own isolated result
-                for (int i = 0; i < threadCount; i++) {
-                    Map<String, Object> resultData = futures.get(i).get();
-                    assertEquals(i, resultData.get("threadId"),
-                        "Thread " + i + " should have its own isolated result");
-                    assertTrue((Boolean) resultData.get("success"),
-                        "Thread " + i + " execution should succeed");
-                }
-                
-                logger.info("[OK] Result isolation verified: {} threads with isolated results",
-                    threadCount);
-                
-            } catch (Exception e) {
-                fail("Result isolation test failed: " + e.getMessage());
-            } finally {
-                executorService.shutdown();
+            startLatch.countDown();
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(30, TimeUnit.SECONDS), "Concurrent scenario-id tasks should finish");
+
+            for (Future<?> future : futures) {
+                future.get(5, TimeUnit.SECONDS);
             }
-        }
-        
-        @Test
-        @DisplayName("Should handle concurrent cache access safely")
-        void testConcurrentCacheAccess() {
-            logger.info("TEST: Concurrent cache access");
 
-            // Given: Scenario with classification rule (using direct field access)
-            scenario.setClassificationRuleCondition("#type == 'OTC'");
-            
-            // Use standalone YAML without external database dependencies
-            ScenarioStage stage = new ScenarioStage("test-stage", "scenario/concurrent-test-simple.yaml", 1);
-            scenario.addProcessingStage(stage);
-            
-            // When: Execute same scenario from multiple threads (cache hit scenario)
-            int threadCount = 10;
-            int executionsPerThread = 5;
-            ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-            AtomicInteger successCount = new AtomicInteger(0);
-            
-            try {
-                List<Future<?>> futures = new ArrayList<>();
-                List<String> errors = new java.util.concurrent.CopyOnWriteArrayList<>();
-
-                for (int t = 0; t < threadCount; t++) {
-                    futures.add(executorService.submit(() -> {
-                        for (int i = 0; i < executionsPerThread; i++) {
-                            try {
-                                Map<String, Object> testData = new HashMap<>();
-                                testData.put("type", "OTC");
-
-                                ScenarioExecutionResult result = executor.executeStages(scenario, testData);
-                                if (result.isSuccessful() || result.requiresReview()) {
-                                    successCount.incrementAndGet();
-                                } else {
-                                    String errorMsg = String.format("Execution failed: %s | Successful=%s, RequiresReview=%s, Terminated=%s, Warnings=%s, StageResults=%d",
-                                        result.getExecutionSummary(),
-                                        result.isSuccessful(),
-                                        result.requiresReview(),
-                                        result.isTerminated(),
-                                        result.getWarnings(),
-                                        result.getStageResults().size());
-                                    errors.add(errorMsg);
-                                    logger.error("Concurrent execution failed: {}", errorMsg);
-                                }
-                            } catch (Exception e) {
-                                errors.add("Exception during execution: " + e.getMessage());
-                                logger.error("Exception in concurrent execution", e);
-                            }
-                        }
-                    }));
-                }
-
-                // Wait for all to complete
-                for (Future<?> future : futures) {
-                    future.get();
-                }
-
-                // Log any errors
-                if (!errors.isEmpty()) {
-                    logger.error("Errors during concurrent execution: {}", errors);
-                }
-                
-                // Then: Verify all cache accesses succeeded
-                int expectedTotal = threadCount * executionsPerThread;
-                assertEquals(expectedTotal, successCount.get(),
-                    "All concurrent cache accesses should succeed");
-                
-                logger.info("[OK] Concurrent cache access verified: {} threads, {} executions each",
-                    threadCount, executionsPerThread);
-                
-            } catch (Exception e) {
-                fail("Concurrent cache access test failed: " + e.getMessage());
-            } finally {
-                executorService.shutdown();
-            }
+            assertTrue(errors.isEmpty(), () -> "Concurrent scenario-id evaluation failed: " + errors);
+        } finally {
+            executor.shutdownNow();
+            engine.shutdown();
         }
     }
 }
-
