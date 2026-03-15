@@ -17,11 +17,11 @@
 package dev.mars.apex.engine.pipeline;
 
 import dev.mars.apex.core.config.pipeline.PipelineStep;
+import dev.mars.apex.engine.core.SpelParserHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.ArrayList;
@@ -45,10 +45,10 @@ public class TransformationStepExecutor {
     private final ExpressionParser expressionParser;
 
     /**
-     * Constructs a TransformationStepExecutor with a new SpEL expression parser.
+     * Constructs a TransformationStepExecutor with the shared SpEL expression parser.
      */
     public TransformationStepExecutor() {
-        this.expressionParser = new SpelExpressionParser();
+        this.expressionParser = SpelParserHolder.INSTANCE;
     }
 
     /**
