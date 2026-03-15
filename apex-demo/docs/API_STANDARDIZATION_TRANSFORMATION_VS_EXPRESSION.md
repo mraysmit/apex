@@ -56,12 +56,12 @@ private String expression; // SpEL expression for the transformation
 Both properties are processed **identically**:
 
 ```java
-// Line 780-781 in YamlEnrichmentProcessor.java
+// Line 780-781 in EnrichmentProcessor.java
 if (mapping.getTransformation() != null && !mapping.getTransformation().trim().isEmpty()) {
     valueToSet = applyTransformation(mapping.getTransformation(), valueToSet, targetObject);
 }
 
-// Line 404 in YamlEnrichmentProcessor.java
+// Line 404 in EnrichmentProcessor.java
 Expression calcExpr = getOrCompileExpression(calcConfig.getExpression());
 Object result = calcExpr.getValue(context);
 ```
@@ -135,7 +135,7 @@ public static class FieldMapping {
 }
 ```
 
-**Changes to YamlEnrichmentProcessor:**
+**Changes to EnrichmentProcessor:**
 
 ```java
 // Update all usages to call getExpression() instead of getTransformation()
@@ -209,7 +209,7 @@ enrichments:
    - Add `expression` property to `FieldMapping` class
    - Update getter logic for backward compatibility
 
-2. **apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java**
+2. **apex-core/src/main/java/dev/mars/apex/core/service/enrichment/EnrichmentProcessor.java**
    - Update all calls from `getTransformation()` to `getExpression()`
    - Add deprecation logging
 

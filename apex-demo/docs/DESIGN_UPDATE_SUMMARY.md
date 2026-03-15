@@ -32,7 +32,7 @@
 #### Updated: Implementation Plan
 - **NEW Phase 1:** API Standardization (1 day)
   - Add `expression` property to YamlEnrichment.FieldMapping
-  - Update YamlEnrichmentProcessor to use new getter logic
+  - Update EnrichmentProcessor to use new getter logic
   - Add deprecation warnings
   - Update documentation
 
@@ -160,7 +160,7 @@
 
 **apex-core module:**
 1. `YamlEnrichment.java` - Add `expression` property to FieldMapping
-2. `YamlEnrichmentProcessor.java` - Update to use `getExpression()`
+2. `EnrichmentProcessor.java` - Update to use `getExpression()`
 3. `YamlTransformation.java` - Add simple transformation fields
 
 **apex-demo module:**

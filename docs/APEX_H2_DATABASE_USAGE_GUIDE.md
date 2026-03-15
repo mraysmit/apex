@@ -297,7 +297,7 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.service.enrichment.EnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -390,7 +390,7 @@ public class SharedDataSourceDemo {
         // Initialize APEX services - they can now connect to the shared database
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        YamlEnrichmentProcessor enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
+        EnrichmentProcessor enrichmentProcessor = new EnrichmentProcessor(serviceRegistry, expressionEvaluator);
         enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
 
         logger.info("APEX services initialized");

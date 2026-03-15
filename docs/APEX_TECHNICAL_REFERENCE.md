@@ -2704,8 +2704,7 @@ flowchart TD
     B --> B1[RuleBuilder]
     B --> B2[RulesEngineConfiguration]
     B --> B3[RuleSet API]
-    B --> B4[SimpleRulesEngine]
-    B --> B5[RuleGroupBuilder]
+    B --> B4[RuleGroupBuilder]
 
     C --> C1[Basic YAML Rules]
     C --> C2[Rule Groups YAML]
@@ -2721,7 +2720,6 @@ flowchart TD
     B2 --> E
     B3 --> E
     B4 --> E
-    B5 --> E
 
     C1 --> F[YAML Processor]
     C2 --> F

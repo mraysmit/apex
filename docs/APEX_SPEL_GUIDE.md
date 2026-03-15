@@ -642,14 +642,14 @@ condition: "#trade.legs.?[currency != null].size() == #trade.legs.size()"
 
 **Version 2.3 Changes:**
 - Added SpEL support to `source-field` and `target-field` in field mappings
-- Modified `getFieldValue()` and `setFieldValue()` methods in `YamlEnrichmentProcessor.java`
+- Modified `getFieldValue()` and `setFieldValue()` methods in `EnrichmentProcessor.java`
 - 100% backward compatible with existing configurations
 - Comprehensive test coverage (15 tests, all passing)
 - No new dependencies required
 - Graceful error handling (logs warnings, doesn't throw exceptions)
 
 **Files Modified:**
-- `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java`
+- `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/EnrichmentProcessor.java`
 
 **Test Files Created:**
 - `apex-core/src/test/java/dev/mars/apex/core/service/enrichment/SpelFieldMappingTest.java`

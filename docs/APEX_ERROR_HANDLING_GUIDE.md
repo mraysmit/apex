@@ -199,7 +199,7 @@ rules:
 #### Scenario 2: Enrichment Exception
 
 ```java
-// From YamlEnrichmentProcessor
+// From EnrichmentProcessor
 try {
     return processEnrichmentWithResult(enrichment, targetObject);
 } catch (Exception e) {
@@ -685,7 +685,7 @@ While the error recovery system primarily focuses on **rule evaluation** errors,
 Enrichments use **fail-fast** error handling by default. When an enrichment fails, processing stops immediately:
 
 ```java
-// From YamlEnrichmentProcessor.java (lines 1752-1760)
+// From EnrichmentProcessor
 tasks.add(() -> {
     try {
         return processEnrichmentWithResult(enrichment, targetObject);
@@ -1267,7 +1267,7 @@ ExecutorService executor = Executors.newFixedThreadPool(
 #### Example: Parallel Execution with Error Handling
 
 ```java
-// From YamlEnrichmentProcessor.java (lines 1752-1760)
+// From EnrichmentProcessor
 if (group.isParallelExecution() && ordered.size() > 1) {
     // Parallel branch: disable short-circuit and execute all enrichments
     shortCircuit = false;

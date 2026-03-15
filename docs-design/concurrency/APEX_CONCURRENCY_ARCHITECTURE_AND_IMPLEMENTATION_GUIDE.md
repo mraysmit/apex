@@ -1,7 +1,7 @@
 # APEX Concurrency Architecture and Implementation Guide
 
 **Status:** Active design document  
-**Last Updated:** 2026-03-14  
+**Last Updated:** 2026-03-15  
 **Scope:** `apex-core` concurrency behavior, external data-source hardening, high-volume processing guidance, and pipeline parallel-execution design.
 
 ---
@@ -77,7 +77,7 @@ The following table summarizes the current concurrency posture.
 | `DataSourceFactory` | Shared singleton with targeted concurrency coverage | Safe for current supported use; keep lifecycle races under observation |
 | `ApexCacheManager` and external cache managers | Shared, concurrency-sensitive infrastructure | Keep invariant-based tests authoritative |
 | `StandardEvaluationContext` | Per-evaluation object, not safe to share | Create fresh contexts per evaluation |
-| `LookupServiceRegistry` | Backed by plain `HashMap`, not a general-purpose shared concurrent registry | Treat as request- or engine-scoped unless redesigned |
+| `LookupServiceRegistry` | Backed by `ConcurrentHashMap`; `getRegisteredServices()` returns an unmodifiable defensive copy | Safe for concurrent reads; mutation is confined to registration-time setup |
 | `PipelineExecutor` | Context maps are concurrent, but execution is still sequential in parallel mode | Do not assume true parallel step safety |
 
 ### 3.3 Important caveats
@@ -133,8 +133,14 @@ The following tests are part of the current concurrency baseline:
 - `ConcurrencyIntegrationTest`
 - `MixedExternalDataSourceConcurrencyIntegrationTest`
 - `RulesEngineConcurrentEvaluationTest`
+- `RulesEngineLifecycleCoordinationTest`
 - `ScenarioConcurrentAccessTest`
 - `StageExecutionConcurrencyTest`
+- `ResultThreadSafetyTest`
+- `ConfigurationContextTest`
+- `DataSourceRegistryGetOrCreateTest`
+- `EnrichmentProcessorConcurrentConfigurationTest`
+- `PipelineExecutionManagerStateIsolationTest`
 - `ExternalDataSourceReferenceLookupIntegrationTest`
 
 ### 4.4 Validation commands
@@ -149,10 +155,10 @@ mvn -pl apex-core "-Dtest=ConcurrencyIntegrationTest,MixedExternalDataSourceConc
 mvn -pl apex-core -Dtest=ExternalDataSourceReferenceLookupIntegrationTest test
 ```
 
-Representative broad slice used during the hardening stream:
+Representative broad slice covering all baseline tests:
 
 ```bash
-mvn -pl apex-core "-Dtest=DataSourceFactoryConcurrencyTest,InMemoryCacheManagerConcurrencyTest,DatabaseDataSourceConcurrencyTest,FileSystemDataSourceConcurrencyTest,RestApiDataSourceConcurrencyTest,ConcurrencyIntegrationTest,MixedExternalDataSourceConcurrencyIntegrationTest,DataSourceRegistryGetOrCreateTest,ConfigurationContextTest,ResultThreadSafetyTest,ScenarioConcurrentAccessTest,RulesEngineConcurrentEvaluationTest" test
+mvn -pl apex-core "-Dtest=DataSourceFactoryConcurrencyTest,InMemoryCacheManagerConcurrencyTest,DatabaseDataSourceConcurrencyTest,FileSystemDataSourceConcurrencyTest,RestApiDataSourceConcurrencyTest,ConcurrencyIntegrationTest,MixedExternalDataSourceConcurrencyIntegrationTest,RulesEngineConcurrentEvaluationTest,RulesEngineLifecycleCoordinationTest,ScenarioConcurrentAccessTest,StageExecutionConcurrencyTest,ResultThreadSafetyTest,ConfigurationContextTest,DataSourceRegistryGetOrCreateTest,EnrichmentProcessorConcurrentConfigurationTest,PipelineExecutionManagerStateIsolationTest,ExternalDataSourceReferenceLookupIntegrationTest" test
 ```
 
 ### 4.5 Confirmed implementation note for H2 integration tests
@@ -365,10 +371,11 @@ A concurrency change is done when:
 
 ### 8.1 Short-term backlog
 
-- Execute the prioritized remediation work captured in `APEX_CONCURRENCY_REMEDIATION_PLAN.md`.
 - Continue monitoring `DataSourceFactory` lifecycle behavior around clear and shutdown paths.
 - Keep validating `DataSourceMetrics` reset semantics if reset becomes more important in runtime code.
 - Preserve the current external-data-source concurrency suite as a guarded baseline.
+
+Note: The prioritized remediation work in `APEX_CONCURRENCY_REMEDIATION_PLAN.md` (WP-1 through WP-7) is now complete. See that document for execution status and benchmark results.
 
 ### 8.2 Medium-term backlog
 
