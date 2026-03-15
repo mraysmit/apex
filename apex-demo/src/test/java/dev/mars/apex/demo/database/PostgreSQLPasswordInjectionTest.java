@@ -208,8 +208,11 @@ class PostgreSQLPasswordInjectionTest {
         assertNotNull(connectionResult, "Connection test result should not be null");
 
         // Verify that the injected values are present in the result
-        assertTrue(connectionResult.contains("jdbc:postgresql://localhost"),
-                   "Should contain resolved PostgreSQL JDBC URL");
+        // Use the same JDBC URL that was injected via system properties to avoid
+        // localhost vs 127.0.0.1 mismatch between getHost() and getJdbcUrl()
+        String injectedUrl = postgres.getJdbcUrl();
+        assertTrue(connectionResult.contains(injectedUrl),
+                   "Should contain resolved PostgreSQL JDBC URL (expected: " + injectedUrl + ", actual: " + connectionResult + ");");
         assertTrue(connectionResult.contains("testuser"),
                    "Should contain resolved username");
         
