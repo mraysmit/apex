@@ -10,7 +10,6 @@
 - [Overview](#overview)
 - [SpEL in APEX Features](#spel-in-apex-features)
 - [Field Mapping SpEL Support](#field-mapping-spel-support)
-- [Runtime Script Bridge (`#script`)](#runtime-script-bridge-script)
 - [Basic Syntax](#basic-syntax)
 - [Safe Navigation](#safe-navigation)
 - [Array and Collection Access](#array-and-collection-access)
@@ -19,6 +18,10 @@
 - [Best Practices](#best-practices)
 - [Common Pitfalls](#common-pitfalls)
 - [Real-World Examples](#real-world-examples)
+- [Advanced Patterns](#advanced-patterns)
+- [Runtime Script Bridge (`#script`)](#runtime-script-bridge-script)
+- [Groovy Runtime Compatibility](#groovy-runtime-compatibility)
+- [Summary](#summary)
 
 ---
 
@@ -142,200 +145,6 @@ field-mappings:
   - source-field: "#currency"
     target-field: "buy_currency"
 ```
-
----
-
-## Runtime Script Bridge (`#script`)
-
-APEX can call externally defined Groovy scripts from any SpEL expression using the `#script(...)` bridge function. This allows complex business logic to live in `.groovy` files while being invoked seamlessly from YAML-driven rules and enrichments.
-
-### Quick Start
-
-1. **Define a Groovy script** (`risk-score.groovy`):
-```groovy
-def run(Map data) {
-    def notional = data.notionalAmount as BigDecimal
-    if (notional > 10_000_000) return 'HIGH'
-    if (notional > 1_000_000)  return 'MEDIUM'
-    return 'LOW'
-}
-```
-
-2. **Register it in YAML**:
-```yaml
-runtime-scripts:
-  enabled: true
-  locations:
-    - "classpath:dev/mars/apex/demo/scripts/groovy"
-  allowlist:
-    - "risk-score"
-  execution-timeout-ms: 5000
-  polling-interval-ms: 5000
-  fail-mode: "use-last-good"
-```
-
-3. **Call from any SpEL expression**:
-```yaml
-enrichments:
-  - id: "compute-risk"
-    type: "calculation-enrichment"
-    calculation-config:
-      expression: "#script('risk-score', #root)"
-      result-field: "riskLevel"
-```
-
-  ### Script Authoring Contract
-
-  - Define `run(...)` as a top-level Groovy script function when using the default call form.
-  - Additional callable functions should also be top-level script functions.
-  - Method dispatch is arity-sensitive: if argument count does not match, invocation fails with an explicit error.
-  - Script IDs are case-sensitive and must match the `.groovy` filename (without extension).
-
-### `#script` Function Signature
-
-```
-#script(scriptId, arg1, arg2, ...)
-```
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `scriptId` | String | Name of the script (filename without `.groovy` extension) |
-| `arg1..N` | Any | Positional arguments passed to the target script function |
-
-**Return value:** Whatever the Groovy `run()` method returns (String, Number, Map, etc.)
-
-### Runtime Scripts Configuration Reference
-
-The `runtime-scripts` block controls discovery, execution, and reload behavior.
-
-```yaml
-runtime-scripts:
-  enabled: true
-  locations:
-    - "classpath:dev/mars/apex/demo/scripts/groovy"
-    - "./config/scripts"
-  engine: "groovy"
-  polling-interval-ms: 5000
-  execution-timeout-ms: 200
-  allowlist:
-    - "risk-score"
-    - "eligibility-check"
-  fail-mode: "use-last-good"
-```
-
-| Property | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `enabled` | No | `true` | Turns runtime scripting on or off for this configuration. |
-| `locations` | Yes (when enabled) | — | List of script directories to scan. Supports filesystem paths and `classpath:` references. |
-| `engine` | No | `groovy` | Script engine identifier. Current implementation uses Groovy. |
-| `polling-interval-ms` | No | `5000` | Reload polling interval in milliseconds. Use `0` to disable polling. |
-| `execution-timeout-ms` | No | `200` | Maximum runtime for each script invocation before timeout failure. |
-| `allowlist` | No | empty (allow all discovered scripts) | List of script IDs allowed to execute. Script ID = filename without `.groovy`. |
-| `fail-mode` | No | `use-last-good` | Compile failure behavior during reload: keep previous compiled version (`use-last-good`) or fail immediately (`fail-fast`). |
-
-### Location Rules and Path Handling
-
-Use `locations` entries that match your deployment model:
-
-1. Classpath locations (recommended for packaged apps and tests):
-```yaml
-locations:
-  - "classpath:dev/mars/apex/demo/scripts/groovy"
-```
-
-2. Filesystem locations (recommended for externalized runtime updates):
-```yaml
-locations:
-  - "./config/scripts"
-  - "/etc/apex/scripts"
-```
-
-Resolution notes:
-- `classpath:` locations are accepted when they resolve to a filesystem-backed resource path.
-- Invalid or missing locations are logged and skipped.
-- If no valid location is resolved while scripting is enabled, runtime script initialization fails.
-
-### Recommended Configuration Profiles
-
-1. Development profile (fast feedback):
-```yaml
-runtime-scripts:
-  enabled: true
-  locations:
-    - "classpath:dev/mars/apex/demo/scripts/groovy"
-  polling-interval-ms: 2000
-  execution-timeout-ms: 1000
-  fail-mode: "use-last-good"
-```
-
-2. Production profile (controlled and stable):
-```yaml
-runtime-scripts:
-  enabled: true
-  locations:
-    - "/opt/apex/scripts"
-  allowlist:
-    - "risk-score"
-    - "margin-calc"
-    - "eligibility-check"
-  polling-interval-ms: 10000
-  execution-timeout-ms: 300
-  fail-mode: "use-last-good"
-```
-
-### How It Works
-
-1. RulesEngine reads `runtime-scripts` from YAML and initializes a `RuntimeScriptRegistry`
-2. Groovy files are compiled once by `GroovyScriptCompiler` and cached
-3. The `#script` SpEL function is registered via `ScriptBridge` (ThreadLocal, thread-safe)
-4. Each `#script(...)` call invokes `ScriptExecutor` which runs the script's `run()` method with a configurable timeout
-5. If the script exceeds the timeout, a `ScriptTimeoutException` is thrown
-
-### Calling Specific Methods
-
-By default, `#script` invokes `run(...)`. To call a different function, pass the function name as the second argument:
-
-```yaml
-expression: "#script('risk-score', #root)"                          # calls run(data)
-expression: "#script('risk-score', 'riskAdjustedNotional', #notional, #riskLevel)"
-```
-
-### Security: Script Allowlist
-
-Only scripts explicitly listed in the `allowlist` can be executed. Any attempt to invoke an unlisted script throws `ScriptNotAllowedException`:
-
-```yaml
-runtime-scripts:
-  allowlist:
-    - "risk-score"
-    - "margin-calc"
-  # Only risk-score.groovy and margin-calc.groovy can be called
-```
-
-### Error Recovery
-
-Script errors integrate with APEX's standard error recovery system. If error recovery is enabled, a failing script expression is handled the same way as any failing SpEL expression:
-
-```yaml
-error-recovery:
-  enabled: true
-  default-strategy: "CONTINUE_WITH_DEFAULT"
-```
-
-With this configuration, a script that throws an exception will log the error and continue processing with a default value rather than failing the entire evaluation.
-
-### Hot Reload
-
-When `polling-interval-ms` is set to a positive value, APEX polls for script file changes and recompiles automatically:
-
-```yaml
-runtime-scripts:
-  polling-interval-ms: 5000   # Check every 5 seconds (0 = disabled)
-```
-
-If a recompiled script fails to compile, the previous good version is retained (use-last-good policy).
-
----
 
 ## Basic Syntax
 
@@ -793,6 +602,191 @@ condition: "#trade?.legs?.size() > 1"
 condition: "#trade.legs.?[notional > 0].size() == #trade.legs.size()"
 condition: "#trade.legs.?[currency != null].size() == #trade.legs.size()"
 ```
+
+---
+
+## Runtime Script Bridge (`#script`)
+
+APEX can call externally defined Groovy scripts from any SpEL expression using the `#script(...)` bridge function. This allows complex business logic to live in `.groovy` files while being invoked from YAML-driven rules and enrichments.
+
+### Quick Start
+
+1. **Define a Groovy script** (`risk-score.groovy`):
+```groovy
+def run(Map data) {
+    def notional = data.notionalAmount as BigDecimal
+    if (notional > 10_000_000) return 'HIGH'
+    if (notional > 1_000_000)  return 'MEDIUM'
+    return 'LOW'
+}
+```
+
+2. **Register it in YAML**:
+```yaml
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  allowlist:
+    - "risk-score"
+  execution-timeout-ms: 5000
+  polling-interval-ms: 5000
+  fail-mode: "use-last-good"
+```
+
+3. **Call from any SpEL expression**:
+```yaml
+enrichments:
+  - id: "compute-risk"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "#script('risk-score', #root)"
+      result-field: "riskLevel"
+```
+
+### Detailed Walkthrough: `RuntimeScriptDemoTest.yaml`
+
+This is a full working example from the demo suite:
+
+```yaml
+metadata:
+  name: "Runtime Script Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates runtime Groovy script invocation from SpEL expressions
+    using the #script(...) bridge function.
+
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  engine: "groovy"
+  polling-interval-ms: 0
+  execution-timeout-ms: 5000
+
+enrichments:
+  - id: "compute-risk-level"
+    name: "Compute Risk Level"
+    type: "calculation-enrichment"
+    description: "Compute risk level from notional and counterparty rating"
+    calculation-config:
+      expression: "#script('RuntimeScriptDemoTest-risk-score', #root)"
+      result-field: "riskLevel"
+    field-mappings:
+      - source-field: "riskLevel"
+        target-field: "riskLevel"
+
+rules:
+  - id: "high-risk-alert"
+    name: "High Risk Alert"
+    condition: "riskLevel == 'HIGH'"
+    message: "Trade classified as HIGH risk — requires senior approval"
+    severity: "WARNING"
+
+  - id: "medium-risk-alert"
+    name: "Medium Risk Alert"
+    condition: "riskLevel == 'MEDIUM'"
+    message: "Trade classified as MEDIUM risk — standard review required"
+    severity: "INFO"
+
+  - id: "low-risk-pass"
+    name: "Low Risk Pass"
+    condition: "riskLevel == 'LOW'"
+    message: "Trade classified as LOW risk — auto-approved"
+    severity: "INFO"
+```
+
+Line-by-line explanation:
+
+- `metadata` block: Human-readable identity for the YAML configuration.
+- `type: "rule-config"`: Tells APEX this file is a standard rule/enrichment configuration.
+- `description`: Long-form documentation shown in logs and tooling.
+- `runtime-scripts.enabled: true`: Turns on runtime script bridge support for this config.
+- `runtime-scripts.locations`: Directory scan roots for `.groovy` files. Here it uses classpath resources.
+- `engine: "groovy"`: Declares Groovy runtime scripting (current implementation target).
+- `polling-interval-ms: 0`: Disables hot-reload polling. Scripts are loaded/compiled on demand and cached.
+- `execution-timeout-ms: 5000`: Hard timeout per script invocation (5 seconds).
+- `enrichments[0].type: "calculation-enrichment"`: This enrichment computes a value via expression.
+- `calculation-config.expression`: Calls script ID `RuntimeScriptDemoTest-risk-score` and passes `#root` payload.
+- `#root`: Entire current evaluation object (input map) is passed into script `run(Map payload)`.
+- `result-field: "riskLevel"`: Stores script return value in the intermediate field `riskLevel`.
+- `field-mappings`: Copies the computed intermediate value to output field(s). In this demo it maps 1:1.
+- `rules` block: Consumes `riskLevel` and emits severity-tagged messages.
+
+### Script Authoring Contract
+
+- Define `run(...)` as a top-level Groovy script function when using the default call form.
+- Additional callable functions should also be top-level script functions.
+- Method dispatch is arity-sensitive: if argument count does not match, invocation fails with an explicit error.
+- Script IDs are case-sensitive and must match the `.groovy` filename (without extension).
+
+### `#script` Function Signature
+
+```
+#script(scriptId, arg1, arg2, ...)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `scriptId` | String | Name of the script (filename without `.groovy` extension) |
+| `arg1..N` | Any | Positional arguments passed to the target script function |
+
+### Runtime Scripts Configuration Reference
+
+```yaml
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+    - "./config/scripts"
+  engine: "groovy"
+  polling-interval-ms: 5000
+  execution-timeout-ms: 200
+  allowlist:
+    - "risk-score"
+    - "eligibility-check"
+  fail-mode: "use-last-good"
+```
+
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `enabled` | No | `true` | Turns runtime scripting on or off for this configuration. |
+| `locations` | Yes (when enabled) | — | List of script directories to scan. Supports filesystem paths and `classpath:` references. |
+| `engine` | No | `groovy` | Script engine identifier. Current implementation uses Groovy. |
+| `polling-interval-ms` | No | `5000` | Reload polling interval in milliseconds. Use `0` to disable polling. |
+| `execution-timeout-ms` | No | `200` | Maximum runtime for each script invocation before timeout failure. |
+| `allowlist` | No | empty (allow all discovered scripts) | List of script IDs allowed to execute. |
+| `fail-mode` | No | `use-last-good` | Compile failure behavior during reload (`use-last-good` or `fail-fast`). |
+
+### How It Works
+
+1. RulesEngine reads `runtime-scripts` from YAML and initializes `RuntimeScriptRegistry`.
+2. Groovy files are compiled by `GroovyScriptCompiler` and cached.
+3. `#script` is registered via `ScriptBridge`.
+4. `ScriptExecutor` invokes script functions with timeout enforcement.
+5. If execution exceeds timeout, `ScriptExecutionTimeoutException` is thrown.
+
+### Calling Specific Methods
+
+```yaml
+expression: "#script('risk-score', #root)"                          # calls run(data)
+expression: "#script('risk-score', 'riskAdjustedNotional', #notional, #riskLevel)"
+```
+
+### Error Recovery and Hot Reload
+
+- Script failures are handled through standard APEX error/recovery behavior.
+- `polling-interval-ms > 0` enables hot reload checks.
+- With `fail-mode: use-last-good`, prior compiled versions remain active if a reload compile fails.
+
+## Groovy Runtime Compatibility
+
+Runtime scripts compile against the JVM actually running APEX, so Groovy compatibility must match runtime JDK class-file levels.
+
+- Use a Groovy version that supports your runtime JDK bytecode level.
+- Keep CI and developer JDK versions aligned to avoid script compile inconsistencies.
+- When upgrading JDK, upgrade Groovy in the same change set and rerun script-focused tests.
 
 ---
 
