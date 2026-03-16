@@ -1,7 +1,7 @@
 # APEX SpEL (Spring Expression Language) Guide
 
-**Version:** 2.4
-**Last Updated:** 2025-07-25
+**Version:** 2.5
+**Last Updated:** 2026-03-16
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 ---
 
