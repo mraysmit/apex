@@ -1,54 +1,21 @@
-![APEX System Logo](docs/APEX%20System%20logo.png)
+<img src="docs/APEX%20System%20logo.png" alt="APEX System Logo" width="220" />
 
-# APEX 
+
+
+
 
 [![Java](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.java.net/projects/jdk/21/)
 [![Maven](https://img.shields.io/badge/Maven-3.6+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/Version-2.4-brightgreen.svg)](https://github.com/apex-rules-engine)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Compatible-blue.svg)](https://www.postgresql.org/)
 [![Playground](https://img.shields.io/badge/Playground-Interactive-purple.svg)](http://localhost:8081/playground)
 [![Financial Services](https://img.shields.io/badge/Financial%20Services-Ready-gold.svg)](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)
 [![API Docs](https://img.shields.io/badge/API-Swagger-green.svg)](http://localhost:8080/swagger-ui.html)
 
-**Version:** 2.4
 **Date:** 2025-11-16
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 An expression processor for Java applications with **data validation and enrichment capabilities**, **external data-source reference system**, scenario-based configuration management, and YAML validation.
-
-## Quick Start
-
-### Interactive Playground (Recommended)
-```bash
-cd apex-playground
-mvn spring-boot:run
-# Access at http://localhost:8081/playground
-```
-
-### REST API
-```bash
-cd apex-rest-api
-mvn spring-boot:run
-# Access Swagger UI at http://localhost:8080/swagger-ui.html
-```
-
-### Run Demonstrations
-```bash
-cd apex-demo
-
-# External Data-Source Reference Demos (APEX 2.1)
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.SimplePostgreSQLLookupDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.PostgreSQLLookupDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookup.ExternalDataSourceWorkingDemo"
-
-# Bootstrap demos (complete end-to-end scenarios)
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapBootstrapDemo"
-
-# Lookup pattern examples
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo"
-```
 
 ## Key Features
 
@@ -61,7 +28,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **External Data Integration**: Connect to databases, REST APIs, file systems, and caches
 - **Error Handling**: Severity-based error recovery (CRITICAL, ERROR, WARNING, INFO) with configurable recovery strategies (FAIL_FAST, CONTINUE_WITH_DEFAULT, RETRY_WITH_SAFE_EXPRESSION, SKIP_RULE)
 - **155 YAML Keywords**: Declarative configuration language with ~140 functionally implemented keywords for rules, enrichments, pipelines, and scenarios
-- **Component Architecture (v2.2.0)**: Group multiple YAML files into reusable components with dependency management and circular reference detection
+- **Component Architecture**: Group multiple YAML files into reusable components with dependency management and circular reference detection
 - **Classification-Based Routing**: Automatic scenario selection based on data content using SpEL expressions
 
 ### Interactive Playground - Development Environment
@@ -70,14 +37,14 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Live Preview**: See validation and enrichment results instantly
 - **Cross-Browser Support**: UI testing with full coverage
 
-### APEX 2.1 - External Data-Source Reference System
+### External Data-Source Reference System
 - **Clean Architecture**: Separation of infrastructure and business logic configurations
 - **Configuration Caching**: Automatic caching of external configurations for performance
 - **Reusable Components**: Share data-source configurations across multiple rule sets
 - **Environment-Specific Configuration**: Environment-specific infrastructure with shared business logic
 - **H2 Support**: Custom H2 parameters directly in YAML configuration for performance tuning and debugging
 
-### Scenario-Based Processing (APEX 3.0)
+### Scenario-Based Processing
 - **Unified RulesEngine API**: Single entry point for all APEX processing types
 - **Classification-Based Routing**: Automatic scenario selection using SpEL expressions based on data content
 - **Component Support**: Use reusable components in processing stages for better organization
@@ -100,9 +67,9 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Component Architecture**: Reusable configuration components with nesting depth management (levels 1-2: OK, 3-5: WARNING, 6+: ERROR)
 - **Test Coverage**: Full testing with cross-browser UI support
 
-## RulesEngine API - Universal Entry Point (APEX 3.0)
+## RulesEngine API - Universal Entry Point
 
-APEX 3.0 introduces the **RulesEngine** as the unified entry point for all APEX processing types: rules, enrichments, pipelines, and scenarios.
+APEX introduces the **RulesEngine** as the unified entry point for all APEX processing types: rules, enrichments, pipelines, and scenarios.
 
 ### Usage Patterns
 
@@ -117,6 +84,35 @@ Choose the right pattern for your use case:
 **Bottom Line:** Start with the one-line pattern. Only use the two-line pattern if you need engine reuse. Avoid the advanced pattern unless you have a specific need for config inspection or modification.
 
 ### Quick Start Examples
+
+**Minimal `config.yaml` used by the examples:**
+```yaml
+metadata:
+  id: "quickstart-demo"
+  name: "Quick Start Demo"
+  type: "rule-config"
+
+rules:
+  - id: "amount-positive"
+    condition: "#amount != null && #amount > 0"
+    message: "Amount must be greater than zero"
+    severity: "ERROR"
+
+  - id: "currency-present"
+    condition: "#currency != null && !#currency.trim().isEmpty()"
+    message: "Currency is present"
+    severity: "INFO"
+```
+
+What this YAML does:
+
+- `metadata.type: "rule-config"` tells APEX to load this as a standard rules configuration.
+- `rules` defines the ordered list of rule evaluations.
+- Rule `amount-positive` fails if `amount` is null or less than/equal to zero.
+- Rule `currency-present` checks that `currency` exists and is not blank.
+- `condition` values use SpEL. The `#` prefix means evaluate against input data.
+- `severity` marks business importance (`ERROR` for hard validation, `INFO` for informational checks).
+- `message` is emitted when the rule condition evaluates to true.
 
 **⭐ One-Line Pattern (Simplest):**
 ```java
@@ -198,13 +194,13 @@ RuleResult result = engine.evaluate(data);
 
 **Old API (Deprecated):**
 ```java
-// DataTypeScenarioService - Deprecated in 3.0
+// DataTypeScenarioService - Deprecated
 DataTypeScenarioService scenarioService = new DataTypeScenarioService();
 scenarioService.loadScenarios("config/scenarios-registry.yaml");
 ScenarioExecutionResult result = scenarioService.processMapData(data);
 ```
 
-**New API (Recommended):**
+**Unified API (Recommended):**
 ```java
 // RulesEngine - Unified API
 RulesEngine engine = RulesEngine.fromScenarioRegistry("config/scenarios-registry.yaml");
@@ -213,7 +209,7 @@ ScenarioExecutionResult result = engine.evaluateWithClassification(data);
 
 ## External Data-Source Reference System
 
-APEX 2.1 introduces an **external data-source reference system** that enables clean architecture and flexible configuration management.
+APEX includes an **external data-source reference system** that enables clean architecture and flexible configuration management.
 
 ### Clean Separation of Concerns
 
@@ -222,7 +218,6 @@ APEX 2.1 introduces an **external data-source reference system** that enables cl
 # Everything mixed together - infrastructure + business logic
 metadata:
   name: "Legacy Configuration"
-  version: "1.0.0"
   type: "rule-config"
 
 data-sources:
@@ -252,7 +247,6 @@ enrichments:
 metadata:
   id: "Modern Configuration"
   name: "Modern Configuration"
-  version: "2.1.0"
   description: "Business logic using external data-source references"
   type: "rule-config"
   author: "business.rules.team@company.com"
@@ -282,7 +276,6 @@ enrichments:
 metadata:
   id: "Customer Database Configuration"
   name: "Customer Database Configuration"
-  version: "1.0.0"
   description: "Database connections for customer data"
   type: "external-data-config"
   author: "data.team@company.com"
@@ -410,7 +403,7 @@ if (result.hasErrors()) {
 
 ---
 
-## 🧩 Component Architecture (v2.2.0)
+## 🧩 Component Architecture
 
 Group multiple YAML configuration files into reusable components with dependency management and circular reference detection.
 
@@ -430,7 +423,6 @@ metadata:
   id: "trade-validation-component"
   type: "component"
   name: "Trade Validation Component"
-  version: "1.0.0"
   description: "Reusable trade validation rules"
   business-domain: "Trading"
   owner: "trading.team@company.com"
@@ -489,7 +481,7 @@ System.out.println("Files executed: " + result.getExecutedFiles());
 System.out.println("All validations passed: " + result.isSuccess());
 ```
 
-**See [APEX Component Implementation Status](docs/APEX_COMPONENT_IMPLEMENTATION_STATUS.md) for complete documentation.**
+**See [APEX Components Configuration Guide](docs/APEX_COMPONENTS_CONFIGURATION_GUIDE.md) for complete documentation.**
 
 ---
 
@@ -574,10 +566,10 @@ Master APEX fundamentals:
 
 ### 🎯 Advanced Features Path (2-4 hours)
 Explore advanced capabilities:
-1. **[APEX Scenario User Guide](docs/APEX_SCENARIO_USER_GUIDE.md)** (45 min) - Multi-stage processing
-2. **[APEX Component Implementation Status](docs/APEX_COMPONENT_IMPLEMENTATION_STATUS.md)** (30 min) - Reusable components
+1. **[APEX Scenario Guide](docs/APEX_SCENARIO_GUIDE.md)** (45 min) - Multi-stage processing
+2. **[APEX Components Configuration Guide](docs/APEX_COMPONENTS_CONFIGURATION_GUIDE.md)** (30 min) - Reusable components
 3. **[External Data-Source Reference System](#external-data-source-reference-system)** (45 min) - Clean architecture
-4. **[APEX Data Pipeline Orchestration Guide](docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** (45 min) - ETL workflows
+4. **[APEX Data Pipeline Orchestration Guide](apex-data-sync/docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** (45 min) - ETL workflows
 5. **Classification-Based Routing** (30 min) - Automatic scenario selection
 
 ### 🏭 Production Implementation Path (1-2 days)
@@ -608,13 +600,13 @@ Production-ready deployment:
 - **Data Service Management** - Infrastructure management
 - **YAML Configuration Patterns** - Advanced configuration examples
 
-### Error Handling Demonstrations ⭐ NEW
+### Error Handling Demonstrations
 - **Severity-Based Recovery** - CRITICAL, ERROR, WARNING, INFO handling
 - **Recovery Strategies** - FAIL_FAST, CONTINUE_WITH_DEFAULT, RETRY_WITH_SAFE_EXPRESSION, SKIP_RULE
 - **Rule Group Error Handling** - fail-fast, continue-on-error, skip-on-error patterns
 - **Enrichment Error Handling** - Graceful degradation with default values
 
-### Component Architecture Demonstrations ⭐ NEW
+### Component Architecture Demonstrations
 - **Reusable Components** - Group multiple YAML files into components
 - **Dependency Management** - Circular reference detection
 - **Execution Order Control** - Explicit and document-order execution
@@ -626,14 +618,14 @@ Production-ready deployment:
 - **[APEX Playground](http://localhost:8081/playground)** - Interactive development environment
 - **[APEX Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** - Complete user documentation with examples
 - **[APEX YAML Reference](docs/APEX_YAML_REFERENCE.md)** - 73 keywords and complete syntax reference
-- **[APEX Error Handling Guide](docs/APEX_ERROR_HANDLING_GUIDE.md)** ⭐ NEW - Severity-based error recovery
+- **[APEX Error Handling Guide](docs/APEX_ERROR_HANDLING_GUIDE.md)** - Severity-based error recovery
 
 ### 🎯 Feature Guides
-- **[APEX Scenario User Guide](docs/APEX_SCENARIO_USER_GUIDE.md)** - Multi-stage processing and classification-based routing
-- **[APEX Component Implementation Status](docs/APEX_COMPONENT_IMPLEMENTATION_STATUS.md)** ⭐ NEW - Reusable component architecture
+- **[APEX Scenario Guide](docs/APEX_SCENARIO_GUIDE.md)** - Multi-stage processing and classification-based routing
+- **[APEX Components Configuration Guide](docs/APEX_COMPONENTS_CONFIGURATION_GUIDE.md)** - Reusable component architecture
 - **[APEX Conditional Processing Guide](docs/APEX_CONDITIONAL_PROCESSING_GUIDE.md)** - Advanced conditional logic patterns
-- **[APEX Lookup Configuration Guide](docs/APEX_LOOKUP_CONFIGURATION_GUIDE.md)** - Data enrichment and lookup patterns
-- **[APEX Data Pipeline Orchestration Guide](docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** - ETL workflows
+- **[APEX Lookup Configuration Guide](docs/APEX_LOOKUPS_CONFIGURATION_GUIDE.md)** - Data enrichment and lookup patterns
+- **[APEX Data Pipeline Orchestration Guide](apex-data-sync/docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** - ETL workflows
 - **[APEX Rule Categories Guide](docs/APEX_RULE_CATEGORIES_GUIDE.md)** - Rule organization and classification
 
 ### 🔧 Technical References
@@ -641,15 +633,15 @@ Production-ready deployment:
 - **[APEX SpEL Guide](docs/APEX_SPEL_GUIDE.md)** - Spring Expression Language reference
 - **[APEX H2 Database Usage Guide](docs/APEX_H2_DATABASE_USAGE_GUIDE.md)** - Database integration patterns
 - **[APEX Parameterized Query Guide](docs/APEX_PARAMETERIZED_QUERY_GUIDE.md)** - Dynamic query patterns
-- **[APEX REST API Guide](docs/APEX_REST_API_GUIDE.md)** - Complete HTTP API reference
+- **[APEX REST API Swagger](http://localhost:8080/swagger-ui.html)** - Complete HTTP API reference
 
 ### 🚀 Advanced Topics
 - **[APEX Configuration Manager API Guide](docs/APEX_CONFIGURATION_MANAGER_API_GUIDE.md)** - Configuration management
-- **[APEX YAML Processing Sequence Guide](docs/APEX_YAML_PROCESSING_SEQUENCE_GUIDE.md)** - Document order processing
-- **[Rule Group Inline Reference Guide](docs/RULE_GROUP_INLINE_REFERENCE_GUIDE.md)** - Rule group patterns
-- **[APEX Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Data integration and management
-- **[Financial Services Guide](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)** - Domain-specific patterns
-- **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** - 16+ demonstrations
+- **[APEX Path Processing Quick Guide](docs/APEX_PATH_PROCESSING_QUICK_GUIDE.md)** - Document order processing
+- **[Rule Group Inline Reference Guide](docs/APEX_RULE_GROUP_INLINE_REFERENCE_GUIDE.md)** - Rule group patterns
+- **[APEX Lookups Configuration Guide](docs/APEX_LOOKUPS_CONFIGURATION_GUIDE.md)** - Data integration and management
+- **[Funds Custody Transaction Processing Guide](docs/APEX_FUNDS_CUSTODY_TRANSACTION_PROCESSING_GUIDE.md)** - Domain-specific patterns
+- **[Bootstrap Demo Examples](apex-demo/src/test/resources/examples/)** - Demonstration configurations
 
 ## Use Cases
 
@@ -659,8 +651,8 @@ Production-ready deployment:
 - **OTC Derivatives Validation**: Multi-tier validation framework
 - **Trade Settlement**: Post-trade processing and auto-repair workflows
 - **Risk Assessment**: Credit, market, and operational risk scoring
-- **Error Recovery** ⭐ NEW: Fault-tolerant processing with severity-based recovery strategies
-- **Component Reusability** ⭐ NEW: Share validation and enrichment logic across multiple scenarios
+- **Error Recovery**: Fault-tolerant processing with severity-based recovery strategies
+- **Component Reusability**: Share validation and enrichment logic across multiple scenarios
 
 ### Data Integration
 - **Static Reference Data** (< 100 records): Use YAML Datasets
@@ -675,6 +667,39 @@ Production-ready deployment:
 - Maven 3.6+
 - PostgreSQL (for database demos)
 
+## Quick Start
+
+### Interactive Playground (Recommended)
+```bash
+cd apex-playground
+mvn spring-boot:run
+# Access at http://localhost:8081/playground
+```
+
+### REST API
+```bash
+cd apex-rest-api
+mvn spring-boot:run
+# Access Swagger UI at http://localhost:8080/swagger-ui.html
+```
+
+### Run Demonstrations
+```bash
+cd apex-demo
+
+# External Data-Source Reference Demos
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.SimplePostgreSQLLookupDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.PostgreSQLLookupDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookup.ExternalDataSourceWorkingDemo"
+
+# Bootstrap demos (complete end-to-end scenarios)
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapBootstrapDemo"
+
+# Lookup pattern examples
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo"
+```
+
 ## License
 
 Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
@@ -683,15 +708,16 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for detai
 
 ### External Data-Source Reference System
 1. **[APEX YAML Reference Guide](docs/APEX_YAML_REFERENCE.md)** - Complete external data-source reference syntax
-2. **[APEX Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Section 16: External Data Source Integration
+2. **[APEX Lookups Configuration Guide](docs/APEX_LOOKUPS_CONFIGURATION_GUIDE.md)** - External data source integration patterns
 3. **External Data-Source Reference Demos** - SimplePostgreSQLLookupDemo, PostgreSQLLookupDemo, ExternalDataSourceWorkingDemo
 
 ### General Documentation
 1. Start with the **[APEX Playground](http://localhost:8081/playground)** for hands-on experience
-2. Review the **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** for practical examples
+2. Review the **[Bootstrap Demo Examples](apex-demo/src/test/resources/examples/)** for practical examples
 3. Check the **[Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** for complete documentation
 4. Explore the **16+ demonstrations** in the `apex-demo` module
 
 ---
 
-**Version:** 2.1 | **Author:** Mark Andrew Ray-Smith Cityline Ltd | **Date:** 2025-08-28
+**Author:** Mark Andrew Ray-Smith Cityline Ltd | **Date:** 2025-08-28
+
