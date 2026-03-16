@@ -70,3 +70,7 @@ LOGS/
 .history*
 .idea/statistic.xml
 apex-core/apex-data-sync/reports/
+
+### Reports directories ###
+reports/
+**/reports/
