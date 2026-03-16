@@ -322,6 +322,10 @@ public class EnrichmentProcessor {
                 return targetObject;
             }
 
+            logger.error("Calculation enrichment '{}' failed for expression '{}': {}",
+                    enrichment.getId(), calcConfig.getExpression(), e.getMessage());
+            logger.debug("Stack trace for calculation enrichment failure", e);
+
             throw new EnrichmentException("Failed to process calculation enrichment", e);
         }
     }

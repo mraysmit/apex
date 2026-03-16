@@ -184,6 +184,13 @@ enrichments:
       result-field: "riskLevel"
 ```
 
+  ### Script Authoring Contract
+
+  - Define `run(...)` as a top-level Groovy script function when using the default call form.
+  - Additional callable functions should also be top-level script functions.
+  - Method dispatch is arity-sensitive: if argument count does not match, invocation fails with an explicit error.
+  - Script IDs are case-sensitive and must match the `.groovy` filename (without extension).
+
 ### `#script` Function Signature
 
 ```
@@ -193,7 +200,7 @@ enrichments:
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `scriptId` | String | Name of the script (filename without `.groovy` extension) |
-| `arg1..N` | Any | Arguments passed to the script's `run()` method as `Object[]` |
+| `arg1..N` | Any | Positional arguments passed to the target script function |
 
 **Return value:** Whatever the Groovy `run()` method returns (String, Number, Map, etc.)
 
@@ -286,7 +293,7 @@ runtime-scripts:
 
 ### Calling Specific Methods
 
-By default, `#script` invokes the `run()` method. To call a different method, pass the method name as the second argument:
+By default, `#script` invokes `run(...)`. To call a different function, pass the function name as the second argument:
 
 ```yaml
 expression: "#script('risk-score', #root)"                          # calls run(data)

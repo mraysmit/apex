@@ -116,12 +116,31 @@ public class ScriptExecutor {
                 return m;
             }
         }
-        // If no exact match, look for any method with the right name
+
+        // If method exists but arity differs, fail explicitly instead of invoking an arbitrary overload.
+        StringBuilder availableSignatures = new StringBuilder();
+        int matchCount = 0;
         for (Method m : clazz.getMethods()) {
             if (m.getName().equals(methodName)) {
-                return m;
+                if (matchCount > 0) {
+                    availableSignatures.append(", ");
+                }
+                availableSignatures.append(methodName)
+                        .append("(")
+                        .append(m.getParameterCount())
+                        .append(" args)");
+                matchCount++;
             }
         }
+
+        if (matchCount > 0) {
+            throw new ScriptExecutionException(
+                    "Method '" + methodName + "' on script class " + clazz.getSimpleName()
+                            + " does not accept " + args.length + " argument(s). Available: "
+                            + availableSignatures,
+                    null);
+        }
+
         throw new ScriptExecutionException(
                 "No method '" + methodName + "' found in script class " + clazz.getSimpleName(), null);
     }
