@@ -217,7 +217,7 @@ public class RulesEngine {
                             scriptRegistry, compiler, scriptConfig.getPollingIntervalMs());
                     reloader.start();
                 }
-                logger.info("Runtime script system initialized with {} location(s)", locations.size());
+                logger.info("Runtime script system initialized with {} location(s): {}", locations.size(), locations);
             } catch (Exception e) {
                 logger.error("Failed to initialize runtime script system", e);
                 if (executor != null) {

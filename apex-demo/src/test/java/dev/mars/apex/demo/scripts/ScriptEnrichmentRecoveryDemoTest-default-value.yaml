@@ -1,0 +1,36 @@
+metadata:
+  name: "Script Default Value Recovery Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates default-value recovery: the script throws an exception
+    but the enrichment has a default-value configured, so it recovers
+    gracefully instead of failing.
+
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  engine: "groovy"
+  polling-interval-ms: 0
+  execution-timeout-ms: 5000
+
+enrichments:
+  - id: "recoverable-enrichment"
+    name: "Recoverable Enrichment"
+    type: "calculation-enrichment"
+    description: "Script throws, but default-value provides a fallback"
+    calculation-config:
+      expression: "#script('ScriptEnrichmentRecoveryDemoTest-always-fails', #root)"
+      result-field: "classification"
+      default-value: "UNKNOWN"
+    field-mappings:
+      - source-field: "classification"
+        target-field: "classification"
+
+rules:
+  - id: "check-default"
+    name: "Check Default Recovery"
+    condition: "classification == 'UNKNOWN'"
+    message: "Default value 'UNKNOWN' was used after script failure"
+    severity: "INFO"

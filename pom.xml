@@ -25,7 +25,7 @@
         <awaitility.version>4.2.0</awaitility.version>
         <postgresql.version>42.7.7</postgresql.version>
         <hikaricp.version>5.0.1</hikaricp.version>
-        <groovy.version>4.0.24</groovy.version>
+        <groovy.version>5.0.4</groovy.version>
 
         <!-- Docker Image Versions for Testcontainers -->
         <docker.postgres.version>postgres:15.13-alpine3.20</docker.postgres.version>

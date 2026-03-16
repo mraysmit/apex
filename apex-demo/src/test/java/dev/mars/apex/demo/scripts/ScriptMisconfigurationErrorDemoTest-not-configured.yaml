@@ -1,0 +1,29 @@
+metadata:
+  name: "Script Not Configured Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates error when #script() is used in an enrichment expression
+    but no runtime-scripts block is configured.  The ScriptBridge is
+    never activated, so the call fails immediately.
+
+# NOTE: no runtime-scripts block here — this is intentional
+
+enrichments:
+  - id: "call-without-scripts-configured"
+    name: "Call Without Scripts Configured"
+    type: "calculation-enrichment"
+    description: "Uses #script() but runtime-scripts is not configured"
+    calculation-config:
+      expression: "#script('any-id', #root)"
+      result-field: "result"
+    field-mappings:
+      - source-field: "result"
+        target-field: "result"
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder"
+    condition: "true"
+    message: "If this fires, the misconfiguration was not detected"
+    severity: "INFO"

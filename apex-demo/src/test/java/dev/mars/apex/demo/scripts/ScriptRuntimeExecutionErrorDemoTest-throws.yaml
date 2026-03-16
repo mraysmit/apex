@@ -1,0 +1,34 @@
+metadata:
+  name: "Script Throws Exception Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates error when a Groovy script throws a RuntimeException
+    during execution.
+
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  engine: "groovy"
+  polling-interval-ms: 0
+  execution-timeout-ms: 5000
+
+enrichments:
+  - id: "call-throwing-script"
+    name: "Call Throwing Script"
+    type: "calculation-enrichment"
+    description: "Calls a script that throws RuntimeException"
+    calculation-config:
+      expression: "#script('ScriptRuntimeExecutionErrorDemoTest-throws', #root)"
+      result-field: "result"
+    field-mappings:
+      - source-field: "result"
+        target-field: "result"
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder"
+    condition: "true"
+    message: "If this fires, the runtime exception was not detected"
+    severity: "INFO"

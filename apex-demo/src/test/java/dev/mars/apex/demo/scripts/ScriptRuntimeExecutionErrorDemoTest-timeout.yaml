@@ -1,0 +1,35 @@
+metadata:
+  name: "Script Timeout Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates timeout enforcement.  The script sleeps for 10 seconds
+    but execution-timeout-ms is 500ms.  The executor should cancel the
+    script and report a timeout failure.
+
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  engine: "groovy"
+  polling-interval-ms: 0
+  execution-timeout-ms: 500
+
+enrichments:
+  - id: "call-slow-script"
+    name: "Call Slow Script"
+    type: "calculation-enrichment"
+    description: "Calls a script that sleeps beyond the timeout"
+    calculation-config:
+      expression: "#script('ScriptRuntimeExecutionErrorDemoTest-timeout', #root)"
+      result-field: "result"
+    field-mappings:
+      - source-field: "result"
+        target-field: "result"
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder"
+    condition: "true"
+    message: "If this fires, the timeout was not enforced"
+    severity: "INFO"

@@ -1,0 +1,58 @@
+metadata:
+  name: "Script Partial Enrichment Failure Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates partial failure: three enrichments run in sequence;
+    enrichment #1 and #3 succeed, but enrichment #2 throws without
+    a default-value.  The overall result is enrichment failure,
+    but the successful enrichments have populated their fields.
+
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  engine: "groovy"
+  polling-interval-ms: 0
+  execution-timeout-ms: 5000
+
+enrichments:
+  - id: "first-succeeds"
+    name: "First Enrichment (succeeds)"
+    type: "calculation-enrichment"
+    description: "Valid script — classifies trade size"
+    calculation-config:
+      expression: "#script('ScriptEnrichmentRecoveryDemoTest-valid-classifier', #root)"
+      result-field: "sizeClass"
+    field-mappings:
+      - source-field: "sizeClass"
+        target-field: "sizeClass"
+
+  - id: "second-fails"
+    name: "Second Enrichment (fails)"
+    type: "calculation-enrichment"
+    description: "Script throws, no default-value — this enrichment fails"
+    calculation-config:
+      expression: "#script('ScriptEnrichmentRecoveryDemoTest-always-fails', #root)"
+      result-field: "brokenField"
+    field-mappings:
+      - source-field: "brokenField"
+        target-field: "brokenField"
+
+  - id: "third-succeeds"
+    name: "Third Enrichment (succeeds)"
+    type: "calculation-enrichment"
+    description: "Static expression — always succeeds"
+    calculation-config:
+      expression: "'STATIC_OK'"
+      result-field: "staticField"
+    field-mappings:
+      - source-field: "staticField"
+        target-field: "staticField"
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder"
+    condition: "true"
+    message: "Placeholder"
+    severity: "INFO"

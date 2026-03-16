@@ -1,0 +1,35 @@
+metadata:
+  name: "Script Not Found Error Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates error behaviour when a #script() call references a
+    script ID that does not exist in the configured locations.
+    The enrichment should fail with a ScriptNotFoundException.
+
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  engine: "groovy"
+  polling-interval-ms: 0
+  execution-timeout-ms: 5000
+
+enrichments:
+  - id: "call-missing-script"
+    name: "Call Missing Script"
+    type: "calculation-enrichment"
+    description: "References a script ID that does not exist"
+    calculation-config:
+      expression: "#script('this-script-does-not-exist', #root)"
+      result-field: "result"
+    field-mappings:
+      - source-field: "result"
+        target-field: "result"
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder"
+    condition: "true"
+    message: "If this fires, the enrichment did not fail as expected"
+    severity: "INFO"

@@ -1,0 +1,35 @@
+metadata:
+  name: "Script Arity Mismatch Error Demo"
+  type: "rule-config"
+  version: "1.0"
+  description: >
+    Demonstrates error when #script() calls a function with the wrong
+    number of arguments.  The script has twoArgHelper(String, String)
+    but the expression passes only one argument.
+
+runtime-scripts:
+  enabled: true
+  locations:
+    - "classpath:dev/mars/apex/demo/scripts/groovy"
+  engine: "groovy"
+  polling-interval-ms: 0
+  execution-timeout-ms: 5000
+
+enrichments:
+  - id: "call-with-wrong-arity"
+    name: "Call With Wrong Arity"
+    type: "calculation-enrichment"
+    description: "Passes 1 arg to a function that requires 2"
+    calculation-config:
+      expression: "#script('ScriptMethodDispatchErrorDemoTest-dispatch', 'twoArgHelper', 'only-one')"
+      result-field: "result"
+    field-mappings:
+      - source-field: "result"
+        target-field: "result"
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder"
+    condition: "true"
+    message: "If this fires, the arity mismatch was not detected"
+    severity: "INFO"
