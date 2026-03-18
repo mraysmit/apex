@@ -15,6 +15,7 @@
  */
 package dev.mars.apex.core.config.loader;
 
+import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlRuleGroup;
@@ -184,6 +185,23 @@ class ItemOrderProcessor {
                 }
             }
             logger.info("Found " + referencedEnrichmentGroupIds.size() + " enrichment-group IDs referenced by other groups: " + referencedEnrichmentGroupIds);
+        }
+
+        // Collect enrichment-group IDs referenced by function mapping rules (enrichment-group-ref in mapping-config).
+        // These groups are invoked at runtime by function mappings, so they must not auto-execute at their definition position.
+        if (config.getEnrichments() != null && !config.getEnrichments().isEmpty()) {
+            for (YamlEnrichment enrichment : config.getEnrichments()) {
+                if (enrichment.getMappingRules() != null) {
+                    for (YamlEnrichment.MappingRule rule : enrichment.getMappingRules()) {
+                        if (rule.getMapping() != null && rule.getMapping().getEnrichmentGroupRef() != null) {
+                            referencedEnrichmentGroupIds.add(rule.getMapping().getEnrichmentGroupRef());
+                        }
+                    }
+                }
+            }
+            if (!referencedEnrichmentGroupIds.isEmpty()) {
+                logger.info("Total enrichment-group IDs referenced (including function mappings): " + referencedEnrichmentGroupIds);
+            }
         }
 
         // Collect rule-group IDs referenced by other rule-groups (use LinkedHashSet to preserve order)

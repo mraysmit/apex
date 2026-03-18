@@ -1,0 +1,61 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: FunctionMappingRefsTest.java
+# Purpose: Test that enrichment groups loaded via enrichment-refs do NOT
+#          auto-execute — they only execute when referenced by function mapping
+# Pattern: Markit converted YAML with Rule Builder import
+# ============================================================================
+
+metadata:
+  id: "function-mapping-refs-test"
+  name: "Function Mapping with Enrichment Refs Test"
+  version: "1.0.0"
+  description: "Validates that referenced enrichment groups are definitions only"
+  type: "rule-config"
+
+# Import the Rule Builder (like Java import — should NOT auto-execute)
+enrichment-refs:
+  - name: "translate-rule-builder"
+    source: "src/test/resources/dev/mars/apex/demo/conditional/FunctionMappingRefsTest-rule-builder.yaml"
+    enabled: true
+    description: "Map External to Internal Code"
+
+# Inline enrichment that uses function mapping to invoke the imported group
+enrichments:
+  - id: "translate-via-function"
+    type: "conditional-mapping-enrichment"
+    name: "Translate Code via Function"
+    description: "Invokes imported translate-group via function mapping"
+    enabled: true
+    target-field: "OUTPUT_CODE"
+
+    mapping-rules:
+      - id: "invoke-translation"
+        name: "Invoke Translation Group"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#INPUT_CODE != null"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "translate-group"
+          input-parameters:
+            - source-field: "constant"
+              target-field: "Translation_Type"
+              expression: "'CURRENCY'"
+            - source-field: "#INPUT_CODE"
+              target-field: "Input_Code"
+          output-field: "translation_result"
+
+      - id: "default-no-translation"
+        name: "Default - No Translation Needed"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'NO_TRANSLATION'"
+
+    execution-settings:
+      stop-on-first-match: true
+      log-matched-rule: true
