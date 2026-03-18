@@ -19,6 +19,7 @@
 6. [Conditional Enrichments](#6-conditional-enrichments)
    - 6.5 [SpEL in Field Mappings](#65-spel-in-field-mappings-new-in-v23)
 7. [Priority-Based Conditional Mapping](#7-priority-based-conditional-mapping)
+   - 7.1 [Function Mapping Type](#71-function-mapping-type)
 8. [Advanced Patterns](#8-advanced-patterns)
 9. [Performance Considerations](#9-performance-considerations)
 10. [Best Practices](#10-best-practices)
@@ -828,6 +829,115 @@ enrichments:
               'fee': 0.00
             }
 ```
+
+### 7.1 Function Mapping Type
+
+The `function` mapping type allows a mapping rule to invoke a reusable enrichment group, binding input parameters before execution and extracting a specific output field afterward. This replaces the older pattern of using two implicitly coupled field-enrichments.
+
+#### Before: Two Implicit Enrichments
+
+```yaml
+# Enrichment 1: bind input parameters into the group's context
+- id: "setup-translation-params"
+  type: "field-enrichment"
+  condition: "#IS_NDF != null"
+  field-mappings:
+    - source-field: "constant"
+      target-field: "#translation.Translation_Type"
+      expression: "'IS_NDF'"
+    - source-field: "#client_code"
+      target-field: "#translation.Client_Code"
+
+# Enrichment 2: extract the result
+- id: "extract-translation-result"
+  type: "field-enrichment"
+  condition: "#IS_NDF != null"
+  field-mappings:
+    - source-field: "translation_result"
+      target-field: "#fx.is_ndf"
+```
+
+The coupling between these two enrichments is purely by naming convention — fragile, duplicated conditions, and not self-documenting.
+
+#### After: Single Function Mapping Rule
+
+```yaml
+enrichments:
+  - id: "ndf-translation"
+    type: "conditional-mapping-enrichment"
+    target-field: "IS_NDF"
+
+    mapping-rules:
+      - id: "translate-via-group"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#IS_NDF != null"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "translation-group"
+          input-parameters:
+            - source-field: "constant"
+              target-field: "#translation.Translation_Type"
+              expression: "'IS_NDF'"
+            - source-field: "#client_code"
+              target-field: "#translation.Client_Code"
+          output-field: "translation_result"
+
+      - id: "default-fallback"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'UNKNOWN'"
+
+    execution-settings:
+      stop-on-first-match: true
+```
+
+#### Mixing Function and Direct Mappings
+
+Function mappings participate in the same priority chain as `direct` and `lookup` mappings. Lower-priority rules serve as fallbacks:
+
+```yaml
+mapping-rules:
+  # Priority 1: try direct match first
+  - id: "direct-match"
+    priority: 1
+    conditions:
+      operator: "AND"
+      rules:
+        - condition: "#MODE == 'DIRECT'"
+    mapping:
+      type: "direct"
+      expression: "'DIRECT_RESULT'"
+
+  # Priority 2: invoke enrichment group if direct didn't match
+  - id: "function-call"
+    priority: 2
+    conditions:
+      operator: "AND"
+      rules:
+        - condition: "#MODE == 'FUNCTION'"
+    mapping:
+      type: "function"
+      enrichment-group-ref: "calc-group"
+      input-parameters:
+        - source-field: "#INPUT_DATA"
+          target-field: "#calc.input_value"
+      output-field: "calc_result"
+
+  # Priority 999: default fallback
+  - id: "default"
+    priority: 999
+    mapping:
+      type: "direct"
+      expression: "'DEFAULT'"
+```
+
+#### Recursion Guard
+
+Function mappings that invoke groups containing further function mappings are allowed up to a depth of 5. Deeper recursion logs an error and the mapping returns `null`.
 
 ### When to Use Priority-Based Conditional Mapping
 

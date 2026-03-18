@@ -3561,9 +3561,12 @@ enrichments:
 
 | Property | Required | Description |
 |----------|----------|-------------|
-| `type` | Yes | Mapping type: "direct" or "lookup" |
-| `expression` | Yes* | SpEL expression for direct mappings |
+| `type` | Yes | Mapping type: `"direct"`, `"lookup"`, or `"function"` |
+| `expression` | Yes* | SpEL expression for direct mappings (*required for `direct` type*) |
 | `source-field` | No | Source field for the mapping |
+| `enrichment-group-ref` | Yes* | ID of enrichment group to invoke (*required for `function` type*) |
+| `input-parameters` | No | List of field mappings applied before group invocation (*`function` type*) |
+| `output-field` | Yes* | Field name to extract from context after group execution (*required for `function` type*) |
 
 #### Execution Settings
 
@@ -3573,6 +3576,63 @@ enrichments:
 | `log-matched-rule` | false | Log which rule was matched |
 | `validate-result` | false | Validate the mapping result |
 
+#### Function Mapping Type
+
+The `function` mapping type invokes a reusable enrichment group as a single mapping operation. It binds input parameters, executes the group, and extracts a specific output field — replacing the older pattern of using two separate field-enrichments to set up inputs and extract outputs.
+
+```yaml
+enrichments:
+  - id: "ndf-translation"
+    type: "conditional-mapping-enrichment"
+    target-field: "IS_NDF"
+
+    mapping-rules:
+      # Function mapping: invoke a reusable enrichment group
+      - id: "translate-via-group"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#IS_NDF != null"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "translation-group"
+          input-parameters:
+            - source-field: "constant"
+              target-field: "#translation.Translation_Type"
+              expression: "'IS_NDF'"
+            - source-field: "#client_code"
+              target-field: "#translation.Client_Code"
+          output-field: "translation_result"
+
+      # Direct fallback if function mapping condition not met
+      - id: "default-value"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'UNKNOWN'"
+
+    execution-settings:
+      stop-on-first-match: true
+```
+
+**Function Mapping Fields:**
+
+| Property | Required | Description |
+|----------|----------|-------------|
+| `enrichment-group-ref` | Yes | ID of the enrichment group to invoke |
+| `input-parameters` | No | Field mappings applied to the context before group execution |
+| `output-field` | Yes | Field name to extract from the context after group execution |
+
+**Execution flow:** When a `function` mapping rule matches:
+1. `input-parameters` are applied to the shared context (same semantics as field-enrichment field-mappings)
+2. The enrichment group identified by `enrichment-group-ref` is executed
+3. The value of `output-field` is extracted from the context and written to `target-field`
+
+**Recursion guard:** Function mappings that invoke groups containing further function mappings are allowed up to a depth of 5. Deeper recursion logs an error and returns `null`.
+
+**Error handling:** If the enrichment group is not found, a warning is logged and the mapping returns `null` (allowing lower-priority rules to match if `stop-on-first-match` is not yet triggered).
+
 #### When to Use Conditional Mapping Enrichment
 
 Use `conditional-mapping-enrichment` when you need to:
@@ -3580,6 +3640,7 @@ Use `conditional-mapping-enrichment` when you need to:
 - Apply first-match-wins logic
 - Route data based on complex priority rules
 - Have clear separation between condition evaluation and value mapping
+- Invoke reusable enrichment groups as functions within a priority chain (use `type: "function"`)
 
 **vs. field-enrichment**: Use field-enrichment for simpler conditional logic with ternary operators
 **vs. lookup-enrichment**: Use lookup when mapping values come from external datasets

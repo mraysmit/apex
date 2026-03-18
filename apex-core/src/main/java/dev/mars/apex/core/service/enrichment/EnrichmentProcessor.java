@@ -95,9 +95,42 @@ public class EnrichmentProcessor {
     // EnrichmentProcessor -> EnrichmentGroupExecutor -> EnrichmentProcessor
     private Supplier<EnrichmentGroupExecutor> enrichmentGroupExecutorSupplier;
 
-    // Recursion depth guard for function mapping to prevent infinite loops
+    // Recursion depth guard for function mapping to prevent infinite loops.
+    // ThreadLocal is removed (not just reset to 0) on final unwind to avoid retaining state on pooled threads.
     private static final int MAX_FUNCTION_MAPPING_DEPTH = 5;
     private static final ThreadLocal<Integer> functionMappingDepth = ThreadLocal.withInitial(() -> 0);
+
+    /**
+     * Enter a function-mapping recursion level.
+     * @param groupRef the enrichment-group-ref being entered (for error messages)
+     * @return the depth <em>before</em> entry, or -1 if the limit has been reached
+     */
+    private static int enterFunctionMapping(String groupRef) {
+        int depth = functionMappingDepth.get();
+        if (depth >= MAX_FUNCTION_MAPPING_DEPTH) {
+            logger.error("Function mapping recursion depth exceeded (max {}). " +
+                        "Possible circular enrichment-group-ref chain involving '{}'",
+                        MAX_FUNCTION_MAPPING_DEPTH, groupRef);
+            return -1;
+        }
+        functionMappingDepth.set(depth + 1);
+        return depth;
+    }
+
+    /**
+     * Exit a function-mapping recursion level.
+     * If unwinding back to depth 0, removes the ThreadLocal entirely
+     * so pooled threads don't retain stale state.
+     *
+     * @param previousDepth the value returned by {@link #enterFunctionMapping}
+     */
+    private static void exitFunctionMapping(int previousDepth) {
+        if (previousDepth == 0) {
+            functionMappingDepth.remove();
+        } else {
+            functionMappingDepth.set(previousDepth);
+        }
+    }
 
     /**
      * Constructor with all required dependencies.
@@ -755,15 +788,11 @@ public class EnrichmentProcessor {
         }
 
         // Recursion depth guard
-        int currentDepth = functionMappingDepth.get();
-        if (currentDepth >= MAX_FUNCTION_MAPPING_DEPTH) {
-            logger.error("Function mapping recursion depth exceeded (max {}). " +
-                        "Possible circular enrichment-group-ref chain involving '{}'",
-                        MAX_FUNCTION_MAPPING_DEPTH, groupRef);
+        int previousDepth = enterFunctionMapping(groupRef);
+        if (previousDepth < 0) {
             return null;
         }
 
-        functionMappingDepth.set(currentDepth + 1);
         try {
             // 1. Apply input-parameters into the shared targetObject
             List<YamlEnrichment.FieldMapping> inputParams = mapping.getInputParameters();
@@ -860,7 +889,7 @@ public class EnrichmentProcessor {
 
             return outputValue;
         } finally {
-            functionMappingDepth.set(currentDepth);
+            exitFunctionMapping(previousDepth);
         }
     }
 

@@ -717,10 +717,41 @@ enrichments:
 | `mapping-rules[].id` | Yes | — | Unique rule identifier |
 | `mapping-rules[].priority` | Yes | — | Lower number = evaluated first |
 | `mapping-rules[].conditions` | Yes | — | Conditions that must be met |
-| `mapping-rules[].mapping.type` | Yes | — | `direct` or `lookup` |
+| `mapping-rules[].mapping.type` | Yes | — | `direct`, `lookup`, or `function` |
 | `mapping-rules[].mapping.expression` | No | — | SpEL expression for direct mappings |
+| `mapping-rules[].mapping.enrichment-group-ref` | No | — | Enrichment group to invoke (required for `function` type) |
+| `mapping-rules[].mapping.input-parameters` | No | — | Field mappings applied before group invocation (`function` type) |
+| `mapping-rules[].mapping.output-field` | No | — | Field to extract after group execution (required for `function` type) |
 | `execution-settings.stop-on-first-match` | No | `true` | Stop after first matching rule |
 | `execution-settings.log-matched-rule` | No | `false` | Log which rule was matched |
+
+#### Function Mapping Type
+
+The `function` mapping type invokes a reusable enrichment group as a single mapping operation within a `conditional-mapping-enrichment`. It replaces the older pattern of using two separate field-enrichments (one to bind input parameters, one to extract the result) with a single self-contained mapping rule.
+
+```yaml
+mapping-rules:
+  - id: "translate-code"
+    priority: 1
+    conditions:
+      operator: "AND"
+      rules:
+        - condition: "#code != null"
+    mapping:
+      type: "function"
+      enrichment-group-ref: "translation-group"
+      input-parameters:
+        - source-field: "constant"
+          target-field: "#translation.Translation_Type"
+          expression: "'IS_NDF'"
+        - source-field: "#client_code"
+          target-field: "#translation.Client_Code"
+      output-field: "translation_result"
+```
+
+**How it works:** When the mapping rule's conditions match, the engine binds `input-parameters` into the shared context, executes the enrichment group identified by `enrichment-group-ref`, then extracts the value of `output-field` from the context and writes it to the enrichment's `target-field`.
+
+Function mappings can be mixed with `direct` and `lookup` rules in the same priority chain — lower-priority rules serve as fallbacks if the function mapping's conditions are not met.
 
 ## 6. Advanced YAML Patterns
 

@@ -1,7 +1,7 @@
 # Design: `function` Mapping Type for Conditional Mapping Enrichment
 
-**Status:** Proposed  
-**Date:** 2026-03-17  
+**Status:** Implemented  
+**Date:** 2026-03-17 (implemented 2026-03-18)  
 **Module:** apex-core
 
 ---
