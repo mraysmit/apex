@@ -266,6 +266,11 @@ public class RulesEngine {
 
         // Initialize remaining executors (after dependencies are initialized)
         this.enrichmentGroupExecutor = new EnrichmentGroupExecutor(this.enrichmentProcessor);
+
+        // Wire the enrichment group executor back into the enrichment processor
+        // to support function mapping type (breaks circular dependency via lazy supplier)
+        this.enrichmentProcessor.setEnrichmentGroupExecutorSupplier(() -> this.enrichmentGroupExecutor);
+
         this.ruleChainExecutor = new RuleChainExecutor(this.unifiedEvaluator, this.enrichmentGroupExecutor);
         this.sequentialProcessor = new SequentialProcessor(
             this.configuration,

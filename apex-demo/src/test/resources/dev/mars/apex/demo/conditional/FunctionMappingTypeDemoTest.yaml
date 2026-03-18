@@ -1,0 +1,76 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: FunctionMappingTypeDemoTest.java
+# Purpose: Test function mapping type within conditional-mapping-enrichment
+# Status: Function mapping type - Tests basic invocation and parameter binding
+# ============================================================================
+
+metadata:
+  id: "function-mapping-type-demo-test"
+  name: "Function Mapping Type Demo Test"
+  version: "1.0.0"
+  description: "Test configuration for function mapping type in conditional-mapping-enrichment"
+  type: "rule-config"
+  author: "Leif He"
+  created: "2026-03-18"
+
+enrichments:
+  # Reusable enrichment that acts as the "function body"
+  # This enrichment reads Translation_Type and Input_Code from context,
+  # then writes a computed translation_result field.
+  - id: "translator-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "translation_result"
+        expression: "'TRANSLATED_' + #Translation_Type + '_' + #Input_Code"
+
+  # Conditional mapping enrichment using the new function mapping type
+  - id: "function-mapping-demo"
+    type: "conditional-mapping-enrichment"
+    name: "Function Mapping Demo"
+    description: "Demonstrates function mapping type invoking an enrichment group"
+    enabled: true
+
+    # Target field to receive the function output
+    target-field: "FINAL_RESULT"
+
+    mapping-rules:
+      # Rule 1: Function mapping — invokes translator-group with bound parameters
+      - id: "translate-via-function"
+        name: "Translate via Enrichment Group Function"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#INPUT_VALUE != null"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "translator-group"
+          input-parameters:
+            - source-field: "constant"
+              target-field: "Translation_Type"
+              expression: "'IS_NDF'"
+            - source-field: "#INPUT_VALUE"
+              target-field: "Input_Code"
+          output-field: "translation_result"
+
+      # Rule 2: Default fallback (lowest priority, no conditions)
+      - id: "default-fallback"
+        name: "Default Fallback"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'DEFAULT_NO_INPUT'"
+
+    execution-settings:
+      stop-on-first-match: true
+      log-matched-rule: true
+
+# Enrichment group that the function mapping invokes
+enrichment-groups:
+  - id: "translator-group"
+    name: "Translation Enrichment Group"
+    enrichment-ids:
+      - "translator-enrichment"

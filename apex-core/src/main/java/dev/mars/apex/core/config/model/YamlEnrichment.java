@@ -980,7 +980,7 @@ public class YamlEnrichment {
      */
     public static class MappingConfig {
         @JsonProperty("type")
-        private String type; // "direct" or "lookup"
+        private String type; // "direct", "lookup", or "function"
 
         @JsonProperty("source-field")
         private String sourceField;
@@ -994,6 +994,15 @@ public class YamlEnrichment {
 
         @JsonProperty("lookup-config")
         private LookupConfig lookupConfig;
+
+        @JsonProperty("enrichment-group-ref")
+        private String enrichmentGroupRef;
+
+        @JsonProperty("input-parameters")
+        private List<FieldMapping> inputParameters;
+
+        @JsonProperty("output-field")
+        private String outputField;
 
         // Default constructor
         public MappingConfig() {}
@@ -1037,6 +1046,30 @@ public class YamlEnrichment {
 
         public void setLookupConfig(LookupConfig lookupConfig) {
             this.lookupConfig = lookupConfig;
+        }
+
+        public String getEnrichmentGroupRef() {
+            return enrichmentGroupRef;
+        }
+
+        public void setEnrichmentGroupRef(String enrichmentGroupRef) {
+            this.enrichmentGroupRef = enrichmentGroupRef;
+        }
+
+        public List<FieldMapping> getInputParameters() {
+            return inputParameters;
+        }
+
+        public void setInputParameters(List<FieldMapping> inputParameters) {
+            this.inputParameters = inputParameters;
+        }
+
+        public String getOutputField() {
+            return outputField;
+        }
+
+        public void setOutputField(String outputField) {
+            this.outputField = outputField;
         }
     }
 

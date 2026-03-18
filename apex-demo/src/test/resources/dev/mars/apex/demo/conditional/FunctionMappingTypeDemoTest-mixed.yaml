@@ -1,0 +1,141 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: FunctionMappingTypeDemoTest.java (shouldMixDirectAndFunctionRulesInPriorityChain)
+# Purpose: Test mixing direct and function mapping types in same priority chain
+# Status: Function mapping type - Mixed mapping types test
+#
+# KEY CONCEPT: ** This configuration demonstrates that "direct", "lookup", and
+# "function" mapping types can coexist in the same conditional-mapping-enrichment.
+# Rules are evaluated by ascending priority number — the first rule whose
+# conditions match produces the value written to target-field. This is
+# identical to how direct-only priority chains work (here every mapping rule uses type: "direct". 
+# In that pattern, rules are evaluated by ascending priority number and the first match wins); 
+# the function type simply adds the ability to <<delegate to an enrichment group mid-chain>>.
+#
+# EXECUTION FLOW (with stop-on-first-match: true):
+#   1. Evaluate swift-direct   (priority 1)  → if SWIFT + NDF, return literal
+#   2. Evaluate compute-via-function (priority 5) → if INPUT_VALUE present,
+#      bind it into compute-group, execute the group, extract compute_output
+#   3. Evaluate default-mapping (priority 999) → unconditional fallback
+#   First match wins; remaining rules are skipped.
+#
+# TEST SCENARIOS (see FunctionMappingTypeDemoTest.java):
+#   Scenario A: SYSTEM_CODE='SWIFT', IS_NDF='Y' → swift-direct matches → "SWIFT_HIGH_PRIORITY"
+#   Scenario B: SYSTEM_CODE='OTHER', INPUT_VALUE='CODE_99' → compute-via-function matches → "COMPUTED_CODE_99"
+# ============================================================================
+
+metadata:
+  id: "function-mapping-mixed-test"
+  name: "Function Mapping Mixed Types Test"
+  version: "1.0.0"
+  description: "Test mixing direct and function mapping types in priority chain"
+  type: "rule-config"
+  author: "Leif He"
+  created: "2026-03-18"
+
+# ---------------------------------------------------------------------------
+# ENRICHMENTS
+# ---------------------------------------------------------------------------
+# Two enrichments defined:
+#   1. "compute-enrichment" — a standalone field-enrichment that acts as the
+#      body of the function. It reads #compute_input from the shared context
+#      and writes compute_output. This enrichment is NOT executed directly by
+#      the top-level processing — it is only invoked indirectly when the
+#      function mapping rule delegates to compute-group.
+#   2. "mixed-mapping" — the conditional-mapping-enrichment under test, which
+#      contains a priority chain mixing direct and function mapping rules.
+# ---------------------------------------------------------------------------
+
+enrichments:
+  # ---- Function body (reusable enrichment invoked via enrichment group) ----
+  # This enrichment concatenates a prefix with the value of #compute_input.
+  # The caller (function mapping rule) is responsible for setting #compute_input
+  # in the shared context via input-parameters before this executes.
+  - id: "compute-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "compute_output"
+        expression: "'COMPUTED_' + #compute_input"
+
+  # ---- Main conditional mapping enrichment (priority chain under test) -----
+  # All mapping rules write their result into the same target-field: "RESULT".
+  # The three rules below show the three mapping types coexisting:
+  #   direct   (priority 1)   — inline SpEL literal
+  #   function (priority 5)   — delegates to compute-group
+  #   direct   (priority 999) — unconditional default fallback
+  - id: "mixed-mapping"
+    type: "conditional-mapping-enrichment"
+    name: "Mixed Direct and Function Mapping"
+    description: "Priority chain mixing direct and function mapping types"
+    enabled: true
+    target-field: "RESULT"
+
+    mapping-rules:
+      # ---- Rule 1 (priority 1): Direct mapping ----
+      # Matches when SYSTEM_CODE is 'SWIFT' AND IS_NDF is 'Y'.
+      # Returns a hardcoded string — no enrichment group involved.
+      # Because priority 1 is the lowest number, it is evaluated first.
+      - id: "swift-direct"
+        name: "SWIFT Direct High Priority"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#SYSTEM_CODE == 'SWIFT'"
+            - condition: "#IS_NDF == 'Y'"
+        mapping:
+          type: "direct"
+          expression: "'SWIFT_HIGH_PRIORITY'"
+
+      # ---- Rule 2 (priority 5): Function mapping ----
+      # Matches when INPUT_VALUE is present. Demonstrates the function type:
+      #   1. input-parameters bind #INPUT_VALUE → #compute_input in the
+      #      shared context (mutates targetObject before group execution)
+      #   2. enrichment-group-ref identifies which group to execute
+      #   3. The group runs compute-enrichment, which writes compute_output
+      #   4. output-field extracts compute_output from the shared context
+      #   5. The extracted value is written to target-field ("RESULT")
+      - id: "compute-via-function"
+        name: "Compute via Enrichment Group"
+        priority: 5
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#INPUT_VALUE != null"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "compute-group"       # references enrichment-groups[0] below
+          input-parameters:
+            - source-field: "#INPUT_VALUE"             # read from shared context
+              target-field: "compute_input"            # written into shared context for the group
+          output-field: "compute_output"               # extracted from shared context after group runs
+
+      # ---- Rule 3 (priority 999): Default fallback ----
+      # No conditions — always matches. Acts as the catch-all when no
+      # higher-priority rule matched. Uses direct type with a literal.
+      - id: "default-mapping"
+        name: "Default"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'NO_MATCH'"
+
+    execution-settings:
+      stop-on-first-match: true       # stop after first matching rule (standard for priority chains)
+      log-matched-rule: true           # emit a log line identifying which rule matched
+
+# ---------------------------------------------------------------------------
+# ENRICHMENT GROUPS
+# ---------------------------------------------------------------------------
+# Groups package one or more enrichments into a callable unit.
+# "compute-group" wraps compute-enrichment so the function mapping rule
+# can invoke it by reference. The group executes its enrichment list in
+# order; here there is only one member.
+# ---------------------------------------------------------------------------
+enrichment-groups:
+  - id: "compute-group"
+    name: "Computation Group"
+    enrichment-ids:
+      - "compute-enrichment"

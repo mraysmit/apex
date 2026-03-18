@@ -792,8 +792,8 @@ public class EnrichmentValidator {
             throw new ConfigurationException("Mapping configuration missing 'type' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
         }
 
-        if (!"direct".equalsIgnoreCase(type) && !"lookup".equalsIgnoreCase(type)) {
-            throw new ConfigurationException("Invalid mapping type '" + type + "' for rule '" + ruleId + "' in enrichment: " + enrichmentId + ". Valid types: direct, lookup");
+        if (!"direct".equalsIgnoreCase(type) && !"lookup".equalsIgnoreCase(type) && !"function".equalsIgnoreCase(type)) {
+            throw new ConfigurationException("Invalid mapping type '" + type + "' for rule '" + ruleId + "' in enrichment: " + enrichmentId + ". Valid types: direct, lookup, function");
         }
 
         // Type-specific validation
@@ -807,6 +807,14 @@ public class EnrichmentValidator {
             // Lookup mapping should have lookup-config
             if (mappingConfig.getLookupConfig() == null) {
                 throw new ConfigurationException("Lookup mapping requires 'lookup-config' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
+            }
+        } else if ("function".equalsIgnoreCase(type)) {
+            // Function mapping requires enrichment-group-ref and output-field
+            if (mappingConfig.getEnrichmentGroupRef() == null || mappingConfig.getEnrichmentGroupRef().trim().isEmpty()) {
+                throw new ConfigurationException("Function mapping requires 'enrichment-group-ref' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
+            }
+            if (mappingConfig.getOutputField() == null || mappingConfig.getOutputField().trim().isEmpty()) {
+                throw new ConfigurationException("Function mapping requires 'output-field' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
             }
         }
 

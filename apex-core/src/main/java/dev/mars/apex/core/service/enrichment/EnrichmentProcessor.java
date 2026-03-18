@@ -1,11 +1,16 @@
 package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.cache.ApexCacheManager;
+import dev.mars.apex.core.config.EnrichmentGroupFactory;
 import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
+import dev.mars.apex.engine.execution.EnrichmentGroupExecutor;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.engine.model.EnrichmentGroup;
+import dev.mars.apex.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.config.model.YamlRule;
 import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
@@ -19,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -84,6 +90,15 @@ public class EnrichmentProcessor {
     // Result analysis (Phase 13 extraction)
     private final EnrichmentResultBuilder resultBuilder = new EnrichmentResultBuilder();
 
+    // Lazy reference to EnrichmentGroupExecutor to support function mapping type.
+    // Set after construction to break the circular dependency:
+    // EnrichmentProcessor -> EnrichmentGroupExecutor -> EnrichmentProcessor
+    private Supplier<EnrichmentGroupExecutor> enrichmentGroupExecutorSupplier;
+
+    // Recursion depth guard for function mapping to prevent infinite loops
+    private static final int MAX_FUNCTION_MAPPING_DEPTH = 5;
+    private static final ThreadLocal<Integer> functionMappingDepth = ThreadLocal.withInitial(() -> 0);
+
     /**
      * Constructor with all required dependencies.
      *
@@ -148,7 +163,7 @@ public class EnrichmentProcessor {
                 result = processFieldEnrichment(enrichment, targetObject);
                 break;
             case "conditional-mapping-enrichment":
-                result = processConditionalMappingEnrichment(enrichment, targetObject);
+                result = processConditionalMappingEnrichment(enrichment, targetObject, configuration);
                 break;
             default:
                 logger.warn("Unknown enrichment type: " + enrichment.getType());
@@ -400,7 +415,8 @@ public class EnrichmentProcessor {
      * @param targetObject The target object
      * @return The enriched object
      */
-    private Object processConditionalMappingEnrichment(YamlEnrichment enrichment, Object targetObject) {
+    private Object processConditionalMappingEnrichment(YamlEnrichment enrichment, Object targetObject,
+                                                         YamlRuleConfiguration configuration) {
         String targetField = enrichment.getTargetField();
         List<YamlEnrichment.MappingRule> mappingRules = enrichment.getMappingRules();
         YamlEnrichment.ExecutionSettings executionSettings = enrichment.getExecutionSettings();
@@ -445,7 +461,7 @@ public class EnrichmentProcessor {
                     }
 
                     // Apply the mapping
-                    Object mappedValue = applyMappingRule(rule, targetObject);
+                    Object mappedValue = applyMappingRule(rule, targetObject, configuration);
 
                     // Set the target field
                     setFieldValue(targetObject, targetField, mappedValue);
@@ -626,7 +642,8 @@ public class EnrichmentProcessor {
      * @param targetObject The target object for context
      * @return The mapped value
      */
-    private Object applyMappingRule(YamlEnrichment.MappingRule rule, Object targetObject) {
+    private Object applyMappingRule(YamlEnrichment.MappingRule rule, Object targetObject,
+                                     YamlRuleConfiguration configuration) {
         YamlEnrichment.MappingConfig mapping = rule.getMapping();
 
         if (mapping == null) {
@@ -644,6 +661,8 @@ public class EnrichmentProcessor {
                 return applyDirectMapping(mapping, targetObject);
             } else if ("lookup".equalsIgnoreCase(mappingType)) {
                 return applyLookupMapping(mapping, targetObject);
+            } else if ("function".equalsIgnoreCase(mappingType)) {
+                return applyFunctionMapping(mapping, targetObject, configuration);
             } else {
                 logger.warn("Unknown mapping type '" + mappingType + "' for rule: " + rule.getId());
                 return null;
@@ -706,6 +725,154 @@ public class EnrichmentProcessor {
         }
 
         return null;
+    }
+
+    /**
+     * Apply function mapping: invoke an enrichment group with bound input parameters
+     * and extract a specific output field.
+     *
+     * @param mapping The mapping configuration containing enrichment-group-ref, input-parameters, and output-field
+     * @param targetObject The target object (shared context)
+     * @param configuration The YAML configuration for resolving enrichment groups
+     * @return The extracted output value, or null if the function call fails
+     */
+    private Object applyFunctionMapping(YamlEnrichment.MappingConfig mapping, Object targetObject,
+                                         YamlRuleConfiguration configuration) {
+        String groupRef = mapping.getEnrichmentGroupRef();
+        if (groupRef == null || groupRef.trim().isEmpty()) {
+            logger.warn("Function mapping has no enrichment-group-ref");
+            return null;
+        }
+
+        if (enrichmentGroupExecutorSupplier == null) {
+            logger.warn("Function mapping requires EnrichmentGroupExecutor but none is configured");
+            return null;
+        }
+
+        if (configuration == null) {
+            logger.warn("Function mapping requires YamlRuleConfiguration to resolve enrichment-group-ref '{}'", groupRef);
+            return null;
+        }
+
+        // Recursion depth guard
+        int currentDepth = functionMappingDepth.get();
+        if (currentDepth >= MAX_FUNCTION_MAPPING_DEPTH) {
+            logger.error("Function mapping recursion depth exceeded (max {}). " +
+                        "Possible circular enrichment-group-ref chain involving '{}'",
+                        MAX_FUNCTION_MAPPING_DEPTH, groupRef);
+            return null;
+        }
+
+        functionMappingDepth.set(currentDepth + 1);
+        try {
+            // 1. Apply input-parameters into the shared targetObject
+            List<YamlEnrichment.FieldMapping> inputParams = mapping.getInputParameters();
+            if (inputParams != null && !inputParams.isEmpty()) {
+                for (YamlEnrichment.FieldMapping param : inputParams) {
+                    try {
+                        Object value;
+                        boolean isConstant = "constant".equals(param.getSourceField())
+                                || param.getSourceField() == null
+                                || param.getSourceField().trim().isEmpty();
+
+                        if (isConstant) {
+                            if (param.getExpression() != null && !param.getExpression().trim().isEmpty()) {
+                                StandardEvaluationContext ctx = createEvaluationContext(targetObject);
+                                Expression expr = getOrCompileExpression(param.getExpression());
+                                value = expr.getValue(ctx);
+                            } else {
+                                value = param.getDefaultValue();
+                            }
+                        } else {
+                            // Evaluate source-field as SpEL expression against the context
+                            StandardEvaluationContext ctx = createEvaluationContext(targetObject);
+                            String sourceExpr = param.getSourceField().startsWith("#")
+                                    ? param.getSourceField()
+                                    : "#" + param.getSourceField();
+                            Expression expr = getOrCompileExpression(sourceExpr);
+                            value = expr.getValue(ctx);
+
+                            // Apply expression/transformation if specified
+                            if (value != null && param.getExpression() != null
+                                    && !param.getExpression().trim().isEmpty()) {
+                                value = applyExpression(param.getExpression(), value, targetObject);
+                            }
+                        }
+
+                        if (param.getTargetField() != null) {
+                            setFieldValue(targetObject, param.getTargetField(), value);
+                            logger.debug("Function mapping input: {} -> {} = {}",
+                                    param.getSourceField(), param.getTargetField(), value);
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Failed to apply function mapping input parameter '{}' -> '{}': {}",
+                                param.getSourceField(), param.getTargetField(), e.getMessage());
+                        logger.debug("Stack trace for input parameter failure:", e);
+                    }
+                }
+            }
+
+            // 2. Resolve the enrichment group by ID
+            List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(configuration);
+            EnrichmentGroup targetGroup = groups.stream()
+                    .filter(g -> groupRef.equals(g.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (targetGroup == null) {
+                logger.warn("enrichment-group-ref '{}' not found in configuration", groupRef);
+                return null;
+            }
+
+            // 3. Execute the enrichment group via EnrichmentGroupExecutor
+            EnrichmentGroupExecutor executor = enrichmentGroupExecutorSupplier.get();
+            EnrichmentGroupResult groupResult = executor.processEnrichmentGroup(
+                    targetGroup, targetObject, configuration);
+
+            if (!groupResult.isSuccess()) {
+                logger.warn("Function mapping enrichment group '{}' execution failed: {}",
+                        groupRef, groupResult.getMessage());
+
+                // Apply fallback-value if configured
+                if (mapping.getFallbackValue() != null && !mapping.getFallbackValue().trim().isEmpty()) {
+                    try {
+                        StandardEvaluationContext ctx = createEvaluationContext(targetObject);
+                        Expression fallbackExpr = getOrCompileExpression(mapping.getFallbackValue());
+                        Object fallbackResult = fallbackExpr.getValue(ctx);
+                        logger.debug("Function mapping fallback applied for group '{}': {}", groupRef, fallbackResult);
+                        return fallbackResult;
+                    } catch (Exception fallbackEx) {
+                        logger.warn("Failed to apply fallback value for function mapping group '{}': {}",
+                                groupRef, fallbackEx.getMessage());
+                    }
+                }
+            }
+
+            // 4. Extract the output-field value from the mutated targetObject
+            String outputField = mapping.getOutputField();
+            if (outputField == null || outputField.trim().isEmpty()) {
+                logger.warn("Function mapping has no output-field specified for enrichment-group-ref '{}'", groupRef);
+                return null;
+            }
+
+            Object outputValue = getFieldValue(targetObject, outputField);
+            logger.debug("Function mapping output: {} = {} (from group '{}')", outputField, outputValue, groupRef);
+
+            return outputValue;
+        } finally {
+            functionMappingDepth.set(currentDepth);
+        }
+    }
+
+    /**
+     * Set the enrichment group executor supplier for function mapping support.
+     * Called after construction to break the circular dependency between
+     * EnrichmentProcessor and EnrichmentGroupExecutor.
+     *
+     * @param supplier Supplier that provides the EnrichmentGroupExecutor instance
+     */
+    public void setEnrichmentGroupExecutorSupplier(Supplier<EnrichmentGroupExecutor> supplier) {
+        this.enrichmentGroupExecutorSupplier = supplier;
     }
 
     // ========================================
