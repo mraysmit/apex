@@ -3633,6 +3633,43 @@ enrichments:
 
 **Error handling:** If the enrichment group is not found, a warning is logged and the mapping returns `null` (allowing lower-priority rules to match if `stop-on-first-match` is not yet triggered).
 
+#### Typed Condition Rules (for `mapping-rules[].conditions.rules[]`)
+
+Condition rules support typed resolution so the WHEN side can evaluate expression, lookup, or function-based predicates.
+
+| Property | Required | Description |
+|----------|----------|-------------|
+| `type` | No | Condition type: `"expression"` (default), `"lookup"`, or `"function"` |
+| `condition` | Yes | Final boolean SpEL gate evaluated after type resolution |
+| `lookup-config` | Yes* | Lookup configuration (*required for `lookup` type*) |
+| `function-config` | Yes* | Function configuration (*required for `function` type*) |
+| `result-field` | No | Context field where the resolved value is stored |
+
+```yaml
+conditions:
+  operator: "AND"
+  rules:
+    - type: "lookup"
+      result-field: "currency_info"
+      condition: "#currency_info != null && #currency_info['isRestricted'] == false"
+      lookup-config:
+        lookup-dataset:
+          type: "inline"
+          key-field: "code"
+          records:
+            - code: "USD"
+              isRestricted: false
+        lookup-key:
+          expression: "#CURRENCY_CODE"
+
+    - type: "function"
+      result-field: "risk_level"
+      condition: "#risk_level == 'HIGH'"
+      function-config:
+        enrichment-group-ref: "risk-classifier-group"
+        output-field: "risk_level"
+```
+
 #### When to Use Conditional Mapping Enrichment
 
 Use `conditional-mapping-enrichment` when you need to:

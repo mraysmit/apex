@@ -753,6 +753,42 @@ mapping-rules:
 
 Function mappings can be mixed with `direct` and `lookup` rules in the same priority chain — lower-priority rules serve as fallbacks if the function mapping's conditions are not met.
 
+#### Typed Condition Rule Types
+
+Condition rules under `mapping-rules[].conditions.rules[]` support typed resolution:
+
+| Field | Description |
+|-------|-------------|
+| `type` | `expression` (default), `lookup`, or `function` |
+| `condition` | Final boolean SpEL gate |
+| `lookup-config` | Required for `type: "lookup"` |
+| `function-config` | Required for `type: "function"` |
+| `result-field` | Field name where typed result is stored for SpEL evaluation |
+
+```yaml
+mapping-rules:
+  - id: "lookup-gated-rule"
+    priority: 1
+    conditions:
+      operator: "AND"
+      rules:
+        - type: "lookup"
+          result-field: "cp_info"
+          condition: "#cp_info != null && #cp_info['active'] == true"
+          lookup-config:
+            lookup-dataset:
+              type: "inline"
+              key-field: "code"
+              records:
+                - code: "GS"
+                  active: true
+            lookup-key:
+              expression: "#COUNTERPARTY_CODE"
+    mapping:
+      type: "direct"
+      expression: "'ACTIVE_COUNTERPARTY'"
+```
+
 ## 6. Advanced YAML Patterns
 
 This section covers advanced APEX YAML configuration patterns: result fields, rule chaining, enrichment chaining, and rule-result-driven enrichments.

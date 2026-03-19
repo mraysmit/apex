@@ -20,6 +20,7 @@
    - 6.5 [SpEL in Field Mappings](#65-spel-in-field-mappings-new-in-v23)
 7. [Priority-Based Conditional Mapping](#7-priority-based-conditional-mapping)
    - 7.1 [Function Mapping Type](#71-function-mapping-type)
+  - 7.2 [Typed Condition Rules](#72-typed-condition-rules)
 8. [Advanced Patterns](#8-advanced-patterns)
 9. [Performance Considerations](#9-performance-considerations)
 10. [Best Practices](#10-best-practices)
@@ -938,6 +939,60 @@ mapping-rules:
 #### Recursion Guard
 
 Function mappings that invoke groups containing further function mappings are allowed up to a depth of 5. Deeper recursion logs an error and the mapping returns `null`.
+
+### 7.2 Typed Condition Rules
+
+Condition rules inside `mapping-rules[].conditions.rules[]` support typed resolution. This means the WHEN side of a conditional mapping can now evaluate more than plain SpEL.
+
+| Condition Rule Field | Description |
+|----------------------|-------------|
+| `type` | Condition type: `expression` (default), `lookup`, or `function` |
+| `condition` | Final boolean SpEL gate evaluated after typed resolution |
+| `lookup-config` | Lookup config used when `type: "lookup"` |
+| `function-config` | Function config used when `type: "function"` |
+| `result-field` | Context field where typed resolution result is stored |
+
+```yaml
+mapping-rules:
+  - id: "if-lookup-then-direct"
+    priority: 1
+    conditions:
+      operator: "AND"
+      rules:
+        - type: "lookup"
+          result-field: "currency_info"
+          condition: "#currency_info != null && #currency_info['isRestricted'] == false"
+          lookup-config:
+            lookup-dataset:
+              type: "inline"
+              key-field: "code"
+              records:
+                - code: "USD"
+                  isRestricted: false
+            lookup-key:
+              expression: "#CURRENCY_CODE"
+    mapping:
+      type: "direct"
+      expression: "'STANDARD'"
+
+  - id: "if-function-then-function"
+    priority: 2
+    conditions:
+      operator: "AND"
+      rules:
+        - type: "function"
+          result-field: "risk_result"
+          condition: "#risk_result == 'HIGH'"
+          function-config:
+            enrichment-group-ref: "risk-classifier-group"
+            output-field: "risk_level"
+    mapping:
+      type: "function"
+      enrichment-group-ref: "route-group"
+      output-field: "routing_result"
+```
+
+Execution semantics remain unchanged: `mapping-rules` are still priority ordered and evaluated first-match-wins when `stop-on-first-match: true`.
 
 ### When to Use Priority-Based Conditional Mapping
 
