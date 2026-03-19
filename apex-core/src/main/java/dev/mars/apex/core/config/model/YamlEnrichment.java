@@ -880,19 +880,55 @@ public class YamlEnrichment {
     }
 
     /**
-     * Individual condition rule for conditional mappings.
+     * Individual condition predicate for conditional mappings.
+     * <p>
+     * Supports three resolution types via the {@code type} field:
+     * <ul>
+     *   <li>{@code "expression"} (default) — pure SpEL evaluation</li>
+     *   <li>{@code "lookup"} — execute a lookup, stash result, then evaluate SpEL condition</li>
+     *   <li>{@code "function"} — invoke an enrichment group, stash output, then evaluate SpEL condition</li>
+     * </ul>
+     * The {@code condition} SpEL string is always the final boolean gate regardless of type.
      */
     public static class ConditionRule {
+        @JsonProperty("type")
+        private String type; // "expression" (default), "lookup", "function"
+
         @JsonProperty("condition")
-        private String condition; // SpEL expression
+        private String condition; // SpEL expression → Boolean (always present)
 
         @JsonProperty("description")
         private String description;
+
+        // For type: "lookup"
+        @JsonProperty("lookup-config")
+        private LookupConfig lookupConfig;
+
+        @JsonProperty("result-field")
+        private String resultField; // Context field to stash lookup result
+
+        // For type: "function"
+        @JsonProperty("enrichment-group-ref")
+        private String enrichmentGroupRef;
+
+        @JsonProperty("input-parameters")
+        private List<FieldMapping> inputParameters;
+
+        @JsonProperty("output-field")
+        private String outputField; // Context field to stash function output
 
         // Default constructor
         public ConditionRule() {}
 
         // Getters and setters
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
         public String getCondition() {
             return condition;
         }
@@ -907,6 +943,46 @@ public class YamlEnrichment {
 
         public void setDescription(String description) {
             this.description = description;
+        }
+
+        public LookupConfig getLookupConfig() {
+            return lookupConfig;
+        }
+
+        public void setLookupConfig(LookupConfig lookupConfig) {
+            this.lookupConfig = lookupConfig;
+        }
+
+        public String getResultField() {
+            return resultField;
+        }
+
+        public void setResultField(String resultField) {
+            this.resultField = resultField;
+        }
+
+        public String getEnrichmentGroupRef() {
+            return enrichmentGroupRef;
+        }
+
+        public void setEnrichmentGroupRef(String enrichmentGroupRef) {
+            this.enrichmentGroupRef = enrichmentGroupRef;
+        }
+
+        public List<FieldMapping> getInputParameters() {
+            return inputParameters;
+        }
+
+        public void setInputParameters(List<FieldMapping> inputParameters) {
+            this.inputParameters = inputParameters;
+        }
+
+        public String getOutputField() {
+            return outputField;
+        }
+
+        public void setOutputField(String outputField) {
+            this.outputField = outputField;
         }
     }
 
