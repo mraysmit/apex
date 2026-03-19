@@ -323,6 +323,7 @@ Key YAML model classes in `apex-core/src/main/java/dev/mars/apex/core/config/yam
 ## Anti-Patterns to Avoid
 - ❌ Don't embed infrastructure in business logic YAML
 - ❌ Don't use mocks in demo tests—use real APEX services
+- ❌ Don't use reflection in tests (no `getDeclaredMethod`, `setAccessible`, `Method.invoke`, private-field access). Test via public APIs and observable behavior.
 - ❌ Don't skip `DemoTestBase` patterns for test setup
 - ❌ Don't instantiate `RulesEngine` constructor directly—use static factory methods
 

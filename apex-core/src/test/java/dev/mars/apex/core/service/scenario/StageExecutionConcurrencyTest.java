@@ -559,6 +559,11 @@ public class StageExecutionConcurrencyTest {
             Map<String, Object> outputsA = Map.of("left", "A", "right", "B");
             Map<String, Object> outputsB = Map.of("left", "C", "right", "D");
 
+            // Seed initial state to ensure observers validate replacement atomicity,
+            // not startup emptiness before first writer publication.
+            scenarioResult.setScenarioOutputs(outputsA);
+            long startedAt = System.nanoTime();
+
             Runnable writerA = () -> {
                 try {
                     startLatch.await();
@@ -613,6 +618,9 @@ public class StageExecutionConcurrencyTest {
             executor.shutdown();
 
             Map<String, Object> finalOutputs = scenarioResult.getScenarioOutputs();
+            long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
+            logger.info("Scenario output atomicity run metrics: elapsedMs={}, emptyObservations={}, partialObservations={}",
+                elapsedMs, emptyObservations.get(), partialObservations.get());
             assertEquals(0, emptyObservations.get(),
                 "Concurrent scenario output snapshots should never observe an empty map");
             assertEquals(0, partialObservations.get(),

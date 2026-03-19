@@ -1,6 +1,6 @@
 # APEX Service Layer Testing Methodology
 
-**Last Updated:** 2026-03-18  
+**Last Updated:** 2026-03-19  
 **Java Version:** 21+  
 **JUnit:** 5.11.4  
 **Testcontainers:** 2.0.2  
@@ -30,6 +30,14 @@
 APEX tests use real service instances exclusively. Mockito and all mocking frameworks are forbidden. Tests exercise the actual APEX engine, YAML deserialization, SpEL evaluation, enrichment processing, and data source integration.
 
 **Rationale:** APEX is a configuration-driven engine where behavior emerges from the interaction of YAML configuration, SpEL expressions, and service orchestration. Mocking any layer hides the integration bugs that matter most.
+
+### No Reflection in Tests
+
+Reflection-based test techniques are forbidden. Do not use `getDeclaredMethod`, `setAccessible`, `Method.invoke`, `Field.set`, or similar reflective access to private/internal methods or fields.
+
+Tests must validate behavior through public APIs and supported entry points (`RulesEngine`, service interfaces, YAML-driven execution paths). If a behavior is not testable through public contracts, redesign test coverage around externally observable outcomes rather than internal implementation details.
+
+**Rationale:** Reflection-coupled tests are brittle under refactoring, break encapsulation boundaries, and create false failures when private signatures evolve without behavioral regressions.
 
 ### Two-Tier Error Logging
 

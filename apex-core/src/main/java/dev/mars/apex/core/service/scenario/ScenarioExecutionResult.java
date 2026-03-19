@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +53,7 @@ public class ScenarioExecutionResult {
     private final List<String> reviewFlags;
     private final Map<String, String> skippedStages; // stageName -> reason (ConcurrentHashMap for thread-safety)
     private final AtomicLong totalExecutionTimeMs;
-    private final Map<String, Object> scenarioOutputs;
+    private final AtomicReference<Map<String, Object>> scenarioOutputs;
     private final List<dev.mars.apex.engine.model.ExecutionStep> executionPath; // Trace execution
     
     public ScenarioExecutionResult(String scenarioId) {
@@ -66,7 +67,7 @@ public class ScenarioExecutionResult {
         this.reviewFlags = new CopyOnWriteArrayList<>();
         this.skippedStages = new ConcurrentHashMap<>();
         this.totalExecutionTimeMs = new AtomicLong(0);
-        this.scenarioOutputs = Collections.synchronizedMap(new HashMap<>());
+        this.scenarioOutputs = new AtomicReference<>(Collections.emptyMap());
         this.executionPath = new CopyOnWriteArrayList<>();
     }
     
@@ -112,8 +113,8 @@ public class ScenarioExecutionResult {
         return executionStartTime;
     }
     
-    public synchronized Map<String, Object> getScenarioOutputs() {
-        return new HashMap<>(scenarioOutputs);
+    public Map<String, Object> getScenarioOutputs() {
+        return new HashMap<>(scenarioOutputs.get());
     }
 
     public List<dev.mars.apex.engine.model.ExecutionStep> getExecutionPath() {
@@ -241,19 +242,24 @@ public class ScenarioExecutionResult {
     
     // Output management methods
     
-    public synchronized void addScenarioOutput(String key, Object value) {
-        scenarioOutputs.put(key, value);
+    public void addScenarioOutput(String key, Object value) {
+        scenarioOutputs.updateAndGet(current -> {
+            Map<String, Object> next = new HashMap<>(current);
+            next.put(key, value);
+            return Collections.unmodifiableMap(next);
+        });
     }
     
-    public synchronized void setScenarioOutputs(Map<String, Object> outputs) {
-        this.scenarioOutputs.clear();
-        if (outputs != null) {
-            this.scenarioOutputs.putAll(outputs);
+    public void setScenarioOutputs(Map<String, Object> outputs) {
+        if (outputs == null || outputs.isEmpty()) {
+            this.scenarioOutputs.set(Collections.emptyMap());
+            return;
         }
+        this.scenarioOutputs.set(Collections.unmodifiableMap(new HashMap<>(outputs)));
     }
     
-    public synchronized Object getScenarioOutput(String key) {
-        return scenarioOutputs.get(key);
+    public Object getScenarioOutput(String key) {
+        return scenarioOutputs.get().get(key);
     }
     
     // Utility methods

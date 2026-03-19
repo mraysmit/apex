@@ -676,39 +676,41 @@ class EnrichmentProcessorCoverageGapTest {
 
     @Test
     @DisplayName("GAP 5.8: evaluateConditionRule edge cases — null/non-boolean conditions")
-    void testEvaluateConditionRuleEdgeCases() throws Exception {
-        logger.info("GAP 5.8: Testing evaluateConditionRule edge cases");
+    void testEvaluateConditionRuleEdgeCases() {
+        logger.info("GAP 5.8: Testing evaluateConditionRule edge cases via condition evaluator API");
 
-        Method evaluateConditionRule = EnrichmentProcessor.class
-                .getDeclaredMethod("evaluateConditionRule",
-                        YamlEnrichment.ConditionRule.class,
-                        org.springframework.expression.spel.support.StandardEvaluationContext.class);
-        evaluateConditionRule.setAccessible(true);
+        EnrichmentConditionEvaluator evaluator =
+                new EnrichmentConditionEvaluator(evaluatorService.getParser(), evaluatorService::createEvaluationContext);
 
         Map<String, Object> data = new HashMap<>();
         data.put("amount", 500.0);
-        org.springframework.expression.spel.support.StandardEvaluationContext ctx =
-                evaluatorService.createEvaluationContext(data);
 
-        // Test 1: null condition → should return true
+        // Test 1: null condition -> true
         YamlEnrichment.ConditionRule nullRule = new YamlEnrichment.ConditionRule();
         nullRule.setCondition(null);
-        boolean result1 = (boolean) evaluateConditionRule.invoke(processor, nullRule, ctx);
-        assertTrue(result1, "Null condition should return true");
+        YamlEnrichment.ConditionGroup nullGroup = new YamlEnrichment.ConditionGroup();
+        nullGroup.setOperator("AND");
+        nullGroup.setRules(List.of(nullRule));
+        assertTrue(evaluator.evaluateConditionGroup(nullGroup, data), "Null condition should return true");
 
-        // Test 2: empty condition → should return true
+        // Test 2: empty condition -> true
         YamlEnrichment.ConditionRule emptyRule = new YamlEnrichment.ConditionRule();
         emptyRule.setCondition("   ");
-        boolean result2 = (boolean) evaluateConditionRule.invoke(processor, emptyRule, ctx);
-        assertTrue(result2, "Empty condition should return true");
+        YamlEnrichment.ConditionGroup emptyGroup = new YamlEnrichment.ConditionGroup();
+        emptyGroup.setOperator("AND");
+        emptyGroup.setRules(List.of(emptyRule));
+        assertTrue(evaluator.evaluateConditionGroup(emptyGroup, data), "Empty condition should return true");
 
-        // Test 3: expression returning non-boolean (string) → should return true
+        // Test 3: non-boolean expression result (string) -> true
         YamlEnrichment.ConditionRule stringRule = new YamlEnrichment.ConditionRule();
         stringRule.setCondition("'hello'");
-        boolean result3 = (boolean) evaluateConditionRule.invoke(processor, stringRule, ctx);
-        assertTrue(result3, "Non-boolean (non-null) result should return true");
+        YamlEnrichment.ConditionGroup stringGroup = new YamlEnrichment.ConditionGroup();
+        stringGroup.setOperator("AND");
+        stringGroup.setRules(List.of(stringRule));
+        assertTrue(evaluator.evaluateConditionGroup(stringGroup, data),
+                "Non-boolean (non-null) result should return true");
 
-        logger.info("GAP 5.8 PASSED: evaluateConditionRule edge cases handled correctly");
+        logger.info("GAP 5.8 PASSED: evaluateConditionRule edge cases handled correctly via public evaluator path");
     }
 
     @Test
@@ -828,60 +830,49 @@ class EnrichmentProcessorCoverageGapTest {
 
     @Test
     @DisplayName("GAP 5.13: evaluateOrConditions with invalid SpEL should propagate exception")
-    void testEvaluateOrConditionsException() throws Exception {
-        logger.info("GAP 5.13: Testing evaluateOrConditions exception catch block");
+    void testEvaluateOrConditionsException() {
+        logger.info("GAP 5.13: Testing OR condition exception path via condition evaluator API");
 
-        Method evaluateOrConditions = EnrichmentProcessor.class
-                .getDeclaredMethod("evaluateOrConditions", List.class,
-                        org.springframework.expression.spel.support.StandardEvaluationContext.class);
-        evaluateOrConditions.setAccessible(true);
+        EnrichmentConditionEvaluator evaluator =
+                new EnrichmentConditionEvaluator(evaluatorService.getParser(), evaluatorService::createEvaluationContext);
 
         Map<String, Object> data = new HashMap<>();
-        org.springframework.expression.spel.support.StandardEvaluationContext ctx =
-                evaluatorService.createEvaluationContext(data);
-
-        // Invalid SpEL expression triggers evaluateConditionRule → throws → caught by evaluateOrConditions
         YamlEnrichment.ConditionRule badRule = new YamlEnrichment.ConditionRule();
         badRule.setCondition("!!!INVALID_SPEL!!!");
 
-        try {
-            evaluateOrConditions.invoke(processor, List.of(badRule), ctx);
-            fail("Should have thrown InvocationTargetException wrapping EnrichmentException");
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            assertTrue(e.getCause() instanceof EnrichmentException,
-                    "Root cause should be EnrichmentException, got: " + e.getCause().getClass().getSimpleName());
-            logger.info("GAP 5.13: OR conditions exception correctly propagated: {}", e.getCause().getMessage());
-        }
+        YamlEnrichment.ConditionGroup group = new YamlEnrichment.ConditionGroup();
+        group.setOperator("OR");
+        group.setRules(List.of(badRule));
 
-        logger.info("GAP 5.13 PASSED: evaluateOrConditions exception path covered");
+        EnrichmentException ex = assertThrows(EnrichmentException.class,
+                () -> evaluator.evaluateConditionGroup(group, data),
+                "Invalid OR condition should propagate EnrichmentException");
+
+        logger.info("GAP 5.13: OR conditions exception correctly propagated: {}", ex.getMessage());
+        logger.info("GAP 5.13 PASSED: evaluateOrConditions exception path covered via public evaluator path");
     }
 
     @Test
     @DisplayName("GAP 5.14: evaluateAndConditions with invalid SpEL should propagate exception")
-    void testEvaluateAndConditionsException() throws Exception {
-        logger.info("GAP 5.14: Testing evaluateAndConditions exception catch block");
+        void testEvaluateAndConditionsException() {
+                logger.info("GAP 5.14: Testing AND condition exception path via condition evaluator API");
 
-        Method evaluateAndConditions = EnrichmentProcessor.class
-                .getDeclaredMethod("evaluateAndConditions", List.class,
-                        org.springframework.expression.spel.support.StandardEvaluationContext.class);
-        evaluateAndConditions.setAccessible(true);
+                EnrichmentConditionEvaluator evaluator =
+                                new EnrichmentConditionEvaluator(evaluatorService.getParser(), evaluatorService::createEvaluationContext);
 
-        Map<String, Object> data = new HashMap<>();
-        org.springframework.expression.spel.support.StandardEvaluationContext ctx =
-                evaluatorService.createEvaluationContext(data);
+                Map<String, Object> data = new HashMap<>();
+                YamlEnrichment.ConditionRule badRule = new YamlEnrichment.ConditionRule();
+                badRule.setCondition("!!!INVALID_SPEL!!!");
 
-        YamlEnrichment.ConditionRule badRule = new YamlEnrichment.ConditionRule();
-        badRule.setCondition("!!!INVALID_SPEL!!!");
+                YamlEnrichment.ConditionGroup group = new YamlEnrichment.ConditionGroup();
+                group.setOperator("AND");
+                group.setRules(List.of(badRule));
 
-        try {
-            evaluateAndConditions.invoke(processor, List.of(badRule), ctx);
-            fail("Should have thrown InvocationTargetException wrapping EnrichmentException");
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            assertTrue(e.getCause() instanceof EnrichmentException,
-                    "Root cause should be EnrichmentException, got: " + e.getCause().getClass().getSimpleName());
-            logger.info("GAP 5.14: AND conditions exception correctly propagated: {}", e.getCause().getMessage());
-        }
+                EnrichmentException ex = assertThrows(EnrichmentException.class,
+                                () -> evaluator.evaluateConditionGroup(group, data),
+                                "Invalid AND condition should propagate EnrichmentException");
 
-        logger.info("GAP 5.14 PASSED: evaluateAndConditions exception path covered");
+                logger.info("GAP 5.14: AND conditions exception correctly propagated: {}", ex.getMessage());
+                logger.info("GAP 5.14 PASSED: evaluateAndConditions exception path covered via public evaluator path");
     }
 }
