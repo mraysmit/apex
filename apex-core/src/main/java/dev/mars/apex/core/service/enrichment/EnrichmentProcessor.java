@@ -87,6 +87,9 @@ public class EnrichmentProcessor {
     // Lookup enrichment handling (Phase 13 extraction)
     private final LookupEnrichmentHandler lookupHandler;
 
+    // Condition action executor for typed condition predicates (lookup/function)
+    private final ConditionActionExecutor conditionActionExecutor;
+
     // Result analysis (Phase 13 extraction)
     private final EnrichmentResultBuilder resultBuilder = new EnrichmentResultBuilder();
 
@@ -156,6 +159,9 @@ public class EnrichmentProcessor {
         this.codeMappingProcessor = new CodeMappingProcessor(this.parser, this.evaluatorService, this.fieldAccessor);
         this.lookupHandler = new LookupEnrichmentHandler(this.fieldAccessor, this::createEvaluationContext,
             this.cacheManager, this.serviceRegistry, this.dataSourceRegistry);
+        this.conditionActionExecutor = new ConditionActionExecutor(
+            this.lookupHandler, this.fieldAccessor, this.parser, this::createEvaluationContext);
+        this.conditionEvaluator.setActionExecutor(this.conditionActionExecutor);
 
         logger.info("EnrichmentProcessor initialized with unified cache manager" + 
                    (dataSourceRegistry != null ? " and data source registry (" + dataSourceRegistry.size() + " data sources)" : "") +
@@ -486,7 +492,7 @@ public class EnrichmentProcessor {
         for (YamlEnrichment.MappingRule rule : mappingRules) {
             try {
                 // Check if rule conditions are met
-                if (evaluateMappingRuleConditions(rule, targetObject)) {
+                if (evaluateMappingRuleConditions(rule, targetObject, configuration)) {
                     anyRuleMatched = true;  // Track that a rule matched
 
                     if (logMatchedRule) {
@@ -530,30 +536,6 @@ public class EnrichmentProcessor {
      */
     private boolean evaluateConditionGroup(YamlEnrichment.ConditionGroup conditionGroup, Object targetObject) {
         return conditionEvaluator.evaluateConditionGroup(conditionGroup, targetObject);
-    }
-
-    /**
-     * Evaluate conditions with OR logic.
-     * Delegates to {@link EnrichmentConditionEvaluator#evaluateOrConditions}.
-     */
-    private boolean evaluateOrConditions(List<YamlEnrichment.ConditionRule> rules, StandardEvaluationContext context) {
-        return conditionEvaluator.evaluateOrConditions(rules, context);
-    }
-
-    /**
-     * Evaluate conditions with AND logic.
-     * Delegates to {@link EnrichmentConditionEvaluator#evaluateAndConditions}.
-     */
-    private boolean evaluateAndConditions(List<YamlEnrichment.ConditionRule> rules, StandardEvaluationContext context) {
-        return conditionEvaluator.evaluateAndConditions(rules, context);
-    }
-
-    /**
-     * Evaluate a single condition rule.
-     * Delegates to {@link EnrichmentConditionEvaluator#evaluateConditionRule}.
-     */
-    private boolean evaluateConditionRule(YamlEnrichment.ConditionRule rule, StandardEvaluationContext context) {
-        return conditionEvaluator.evaluateConditionRule(rule, context);
     }
 
     /**
@@ -664,8 +646,9 @@ public class EnrichmentProcessor {
      * Evaluate conditions for a mapping rule.
      * Delegates to {@link EnrichmentConditionEvaluator#evaluateMappingRuleConditions}.
      */
-    private boolean evaluateMappingRuleConditions(YamlEnrichment.MappingRule rule, Object targetObject) {
-        return conditionEvaluator.evaluateMappingRuleConditions(rule, targetObject);
+    private boolean evaluateMappingRuleConditions(YamlEnrichment.MappingRule rule, Object targetObject,
+                                                   YamlRuleConfiguration configuration) {
+        return conditionEvaluator.evaluateMappingRuleConditions(rule, targetObject, configuration);
     }
 
     /**
@@ -693,7 +676,7 @@ public class EnrichmentProcessor {
             if ("direct".equalsIgnoreCase(mappingType)) {
                 return applyDirectMapping(mapping, targetObject);
             } else if ("lookup".equalsIgnoreCase(mappingType)) {
-                return applyLookupMapping(mapping, targetObject);
+                return applyLookupMapping(mapping, targetObject, configuration);
             } else if ("function".equalsIgnoreCase(mappingType)) {
                 return applyFunctionMapping(mapping, targetObject, configuration);
             } else {
@@ -743,21 +726,70 @@ public class EnrichmentProcessor {
     }
 
     /**
-     * Apply lookup mapping (database/external lookup with expression).
+     * Apply lookup mapping (database/external lookup) within a conditional-mapping-enrichment.
+     * Delegates to {@link LookupEnrichmentHandler} for service resolution and lookup execution.
+     *
+     * @param mapping      The mapping configuration containing lookup-config
+     * @param targetObject The target object (shared context)
+     * @param configuration The YAML configuration for data-source-ref resolution
+     * @return The lookup result (single row as Map), or null if lookup fails/returns no data
      */
-    private Object applyLookupMapping(YamlEnrichment.MappingConfig mapping, Object targetObject) {
-        // This is a simplified implementation - in a full implementation,
-        // you would use the lookup-config to perform the actual lookup
-        logger.warn("Lookup mapping not fully implemented yet for conditional-mapping-enrichment");
-
-        // For now, fall back to expression if available
-        if (mapping.getExpression() != null && !mapping.getExpression().trim().isEmpty()) {
-            StandardEvaluationContext context = createEvaluationContext(targetObject);
-            Expression expr = getOrCompileExpression(mapping.getExpression());
-            return expr.getValue(context);
+    private Object applyLookupMapping(YamlEnrichment.MappingConfig mapping, Object targetObject,
+                                       YamlRuleConfiguration configuration) {
+        YamlEnrichment.LookupConfig lookupConfig = mapping.getLookupConfig();
+        if (lookupConfig == null) {
+            logger.warn("Lookup mapping has no lookup-config");
+            // Fall back to expression if available
+            if (mapping.getExpression() != null && !mapping.getExpression().trim().isEmpty()) {
+                StandardEvaluationContext context = createEvaluationContext(targetObject);
+                Expression expr = getOrCompileExpression(mapping.getExpression());
+                return expr.getValue(context);
+            }
+            return null;
         }
 
-        return null;
+        try {
+            // 1. Resolve lookup service via LookupEnrichmentHandler
+            LookupService lookupService = lookupHandler.resolveLookupService(
+                    "conditional-mapping-lookup", lookupConfig, configuration);
+
+            // 2. Extract lookup key
+            StandardEvaluationContext context = createEvaluationContext(targetObject);
+            Expression keyExpr = getOrCompileExpression(lookupConfig.getLookupKey());
+            Object lookupKey = keyExpr.getValue(context);
+
+            if (lookupKey == null) {
+                logger.warn("Lookup mapping key expression '{}' evaluated to null", lookupConfig.getLookupKey());
+                return null;
+            }
+
+            // 3. Perform lookup
+            Object lookupResult = lookupHandler.performLookup(lookupService, lookupKey, lookupConfig);
+            logger.debug("Lookup mapping result for key '{}': {}", lookupKey, lookupResult);
+
+            // 4. Extract output-field if specified
+            if (mapping.getOutputField() != null && !mapping.getOutputField().trim().isEmpty()) {
+                // If outputField is specified, store full result and extract specific field
+                if (lookupResult instanceof java.util.Map) {
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> resultMap = (java.util.Map<String, Object>) lookupResult;
+                    return resultMap.get(mapping.getOutputField());
+                }
+                return lookupResult;
+            }
+
+            // 5. Apply expression/transformation on the result if specified
+            if (lookupResult != null && mapping.getExpression() != null
+                    && !mapping.getExpression().trim().isEmpty()) {
+                return applyExpression(mapping.getExpression(), lookupResult, targetObject);
+            }
+
+            return lookupResult;
+        } catch (Exception e) {
+            logger.warn("Lookup mapping failed: {}", e.getMessage());
+            logger.debug("Stack trace for lookup mapping failure:", e);
+            return null;
+        }
     }
 
     /**
@@ -902,6 +934,8 @@ public class EnrichmentProcessor {
      */
     public void setEnrichmentGroupExecutorSupplier(Supplier<EnrichmentGroupExecutor> supplier) {
         this.enrichmentGroupExecutorSupplier = supplier;
+        // Also wire to ConditionActionExecutor for function condition predicates
+        this.conditionActionExecutor.setEnrichmentGroupExecutorSupplier(supplier);
     }
 
     // ========================================
