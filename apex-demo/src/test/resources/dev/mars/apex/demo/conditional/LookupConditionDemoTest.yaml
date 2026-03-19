@@ -4,7 +4,7 @@
 # a database/inline lookup, stashes the result into result-field, then evaluates
 # a SpEL condition against it.
 #
-# Markit-like Pattern: IF=DB Lookup — the WHEN side resolves via lookup *before*
+# RuleBuilder-like Pattern: IF=DB Lookup — the WHEN side resolves via lookup *before*
 # evaluating the boolean gate. This is the key innovation of the unified condition
 # resolution design: conditions are no longer limited to pure SpEL expressions.
 #

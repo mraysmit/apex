@@ -3,7 +3,7 @@
 # ============================================================================
 # Used by: FunctionMappingRefsTest.java (loaded via enrichment-refs)
 # Purpose: Reusable enrichment group invoked only via function mapping
-# Pattern: Markit converted YAML - imported like a Java import, never auto-executed
+# Pattern: RuleBuilder converted YAML - imported like a Java import, never auto-executed
 # ============================================================================
 
 metadata:

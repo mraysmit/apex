@@ -3,7 +3,7 @@
 # Demonstrates the RefLookup pattern: pure lookup on the THEN side with no condition.
 # This is the simplest data enrichment pattern — "for this input, look up and return the value".
 #
-# Markit Pattern: RefLookup — the mapping rule performs a database/inline lookup to resolve
+# RuleBuilder Pattern: RefLookup — the mapping rule performs a database/inline lookup to resolve
 # the target field value. No boolean condition gate needed.
 #
 # Scenario: Counterparty reference data enrichment.

@@ -9,7 +9,7 @@
 
 ## Solution Summary
 
-APEX conditional-mapping-enrichment had an asymmetry: the THEN (mapping) side supported pluggable resolution types (`"direct"`, `"lookup"`, `"function"`), but the WHEN (condition) side was hard-coded to SpEL expressions only. This blocked three Markit Rule Builder conversion patterns.
+APEX conditional-mapping-enrichment had an asymmetry: the THEN (mapping) side supported pluggable resolution types (`"direct"`, `"lookup"`, `"function"`), but the WHEN (condition) side was hard-coded to SpEL expressions only. This blocked three Rule Builder conversion patterns.
 
 **The fix:** add the same `type` dispatch to condition predicates. A `ConditionRule` now accepts `type: "expression"` (default — pure SpEL, unchanged), `type: "lookup"` (execute a lookup, store the result, then evaluate SpEL against it), or `type: "function"` (invoke an enrichment group, store the output, then evaluate SpEL). The `condition:` SpEL string is always the final boolean gate regardless of type.
 
@@ -26,7 +26,7 @@ APEX conditional-mapping-enrichment had an asymmetry: the THEN (mapping) side su
 - `EnrichmentConditionEvaluator` — rewritten with type dispatch
 - `EnrichmentProcessor` — `applyLookupMapping()` implemented; `YamlRuleConfiguration` threaded through condition evaluation
 
-**Three Markit patterns now supported:**
+**Three RuleBuilder patterns now supported:**
 
 | Pattern | Condition (WHEN) | Mapping (THEN) | Demo test |
 |---------|-----------------|----------------|-----------|
@@ -59,7 +59,7 @@ conditions:
     - condition: "#trade.broker_code != null"   # SpEL only — no lookup, no function
 ```
 
-This prevents three patterns found in Markit Rule Builder conversions:
+This prevents three patterns found in Rule Builder conversions:
 
 ### Pattern 1: IF = Function, THEN = Function
 
@@ -189,7 +189,7 @@ Both containment and reference are naturally supported through existing APEX pat
 
 ---
 
-## Markit Pattern Examples
+## RuleBuilder Pattern Examples
 
 ### Pattern 1: IF = Function, THEN = Function
 
@@ -408,7 +408,7 @@ Conditional Mapping Enrichment
 
 ### Prerequisite: Implement `applyLookupMapping()`
 
-The existing stub in `EnrichmentProcessor` must be wired to real lookup infrastructure before any of the three Markit patterns work fully. `MappingConfig` already has a `LookupConfig lookupConfig` field — the model is ready.
+The existing stub in `EnrichmentProcessor` must be wired to real lookup infrastructure before any of the three RuleBuilder patterns work fully. `MappingConfig` already has a `LookupConfig lookupConfig` field — the model is ready.
 
 **Changes:**
 - `EnrichmentProcessor.applyLookupMapping()` — replace stub with delegation to `LookupEnrichmentHandler` lookup resolution and execution logic
@@ -520,7 +520,7 @@ Add `type` field and resolution dispatch to `ConditionRule` / `EnrichmentConditi
 
 ### Phase 3: Demo tests
 
-Three Markit pattern tests following existing `DemoTestBase` conventions:
+Three RuleBuilder pattern tests following existing `DemoTestBase` conventions:
 1. IF=Function, THEN=Function
 2. IF=DB Lookup, THEN=Direct
 3. RefLookup (no condition, THEN=Lookup)

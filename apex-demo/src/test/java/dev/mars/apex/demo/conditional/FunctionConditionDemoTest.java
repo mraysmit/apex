@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Demonstrates the IF=Function + THEN=Function Markit pattern: both the condition
+ * Demonstrates the IF=Function + THEN=Function RuleBuilder pattern: both the condition
  * predicate and the mapping resolution invoke enrichment groups.
  *
  * <p>Scenario: Trade risk classification and routing.

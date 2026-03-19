@@ -3,7 +3,7 @@
 # Demonstrates the IF=Function + THEN=Function pattern: both the condition predicate
 # and the mapping resolution invoke enrichment groups.
 #
-# Markit Pattern: Both sides of the mapping rule resolve via enrichment group invocation.
+# RuleBuilder Pattern: Both sides of the mapping rule resolve via enrichment group invocation.
 # This is the most powerful composition: the WHEN side runs a function to decide,
 # and the THEN side runs a different function to produce the result.
 #

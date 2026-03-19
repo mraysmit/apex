@@ -4,7 +4,7 @@
 # Used by: FunctionMappingRefsTest.java
 # Purpose: Test that enrichment groups loaded via enrichment-refs do NOT
 #          auto-execute — they only execute when referenced by function mapping
-# Pattern: Markit converted YAML with Rule Builder import
+# Pattern: RuleBuilder converted YAML with Rule Builder import
 # ============================================================================
 
 metadata:

@@ -36,7 +36,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration test for the Markit Rule Builder pattern:
+ * Integration test for the Rule Builder pattern:
  * enrichment group loaded via enrichment-refs (like Java import) is NOT auto-executed.
  * 
  * The enrichment group is a definition only — it executes solely when invoked

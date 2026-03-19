@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Demonstrates the RefLookup Markit pattern: the THEN side of a mapping rule
+ * Demonstrates the RefLookup RuleBuilder pattern: the THEN side of a mapping rule
  * is a pure lookup — no condition gate needed. This is the simplest enrichment
  * pattern: "for this key, look up the value".
  *

@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Demonstrates the IF=Lookup Markit pattern: the WHEN side of a mapping rule
+ * Demonstrates the IF=Lookup RuleBuilder pattern: the WHEN side of a mapping rule
  * performs a lookup to resolve data, stashes the result into the shared context,
  * then evaluates a SpEL condition against it.
  *
