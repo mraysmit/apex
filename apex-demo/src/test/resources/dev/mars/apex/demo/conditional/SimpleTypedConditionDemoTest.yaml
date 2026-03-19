@@ -1,0 +1,53 @@
+# SimpleTypedConditionDemoTest.yaml
+# =================================
+# Simplest possible demonstration of the unified condition resolution feature.
+#
+# The key change: conditions can now have a "type" that resolves data
+# before the SpEL boolean gate evaluates. Here a lookup condition resolves
+# a country code from an inline dataset, stashes the result, and the SpEL
+# condition checks whether the lookup found a match.
+#
+# Input:  COUNTRY_CODE (e.g. "GB")
+# Output: COUNTRY_NAME (e.g. "United Kingdom") or "UNKNOWN" if not found
+
+metadata:
+  name: "Simple Typed Condition Demo"
+
+enrichments:
+  - id: "country-resolver"
+    type: "conditional-mapping-enrichment"
+    target-field: "COUNTRY_NAME"
+    mapping-rules:
+
+      # Lookup condition: resolve country, then check if found
+      - id: "known-country"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - type: "lookup"
+              description: "Look up country by code"
+              lookup-config:
+                lookup-dataset:
+                  type: "inline"
+                  data:
+                    - code: "GB"
+                      name: "United Kingdom"
+                    - code: "US"
+                      name: "United States"
+                    - code: "DE"
+                      name: "Germany"
+                  key-field: "code"
+                lookup-key: "#COUNTRY_CODE"
+              result-field: "country_info"
+              condition: "#country_info != null"
+        mapping:
+          type: "direct"
+          expression: "#country_info['name']"
+
+      # Fallback: no conditions = always matches
+      - id: "unknown-country"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'UNKNOWN'"

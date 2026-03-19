@@ -1,0 +1,153 @@
+# LookupConditionDemoTest.yaml
+# =============================
+# Demonstrates the IF=Lookup pattern: the WHEN side of a mapping rule performs
+# a database/inline lookup, stashes the result into result-field, then evaluates
+# a SpEL condition against it.
+#
+# Markit-like Pattern: IF=DB Lookup — the WHEN side resolves via lookup *before*
+# evaluating the boolean gate. This is the key innovation of the unified condition
+# resolution design: conditions are no longer limited to pure SpEL expressions.
+#
+# Scenario: Settlement routing based on currency reference data.
+#   Given a currency code and trade amount, determine the settlement instruction:
+#     - Unrestricted currencies (USD, EUR) → standard settlement with region + cutoff
+#     - Restricted currencies (CNY, KRW)   → manual review with region
+#     - Unknown currencies                 → rejection
+#
+# Flow (for the standard-settlement rule as example):
+#   1. Condition rule (type: "lookup") resolves currency code from inline dataset
+#   2. Full currency record stashed into "currency_info" in shared context via result-field
+#   3. SpEL condition checks "#currency_info != null && #currency_info['isRestricted'] == false"
+#   4. Second condition rule (pure SpEL) checks "#AMOUNT > 0" — AND logic requires both
+#   5. If both conditions pass → direct mapping builds settlement instruction from stashed data
+#   6. If either fails → falls through to next priority rule
+#
+# Key concepts demonstrated:
+#   - Condition type: "lookup" — the WHEN side resolves via lookup before SpEL evaluation
+#   - result-field: stashes the full lookup result into the shared context for downstream use
+#   - SpEL condition gate after lookup — the boolean gate accesses the stashed result
+#   - AND operator with mixed condition types — lookup + pure SpEL in the same condition group
+#   - Priority-based routing — three rules at priority 1, 2, 999 form a decision chain
+#   - Stashed data reuse in mapping expression — the THEN side reads from result-field data
+#   - stop-on-first-match (default true) — first matching rule wins, remaining rules skipped
+
+metadata:
+  id: "lookup-condition-demo"
+  type: "rule-config"
+  description: "Demonstrates lookup-typed condition predicates (IF=Lookup pattern)"
+
+enrichments:
+  # ── Single conditional-mapping-enrichment with 3 priority-ordered rules ──────
+  # The enrichment targets SETTLEMENT_INSTRUCTION and uses stop-on-first-match
+  # (default). Rules are evaluated in priority order; first match writes the value.
+  - id: "settlement-routing"
+    type: "conditional-mapping-enrichment"
+    target-field: "SETTLEMENT_INSTRUCTION"
+    mapping-rules:
+
+      # ── Rule 1 (priority 1): Unrestricted currency → standard settlement ────
+      # Condition group (AND):
+      #   1. Lookup condition: resolve currency from inline dataset, stash into currency_info,
+      #      then check isRestricted == false
+      #   2. Pure SpEL condition: AMOUNT > 0
+      # Both must pass for this rule to match.
+      # Mapping: direct SpEL expression that reads region and cutoff from stashed currency_info.
+      - id: "standard-settlement"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - type: "lookup"
+              description: "Resolve currency details from reference data"
+              lookup-config:
+                lookup-key: "#CURRENCY_CODE"
+                lookup-dataset:
+                  type: "inline"
+                  key-field: "code"
+                  data:
+                    - code: "USD"
+                      name: "US Dollar"
+                      isRestricted: false
+                      settlementCutoff: "17:00"
+                      region: "AMER"
+                    - code: "EUR"
+                      name: "Euro"
+                      isRestricted: false
+                      settlementCutoff: "16:00"
+                      region: "EMEA"
+                    - code: "CNY"
+                      name: "Chinese Yuan"
+                      isRestricted: true
+                      settlementCutoff: "14:00"
+                      region: "APAC"
+                    - code: "KRW"
+                      name: "Korean Won"
+                      isRestricted: true
+                      settlementCutoff: "13:00"
+                      region: "APAC"
+              result-field: "currency_info"
+              condition: "#currency_info != null && #currency_info['isRestricted'] == false"
+            # Pure SpEL condition — no lookup needed, just evaluates against input data.
+            # Demonstrates AND logic with mixed condition types (lookup + expression).
+            - condition: "#AMOUNT > 0"
+              description: "Amount must be positive"
+        # Direct mapping expression reads from stashed lookup data.
+        # The currency_info map was populated by the lookup condition above.
+        mapping:
+          type: "direct"
+          expression: "'STANDARD_' + #currency_info['region'] + '_' + #currency_info['settlementCutoff']"
+
+      # ── Rule 2 (priority 2): Restricted currency → manual review ────────────
+      # Same lookup pattern as rule 1, but the SpEL gate checks isRestricted == true.
+      # If the currency is restricted (CNY, KRW), routes to manual review.
+      # Note: the same inline dataset is used — in production this would be a
+      # data-source-ref to an external database, avoiding duplication.
+      - id: "restricted-settlement"
+        priority: 2
+        conditions:
+          operator: "AND"
+          rules:
+            - type: "lookup"
+              description: "Resolve currency — expect restricted"
+              lookup-config:
+                lookup-key: "#CURRENCY_CODE"
+                lookup-dataset:
+                  type: "inline"
+                  key-field: "code"
+                  data:
+                    - code: "USD"
+                      name: "US Dollar"
+                      isRestricted: false
+                      settlementCutoff: "17:00"
+                      region: "AMER"
+                    - code: "EUR"
+                      name: "Euro"
+                      isRestricted: false
+                      settlementCutoff: "16:00"
+                      region: "EMEA"
+                    - code: "CNY"
+                      name: "Chinese Yuan"
+                      isRestricted: true
+                      settlementCutoff: "14:00"
+                      region: "APAC"
+                    - code: "KRW"
+                      name: "Korean Won"
+                      isRestricted: true
+                      settlementCutoff: "13:00"
+                      region: "APAC"
+              result-field: "currency_info"
+              condition: "#currency_info != null && #currency_info['isRestricted'] == true"
+        mapping:
+          type: "direct"
+          expression: "'MANUAL_REVIEW_' + #currency_info['region']"
+
+      # ── Rule 3 (priority 999): Unknown currency → rejection ─────────────────
+      # No conditions — this is the catch-all fallback rule.
+      # If the currency code doesn't exist in the dataset, the lookup conditions
+      # in rules 1 and 2 both fail (currency_info is null → SpEL gate returns false),
+      # so processing falls through to this default rule.
+      - id: "unknown-currency"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'REJECTED_UNKNOWN_CURRENCY'"

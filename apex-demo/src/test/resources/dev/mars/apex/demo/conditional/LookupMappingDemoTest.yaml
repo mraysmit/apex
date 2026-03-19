@@ -1,0 +1,167 @@
+# LookupMappingDemoTest.yaml
+# =========================
+# Demonstrates the RefLookup pattern: pure lookup on the THEN side with no condition.
+# This is the simplest data enrichment pattern — "for this input, look up and return the value".
+#
+# Markit Pattern: RefLookup — the mapping rule performs a database/inline lookup to resolve
+# the target field value. No boolean condition gate needed.
+#
+# Scenario: Counterparty reference data enrichment.
+#   Given a counterparty short code (e.g. "GS", "JPM"), look up and populate:
+#     1. Legal entity name   → COUNTERPARTY_NAME
+#     2. LEI (Legal Entity Identifier) → COUNTERPARTY_LEI
+#     3. Regulatory jurisdiction → REGULATORY_REGION
+#
+# This test covers three variants of the lookup mapping pattern:
+#   - Enrichment 1 (counterparty-enrichment): Pure THEN=Lookup with output-field="name"
+#     No condition — the lookup always fires. If the key is not found, target gets null.
+#   - Enrichment 2 (lei-enrichment): Same pattern, output-field="lei"
+#     Demonstrates extracting a different field from the same dataset shape.
+#   - Enrichment 3 (jurisdiction-enrichment): IF=Lookup condition gates a direct mapping
+#     Combines lookup condition (type: "lookup") with a fallback rule, so unknown
+#     counterparties resolve to "UNKNOWN" instead of null.
+#
+# Key concepts demonstrated:
+#   - mapping.type: "lookup" — the THEN side resolves via inline dataset lookup
+#   - output-field — extracts a single field from the lookup result map
+#   - Condition type: "lookup" — the WHEN side performs a lookup before evaluating SpEL
+#   - result-field — stashes the lookup result into the shared context for SpEL access
+#   - Priority-based fallback — lower-priority rule catches unresolved lookups
+
+metadata:
+  id: "lookup-mapping-demo"
+  type: "rule-config"
+  description: "Demonstrates lookup-typed mapping (RefLookup pattern — no condition, THEN=Lookup)"
+
+enrichments:
+  # ── Enrichment 1: Counterparty Name ────────────────────────────────────
+  # Pure RefLookup — no condition gate, the lookup always fires.
+  # The mapping type is "lookup", which resolves the target field by performing
+  # an inline dataset lookup keyed on COUNTERPARTY_CODE and extracting the "name" field.
+  - id: "counterparty-enrichment"
+    type: "conditional-mapping-enrichment"
+    target-field: "COUNTERPARTY_NAME"
+    mapping-rules:
+
+      # No conditions block — this rule matches unconditionally.
+      # output-field: "name" extracts only the name from the full lookup result map.
+      - id: "lookup-counterparty"
+        priority: 1
+        mapping:
+          type: "lookup"
+          lookup-config:
+            lookup-key: "#COUNTERPARTY_CODE"
+            lookup-dataset:
+              type: "inline"
+              key-field: "code"
+              data:
+                - code: "GS"
+                  name: "Goldman Sachs Group Inc."
+                  lei: "784F5XWPLTWKTBV8GR34"
+                  jurisdiction: "US"
+                - code: "JPM"
+                  name: "JPMorgan Chase & Co."
+                  lei: "8I5DZWZKVSZI1NUHU748"
+                  jurisdiction: "US"
+                - code: "DB"
+                  name: "Deutsche Bank AG"
+                  lei: "7LTWFZYICNSX8D621K86"
+                  jurisdiction: "DE"
+                - code: "BARC"
+                  name: "Barclays PLC"
+                  lei: "213800LBQA1Y9L22JB70"
+                  jurisdiction: "GB"
+          output-field: "name"
+
+  # ── Enrichment 2: LEI (Legal Entity Identifier) ───────────────────────
+  # Same dataset shape as enrichment 1, but output-field extracts "lei" instead of "name".
+  # This demonstrates that multiple enrichments can query the same reference data
+  # and pull different fields into different target fields.
+  - id: "lei-enrichment"
+    type: "conditional-mapping-enrichment"
+    target-field: "COUNTERPARTY_LEI"
+    mapping-rules:
+      - id: "lookup-lei"
+        priority: 1
+        mapping:
+          type: "lookup"
+          lookup-config:
+            lookup-key: "#COUNTERPARTY_CODE"
+            lookup-dataset:
+              type: "inline"
+              key-field: "code"
+              data:
+                - code: "GS"
+                  name: "Goldman Sachs Group Inc."
+                  lei: "784F5XWPLTWKTBV8GR34"
+                  jurisdiction: "US"
+                - code: "JPM"
+                  name: "JPMorgan Chase & Co."
+                  lei: "8I5DZWZKVSZI1NUHU748"
+                  jurisdiction: "US"
+                - code: "DB"
+                  name: "Deutsche Bank AG"
+                  lei: "7LTWFZYICNSX8D621K86"
+                  jurisdiction: "DE"
+                - code: "BARC"
+                  name: "Barclays PLC"
+                  lei: "213800LBQA1Y9L22JB70"
+                  jurisdiction: "GB"
+          output-field: "lei"
+
+  # ── Enrichment 3: Regulatory Jurisdiction (with fallback) ──────────────
+  # Unlike enrichments 1 & 2, this one needs graceful handling of unknown counterparties.
+  # It uses an IF=Lookup condition to gate the mapping: the condition performs the lookup,
+  # stashes the result into "cpty_jurisdiction_data", and checks if it's non-null.
+  # If the counterparty is found → extract jurisdiction from the stashed result.
+  # If not found → the condition fails, and the fallback rule at priority 999 writes "UNKNOWN".
+  #
+  # This pattern combines:
+  #   - Condition type: "lookup" (WHEN side resolves via lookup)
+  #   - result-field: stashes lookup result into shared context
+  #   - SpEL condition gate: "#cpty_jurisdiction_data != null"
+  #   - Mapping type: "direct" with SpEL expression reading from stashed data
+  #   - Priority-ordered fallback for the not-found case
+  - id: "jurisdiction-enrichment"
+    type: "conditional-mapping-enrichment"
+    target-field: "REGULATORY_REGION"
+    mapping-rules:
+      - id: "lookup-jurisdiction"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            # Lookup condition: resolve counterparty from inline dataset.
+            # If found, the full record is stashed into "cpty_jurisdiction_data".
+            # The SpEL condition then checks for non-null to confirm the lookup succeeded.
+            - type: "lookup"
+              lookup-config:
+                lookup-key: "#COUNTERPARTY_CODE"
+                lookup-dataset:
+                  type: "inline"
+                  key-field: "code"
+                  data:
+                    - code: "GS"
+                      jurisdiction: "US"
+                    - code: "JPM"
+                      jurisdiction: "US"
+                    - code: "DB"
+                      jurisdiction: "DE"
+                    - code: "BARC"
+                      jurisdiction: "GB"
+              result-field: "cpty_jurisdiction_data"
+              condition: "#cpty_jurisdiction_data != null"
+        # If the lookup condition passed, extract jurisdiction from the stashed result.
+        # Note: the mapping type here is "direct" (SpEL), not "lookup" — the actual
+        # lookup already happened in the condition. This avoids a redundant second lookup.
+        mapping:
+          type: "direct"
+          expression: "#cpty_jurisdiction_data['jurisdiction']"
+
+      # Fallback: fires when the lookup condition fails (counterparty not in dataset).
+      # Priority 999 ensures this only matches after all higher-priority rules are tried.
+      - id: "unknown-counterparty"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'UNKNOWN'"

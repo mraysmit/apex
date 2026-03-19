@@ -1,0 +1,167 @@
+# FunctionConditionDemoTest.yaml
+# ===============================
+# Demonstrates the IF=Function + THEN=Function pattern: both the condition predicate
+# and the mapping resolution invoke enrichment groups.
+#
+# Markit Pattern: Both sides of the mapping rule resolve via enrichment group invocation.
+# This is the most powerful composition: the WHEN side runs a function to decide,
+# and the THEN side runs a different function to produce the result.
+#
+# Scenario: Trade risk classification and routing.
+#   Given a trade with NOTIONAL amount and DESK_CODE, the system:
+#     1. Classifies risk level (HIGH / MEDIUM / LOW) via the classifier enrichment group
+#     2. Routes the trade via the appropriate router enrichment group
+#
+# Architecture:
+#   - 4 "worker" enrichments (field-enrichment type): do the actual computation
+#   - 4 enrichment-groups: wrap workers into invocable units
+#   - 1 conditional-mapping-enrichment (the orchestrator): coordinates IF/THEN dispatch
+#
+# Flow (for the high-risk-route rule as example):
+#   1. Condition (type: "function") invokes "risk-classifier-group"
+#      → classifier enrichment evaluates NOTIONAL thresholds
+#      → sets risk_level in shared context (output-field)
+#      → SpEL condition checks "#risk_level == 'HIGH'"
+#   2. If condition passes → Mapping (type: "function") invokes "high-risk-router-group"
+#      → router enrichment produces routing_instruction using DESK_CODE
+#      → output-field extracts routing_instruction → written to target-field TRADE_ROUTING
+#
+# Key concepts demonstrated:
+#   - Condition type: "function" — the WHEN side invokes an enrichment group
+#   - output-field on condition — stashes function output into shared context for SpEL gate
+#   - Mapping type: "function" — the THEN side also invokes an enrichment group
+#   - enrichment-group-ref — references groups defined in the enrichment-groups section
+#   - Groups as definitions only — enrichment-groups don't auto-execute; they run only
+#     when invoked by a function condition or function mapping
+#   - Priority-based classification routing — rules at 1, 2, 999 form a decision chain
+#   - Risk thresholds: >5M = HIGH, >1M = MEDIUM, else LOW
+
+metadata:
+  id: "function-condition-demo"
+  type: "rule-config"
+  description: "Demonstrates function-typed condition + function-typed mapping (IF=Function, THEN=Function)"
+
+enrichments:
+  # ── Worker Enrichments ──────────────────────────────────────────────────────
+  # These are standalone field-enrichment definitions. They don't execute at their
+  # definition position in the YAML — they only run when invoked through an
+  # enrichment group via a function condition or function mapping.
+
+  # Risk classifier: evaluates trade notional against thresholds and writes risk_level.
+  # Thresholds: >5M → HIGH, >1M → MEDIUM, else → LOW
+  - id: "risk-classifier-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "risk_level"
+        expression: "#NOTIONAL > 5000000 ? 'HIGH' : (#NOTIONAL > 1000000 ? 'MEDIUM' : 'LOW')"
+
+  # High-risk router: produces a compliance routing instruction.
+  # Concatenates DESK_CODE into the routing path for audit traceability.
+  - id: "high-risk-router-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "routing_instruction"
+        expression: "'ROUTE_COMPLIANCE_' + #DESK_CODE + '_PRIORITY'"
+
+  # Medium-risk router: produces a standard desk routing instruction.
+  - id: "medium-risk-router-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "routing_instruction"
+        expression: "'ROUTE_STANDARD_' + #DESK_CODE"
+
+  # Low-risk router: produces a fixed auto-approval instruction (no desk routing needed).
+  - id: "low-risk-router-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "routing_instruction"
+        expression: "'AUTO_APPROVED'"
+
+  # ── Orchestrator: Conditional Mapping Enrichment ────────────────────────────
+  # This is the main enrichment that drives the classification and routing.
+  # It contains 3 mapping rules evaluated in priority order (stop-on-first-match).
+  # Each rule's condition invokes the classifier, and each rule's mapping invokes a router.
+  - id: "trade-routing"
+    type: "conditional-mapping-enrichment"
+    target-field: "TRADE_ROUTING"
+    mapping-rules:
+
+      # ── Rule 1 (priority 1): HIGH risk → compliance routing ─────────────────
+      # Condition: invoke risk-classifier-group → read risk_level → check == 'HIGH'
+      # Mapping:   invoke high-risk-router-group → read routing_instruction → write to target
+      - id: "high-risk-route"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - type: "function"
+              description: "Classify trade risk level"
+              enrichment-group-ref: "risk-classifier-group"
+              output-field: "risk_level"
+              condition: "#risk_level == 'HIGH'"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "high-risk-router-group"
+          output-field: "routing_instruction"
+
+      # ── Rule 2 (priority 2): MEDIUM risk → standard desk routing ─────────────
+      # Same classifier invocation as rule 1, but SpEL gate checks for 'MEDIUM'.
+      # If rule 1 matched (HIGH), this rule is never evaluated (stop-on-first-match).
+      - id: "medium-risk-route"
+        priority: 2
+        conditions:
+          operator: "AND"
+          rules:
+            - type: "function"
+              description: "Classify trade risk level"
+              enrichment-group-ref: "risk-classifier-group"
+              output-field: "risk_level"
+              condition: "#risk_level == 'MEDIUM'"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "medium-risk-router-group"
+          output-field: "routing_instruction"
+
+      # ── Rule 3 (priority 999): Default → LOW risk auto-approve ──────────────
+      # No conditions — this is the catch-all fallback.
+      # If neither HIGH nor MEDIUM matched, the trade is LOW risk.
+      # Note: the mapping is still type: "function" even without a condition —
+      # the router group produces the auto-approval instruction.
+      - id: "low-risk-route"
+        priority: 999
+        mapping:
+          type: "function"
+          enrichment-group-ref: "low-risk-router-group"
+          output-field: "routing_instruction"
+
+# ── Enrichment Groups ──────────────────────────────────────────────────────────
+# These are definition-only containers. They do NOT auto-execute at this position
+# in the YAML actually a code change was required to align with the behaviour of other *group refs. They only execute when invoked via enrichment-group-ref from a
+# function condition or function mapping above.
+#
+# Each group wraps one worker enrichment. In production, groups can contain
+# multiple enrichments forming a processing pipeline.
+enrichment-groups:
+  - id: "risk-classifier-group"
+    name: "Trade Risk Classifier"
+    enrichment-ids:
+      - "risk-classifier-enrichment"
+
+  - id: "high-risk-router-group"
+    name: "High Risk Router"
+    enrichment-ids:
+      - "high-risk-router-enrichment"
+
+  - id: "medium-risk-router-group"
+    name: "Medium Risk Router"
+    enrichment-ids:
+      - "medium-risk-router-enrichment"
+
+  - id: "low-risk-router-group"
+    name: "Low Risk Router"
+    enrichment-ids:
+      - "low-risk-router-enrichment"
