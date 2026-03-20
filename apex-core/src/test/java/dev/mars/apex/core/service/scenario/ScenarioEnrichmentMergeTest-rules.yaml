@@ -1,0 +1,37 @@
+metadata:
+  id: "enrichment-merge-rules"
+  name: "Enrichment Merge Rules"
+  version: "1.0.0"
+  description: "Rules that enrich input data with computed fields for merge-back testing"
+  type: "rule-config"
+  created-by: "APEX Test Suite"
+
+rules:
+  - id: "always-match"
+    name: "Always Match"
+    condition: "true"
+    message: "Stage executed"
+    severity: "INFO"
+
+enrichments:
+  - id: "add-risk-category"
+    name: "Add Risk Category"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "'HIGH_RISK'"
+      result-field: "riskCategory"
+    field-mappings:
+      - source-field: "riskCategory"
+        target-field: "riskCategory"
+
+  - id: "add-settlement-status"
+    name: "Add Settlement Status"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "'PENDING_REVIEW'"
+      result-field: "settlementStatus"
+    field-mappings:
+      - source-field: "settlementStatus"
+        target-field: "settlementStatus"
