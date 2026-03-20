@@ -1,0 +1,13 @@
+metadata:
+  id: "enrichment-merge-registry"
+  name: "Enrichment Merge Registry"
+  version: "1.0.0"
+  description: "Registry for testing enrichment merge-back with classification-based routing"
+  type: "scenario-registry"
+  created-by: "APEX Test Suite"
+
+scenarios:
+  - scenario-id: "enrichment-merge-scenario"
+    config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioEnrichmentMergeTest-classified-scenario.yaml"
+    enabled: true
+    description: "Matches trades with productType OPTION"

@@ -1,0 +1,22 @@
+metadata:
+  id: "enrichment-merge-classified-scenario"
+  name: "Enrichment Merge Classified Scenario"
+  version: "1.0.0"
+  description: "Scenario with classification rule for merge-back testing via evaluateWithClassification"
+  type: "scenario"
+  created-by: "APEX Test Suite"
+
+scenario:
+  scenario-id: "enrichment-merge-scenario"
+  name: "Enrichment Merge Classified Scenario"
+  description: "Matches OPTION trades and enriches with riskCategory and settlementStatus"
+
+  classification-rule:
+    condition: "#productType == 'OPTION'"
+    description: "Matches trades with productType OPTION"
+
+  processing-stages:
+    - stage-name: "enrichment-stage"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioEnrichmentMergeTest-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"

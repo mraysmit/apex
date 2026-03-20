@@ -1,0 +1,17 @@
+metadata:
+  id: "enrichment-merge-scenario"
+  name: "Enrichment Merge Scenario"
+  version: "1.0.0"
+  description: "Single-stage scenario for testing that enrichments merge back into caller input data"
+  type: "scenario"
+  created-by: "APEX Test Suite"
+
+scenario:
+  scenario-id: "enrichment-merge-scenario"
+  name: "Enrichment Merge Scenario"
+  description: "Enriches input data with riskCategory and settlementStatus"
+  processing-stages:
+    - stage-name: "enrichment-stage"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioEnrichmentMergeTest-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"

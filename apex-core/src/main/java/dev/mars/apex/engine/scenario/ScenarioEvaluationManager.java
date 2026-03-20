@@ -100,6 +100,9 @@ public class ScenarioEvaluationManager {
             );
         }
 
+        // Deep copy input data to protect against callers sharing the same map across concurrent calls
+        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
+
         logger.info("Evaluating scenario from YAML configuration");
 
         // Parse scenario configuration from YAML using ScenarioParser
@@ -108,10 +111,12 @@ public class ScenarioEvaluationManager {
         // Create ScenarioStageExecutor and execute stages
         ScenarioStageExecutor executor = new ScenarioStageExecutor();
 
-        // Deep copy input data to protect against callers sharing the same map across concurrent calls
-        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
+        ScenarioExecutionResult result = executor.executeStages(scenario, safeInputData);
 
-        return executor.executeStages(scenario, safeInputData);
+        // Merge enriched data back into the caller's original map so stage outputs are visible
+        DataCopyUtility.deepMergeInto(inputData, safeInputData);
+
+        return result;
     }
 
     /**
@@ -143,6 +148,9 @@ public class ScenarioEvaluationManager {
             );
         }
 
+        // Deep copy input data to protect against callers sharing the same map across concurrent calls
+        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
+
         logger.info("Evaluating scenario by ID: {}", scenarioId);
 
         // Look up scenario from registry using the lookup strategy
@@ -151,10 +159,12 @@ public class ScenarioEvaluationManager {
         // Create ScenarioStageExecutor and execute stages
         ScenarioStageExecutor executor = new ScenarioStageExecutor();
 
-        // Deep copy input data to protect against callers sharing the same map across concurrent calls
-        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
+        ScenarioExecutionResult result = executor.executeStages(scenario, safeInputData);
 
-        return executor.executeStages(scenario, safeInputData);
+        // Merge enriched data back into the caller's original map so stage outputs are visible
+        DataCopyUtility.deepMergeInto(inputData, safeInputData);
+
+        return result;
     }
 
     /**
@@ -181,10 +191,13 @@ public class ScenarioEvaluationManager {
             );
         }
 
+        // Deep copy input data to protect against callers sharing the same map across concurrent calls
+        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
+
         logger.info("Evaluating scenario using classification-based routing");
 
         // Find matching scenario based on classification rules using the lookup strategy
-        ScenarioConfiguration scenario = scenarioLookup.findMatchingScenario(inputData);
+        ScenarioConfiguration scenario = scenarioLookup.findMatchingScenario(safeInputData);
 
         if (scenario == null) {
             throw new IllegalStateException(
@@ -198,10 +211,12 @@ public class ScenarioEvaluationManager {
         // Create ScenarioStageExecutor and execute stages
         ScenarioStageExecutor executor = new ScenarioStageExecutor();
 
-        // Deep copy input data to protect against callers sharing the same map across concurrent calls
-        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
+        ScenarioExecutionResult result = executor.executeStages(scenario, safeInputData);
 
-        return executor.executeStages(scenario, safeInputData);
+        // Merge enriched data back into the caller's original map so stage outputs are visible
+        DataCopyUtility.deepMergeInto(inputData, safeInputData);
+
+        return result;
     }
 
     /**
