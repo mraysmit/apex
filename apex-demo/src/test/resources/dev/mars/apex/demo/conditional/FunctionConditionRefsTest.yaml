@@ -1,0 +1,110 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: FunctionConditionRefsTest.java
+# Purpose: Test that enrichment groups referenced by function CONDITIONS
+#          are filtered from itemOrder (not just function MAPPINGS).
+#
+# Groups:
+#   - validate-group:     Referenced by function condition in mapping-rules   → FILTERED
+#   - cm-validate-group:  Referenced by function condition in conditional-mappings → FILTERED
+#   - unreferenced-group: Not referenced by anything                          → REMAINS
+# ============================================================================
+
+metadata:
+  id: "function-condition-refs-test"
+  type: "rule-config"
+  description: "Tests that enrichment groups referenced by function conditions are filtered from itemOrder"
+
+enrichments:
+  # ── Worker Enrichments (definitions only — executed via their group) ──────
+
+  # Used by validate-group: classifies trade validity
+  - id: "validator-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "validation_status"
+        expression: "#TRADE_TYPE != null ? 'VALID_' + #TRADE_TYPE : 'INVALID'"
+
+  # Used by cm-validate-group: computes a check code
+  - id: "check-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "check_code"
+        expression: "#TRADE_TYPE != null ? 'CHECK_' + #TRADE_TYPE : 'NO_CHECK'"
+
+  # Used by unreferenced-group: produces standalone output
+  - id: "standalone-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "standalone_result"
+        expression: "'STANDALONE_OK'"
+
+  # ── Path 1: mapping-rules with function CONDITION ─────────────────────────
+  # routing-enrichment uses conditional-mapping-enrichment with mapping-rules.
+  # The condition invokes validate-group via enrichment-group-ref.
+  - id: "routing-enrichment"
+    type: "conditional-mapping-enrichment"
+    target-field: "ROUTING_RESULT"
+    mapping-rules:
+      - id: "route-if-valid"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - type: "function"
+              description: "Validate trade via enrichment group"
+              enrichment-group-ref: "validate-group"
+              output-field: "validation_status"
+              condition: "#validation_status != null and #validation_status.startsWith('VALID')"
+        mapping:
+          type: "direct"
+          expression: "'ROUTED_' + #validation_status"
+
+      - id: "default-route"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'DEFAULT_ROUTE'"
+    execution-settings:
+      stop-on-first-match: true
+      log-matched-rule: true
+
+  # ── Path 2: conditional-mappings with function CONDITION ──────────────────
+  # cm-routing-enrichment uses field-enrichment with conditional-mappings.
+  # The condition invokes cm-validate-group via enrichment-group-ref.
+  - id: "cm-routing-enrichment"
+    type: "field-enrichment"
+    condition: "true"
+    conditional-mappings:
+      - conditions:
+          operator: "AND"
+          rules:
+            - type: "function"
+              description: "Check trade via enrichment group"
+              enrichment-group-ref: "cm-validate-group"
+              output-field: "check_code"
+              condition: "#check_code != null and #check_code.startsWith('CHECK')"
+        field-mappings:
+          - source-field: "constant"
+            target-field: "CM_RESULT"
+            expression: "'CM_ROUTED_' + #check_code"
+
+enrichment-groups:
+  # Referenced by function CONDITION in mapping-rules → MUST be FILTERED
+  - id: "validate-group"
+    name: "Validation Group"
+    enrichment-ids: [ "validator-enrichment" ]
+
+  # Referenced by function CONDITION in conditional-mappings → MUST be FILTERED
+  - id: "cm-validate-group"
+    name: "CM Validation Group"
+    enrichment-ids: [ "check-enrichment" ]
+
+  # NOT referenced by any function condition or mapping → MUST REMAIN in itemOrder
+  - id: "unreferenced-group"
+    name: "Standalone Processing Group"
+    enrichment-ids: [ "standalone-enrichment" ]

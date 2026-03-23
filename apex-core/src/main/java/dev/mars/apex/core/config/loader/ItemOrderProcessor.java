@@ -187,20 +187,29 @@ class ItemOrderProcessor {
             logger.info("Found " + referencedEnrichmentGroupIds.size() + " enrichment-group IDs referenced by other groups: " + referencedEnrichmentGroupIds);
         }
 
-        // Collect enrichment-group IDs referenced by function mapping rules (enrichment-group-ref in mapping-config).
-        // These groups are invoked at runtime by function mappings, so they must not auto-execute at their definition position.
+        // Collect enrichment-group IDs referenced by function mappings and function conditions.
+        // These groups are invoked at runtime, so they must not auto-execute at their definition position.
         if (config.getEnrichments() != null && !config.getEnrichments().isEmpty()) {
             for (YamlEnrichment enrichment : config.getEnrichments()) {
+                // From mapping-rules: mapping-config enrichment-group-ref (function mapping action)
                 if (enrichment.getMappingRules() != null) {
                     for (YamlEnrichment.MappingRule rule : enrichment.getMappingRules()) {
                         if (rule.getMapping() != null && rule.getMapping().getEnrichmentGroupRef() != null) {
                             referencedEnrichmentGroupIds.add(rule.getMapping().getEnrichmentGroupRef());
                         }
+                        // From mapping-rules: condition-rules with type "function"
+                        collectFunctionConditionGroupRefs(rule.getConditions(), referencedEnrichmentGroupIds);
+                    }
+                }
+                // From conditional-mappings: condition-rules with type "function"
+                if (enrichment.getConditionalMappings() != null) {
+                    for (YamlEnrichment.ConditionalMapping cm : enrichment.getConditionalMappings()) {
+                        collectFunctionConditionGroupRefs(cm.getConditions(), referencedEnrichmentGroupIds);
                     }
                 }
             }
             if (!referencedEnrichmentGroupIds.isEmpty()) {
-                logger.info("Total enrichment-group IDs referenced (including function mappings): " + referencedEnrichmentGroupIds);
+                logger.info("Total enrichment-group IDs referenced (including function mappings/conditions): " + referencedEnrichmentGroupIds);
             }
         }
 
@@ -267,5 +276,20 @@ class ItemOrderProcessor {
                    rulesFiltered + " rules, " + enrichmentGroupsFiltered + " enrichment-groups, and " +
                    ruleGroupsFiltered + " rule-groups from itemOrder (original: " + originalOrder.size() +
                    " items, filtered: " + filteredOrder.size() + " items)");
+    }
+
+    /**
+     * Collect enrichment-group IDs from condition rules with type "function" in a ConditionGroup.
+     */
+    private void collectFunctionConditionGroupRefs(YamlEnrichment.ConditionGroup conditionGroup,
+                                                   Set<String> target) {
+        if (conditionGroup == null || conditionGroup.getRules() == null) {
+            return;
+        }
+        for (YamlEnrichment.ConditionRule cr : conditionGroup.getRules()) {
+            if ("function".equalsIgnoreCase(cr.getType()) && cr.getEnrichmentGroupRef() != null) {
+                target.add(cr.getEnrichmentGroupRef());
+            }
+        }
     }
 }
