@@ -1,0 +1,64 @@
+# ============================================================================
+# STRUCTURED MIXED CONDITIONS DEMO TEST
+# ============================================================================
+# Purpose: Demonstrate a realistic structured 'conditions' block that mixes
+#          all three predicate types: expression, lookup (with database config),
+#          and function (without explicit condition — defaults to true).
+#
+# This mirrors a real-world financial services pattern where:
+#   1. Simple expression checks gate on field values
+#   2. A lookup verifies existence in a translation mapping table
+#   3. A function classifies trade risk, stashing the result
+#
+# NOTE: Phase 3 (runtime evaluation) is not yet implemented.
+#       This test validates YAML parsing and model wiring only.
+# ============================================================================
+
+metadata:
+  id: "structured-mixed-conditions-demo"
+  name: "Structured Mixed Conditions Demo"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Demonstrates mixed expression, lookup, and function predicates"
+
+rules:
+  # Realistic mixed-type structured conditions
+  - id: "ndf-swift-trade-validation"
+    name: "NDF SWIFT Trade Validation"
+    conditions:
+      operator: "AND"
+      rules:
+        # Expression predicate — simple field check (no type → defaults to expression)
+        - condition: "#SYSTEM_CODE == 'SWIFT'"
+
+        # Expression predicate — another field check
+        - condition: "#IS_NDF == 'Y'"
+
+        # Lookup predicate — verify mapping exists in database
+        - type: "lookup"
+          lookup-config:
+            lookup-dataset:
+              type: "database"
+              data-source-ref: "postgres-database"
+              query-ref: "lookup-translation-rule"
+              parameters:
+                - field: "CLIENT_CODE"
+                  type: "string"
+                - field: "SYSTEM_CODE"
+                  type: "string"
+                - field: "EXTERNAL_CODE"
+                  type: "string"
+            lookup-key: "{'CLIENT_CODE': #control.client_code, 'SYSTEM_CODE': #control.system_code, 'EXTERNAL_CODE': #fx.exec_broker}"
+          result-field: "exists_flag"
+          condition: "#exists_flag"
+
+        # Function predicate — classify risk, no explicit condition (defaults to true)
+        - type: "function"
+          description: "Classify trade risk level"
+          enrichment-group-ref: "risk-classifier-group"
+          input-parameters:
+            - source-field: "#INPUT_VALUE"
+              target-field: "compute_input"
+          output-field: "rbresult1"
+    message: "NDF SWIFT trade validated with lookup and risk classification"
+    severity: "WARNING"

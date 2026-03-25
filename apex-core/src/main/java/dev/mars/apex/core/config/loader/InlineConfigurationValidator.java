@@ -126,9 +126,11 @@ class InlineConfigurationValidator {
                 rule.getType() + "'. Must be one of: expression, lookup, function.");
         }
 
-        if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
+        // Expression type requires an explicit condition; lookup/function default to "true"
+        boolean hasCondition = rule.getCondition() != null && !rule.getCondition().trim().isEmpty();
+        if ("expression".equals(type) && !hasCondition) {
             throw new ConfigurationException(
-                "Rule '" + ruleId + "' conditions[" + index + "] must have a 'condition' SpEL expression.");
+                "Rule '" + ruleId + "' conditions[" + index + "] type 'expression' must have a 'condition' SpEL expression.");
         }
 
         if ("lookup".equals(type)) {

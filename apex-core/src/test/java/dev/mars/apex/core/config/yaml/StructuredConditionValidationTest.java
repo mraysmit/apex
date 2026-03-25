@@ -344,8 +344,8 @@ class StructuredConditionValidationTest {
     }
 
     @Test
-    @DisplayName("Should reject predicate with missing condition expression")
-    void testRejectMissingConditionExpression() throws Exception {
+    @DisplayName("Should reject expression predicate with missing condition")
+    void testRejectExpressionMissingCondition() throws Exception {
         Path yamlFile = tempDir.resolve("missing-condition-expr.yaml");
         String yaml = """
             metadata:
@@ -367,8 +367,71 @@ class StructuredConditionValidationTest {
             loader.loadFromFile(yamlFile.toString());
         });
 
-        assertTrue(exception.getMessage().contains("must have a 'condition' SpEL expression"),
-                "Exception should indicate missing condition expression");
+        assertTrue(exception.getMessage().contains("type 'expression' must have a 'condition' SpEL expression"),
+                "Exception should indicate expression type requires condition");
+    }
+
+    @Test
+    @DisplayName("Should accept lookup predicate without condition (defaults to true)")
+    void testAcceptLookupWithoutCondition() throws Exception {
+        Path yamlFile = tempDir.resolve("lookup-no-condition.yaml");
+        String yaml = """
+            metadata:
+              name: "Lookup No Condition Test"
+              type: "rule-config"
+            rules:
+              - id: "lookup-rule"
+                name: "Lookup Rule"
+                conditions:
+                  operator: "AND"
+                  rules:
+                    - type: "lookup"
+                      lookup-config:
+                        lookup-dataset:
+                          type: "inline"
+                          key-field: "code"
+                          data:
+                            - code: "A"
+                              value: "Alpha"
+                        lookup-key: "#code"
+                      result-field: "lookupResult"
+                message: "Lookup without explicit condition"
+            """;
+        Files.writeString(yamlFile, yaml);
+
+        YamlRuleConfiguration config = loader.loadFromFile(yamlFile.toString());
+        assertNotNull(config);
+        SharedConditionRule predicate = config.getRules().get(0).getConditions().getRules().get(0);
+        assertNull(predicate.getCondition(), "Condition should be null (defaults to true at runtime)");
+    }
+
+    @Test
+    @DisplayName("Should accept function predicate without condition (defaults to true)")
+    void testAcceptFunctionWithoutCondition() throws Exception {
+        Path yamlFile = tempDir.resolve("function-no-condition.yaml");
+        String yaml = """
+            metadata:
+              name: "Function No Condition Test"
+              type: "rule-config"
+            rules:
+              - id: "function-rule"
+                name: "Function Rule"
+                conditions:
+                  operator: "AND"
+                  rules:
+                    - type: "function"
+                      enrichment-group-ref: "risk-classifier-group"
+                      output-field: "riskLevel"
+                message: "Function without explicit condition"
+            """;
+        Files.writeString(yamlFile, yaml);
+
+        YamlRuleConfiguration config = loader.loadFromFile(yamlFile.toString());
+        assertNotNull(config);
+        SharedConditionRule predicate = config.getRules().get(0).getConditions().getRules().get(0);
+        assertEquals("function", predicate.getType());
+        assertNull(predicate.getCondition(), "Condition should be null (defaults to true at runtime)");
+        assertEquals("risk-classifier-group", predicate.getEnrichmentGroupRef());
     }
 
     @Test
