@@ -1,5 +1,6 @@
 package dev.mars.apex.engine.model;
 
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.model.metadata.RuleMetadata;
 import dev.mars.apex.engine.model.metadata.RuleStatus;
@@ -67,7 +68,9 @@ public class Rule implements RuleBase {
     private final List<String> mapToField;
     private final String resultField;
     private final boolean enabled;  
-    
+
+    // Structured condition group (mutually exclusive with string condition)
+    private final SharedConditionGroup conditions;
 
     /**
      * Create a new business rule with full metadata support including enabled flag.
@@ -94,6 +97,38 @@ public class Rule implements RuleBase {
                 String message, String description, int priority, String severity,
                 RuleMetadata metadata, Object defaultValue, String successCode, String errorCode,
                 List<String> mapToField, String resultField, String noMatchMessage, boolean enabled) {
+        this(id, categories, name, condition, message, description, priority, severity,
+             metadata, defaultValue, successCode, errorCode, mapToField, resultField,
+             noMatchMessage, enabled, null);
+    }
+
+    /**
+     * Create a new business rule with full metadata support including structured conditions.
+     * Extended constructor that accepts a {@link SharedConditionGroup} for structured condition evaluation.
+     *
+     * @param id The unique identifier of the rule
+     * @param categories The category objects of the rule
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies (may be null if conditions is set)
+     * @param message The message to display when the rule matches (condition=true)
+     * @param description The description of what the rule does
+     * @param priority The priority of the rule (lower numbers = higher priority)
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param metadata The extensible metadata for the rule
+     * @param defaultValue The default value to use for error recovery (null if no default)
+     * @param successCode The code to use when rule succeeds (null if no code)
+     * @param errorCode The code to use when rule fails (null if no code)
+     * @param mapToField Field mapping expressions for enriching data (null if no mapping)
+     * @param resultField Field name where the boolean condition result will be stored (null if no storage)
+     * @param noMatchMessage The message to display when the rule does not match (condition=false), null to use message
+     * @param enabled Whether the rule is enabled for evaluation (false = skip evaluation)
+     * @param conditions The structured condition group (null if using string condition)
+     */
+    public Rule(String id, Set<Category> categories, String name, String condition,
+                String message, String description, int priority, String severity,
+                RuleMetadata metadata, Object defaultValue, String successCode, String errorCode,
+                List<String> mapToField, String resultField, String noMatchMessage, boolean enabled,
+                SharedConditionGroup conditions) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>(categories);
@@ -110,6 +145,7 @@ public class Rule implements RuleBase {
         this.resultField = resultField;
         this.noMatchMessage = noMatchMessage;
         this.enabled = enabled;
+        this.conditions = conditions;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -186,6 +222,16 @@ public class Rule implements RuleBase {
      */
     public String getCondition() {
         return condition;
+    }
+
+    /**
+     * Get the structured condition group for this rule.
+     * Mutually exclusive with {@link #getCondition()} — only one will be non-null.
+     *
+     * @return The structured condition group, or null if using a simple string condition
+     */
+    public SharedConditionGroup getConditions() {
+        return conditions;
     }
 
     /**
@@ -375,7 +421,8 @@ public class Rule implements RuleBase {
      */
     public Rule withMetadata(RuleMetadata newMetadata) {
         return new Rule(id, categories, name, condition, message, description, priority, severity,
-                       newMetadata, defaultValue, successCode, errorCode, mapToField, resultField, noMatchMessage, this.enabled);
+                       newMetadata, defaultValue, successCode, errorCode, mapToField, resultField, noMatchMessage, this.enabled,
+                       this.conditions);
     }
 
     /**

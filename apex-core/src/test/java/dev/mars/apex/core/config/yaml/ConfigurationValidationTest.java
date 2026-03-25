@@ -678,7 +678,8 @@ class ConfigurationValidationTest {
         }, "Should throw exception for null values in required fields");
         
         assertTrue(exception.getMessage().contains("null") || 
-                  exception.getMessage().contains("required"), 
+                  exception.getMessage().contains("required") ||
+                  exception.getMessage().contains("must define either"), 
                   "Exception message should indicate null value in required field");
     }
 }

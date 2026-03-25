@@ -20,7 +20,11 @@ import dev.mars.apex.core.config.model.YamlCategory;
 import dev.mars.apex.core.config.model.YamlRule;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlRuleGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.core.constants.SeverityConstants;
+
+import java.util.Set;
 
 /**
  * Validates individual rules, rule groups, and categories within a loaded configuration.
@@ -47,6 +51,7 @@ class InlineConfigurationValidator {
 
     /**
      * Validate a rule configuration.
+     * Enforces mutual exclusivity: exactly one of {@code condition} or {@code conditions} must be present.
      */
     void validateRule(YamlRule rule) throws ConfigurationException {
         if (rule.getId() == null || rule.getId().trim().isEmpty()) {
@@ -55,8 +60,22 @@ class InlineConfigurationValidator {
         if (rule.getName() == null || rule.getName().trim().isEmpty()) {
             throw new ConfigurationException("Rule name is required for rule: " + rule.getId());
         }
-        if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
-            throw new ConfigurationException("Rule condition is required for rule: " + rule.getId());
+
+        boolean hasCondition = rule.getCondition() != null && !rule.getCondition().trim().isEmpty();
+        boolean hasConditions = rule.getConditions() != null;
+
+        if (hasCondition && hasConditions) {
+            throw new ConfigurationException(
+                "Rule '" + rule.getId() + "' defines both 'condition' and 'conditions'. " +
+                "Exactly one must be provided.");
+        }
+        if (!hasCondition && !hasConditions) {
+            throw new ConfigurationException(
+                "Rule '" + rule.getId() + "' must define either 'condition' or 'conditions'.");
+        }
+
+        if (hasConditions) {
+            validateConditionGroup(rule.getId(), rule.getConditions());
         }
 
         // Validate severity if present
@@ -65,6 +84,65 @@ class InlineConfigurationValidator {
             if (!SeverityConstants.VALID_SEVERITIES.contains(severity)) {
                 throw new ConfigurationException("Rule '" + rule.getId() + "' has invalid severity '" +
                     rule.getSeverity() + "'. Must be one of: " + String.join(", ", SeverityConstants.VALID_SEVERITIES));
+            }
+        }
+    }
+
+    private static final Set<String> VALID_OPERATORS = Set.of("AND", "OR");
+    private static final Set<String> VALID_CONDITION_TYPES = Set.of("expression", "lookup", "function");
+
+    /**
+     * Validate a structured condition group.
+     */
+    void validateConditionGroup(String ruleId, SharedConditionGroup group) throws ConfigurationException {
+        if (group.getOperator() == null || group.getOperator().trim().isEmpty()) {
+            throw new ConfigurationException(
+                "Rule '" + ruleId + "' conditions must specify an 'operator' (AND or OR).");
+        }
+        String op = group.getOperator().trim().toUpperCase();
+        if (!VALID_OPERATORS.contains(op)) {
+            throw new ConfigurationException(
+                "Rule '" + ruleId + "' conditions has invalid operator '" + group.getOperator() +
+                "'. Must be AND or OR.");
+        }
+        if (group.getRules() == null || group.getRules().isEmpty()) {
+            throw new ConfigurationException(
+                "Rule '" + ruleId + "' conditions must contain at least one rule predicate.");
+        }
+        for (int i = 0; i < group.getRules().size(); i++) {
+            validateConditionRule(ruleId, group.getRules().get(i), i);
+        }
+    }
+
+    /**
+     * Validate an individual condition predicate within a structured condition group.
+     */
+    void validateConditionRule(String ruleId, SharedConditionRule rule, int index) throws ConfigurationException {
+        String type = rule.getType() != null ? rule.getType().trim().toLowerCase() : "expression";
+
+        if (!VALID_CONDITION_TYPES.contains(type)) {
+            throw new ConfigurationException(
+                "Rule '" + ruleId + "' conditions[" + index + "] has invalid type '" +
+                rule.getType() + "'. Must be one of: expression, lookup, function.");
+        }
+
+        if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
+            throw new ConfigurationException(
+                "Rule '" + ruleId + "' conditions[" + index + "] must have a 'condition' SpEL expression.");
+        }
+
+        if ("lookup".equals(type)) {
+            if (rule.getLookupConfig() == null) {
+                throw new ConfigurationException(
+                    "Rule '" + ruleId + "' conditions[" + index + "] type 'lookup' requires 'lookup-config'.");
+            }
+        }
+
+        if ("function".equals(type)) {
+            if (rule.getEnrichmentGroupRef() == null || rule.getEnrichmentGroupRef().trim().isEmpty()) {
+                throw new ConfigurationException(
+                    "Rule '" + ruleId + "' conditions[" + index +
+                    "] type 'function' requires 'enrichment-group-ref'.");
             }
         }
     }

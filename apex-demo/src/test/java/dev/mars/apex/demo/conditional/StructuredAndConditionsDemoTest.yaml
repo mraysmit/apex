@@ -1,0 +1,42 @@
+# ============================================================================
+# STRUCTURED AND CONDITIONS DEMO TEST
+# ============================================================================
+# Purpose: Demonstrate structured 'conditions' block with AND operator
+#          on a YamlRule. Replaces single 'condition' string with typed
+#          predicates for richer, self-documenting rule definitions.
+#
+# NOTE: Phase 3 (runtime evaluation of structured conditions) is not yet
+#       implemented. This test validates YAML parsing and model wiring only.
+# ============================================================================
+
+metadata:
+  id: "structured-and-conditions-demo"
+  name: "Structured AND Conditions Demo"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Demonstrates structured AND conditions on rules"
+
+rules:
+  # Rule using structured AND conditions (all must be true)
+  - id: "high-value-usd-trade"
+    name: "High Value USD Trade Check"
+    conditions:
+      operator: "AND"
+      rules:
+        - type: "expression"
+          condition: "#amount > 10000"
+          description: "Trade amount exceeds threshold"
+        - type: "expression"
+          condition: "#currency == 'USD'"
+          description: "Trade is denominated in USD"
+        - type: "expression"
+          condition: "#counterparty != null"
+          description: "Counterparty is specified"
+    message: "High value USD trade detected"
+    severity: "WARNING"
+
+  # Traditional single-condition rule (backward compatibility)
+  - id: "basic-amount-check"
+    name: "Basic Amount Check"
+    condition: "#amount > 0"
+    message: "Amount is positive"

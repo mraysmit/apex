@@ -75,6 +75,8 @@ module dev.mars.apex.core {
     opens dev.mars.apex.core.config to com.fasterxml.jackson.databind;
     exports dev.mars.apex.core.config.model;
     opens dev.mars.apex.core.config.model to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.model.condition;
+    opens dev.mars.apex.core.config.model.condition to com.fasterxml.jackson.databind;
     exports dev.mars.apex.core.config.loader;
     opens dev.mars.apex.core.config.loader to com.fasterxml.jackson.databind;
     exports dev.mars.apex.core.config.service;

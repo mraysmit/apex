@@ -385,7 +385,7 @@ class ConfigurationLoaderTest {
             loader.loadFromFile(yamlFile.toString());
         }, "Should throw exception for rule without condition");
         
-        assertTrue(exception.getMessage().contains("Rule condition is required"), "Exception message should indicate missing rule condition");
+        assertTrue(exception.getMessage().contains("must define either 'condition' or 'conditions'"), "Exception message should indicate missing rule condition");
     }
 
     @Test

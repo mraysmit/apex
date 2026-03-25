@@ -1,6 +1,7 @@
 package dev.mars.apex.core.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
 
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,9 @@ public class YamlRule {
     
     @JsonProperty("condition")
     private String condition;
+
+    @JsonProperty("conditions")
+    private SharedConditionGroup conditions;
     
     @JsonProperty("message")
     private String message;
@@ -172,6 +176,14 @@ public class YamlRule {
     
     public void setCondition(String condition) {
         this.condition = condition;
+    }
+
+    public SharedConditionGroup getConditions() {
+        return conditions;
+    }
+
+    public void setConditions(SharedConditionGroup conditions) {
+        this.conditions = conditions;
     }
     
     public String getMessage() {

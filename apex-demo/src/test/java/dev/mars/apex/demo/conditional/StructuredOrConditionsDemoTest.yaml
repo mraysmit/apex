@@ -1,0 +1,46 @@
+# ============================================================================
+# STRUCTURED OR CONDITIONS DEMO TEST
+# ============================================================================
+# Purpose: Demonstrate structured 'conditions' block with OR operator
+#          on a YamlRule. Any one predicate being true triggers the rule.
+#
+# NOTE: Phase 3 (runtime evaluation of structured conditions) is not yet
+#       implemented. This test validates YAML parsing and model wiring only.
+# ============================================================================
+
+metadata:
+  id: "structured-or-conditions-demo"
+  name: "Structured OR Conditions Demo"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Demonstrates structured OR conditions on rules"
+
+rules:
+  # Rule using structured OR conditions (any one triggers the rule)
+  - id: "escalation-required"
+    name: "Escalation Required Check"
+    conditions:
+      operator: "OR"
+      rules:
+        - type: "expression"
+          condition: "#amount > 50000"
+          description: "Amount exceeds escalation threshold"
+        - type: "expression"
+          condition: "#priority == 'URGENT'"
+          description: "Priority is urgent"
+        - type: "expression"
+          condition: "#region == 'RESTRICTED'"
+          description: "Region is restricted"
+    message: "Trade requires escalation"
+    severity: "ERROR"
+
+  # Single-predicate structured conditions (valid edge case)
+  - id: "single-predicate-structured"
+    name: "Single Predicate Structured Rule"
+    conditions:
+      operator: "OR"
+      rules:
+        - type: "expression"
+          condition: "#status == 'PENDING_REVIEW'"
+          description: "Status requires review"
+    message: "Pending review detected"

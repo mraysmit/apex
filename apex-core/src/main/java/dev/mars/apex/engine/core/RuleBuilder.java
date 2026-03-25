@@ -1,5 +1,6 @@
 package dev.mars.apex.engine.core;
 
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.model.Category;
 import dev.mars.apex.engine.model.Rule;
@@ -47,6 +48,7 @@ public class RuleBuilder {
     private Set<Category> categories = new HashSet<>();
     private String name;
     private String condition;
+    private SharedConditionGroup conditions;
     private String message;
     private String description;
     private int priority = 100; // Default priority
@@ -161,6 +163,18 @@ public class RuleBuilder {
      */
     public RuleBuilder withCondition(String condition) {
         this.condition = condition;
+        return this;
+    }
+
+    /**
+     * Set the structured condition group for the rule.
+     * Mutually exclusive with {@link #withCondition(String)}.
+     *
+     * @param conditions The structured condition group with AND/OR predicates
+     * @return This builder for method chaining
+     */
+    public RuleBuilder withConditions(SharedConditionGroup conditions) {
+        this.conditions = conditions;
         return this;
     }
 
@@ -347,8 +361,11 @@ public class RuleBuilder {
         if (name == null || name.isEmpty()) {
             throw new IllegalStateException("Rule name must be set");
         }
-        if (condition == null || condition.isEmpty()) {
-            throw new IllegalStateException("Rule condition must be set");
+        if ((condition == null || condition.isEmpty()) && conditions == null) {
+            throw new IllegalStateException("Rule condition or conditions must be set");
+        }
+        if (condition != null && !condition.isEmpty() && conditions != null) {
+            throw new IllegalStateException("Rule cannot have both condition and conditions");
         }
         if (message == null || message.isEmpty()) {
             throw new IllegalStateException("Rule message must be set");
@@ -372,14 +389,16 @@ public class RuleBuilder {
 
         // Auto-detect complexity if not set
         if (tempMetadata.getComplexity() == RuleComplexity.MEDIUM) {
-            metadataBuilder.complexity(RuleComplexity.fromCondition(condition));
+            if (condition != null) {
+                metadataBuilder.complexity(RuleComplexity.fromCondition(condition));
+            }
         }
 
         // Build metadata
         RuleMetadata metadata = metadataBuilder.build();
 
         Rule rule = new Rule(id, categories, name, condition, message, description, priority, severity,
-                metadata, null, null, null, null, null, null, true);
+                metadata, null, null, null, null, null, null, true, conditions);
 
         // Auto-register the rule if configuration is available
         if (configuration != null) {
