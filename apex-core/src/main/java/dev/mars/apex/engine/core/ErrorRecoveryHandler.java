@@ -131,8 +131,10 @@ public class ErrorRecoveryHandler {
             ErrorRecoveryService.ErrorRecoveryStrategy strategy = "FAIL_FAST".equals(actualStrategy) ?
                 ErrorRecoveryService.ErrorRecoveryStrategy.FAIL_FAST :
                 ErrorRecoveryService.ErrorRecoveryStrategy.CONTINUE_WITH_DEFAULT;
+            String conditionDesc = rule.getCondition() != null ? rule.getCondition()
+                    : (rule.getConditions() != null ? "structured:" + rule.getConditions().getOperator() : "none");
             ErrorRecoveryService.RecoveryResult recoveryResult =
-                errorRecoveryService.attemptRecovery(rule.getName(), rule.getCondition(), null, exception, strategy);
+                errorRecoveryService.attemptRecovery(rule.getName(), conditionDesc, null, exception, strategy);
 
             if (recoveryResult != null && recoveryResult.isSuccessful()) {
                 recoverySuccessful = true;
@@ -193,7 +195,9 @@ public class ErrorRecoveryHandler {
                                                     String recoveryStrategy, String recoveryReason,
                                                     Duration recoveryTime) {
         // Complete the basic evaluation metrics first
-        RulePerformanceMetrics baseMetrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), exception);
+        String conditionForMetrics = rule.getCondition() != null ? rule.getCondition()
+                : (rule.getConditions() != null ? "structured:" + rule.getConditions().getOperator() : "none");
+        RulePerformanceMetrics baseMetrics = performanceMonitor.completeEvaluation(metricsBuilder, conditionForMetrics, exception);
 
         // Only add recovery metrics if metrics are enabled
         if (errorRecoveryConfig.isMetricsEnabled()) {

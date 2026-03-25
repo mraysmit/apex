@@ -443,7 +443,8 @@ public class SequentialProcessor {
             return RuleResult.error("rule:" + ruleId, "Rule not found");
         }
 
-        logger.debug("processRuleItem() - executing rule '{}' with condition: {}", ruleId, rule.getCondition());
+        logger.debug("processRuleItem() - executing rule '{}' with condition: {}, hasConditions: {}", 
+                    ruleId, rule.getCondition(), rule.getConditions() != null);
         RuleExecutionContext ctx = new RuleExecutionContext(rule, data);
         RuleResult result = executeRule.apply(ctx);
         logger.debug("processRuleItem() - rule '{}' completed - success={}, resultType={}", 

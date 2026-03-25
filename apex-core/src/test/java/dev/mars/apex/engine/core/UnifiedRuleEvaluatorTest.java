@@ -550,6 +550,268 @@ class UnifiedRuleEvaluatorTest {
                 "NO_MATCH should resolve #{} in no-match-message");
     }
 
+    // =========================================================================
+    // Structured Condition Group Evaluation Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should evaluate structured AND conditions - all true")
+    void testStructuredConditions_AndAllTrue() {
+        // Given: AND group with two expression predicates, both true
+        var group = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        group.setOperator("AND");
+
+        var pred1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred1.setType("expression");
+        pred1.setCondition("#amount > 500");
+        pred1.setDescription("Amount check");
+
+        var pred2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred2.setType("expression");
+        pred2.setCondition("#currency == 'USD'");
+        pred2.setDescription("Currency check");
+
+        group.setRules(List.of(pred1, pred2));
+
+        Rule rule = new RuleBuilder()
+                .withName("Structured AND Rule")
+                .withConditions(group)
+                .withMessage("All conditions met")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertTrue(result.isTriggered(), "AND group with all-true predicates should MATCH");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
+        assertEquals("Structured AND Rule", result.getRuleName());
+    }
+
+    @Test
+    @DisplayName("Should evaluate structured AND conditions - one false")
+    void testStructuredConditions_AndOneFalse() {
+        // Given: AND group where second predicate is false
+        var group = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        group.setOperator("AND");
+
+        var pred1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred1.setType("expression");
+        pred1.setCondition("#amount > 500");
+
+        var pred2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred2.setType("expression");
+        pred2.setCondition("#currency == 'EUR'"); // False — USD != EUR
+
+        group.setRules(List.of(pred1, pred2));
+
+        Rule rule = new RuleBuilder()
+                .withName("Structured AND Fail")
+                .withConditions(group)
+                .withMessage("Should not match")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertFalse(result.isTriggered(), "AND group with one false predicate should NOT match");
+        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("Should evaluate structured OR conditions - one true")
+    void testStructuredConditions_OrOneTrue() {
+        // Given: OR group where first predicate is false, second true
+        var group = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        group.setOperator("OR");
+
+        var pred1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred1.setType("expression");
+        pred1.setCondition("#amount > 5000"); // False
+
+        var pred2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred2.setType("expression");
+        pred2.setCondition("#currency == 'USD'"); // True
+
+        group.setRules(List.of(pred1, pred2));
+
+        Rule rule = new RuleBuilder()
+                .withName("Structured OR Rule")
+                .withConditions(group)
+                .withMessage("At least one condition met")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertTrue(result.isTriggered(), "OR group with one true predicate should MATCH");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("Should evaluate structured OR conditions - all false")
+    void testStructuredConditions_OrAllFalse() {
+        // Given: OR group where all predicates are false
+        var group = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        group.setOperator("OR");
+
+        var pred1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred1.setType("expression");
+        pred1.setCondition("#amount > 5000"); // False
+
+        var pred2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred2.setType("expression");
+        pred2.setCondition("#currency == 'EUR'"); // False
+
+        group.setRules(List.of(pred1, pred2));
+
+        Rule rule = new RuleBuilder()
+                .withName("Structured OR Fail")
+                .withConditions(group)
+                .withMessage("None matched")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertFalse(result.isTriggered(), "OR group with all-false predicates should NOT match");
+        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("Should handle function predicate without condition - defaults to true")
+    void testStructuredConditions_FunctionPredicateNoCondition() {
+        // Given: AND group with one expression (true) and one function with no condition (implicitly true)
+        var group = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        group.setOperator("AND");
+
+        var expr = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        expr.setType("expression");
+        expr.setCondition("#amount > 500");
+
+        var func = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        func.setType("function");
+        func.setDescription("Classify risk level");
+        func.setEnrichmentGroupRef("risk-classification");
+        func.setOutputField("risk_level");
+        // Note: no condition — should default to true
+
+        group.setRules(List.of(expr, func));
+
+        Rule rule = new RuleBuilder()
+                .withName("Function No Condition Rule")
+                .withConditions(group)
+                .withMessage("Function predicate passed")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertTrue(result.isTriggered(), "Function predicate without condition should default to true");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("Should store result-field from structured conditions evaluation")
+    void testStructuredConditions_ResultFieldStored() {
+        // Given: Rule with structured conditions AND a result-field
+        var group = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        group.setOperator("AND");
+
+        var pred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred.setType("expression");
+        pred.setCondition("#amount > 500");
+        group.setRules(List.of(pred));
+
+        // Use 17-param constructor to set result-field (RuleBuilder doesn't expose it)
+        java.util.Set<dev.mars.apex.engine.model.Category> cats = java.util.Set.of(
+                new dev.mars.apex.engine.model.Category("default", 100));
+        Rule rule = new Rule("result-field-test", cats, "Result Field Rule",
+                null, "Stored result", "Test result-field with structured conditions",
+                100, "INFO", null, null, null, null, null,
+                "amountCheck", null, true, group);
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertTrue(result.isTriggered());
+        // result-field should be in enrichedData
+        assertTrue(result.getEnrichedData().containsKey("amountCheck"),
+                "result-field 'amountCheck' should be stored in enrichedData");
+        assertEquals(true, result.getEnrichedData().get("amountCheck"));
+    }
+
+    @Test
+    @DisplayName("Should handle SpEL error in structured conditions via error recovery")
+    void testStructuredConditions_SpelErrorRecovery() {
+        // Given: Structured condition with invalid SpEL
+        var group = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        group.setOperator("AND");
+
+        var pred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred.setType("expression");
+        pred.setCondition("#nonExistent.invalidMethod()");
+        group.setRules(List.of(pred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Structured SpEL Error")
+                .withConditions(group)
+                .withMessage("Should error")
+                .withSeverity("CRITICAL")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
+                "CRITICAL severity structured condition error should return ERROR");
+    }
+
+    @Test
+    @DisplayName("Should coexist with traditional string conditions in evaluateRules")
+    void testStructuredConditions_CoexistsWithTraditional() {
+        // Given: Mix of traditional and structured condition rules
+        Rule traditionalRule = new RuleBuilder()
+                .withName("Traditional Rule")
+                .withCondition("#amount > 2000")  // False
+                .withMessage("Traditional match")
+                .withSeverity("INFO")
+                .build();
+
+        var group = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        group.setOperator("AND");
+        var pred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred.setType("expression");
+        pred.setCondition("#currency == 'USD'");
+        group.setRules(List.of(pred));
+
+        Rule structuredRule = new RuleBuilder()
+                .withName("Structured Rule")
+                .withConditions(group)
+                .withMessage("Structured match")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRules(List.of(traditionalRule, structuredRule), testFacts);
+
+        // Then: Traditional doesn't match, structured does → structured is first significant result
+        assertTrue(result.isTriggered());
+        assertEquals("Structured Rule", result.getRuleName(),
+                "Structured condition rule should be the first match");
+    }
+
     @AfterAll
     static void classTearDown() {
         LoggerFactory.getLogger(UnifiedRuleEvaluatorTest.class)

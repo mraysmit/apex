@@ -175,6 +175,15 @@ public class RulesEngineConfiguration {
             return null;
         }
 
+        // Verify all rules use string conditions — structured conditions cannot be combined by string concatenation
+        for (Rule r : rules) {
+            if (r.getConditions() != null) {
+                throw new IllegalArgumentException(
+                    "Cannot combine rule '" + r.getName() + "' with AND: rule uses structured conditions (SharedConditionGroup). "
+                    + "Only rules with string SpEL conditions can be combined.");
+            }
+        }
+
         StringBuilder combinedCondition = new StringBuilder();
         for (int i = 0; i < rules.size(); i++) {
             if (i > 0) {
@@ -228,6 +237,15 @@ public class RulesEngineConfiguration {
         if (rules == null || rules.isEmpty()) {
             logger.warn("No rules to combine");
             return null;
+        }
+
+        // Verify all rules use string conditions — structured conditions cannot be combined by string concatenation
+        for (Rule r : rules) {
+            if (r.getConditions() != null) {
+                throw new IllegalArgumentException(
+                    "Cannot combine rule '" + r.getName() + "' with OR: rule uses structured conditions (SharedConditionGroup). "
+                    + "Only rules with string SpEL conditions can be combined.");
+            }
         }
 
         StringBuilder combinedCondition = new StringBuilder();

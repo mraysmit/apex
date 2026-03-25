@@ -2,6 +2,8 @@ package dev.mars.apex.engine.core;
 
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleResult;
@@ -143,35 +145,43 @@ public class UnifiedRuleEvaluator {
         }
         
         logger.debug("Starting rule evaluation: {}", rule.getName());
-        logger.debug("Rule details - id: '{}', severity: '{}', condition: '{}'", 
-                        rule.getId(), rule.getSeverity(), rule.getCondition());
+        logger.debug("Rule details - id: '{}', severity: '{}', condition: '{}', hasConditions: {}", 
+                        rule.getId(), rule.getSeverity(), rule.getCondition(), rule.getConditions() != null);
 
         // Start performance monitoring
         RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(rule.getName(), "evaluation");
         
         try {
-            // Validate rule has required condition
-            if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
+            Boolean result;
+
+            if (rule.getConditions() != null) {
+                // Structured condition group evaluation (AND/OR with typed predicates)
+                logger.debug("Evaluating structured conditions for rule '{}': {} group with {} predicates",
+                        rule.getName(), rule.getConditions().getOperator(),
+                        rule.getConditions().getRules() != null ? rule.getConditions().getRules().size() : 0);
+                try {
+                    result = evaluateStructuredConditionGroup(rule.getConditions(), context);
+                    logger.debug("Structured condition evaluation for rule '{}' returned: {}", rule.getName(), result);
+                } catch (Exception e) {
+                    logger.debug("Structured condition evaluation exception for rule '{}': {}", rule.getName(), e.getMessage());
+                    return errorRecoveryHandler.handleEvaluationError(rule, e, metricsBuilder);
+                }
+            } else if (rule.getCondition() != null && !rule.getCondition().trim().isEmpty()) {
+                // Traditional string condition — parse and evaluate the SpEL expression
+                logger.debug("Parsing SpEL expression for rule '{}': {}", rule.getName(), rule.getCondition());
+                Expression exp = parser.parseExpression(rule.getCondition());
+                try {
+                    result = exp.getValue(context, Boolean.class);
+                    logger.debug("SpEL evaluation for rule '{}' returned: {}", rule.getName(), result);
+                } catch (SpelEvaluationException e) {
+                    logger.debug("SpEL evaluation exception for rule '{}': {}", rule.getName(), e.getMessage());
+                    return errorRecoveryHandler.handleEvaluationError(rule, e, metricsBuilder);
+                }
+            } else {
+                // Neither condition nor conditions — invalid rule
                 logger.warn("Rule '{}' has no condition to evaluate", rule.getName());
                 RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
-                
                 return RuleResult.errorWithCode(rule.getName(), "Rule has no condition to evaluate", rule.getSeverity(), "APEX-RULE-001", metrics);
-            }
-            
-            // Parse and evaluate the SpEL expression
-            logger.debug("Parsing SpEL expression for rule '{}': {}", rule.getName(), rule.getCondition());
-            Expression exp = parser.parseExpression(rule.getCondition());
-            Boolean result;
-            
-            try {
-                result = exp.getValue(context, Boolean.class);
-                logger.debug("SpEL evaluation for rule '{}' returned: {}", rule.getName(), result);
-            } catch (SpelEvaluationException e) {
-                logger.debug("SpEL evaluation exception for rule '{}': {}", rule.getName(), e.getMessage());
-                // Delegate to error recovery handler for consistent error handling
-                // This ensures SpEL evaluation errors go through the same recovery logic
-                // as other exceptions, respecting severity-based recovery policies
-                return errorRecoveryHandler.handleEvaluationError(rule, e, metricsBuilder);
             }
 
             // Store result in context if result-field is configured
@@ -182,7 +192,9 @@ public class UnifiedRuleEvaluator {
             }
 
             // Complete performance monitoring for successful evaluation
-            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
+            String conditionForMetrics = rule.getCondition() != null ? rule.getCondition()
+                    : ("structured:" + (rule.getConditions() != null ? rule.getConditions().getOperator() : "none"));
+            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, conditionForMetrics);
 
             // Log the completion with performance metrics
             logger.debug("Rule evaluation completed: {} -> {}", rule.getName(), result != null && result);
@@ -531,5 +543,87 @@ public class UnifiedRuleEvaluator {
      */
     String resolveMessageTemplate(String message, EvaluationContext context) {
         return messageTemplateResolver.resolve(message, context);
+    }
+
+    // =========================================================================
+    // Structured Condition Group Evaluation
+    // =========================================================================
+
+    /**
+     * Evaluate a structured condition group (AND/OR) against the evaluation context.
+     * Supports expression-type predicates with full SpEL evaluation.
+     * Lookup and function predicates evaluate their SpEL condition gate if present,
+     * defaulting to true if absent (action execution requires Phase 3 wiring).
+     *
+     * @param group   The structured condition group
+     * @param context The SpEL evaluation context
+     * @return true if the group evaluates to true, false otherwise
+     */
+    private boolean evaluateStructuredConditionGroup(SharedConditionGroup group, EvaluationContext context) {
+        if (group.getRules() == null || group.getRules().isEmpty()) {
+            logger.debug("Structured condition group has no predicates, returning true");
+            return true;
+        }
+
+        String operator = group.getOperator();
+        if (operator == null) {
+            operator = "AND";
+        }
+
+        if ("OR".equalsIgnoreCase(operator)) {
+            for (SharedConditionRule rule : group.getRules()) {
+                if (evaluateStructuredConditionRule(rule, context)) {
+                    logger.debug("OR predicate satisfied: {}", rule.getDescription());
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            // AND (default)
+            for (SharedConditionRule rule : group.getRules()) {
+                if (!evaluateStructuredConditionRule(rule, context)) {
+                    logger.debug("AND predicate failed: {}", rule.getDescription());
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Evaluate a single structured condition predicate.
+     * <ul>
+     *   <li>{@code expression}: Evaluates the SpEL condition directly.</li>
+     *   <li>{@code lookup}: Action execution deferred to Phase 3 wiring;
+     *       evaluates the SpEL condition gate if present, defaults to true if absent.</li>
+     *   <li>{@code function}: Action execution deferred to Phase 3 wiring;
+     *       evaluates the SpEL condition gate if present, defaults to true if absent.</li>
+     * </ul>
+     *
+     * @param rule    The condition predicate
+     * @param context The SpEL evaluation context
+     * @return true if the predicate is satisfied
+     */
+    private boolean evaluateStructuredConditionRule(SharedConditionRule rule, EvaluationContext context) {
+        String type = rule.getType();
+
+        if ("lookup".equalsIgnoreCase(type)) {
+            logger.debug("Lookup predicate '{}' — action execution requires Phase 3 wiring; evaluating condition gate only",
+                    rule.getDescription());
+        } else if ("function".equalsIgnoreCase(type)) {
+            logger.debug("Function predicate '{}' — action execution requires Phase 3 wiring; evaluating condition gate only",
+                    rule.getDescription());
+        }
+
+        // Evaluate the SpEL condition gate (shared across all predicate types)
+        String condition = rule.getCondition();
+        if (condition == null || condition.trim().isEmpty()) {
+            // No condition gate — implicitly true (valid for function/lookup without a condition)
+            return true;
+        }
+
+        Expression exp = parser.parseExpression(condition);
+        Boolean result = exp.getValue(context, Boolean.class);
+        return result != null && result;
     }
 }

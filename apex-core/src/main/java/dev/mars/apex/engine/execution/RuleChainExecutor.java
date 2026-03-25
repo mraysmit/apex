@@ -514,7 +514,8 @@ public class RuleChainExecutor {
                         yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.INFO,
                         null, null, null, null, null,
                         yamlRule.getResultField(),
-                        null, true
+                        null, true,
+                        yamlRule.getConditions()
                     );
                 }
             }
