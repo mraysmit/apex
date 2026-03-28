@@ -215,9 +215,23 @@ public class EnrichmentConditionEvaluator {
 
         // Execute lookup and stash result
         Object result = actionExecutor.executeLookup(rule, targetObject, config);
-        if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
-            setFieldValue(targetObject, rule.getResultField(), result);
-            logger.debug("Lookup condition stashed result into '{}': {}", rule.getResultField(), result);
+        String resultField = rule.getResultField();
+        if (resultField != null && !resultField.trim().isEmpty()) {
+            // If result is a Map containing the resultField key, extract the scalar value
+            // to avoid double-nesting (e.g., {"exists_flag": {"exists_flag": false}}).
+            // Otherwise stash the entire result (e.g., full lookup record).
+            if (result instanceof java.util.Map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> resultMap = (java.util.Map<String, Object>) result;
+                if (resultMap.containsKey(resultField)) {
+                    setFieldValue(targetObject, resultField, resultMap.get(resultField));
+                } else {
+                    setFieldValue(targetObject, resultField, result);
+                }
+            } else {
+                setFieldValue(targetObject, resultField, result);
+            }
+            logger.debug("Lookup condition stashed result into '{}': {}", resultField, result);
         }
 
         // Evaluate the SpEL condition on the updated context

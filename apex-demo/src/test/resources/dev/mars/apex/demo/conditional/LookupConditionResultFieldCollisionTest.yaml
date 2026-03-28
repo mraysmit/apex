@@ -1,0 +1,92 @@
+# LookupConditionResultFieldCollisionTest.yaml
+# ==============================================
+# Regression test for the double-nesting bug in evaluateLookupCondition.
+#
+# Bug: When a lookup returns a Map like {"exists_flag": false} and the
+# result-field is "exists_flag", the old code stashed the ENTIRE map into
+# the context as exists_flag → {"exists_flag": {"exists_flag": false}}.
+# The SpEL condition "exists_flag == true" then compared a Map to a boolean,
+# which always failed — even when the actual flag was true.
+#
+# This test uses an inline dataset that returns single-key records where the
+# key name matches the result-field, exercising the containsKey extraction.
+#
+# Scenario: Translation parameter existence check.
+#   Given a translation type, check whether a matching config exists.
+#   - "FX_RATE" → exists_flag: true  → TRANSLATION_FOUND
+#   - "UNKNOWN" → exists_flag: false → TRANSLATION_NOT_FOUND
+#   - missing   → lookup returns null → fallback
+
+metadata:
+  id: "lookup-condition-result-field-collision"
+  type: "rule-config"
+  description: "Regression test: result-field name collides with lookup result Map key"
+
+enrichments:
+  - id: "translation-check"
+    type: "conditional-mapping-enrichment"
+    target-field: "TRANSLATION_STATUS"
+    mapping-rules:
+
+      # Rule 1: Translation exists → TRANSLATION_FOUND
+      # Lookup returns {"exists_flag": true} — result-field is "exists_flag".
+      # Before the fix, this stashed {"exists_flag": {"exists_flag": true}}
+      # and the condition "exists_flag == true" would compare Map to boolean → false.
+      - id: "translation-exists"
+        priority: 1
+        conditions:
+          operator: AND
+          rules:
+            - type: "lookup"
+              description: "Check if translation config exists"
+              lookup-config:
+                lookup-key: "#TRANSLATION_TYPE"
+                lookup-dataset:
+                  type: "inline"
+                  key-field: "type"
+                  data:
+                    - type: "FX_RATE"
+                      exists_flag: true
+                    - type: "SETTLEMENT"
+                      exists_flag: true
+                    - type: "UNKNOWN"
+                      exists_flag: false
+              result-field: "exists_flag"
+              condition: "#exists_flag == true"
+        mapping:
+          type: "direct"
+          expression: "'TRANSLATION_FOUND'"
+
+      # Rule 2: Translation does NOT exist → TRANSLATION_NOT_FOUND
+      # Lookup returns {"exists_flag": false}. The condition checks exists_flag == false.
+      - id: "translation-not-found"
+        priority: 2
+        conditions:
+          operator: AND
+          rules:
+            - type: "lookup"
+              description: "Check translation config — expect not found"
+              lookup-config:
+                lookup-key: "#TRANSLATION_TYPE"
+                lookup-dataset:
+                  type: "inline"
+                  key-field: "type"
+                  data:
+                    - type: "FX_RATE"
+                      exists_flag: true
+                    - type: "SETTLEMENT"
+                      exists_flag: true
+                    - type: "UNKNOWN"
+                      exists_flag: false
+              result-field: "exists_flag"
+              condition: "#exists_flag == false"
+        mapping:
+          type: "direct"
+          expression: "'TRANSLATION_NOT_FOUND'"
+
+      # Rule 3: Fallback — lookup returned null (no matching record)
+      - id: "translation-missing"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'NO_TRANSLATION_CONFIG'"
