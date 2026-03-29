@@ -2,6 +2,7 @@ package dev.mars.apex.engine.model;
 
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
+import dev.mars.apex.engine.util.DataCopyUtility;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -76,7 +77,7 @@ public class RuleResult implements Serializable {
         this.timestamp = builder.timestamp != null ? builder.timestamp : Instant.now();
         this.resultType = builder.resultType;
         this.performanceMetrics = builder.performanceMetrics;
-        this.enrichedData = builder.enrichedData != null ? Collections.unmodifiableMap(new HashMap<>(builder.enrichedData)) : Collections.emptyMap();
+        this.enrichedData = builder.enrichedData != null ? Collections.unmodifiableMap(DataCopyUtility.deepCopyMap(builder.enrichedData)) : Collections.emptyMap();
         this.failureMessages = builder.failureMessages != null ? Collections.unmodifiableList(new ArrayList<>(builder.failureMessages)) : Collections.emptyList();
         this.success = builder.success;
         this.successCode = builder.successCode;
@@ -112,7 +113,7 @@ public class RuleResult implements Serializable {
         b.triggered = this.triggered;
         b.resultType = this.resultType;
         b.performanceMetrics = this.performanceMetrics;
-        b.enrichedData = this.enrichedData != null ? new HashMap<>(this.enrichedData) : new HashMap<>();
+        b.enrichedData = this.enrichedData != null ? DataCopyUtility.deepCopyMap(this.enrichedData) : new HashMap<>();
         b.failureMessages = this.failureMessages != null ? new ArrayList<>(this.failureMessages) : new ArrayList<>();
         b.success = this.success;
         b.successCode = this.successCode;

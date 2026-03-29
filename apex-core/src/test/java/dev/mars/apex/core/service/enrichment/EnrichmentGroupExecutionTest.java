@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
-
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -161,6 +161,113 @@ class EnrichmentGroupExecutionTest {
         RuleResult result = engine.evaluate(input);
         assertTrue(result.isSuccess(), "OR group should succeed when any enrichment succeeds");
         assertNotNull(result.getEnrichedData());
+    }
+
+    @Nested
+    @DisplayName("executeEnrichmentGroupsList must not mutate caller's nested Maps")
+    class CallerNestedMapIsolationTests {
+
+        @Test
+        @DisplayName("Caller's nested Map must remain empty after enrichment group execution")
+        void callerNestedMapMustNotBeMutatedByEnrichmentGroupExecution() {
+            // Caller-owned nested structure: metadata.params is empty and must stay empty
+            Map<String, Object> callerParams = new HashMap<>();
+            Map<String, Object> callerMetadata = new HashMap<>();
+            callerMetadata.put("params", callerParams);
+
+            Map<String, Object> callerData = new HashMap<>();
+            callerData.put("name", "original");
+            callerData.put("metadata", callerMetadata);
+
+            // Enrichment result targets the same nested path with injected data
+            Map<String, Object> enrichedParams = new HashMap<>();
+            enrichedParams.put("injected", "leaked-value");
+            Map<String, Object> enrichedMetadata = new HashMap<>();
+            enrichedMetadata.put("params", enrichedParams);
+            Map<String, Object> enrichedOutput = new HashMap<>();
+            enrichedOutput.put("metadata", enrichedMetadata);
+
+            RuleResult enrichmentResult = RuleResult.enrichmentSuccess(enrichedOutput);
+
+            EnrichmentGroup group = new EnrichmentGroup("g_isolation_test").setName("Isolation Test Group");
+            EnrichmentGroupExecutor executor = new EnrichmentGroupExecutor(null) {
+                @Override
+                public EnrichmentGroupResult processEnrichmentGroup(EnrichmentGroup requestedGroup, Object targetObject,
+                                                                    YamlRuleConfiguration yamlConfig) {
+                    return EnrichmentGroupResult.of(
+                            requestedGroup.getId(), true, "Enrichment group succeeded",
+                            List.of(enrichmentResult), 0L);
+                }
+            };
+
+            RuleResult result = executor.executeEnrichmentGroupsList(List.of(group), callerData, null);
+
+            assertTrue(result.isSuccess(), "Enrichment group should succeed");
+            assertNotNull(result.getEnrichedData(), "Enriched data should be present");
+
+            // CRITICAL ASSERTION: caller's nested Map must be untouched
+            assertTrue(callerParams.isEmpty(),
+                    "MUTATION BUG: deepMergeInto wrote enrichment data into the caller's " +
+                    "nested Map via convertToMap aliasing. callerParams should be empty but contains: " + callerParams);
+
+            assertEquals("original", callerData.get("name"),
+                    "Caller's top-level field must not be altered");
+        }
+
+        @Test
+        @DisplayName("Two sequential enrichment group calls must not accumulate state in shared nested Map")
+        void twoSequentialCallsMustNotAccumulateStateInCallerNestedMap() {
+            Map<String, Object> callerParams = new HashMap<>();
+            Map<String, Object> callerMetadata = new HashMap<>();
+            callerMetadata.put("params", callerParams);
+
+            Map<String, Object> callerData = new HashMap<>();
+            callerData.put("name", "original");
+            callerData.put("metadata", callerMetadata);
+
+            // Call 1 enrichment result
+            Map<String, Object> enrichedParams1 = new HashMap<>();
+            enrichedParams1.put("call", "first");
+            Map<String, Object> enrichedMeta1 = new HashMap<>();
+            enrichedMeta1.put("params", enrichedParams1);
+            Map<String, Object> enrichedOutput1 = new HashMap<>();
+            enrichedOutput1.put("metadata", enrichedMeta1);
+            RuleResult enrichmentResult1 = RuleResult.enrichmentSuccess(enrichedOutput1);
+
+            // Call 2 enrichment result
+            Map<String, Object> enrichedParams2 = new HashMap<>();
+            enrichedParams2.put("call", "second");
+            Map<String, Object> enrichedMeta2 = new HashMap<>();
+            enrichedMeta2.put("params", enrichedParams2);
+            Map<String, Object> enrichedOutput2 = new HashMap<>();
+            enrichedOutput2.put("metadata", enrichedMeta2);
+            RuleResult enrichmentResult2 = RuleResult.enrichmentSuccess(enrichedOutput2);
+
+            EnrichmentGroup group = new EnrichmentGroup("g_accum_test").setName("Accumulation Test Group");
+
+            // Executor that returns different results on each call
+            final int[] callCount = {0};
+            EnrichmentGroupExecutor executor = new EnrichmentGroupExecutor(null) {
+                @Override
+                public EnrichmentGroupResult processEnrichmentGroup(EnrichmentGroup requestedGroup, Object targetObject,
+                                                                    YamlRuleConfiguration yamlConfig) {
+                    RuleResult result = (callCount[0]++ == 0) ? enrichmentResult1 : enrichmentResult2;
+                    return EnrichmentGroupResult.of(
+                            requestedGroup.getId(), true, "Enrichment group succeeded",
+                            List.of(result), 0L);
+                }
+            };
+
+            // Call 1
+            executor.executeEnrichmentGroupsList(List.of(group), callerData, null);
+            assertTrue(callerParams.isEmpty(),
+                    "MUTATION BUG (call 1): callerParams polluted with: " + callerParams);
+
+            // Call 2
+            executor.executeEnrichmentGroupsList(List.of(group), callerData, null);
+            assertTrue(callerParams.isEmpty(),
+                    "MUTATION BUG (call 2): callerParams polluted with: " + callerParams);
+        }
     }
 
       @Test

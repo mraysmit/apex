@@ -32,6 +32,7 @@ import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import dev.mars.apex.core.service.transform.TransformationProcessor;
 import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.engine.util.DataCopyUtility;
 import dev.mars.apex.core.util.EnabledFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +127,7 @@ public class SequentialProcessor {
             Function<Map<String, Object>, org.springframework.expression.spel.support.StandardEvaluationContext> createContext) {
 
         List<String> failureMessages = new ArrayList<>();
-        Map<String, Object> enrichedData = new HashMap<>(inputData);
+        Map<String, Object> enrichedData = DataCopyUtility.deepCopyMap(inputData);
         boolean overallSuccess = true;
         List<RuleResult> individualRuleResults = new ArrayList<>();
         List<ExecutionStep> executionPath = new ArrayList<>();

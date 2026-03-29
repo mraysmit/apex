@@ -283,14 +283,16 @@ public class EnrichmentGroupExecutor {
 
     /**
      * Convert an object to a Map.
+     * Returns a deep copy to prevent mutation of the caller's nested structures
+     * when enrichment results are merged via deepMergeInto.
      *
      * @param obj The object to convert
-     * @return A Map representation of the object
+     * @return A deep-copied Map representation of the object
      */
     @SuppressWarnings("unchecked")
     private Map<String, Object> convertToMap(Object obj) {
         if (obj instanceof Map) {
-            return (Map<String, Object>) obj;
+            return DataCopyUtility.deepCopyMap((Map<String, Object>) obj);
         }
         return new HashMap<>();
     }

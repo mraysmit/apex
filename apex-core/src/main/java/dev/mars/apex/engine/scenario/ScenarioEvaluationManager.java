@@ -113,8 +113,12 @@ public class ScenarioEvaluationManager {
 
         ScenarioExecutionResult result = executor.executeStages(scenario, safeInputData);
 
-        // Merge enriched data back into the caller's original map so stage outputs are visible
-        DataCopyUtility.deepMergeInto(inputData, safeInputData);
+        // Copy stage outputs back into the caller's map at the top level only.
+        // Deep-copy each value so the caller never shares mutable nested structures
+        // with the engine's internal state (fixes nested-map mutation bug).
+        for (Map.Entry<String, Object> entry : safeInputData.entrySet()) {
+            inputData.put(entry.getKey(), DataCopyUtility.deepCopyValue(entry.getValue()));
+        }
 
         return result;
     }
@@ -161,8 +165,12 @@ public class ScenarioEvaluationManager {
 
         ScenarioExecutionResult result = executor.executeStages(scenario, safeInputData);
 
-        // Merge enriched data back into the caller's original map so stage outputs are visible
-        DataCopyUtility.deepMergeInto(inputData, safeInputData);
+        // Copy stage outputs back into the caller's map at the top level only.
+        // Deep-copy each value so the caller never shares mutable nested structures
+        // with the engine's internal state (fixes nested-map mutation bug).
+        for (Map.Entry<String, Object> entry : safeInputData.entrySet()) {
+            inputData.put(entry.getKey(), DataCopyUtility.deepCopyValue(entry.getValue()));
+        }
 
         return result;
     }
@@ -213,8 +221,12 @@ public class ScenarioEvaluationManager {
 
         ScenarioExecutionResult result = executor.executeStages(scenario, safeInputData);
 
-        // Merge enriched data back into the caller's original map so stage outputs are visible
-        DataCopyUtility.deepMergeInto(inputData, safeInputData);
+        // Copy stage outputs back into the caller's map at the top level only.
+        // Deep-copy each value so the caller never shares mutable nested structures
+        // with the engine's internal state (fixes nested-map mutation bug).
+        for (Map.Entry<String, Object> entry : safeInputData.entrySet()) {
+            inputData.put(entry.getKey(), DataCopyUtility.deepCopyValue(entry.getValue()));
+        }
 
         return result;
     }
