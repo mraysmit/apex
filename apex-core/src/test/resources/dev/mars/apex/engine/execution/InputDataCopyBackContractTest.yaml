@@ -1,0 +1,50 @@
+# Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ============================================================================
+# Copy-back contract test: verifies that after evaluate(), the caller's
+# original inputData map is updated with enriched values.
+# ============================================================================
+metadata:
+  id: "copy-back-contract"
+  name: "InputData Copy-Back Contract Test"
+  description: "Tests that inputData map is updated with enriched values after evaluate()"
+  version: "1.0"
+  author: "Mark A Ray-Smith Cityline Ltd"
+  type: "rule-config"
+
+enrichments:
+  - id: "add-new-field"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "settlementStatus"
+        expression: "'SETTLEMENT_READY'"
+
+  - id: "lookup-currency"
+    type: "lookup-enrichment"
+    name: "Currency Lookup"
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+          - code: "EUR"
+            name: "Euro"
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"

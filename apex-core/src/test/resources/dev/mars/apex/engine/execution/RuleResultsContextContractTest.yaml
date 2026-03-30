@@ -1,0 +1,43 @@
+# Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ============================================================================
+# Tests that #ruleResults context is populated between rule and enrichment
+# phases. The enrichment condition references a prior rule result and should
+# only fire when that rule evaluated to true.
+# ============================================================================
+metadata:
+  id: "rule-results-context-test"
+  name: "Rule Results Context Contract Test"
+  description: "Tests that #ruleResults context is populated between rule and enrichment phases"
+  version: "1.0"
+  author: "Mark A Ray-Smith Cityline Ltd"
+  type: "rule-config"
+
+# Rule evaluates first — sets ruleResults['amount-check'] = true/false
+rules:
+  - id: "amount-check"
+    name: "Amount Check Rule"
+    condition: "#amount > 1000"
+    message: "Amount exceeds threshold"
+
+# Enrichment evaluates second — condition references the rule result
+enrichments:
+  - id: "conditional-on-rule"
+    type: "field-enrichment"
+    condition: "#ruleResults != null && #ruleResults['amount-check'] == true"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "classification"
+        expression: "'HIGH_VALUE'"

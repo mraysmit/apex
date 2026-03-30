@@ -1,0 +1,12 @@
+# Depth Test Component - Level 2
+
+metadata:
+  id: "depth-test-level2"
+  name: "Depth Test Level 2"
+  description: "Depth enforcement test - level 2"
+  version: "1.0.0"
+  type: "component"
+
+component-refs:
+  - file: "depth-test-component-level3.yaml"
+    execution-order: 1

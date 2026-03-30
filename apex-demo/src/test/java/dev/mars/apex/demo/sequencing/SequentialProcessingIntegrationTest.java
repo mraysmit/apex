@@ -73,9 +73,7 @@ class SequentialProcessingIntegrationTest extends DemoTestBase {
 
             rules:
               - id: "validate-customer"
-                conditions:
-                  - field: "#customerName"
-                    operator: "not_null"
+                condition: "#customerName != null"
             """;
 
         // Parse with OrderedYamlParser
@@ -203,9 +201,7 @@ class SequentialProcessingIntegrationTest extends DemoTestBase {
 
             rules:
               - id: "validation-rule"
-                conditions:
-                  - field: "#field1"
-                    operator: "not_null"
+                condition: "#field1 != null"
 
             data-sources:
               - name: "test-source"

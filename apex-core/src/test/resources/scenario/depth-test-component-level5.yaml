@@ -1,0 +1,12 @@
+# Depth Test Component - Level 5
+
+metadata:
+  id: "depth-test-level5"
+  name: "Depth Test Level 5"
+  description: "Depth enforcement test - level 5"
+  version: "1.0.0"
+  type: "component"
+
+component-refs:
+  - file: "depth-test-component-level6.yaml"
+    execution-order: 1

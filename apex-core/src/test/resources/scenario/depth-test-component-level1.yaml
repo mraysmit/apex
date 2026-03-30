@@ -1,0 +1,13 @@
+# Depth Test Component - Level 1
+# Tests nesting depth enforcement (6 levels triggers ConfigurationException)
+
+metadata:
+  id: "depth-test-level1"
+  name: "Depth Test Level 1"
+  description: "Depth enforcement test - level 1"
+  version: "1.0.0"
+  type: "component"
+
+component-refs:
+  - file: "depth-test-component-level2.yaml"
+    execution-order: 1

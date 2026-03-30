@@ -21,6 +21,7 @@ import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleBase;
 import dev.mars.apex.engine.model.RuleGroup;
 import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.util.DataCopyUtility;
 import dev.mars.apex.core.service.data.external.DataSink;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSinkFactory;
@@ -837,13 +838,32 @@ public class RulesEngine {
         }
 
         // Delegate to SequentialProcessor for document-order processing
-        return sequentialProcessor.evaluateSequential(
+        RuleResult result = sequentialProcessor.evaluateSequential(
             yamlConfig,
             inputData,
             ctx -> executeRuleInternal(ctx.getRule(), ctx.getData()),
             ctx -> executePipeline(ctx.getPipeline(), ctx.getData()),
             this::createContext
         );
+
+        // Copy enriched data back into the caller's map so that inputData
+        // reflects enrichment results (mirrors ScenarioEvaluationManager behaviour).
+        // Deep-copy each value so the caller never shares mutable nested structures
+        // with the engine's internal state.
+        // Guard: if the caller passed an unmodifiable map (e.g. Map.of()), skip
+        // copy-back silently — enriched data is still available via result.getEnrichedData().
+        if (result.getEnrichedData() != null) {
+            try {
+                for (Map.Entry<String, Object> entry : result.getEnrichedData().entrySet()) {
+                    inputData.put(entry.getKey(), DataCopyUtility.deepCopyValue(entry.getValue()));
+                }
+            } catch (UnsupportedOperationException e) {
+                logger.debug("inputData map is unmodifiable — skipping copy-back. " +
+                        "Use result.getEnrichedData() to access enriched values.");
+            }
+        }
+
+        return result;
     }
 
     /**

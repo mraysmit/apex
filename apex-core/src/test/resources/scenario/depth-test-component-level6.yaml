@@ -1,0 +1,13 @@
+# Depth Test Component - Level 6 (leaf - should NOT be reached)
+# If this component loads, nesting depth validation failed
+
+metadata:
+  id: "depth-test-level6"
+  name: "Depth Test Level 6"
+  description: "Depth enforcement test - level 6 (should not be reached)"
+  version: "1.0.0"
+  type: "component"
+
+rule-configurations:
+  - file: "BasicStageConfigurationTest-validation-rules.yaml"
+    execution-order: 1
