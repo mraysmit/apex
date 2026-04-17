@@ -74,3 +74,16 @@ apex-core/apex-data-sync/reports/
 ### Reports directories ###
 reports/
 **/reports/
+apex-core/apex-data-sync/reports/schema-diff-json-test.json
+apex-core/apex-data-sync/reports/schema-diff-json-test.json
+apex-core/apex-data-sync/reports/schema-diff-dual-test.json
+apex-core/apex-data-sync/reports/schema-diff-changes-test.json
+apex-core/apex-data-sync/reports/schema-diff-dual-test.html
+apex-core/apex-data-sync/reports/schema-diff-dual-test.html
+apex-core/apex-data-sync/reports/schema-diff-dual-test.html
+apex-core/apex-data-sync/reports/schema-diff-changes-test.json
+apex-data-sync/reports/custom-type-mapping-report.html
+apex-data-sync/reports/edge-cases-schema.html
+apex-data-sync/reports/inventory-report.html
+apex-data-sync/reports/json-serialization-test.html
+apex-data-sync/reports/schema-diff-module-root.html
