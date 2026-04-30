@@ -1,0 +1,64 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: RuleConditionRefsTest.java
+# Purpose: Test that enrichment groups referenced by function CONDITIONS
+#          on RULES (not enrichments) are filtered from itemOrder.
+#
+# Bug: ItemOrderProcessor.applyGroupsOnlyLogic() does not scan
+#      YamlRule.getConditions() for enrichment-group-ref references.
+#
+# Groups:
+#   - rule-validate-group:  Referenced by function condition on a RULE   → FILTERED
+#   - unreferenced-group:   Not referenced by anything                   → REMAINS
+# ============================================================================
+
+metadata:
+  id: "rule-condition-refs-test"
+  type: "rule-config"
+  description: "Tests that enrichment groups referenced by function conditions on RULES are filtered from itemOrder"
+
+enrichments:
+  # Used by rule-validate-group: classifies trade validity
+  - id: "validator-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "validation_status"
+        expression: "#TRADE_TYPE != null ? 'VALID_' + #TRADE_TYPE : 'INVALID'"
+
+  # Used by unreferenced-group: produces standalone output
+  - id: "standalone-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "standalone_result"
+        expression: "'STANDALONE_OK'"
+
+enrichment-groups:
+  # Referenced by function CONDITION on a RULE → MUST be FILTERED
+  - id: "rule-validate-group"
+    name: "Rule Validation Group"
+    enrichment-ids: [ "validator-enrichment" ]
+
+  # NOT referenced by any function condition → MUST REMAIN in itemOrder
+  - id: "unreferenced-group"
+    name: "Standalone Processing Group"
+    enrichment-ids: [ "standalone-enrichment" ]
+
+rules:
+  - id: "trade-currency-pass"
+    name: "Trade Currency Pass?"
+    conditions:
+      operator: "OR"
+      rules:
+        - type: "expression"
+          condition: "#trade_currency == null"
+        - type: "function"
+          description: "Validate trade via enrichment group"
+          enrichment-group-ref: "rule-validate-group"
+          output-field: "validation_status"
+          condition: "#validation_status != null and #validation_status.startsWith('VALID')"
+    condition: "#validation_status != null"
+    message: "Trade currency validation passed"
+    severity: "INFO"

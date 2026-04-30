@@ -17,8 +17,11 @@ package dev.mars.apex.core.config.loader;
 
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
-import dev.mars.apex.core.config.model.YamlRuleConfiguration;import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
-import dev.mars.apex.core.config.model.condition.SharedConditionRule;import dev.mars.apex.core.config.model.YamlRuleGroup;
+import dev.mars.apex.core.config.model.YamlRule;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.core.config.sequential.ProcessingItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,6 +213,17 @@ class ItemOrderProcessor {
             }
             if (!referencedEnrichmentGroupIds.isEmpty()) {
                 logger.info("Total enrichment-group IDs referenced (including function mappings/conditions): " + referencedEnrichmentGroupIds);
+            }
+        }
+
+        // Collect enrichment-group IDs referenced by function conditions on rules.
+        // Rules can have a structured conditions block with type "function" and enrichment-group-ref.
+        if (config.getRules() != null && !config.getRules().isEmpty()) {
+            for (YamlRule rule : config.getRules()) {
+                collectFunctionConditionGroupRefs(rule.getConditions(), referencedEnrichmentGroupIds);
+            }
+            if (!referencedEnrichmentGroupIds.isEmpty()) {
+                logger.info("Total enrichment-group IDs referenced (including rule conditions): " + referencedEnrichmentGroupIds);
             }
         }
 

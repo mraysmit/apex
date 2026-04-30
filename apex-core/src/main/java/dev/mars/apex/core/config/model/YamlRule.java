@@ -1,8 +1,14 @@
 package dev.mars.apex.core.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +62,7 @@ public class YamlRule {
     private String condition;
 
     @JsonProperty("conditions")
+    @JsonDeserialize(using = YamlRule.ConditionsDeserializer.class)
     private SharedConditionGroup conditions;
     
     @JsonProperty("message")
@@ -406,6 +413,24 @@ public class YamlRule {
         
         public void setCustomValidators(List<String> customValidators) {
             this.customValidators = customValidators;
+        }
+    }
+
+    /**
+     * Custom deserializer that handles both formats of {@code conditions} on a rule:
+     * <ul>
+     *   <li>Object form ({@code operator}, {@code rules}) — deserialized as {@link SharedConditionGroup}</li>
+     *   <li>Array form (legacy, e.g. {@code [{"field":...,"operator":...}]}) — returns {@code null} (silently ignored)</li>
+     * </ul>
+     */
+    static class ConditionsDeserializer extends JsonDeserializer<SharedConditionGroup> {
+        @Override
+        public SharedConditionGroup deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            if (p.currentToken() == JsonToken.START_ARRAY) {
+                p.skipChildren();
+                return null;
+            }
+            return ctxt.readValue(p, SharedConditionGroup.class);
         }
     }
 }
