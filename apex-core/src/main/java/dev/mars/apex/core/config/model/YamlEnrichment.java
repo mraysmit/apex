@@ -2,6 +2,8 @@ package dev.mars.apex.core.config.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.core.constants.SeverityConstants;
 
 import java.util.List;
@@ -822,7 +824,7 @@ public class YamlEnrichment {
      */
     public static class ConditionalMapping {
         @JsonProperty("conditions")
-        private ConditionGroup conditions;
+        private SharedConditionGroup conditions;
 
         @JsonProperty("field-mappings")
         private List<FieldMapping> fieldMappings;
@@ -831,11 +833,11 @@ public class YamlEnrichment {
         public ConditionalMapping() {}
 
         // Getters and setters
-        public ConditionGroup getConditions() {
+        public SharedConditionGroup getConditions() {
             return conditions;
         }
 
-        public void setConditions(ConditionGroup conditions) {
+        public void setConditions(SharedConditionGroup conditions) {
             this.conditions = conditions;
         }
 
@@ -845,144 +847,6 @@ public class YamlEnrichment {
 
         public void setFieldMappings(List<FieldMapping> fieldMappings) {
             this.fieldMappings = fieldMappings;
-        }
-    }
-
-    /**
-     * Condition group with OR/AND logic for conditional mappings.
-     */
-    public static class ConditionGroup {
-        @JsonProperty("operator")
-        private String operator; // "OR" or "AND"
-
-        @JsonProperty("rules")
-        private List<ConditionRule> rules;
-
-        // Default constructor
-        public ConditionGroup() {}
-
-        // Getters and setters
-        public String getOperator() {
-            return operator;
-        }
-
-        public void setOperator(String operator) {
-            this.operator = operator;
-        }
-
-        public List<ConditionRule> getRules() {
-            return rules;
-        }
-
-        public void setRules(List<ConditionRule> rules) {
-            this.rules = rules;
-        }
-    }
-
-    /**
-     * Individual condition predicate for conditional mappings.
-     * <p>
-     * Supports three resolution types via the {@code type} field:
-     * <ul>
-     *   <li>{@code "expression"} (default) — pure SpEL evaluation</li>
-     *   <li>{@code "lookup"} — execute a lookup, stash result, then evaluate SpEL condition</li>
-     *   <li>{@code "function"} — invoke an enrichment group, stash output, then evaluate SpEL condition</li>
-     * </ul>
-     * The {@code condition} SpEL string is always the final boolean gate regardless of type.
-     */
-    public static class ConditionRule {
-        @JsonProperty("type")
-        private String type; // "expression" (default), "lookup", "function"
-
-        @JsonProperty("condition")
-        private String condition; // SpEL expression → Boolean (always present)
-
-        @JsonProperty("description")
-        private String description;
-
-        // For type: "lookup"
-        @JsonProperty("lookup-config")
-        private LookupConfig lookupConfig;
-
-        @JsonProperty("result-field")
-        private String resultField; // Context field to stash lookup result
-
-        // For type: "function"
-        @JsonProperty("enrichment-group-ref")
-        private String enrichmentGroupRef;
-
-        @JsonProperty("input-parameters")
-        private List<FieldMapping> inputParameters;
-
-        @JsonProperty("output-field")
-        private String outputField; // Context field to stash function output
-
-        // Default constructor
-        public ConditionRule() {}
-
-        // Getters and setters
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public void setCondition(String condition) {
-            this.condition = condition;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public LookupConfig getLookupConfig() {
-            return lookupConfig;
-        }
-
-        public void setLookupConfig(LookupConfig lookupConfig) {
-            this.lookupConfig = lookupConfig;
-        }
-
-        public String getResultField() {
-            return resultField;
-        }
-
-        public void setResultField(String resultField) {
-            this.resultField = resultField;
-        }
-
-        public String getEnrichmentGroupRef() {
-            return enrichmentGroupRef;
-        }
-
-        public void setEnrichmentGroupRef(String enrichmentGroupRef) {
-            this.enrichmentGroupRef = enrichmentGroupRef;
-        }
-
-        public List<FieldMapping> getInputParameters() {
-            return inputParameters;
-        }
-
-        public void setInputParameters(List<FieldMapping> inputParameters) {
-            this.inputParameters = inputParameters;
-        }
-
-        public String getOutputField() {
-            return outputField;
-        }
-
-        public void setOutputField(String outputField) {
-            this.outputField = outputField;
         }
     }
 
@@ -1001,7 +865,7 @@ public class YamlEnrichment {
         private Integer priority;
 
         @JsonProperty("conditions")
-        private ConditionGroup conditions;
+        private SharedConditionGroup conditions;
 
         @JsonProperty("mapping")
         private MappingConfig mapping;
@@ -1034,11 +898,11 @@ public class YamlEnrichment {
             this.priority = priority;
         }
 
-        public ConditionGroup getConditions() {
+        public SharedConditionGroup getConditions() {
             return conditions;
         }
 
-        public void setConditions(ConditionGroup conditions) {
+        public void setConditions(SharedConditionGroup conditions) {
             this.conditions = conditions;
         }
 

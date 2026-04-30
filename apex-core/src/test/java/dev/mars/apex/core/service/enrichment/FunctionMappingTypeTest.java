@@ -19,6 +19,8 @@ package dev.mars.apex.core.service.enrichment;
 import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -65,10 +67,10 @@ public class FunctionMappingTypeTest {
         rule.setPriority(1);
 
         // Create conditions
-        YamlEnrichment.ConditionGroup conditions = new YamlEnrichment.ConditionGroup();
+        SharedConditionGroup conditions = new SharedConditionGroup();
         conditions.setOperator("AND");
-        List<YamlEnrichment.ConditionRule> conditionRules = new ArrayList<>();
-        YamlEnrichment.ConditionRule condRule = new YamlEnrichment.ConditionRule();
+        List<SharedConditionRule> conditionRules = new ArrayList<>();
+        SharedConditionRule condRule = new SharedConditionRule();
         condRule.setCondition("#IS_NDF != null");
         conditionRules.add(condRule);
         conditions.setRules(conditionRules);

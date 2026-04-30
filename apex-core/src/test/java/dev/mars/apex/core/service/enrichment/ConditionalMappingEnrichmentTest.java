@@ -3,6 +3,8 @@ package dev.mars.apex.core.service.enrichment;
 import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.DisplayName;
@@ -44,10 +46,10 @@ public class ConditionalMappingEnrichmentTest {
         rule1.setPriority(1);
         
         // Create conditions for rule 1
-        YamlEnrichment.ConditionGroup conditions1 = new YamlEnrichment.ConditionGroup();
+        SharedConditionGroup conditions1 = new SharedConditionGroup();
         conditions1.setOperator("AND");
-        List<YamlEnrichment.ConditionRule> conditionRules1 = new ArrayList<>();
-        YamlEnrichment.ConditionRule condRule1 = new YamlEnrichment.ConditionRule();
+        List<SharedConditionRule> conditionRules1 = new ArrayList<>();
+        SharedConditionRule condRule1 = new SharedConditionRule();
         condRule1.setCondition("#SYSTEM_CODE == 'SWIFT'");
         conditionRules1.add(condRule1);
         conditions1.setRules(conditionRules1);

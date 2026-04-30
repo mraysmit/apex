@@ -12,6 +12,8 @@ package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.Expression;
@@ -26,7 +28,7 @@ import java.util.function.Function;
  * and mapping-rule conditions using SpEL expressions.
  *
  * <p>Supports three condition predicate types via the {@code type} field on
- * {@link YamlEnrichment.ConditionRule}:</p>
+ * {@link SharedConditionRule}:</p>
  * <ul>
  *   <li>{@code "expression"} (default) — pure SpEL evaluation</li>
  *   <li>{@code "lookup"} — execute a lookup, stash result, then evaluate SpEL</li>
@@ -80,7 +82,7 @@ public class EnrichmentConditionEvaluator {
      * @param targetObject   The target object for context
      * @return true if conditions are met, false otherwise
      */
-    public boolean evaluateConditionGroup(YamlEnrichment.ConditionGroup conditionGroup, Object targetObject) {
+    public boolean evaluateConditionGroup(SharedConditionGroup conditionGroup, Object targetObject) {
         return evaluateConditionGroup(conditionGroup, targetObject, null);
     }
 
@@ -93,7 +95,7 @@ public class EnrichmentConditionEvaluator {
      * @param config         YAML configuration (needed for lookup/function conditions, may be null)
      * @return true if conditions are met, false otherwise
      */
-    public boolean evaluateConditionGroup(YamlEnrichment.ConditionGroup conditionGroup,
+    public boolean evaluateConditionGroup(SharedConditionGroup conditionGroup,
                                            Object targetObject,
                                            YamlRuleConfiguration config) {
         if (conditionGroup == null || conditionGroup.getRules() == null || conditionGroup.getRules().isEmpty()) {
@@ -127,10 +129,10 @@ public class EnrichmentConditionEvaluator {
     /**
      * Evaluate conditions with OR logic (short-circuit on first true).
      */
-    boolean evaluateOrConditions(List<YamlEnrichment.ConditionRule> rules,
+    boolean evaluateOrConditions(List<SharedConditionRule> rules,
                                  Object targetObject,
                                  YamlRuleConfiguration config) {
-        for (YamlEnrichment.ConditionRule rule : rules) {
+        for (SharedConditionRule rule : rules) {
             try {
                 if (evaluateConditionRule(rule, targetObject, config)) {
                     logger.trace("OR condition met: " + rule.getCondition());
@@ -150,10 +152,10 @@ public class EnrichmentConditionEvaluator {
     /**
      * Evaluate conditions with AND logic (short-circuit on first false).
      */
-    boolean evaluateAndConditions(List<YamlEnrichment.ConditionRule> rules,
+    boolean evaluateAndConditions(List<SharedConditionRule> rules,
                                   Object targetObject,
                                   YamlRuleConfiguration config) {
-        for (YamlEnrichment.ConditionRule rule : rules) {
+        for (SharedConditionRule rule : rules) {
             try {
                 if (!evaluateConditionRule(rule, targetObject, config)) {
                     logger.trace("AND condition failed: " + rule.getCondition());
@@ -186,7 +188,7 @@ public class EnrichmentConditionEvaluator {
      * @param config       YAML configuration for lookup/function resolution (may be null)
      * @return true if condition is met, false otherwise
      */
-    boolean evaluateConditionRule(YamlEnrichment.ConditionRule rule,
+    boolean evaluateConditionRule(SharedConditionRule rule,
                                   Object targetObject,
                                   YamlRuleConfiguration config) {
         String type = rule.getType();
@@ -205,7 +207,7 @@ public class EnrichmentConditionEvaluator {
     /**
      * Execute a lookup, stash the result, then evaluate the SpEL condition.
      */
-    private boolean evaluateLookupCondition(YamlEnrichment.ConditionRule rule,
+    private boolean evaluateLookupCondition(SharedConditionRule rule,
                                              Object targetObject,
                                              YamlRuleConfiguration config) {
         if (actionExecutor == null) {
@@ -241,7 +243,7 @@ public class EnrichmentConditionEvaluator {
     /**
      * Execute a function (enrichment group), stash the output, then evaluate the SpEL condition.
      */
-    private boolean evaluateFunctionCondition(YamlEnrichment.ConditionRule rule,
+    private boolean evaluateFunctionCondition(SharedConditionRule rule,
                                                Object targetObject,
                                                YamlRuleConfiguration config) {
         if (actionExecutor == null) {
@@ -333,7 +335,7 @@ public class EnrichmentConditionEvaluator {
     public boolean evaluateMappingRuleConditions(YamlEnrichment.MappingRule rule,
                                                   Object targetObject,
                                                   YamlRuleConfiguration config) {
-        YamlEnrichment.ConditionGroup conditions = rule.getConditions();
+        SharedConditionGroup conditions = rule.getConditions();
 
         if (conditions == null) {
             logger.trace("No conditions specified for rule '" + rule.getId() + "', treating as default rule");

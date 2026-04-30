@@ -17,8 +17,8 @@ package dev.mars.apex.core.config.loader;
 
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
-import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.model.YamlRuleGroup;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;import dev.mars.apex.core.config.model.YamlRuleGroup;
 import dev.mars.apex.core.config.sequential.ProcessingItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -281,12 +281,12 @@ class ItemOrderProcessor {
     /**
      * Collect enrichment-group IDs from condition rules with type "function" in a ConditionGroup.
      */
-    private void collectFunctionConditionGroupRefs(YamlEnrichment.ConditionGroup conditionGroup,
+    private void collectFunctionConditionGroupRefs(SharedConditionGroup conditionGroup,
                                                    Set<String> target) {
         if (conditionGroup == null || conditionGroup.getRules() == null) {
             return;
         }
-        for (YamlEnrichment.ConditionRule cr : conditionGroup.getRules()) {
+        for (SharedConditionRule cr : conditionGroup.getRules()) {
             if ("function".equalsIgnoreCase(cr.getType()) && cr.getEnrichmentGroupRef() != null) {
                 target.add(cr.getEnrichmentGroupRef());
             }

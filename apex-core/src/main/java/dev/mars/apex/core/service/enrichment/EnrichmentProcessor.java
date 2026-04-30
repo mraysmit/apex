@@ -4,6 +4,7 @@ import dev.mars.apex.core.cache.ApexCacheManager;
 import dev.mars.apex.core.config.EnrichmentGroupFactory;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.engine.execution.EnrichmentGroupExecutor;
@@ -534,7 +535,7 @@ public class EnrichmentProcessor {
      * Evaluate a condition group with OR/AND logic.
      * Delegates to {@link EnrichmentConditionEvaluator#evaluateConditionGroup}.
      */
-    private boolean evaluateConditionGroup(YamlEnrichment.ConditionGroup conditionGroup, Object targetObject) {
+    private boolean evaluateConditionGroup(SharedConditionGroup conditionGroup, Object targetObject) {
         return conditionEvaluator.evaluateConditionGroup(conditionGroup, targetObject);
     }
 

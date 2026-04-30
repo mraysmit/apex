@@ -13,6 +13,7 @@ package dev.mars.apex.core.service.enrichment;
 import dev.mars.apex.core.config.EnrichmentGroupFactory;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.engine.execution.EnrichmentGroupExecutor;
 import dev.mars.apex.engine.model.EnrichmentGroup;
@@ -74,7 +75,7 @@ public class ConditionActionExecutor {
      * @param config       YAML configuration for data-source-ref resolution
      * @return The lookup result, or null if lookup fails/returns no data
      */
-    public Object executeLookup(YamlEnrichment.ConditionRule rule, Object targetObject,
+    public Object executeLookup(SharedConditionRule rule, Object targetObject,
                                 YamlRuleConfiguration config) {
         YamlEnrichment.LookupConfig lookupConfig = rule.getLookupConfig();
         if (lookupConfig == null) {
@@ -118,7 +119,7 @@ public class ConditionActionExecutor {
      * @param config       YAML configuration for enrichment group resolution
      * @return The extracted output value, or null if invocation fails
      */
-    public Object executeFunction(YamlEnrichment.ConditionRule rule, Object targetObject,
+    public Object executeFunction(SharedConditionRule rule, Object targetObject,
                                   YamlRuleConfiguration config) {
         String groupRef = rule.getEnrichmentGroupRef();
         if (groupRef == null || groupRef.trim().isEmpty()) {

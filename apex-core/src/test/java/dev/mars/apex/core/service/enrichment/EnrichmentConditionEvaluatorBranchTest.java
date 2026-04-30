@@ -3,6 +3,8 @@ package dev.mars.apex.core.service.enrichment;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,11 +73,11 @@ class EnrichmentConditionEvaluatorBranchTest {
         @DisplayName("actionExecutor is null → returns false")
         void lookupWithNullExecutor_returnsFalse() {
             // evaluator has no actionExecutor set — the null guard branch
-            YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+            SharedConditionRule rule = new SharedConditionRule();
             rule.setType("lookup");
             rule.setCondition("#flag == true");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -92,9 +94,9 @@ class EnrichmentConditionEvaluatorBranchTest {
 
             evaluator.setActionExecutor(stubLookupExecutor(lookupResult));
 
-            YamlEnrichment.ConditionRule rule = lookupRule("exists_flag", "#exists_flag == false");
+            SharedConditionRule rule = lookupRule("exists_flag", "#exists_flag == false");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -112,9 +114,9 @@ class EnrichmentConditionEvaluatorBranchTest {
 
             evaluator.setActionExecutor(stubLookupExecutor(lookupResult));
 
-            YamlEnrichment.ConditionRule rule = lookupRule("exists_flag", "#exists_flag == true");
+            SharedConditionRule rule = lookupRule("exists_flag", "#exists_flag == true");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -132,9 +134,9 @@ class EnrichmentConditionEvaluatorBranchTest {
 
             evaluator.setActionExecutor(stubLookupExecutor(lookupResult));
 
-            YamlEnrichment.ConditionRule rule = lookupRule("currency_info", "#currency_info['region'] == 'AMER'");
+            SharedConditionRule rule = lookupRule("currency_info", "#currency_info['region'] == 'AMER'");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -149,9 +151,9 @@ class EnrichmentConditionEvaluatorBranchTest {
         void lookupReturnsNonMap_stashesRawValue() {
             evaluator.setActionExecutor(stubLookupExecutor("ACTIVE"));
 
-            YamlEnrichment.ConditionRule rule = lookupRule("status", "#status == 'ACTIVE'");
+            SharedConditionRule rule = lookupRule("status", "#status == 'ACTIVE'");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -165,9 +167,9 @@ class EnrichmentConditionEvaluatorBranchTest {
         void lookupReturnsNull_conditionSeeNull() {
             evaluator.setActionExecutor(stubLookupExecutor(null));
 
-            YamlEnrichment.ConditionRule rule = lookupRule("result", "#result == null");
+            SharedConditionRule rule = lookupRule("result", "#result == null");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -183,13 +185,13 @@ class EnrichmentConditionEvaluatorBranchTest {
 
             evaluator.setActionExecutor(stubLookupExecutor(lookupResult));
 
-            YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+            SharedConditionRule rule = new SharedConditionRule();
             rule.setType("lookup");
             rule.setResultField(null);  // No result-field — skip stashing
             rule.setCondition("true");  // Always-true gate (no stashed data needed)
             rule.setLookupConfig(minimalLookupConfig());
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -204,13 +206,13 @@ class EnrichmentConditionEvaluatorBranchTest {
         void lookupWithEmptyResultField_skipsStash() {
             evaluator.setActionExecutor(stubLookupExecutor("anything"));
 
-            YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+            SharedConditionRule rule = new SharedConditionRule();
             rule.setType("lookup");
             rule.setResultField("   ");  // Blank
             rule.setCondition("true");
             rule.setLookupConfig(minimalLookupConfig());
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -229,11 +231,11 @@ class EnrichmentConditionEvaluatorBranchTest {
         @Test
         @DisplayName("actionExecutor is null → returns false")
         void functionWithNullExecutor_returnsFalse() {
-            YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+            SharedConditionRule rule = new SharedConditionRule();
             rule.setType("function");
             rule.setCondition("#output == 'HIGH'");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -246,13 +248,13 @@ class EnrichmentConditionEvaluatorBranchTest {
         void functionResultStashed_conditionEvaluates() {
             evaluator.setActionExecutor(stubFunctionExecutor("HIGH"));
 
-            YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+            SharedConditionRule rule = new SharedConditionRule();
             rule.setType("function");
             rule.setOutputField("risk_level");
             rule.setCondition("#risk_level == 'HIGH'");
             rule.setEnrichmentGroupRef("fake-group");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -266,13 +268,13 @@ class EnrichmentConditionEvaluatorBranchTest {
         void functionWithNullOutputField_skipsStash() {
             evaluator.setActionExecutor(stubFunctionExecutor("MEDIUM"));
 
-            YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+            SharedConditionRule rule = new SharedConditionRule();
             rule.setType("function");
             rule.setOutputField(null);  // No output-field
             rule.setCondition("true");
             rule.setEnrichmentGroupRef("fake-group");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -291,10 +293,10 @@ class EnrichmentConditionEvaluatorBranchTest {
         @Test
         @DisplayName("SpEL that returns null → false")
         void spelReturnsNull_isFalse() {
-            YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+            SharedConditionRule rule = new SharedConditionRule();
             rule.setCondition("#nonExistentVar");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             // #nonExistentVar will be null → should return false
@@ -306,10 +308,10 @@ class EnrichmentConditionEvaluatorBranchTest {
         @Test
         @DisplayName("SpEL that returns non-boolean non-null → true")
         void spelReturnsNonBooleanNonNull_isTrue() {
-            YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+            SharedConditionRule rule = new SharedConditionRule();
             rule.setCondition("42");
 
-            YamlEnrichment.ConditionGroup group = conditionGroup("AND", rule);
+            SharedConditionGroup group = conditionGroup("AND", rule);
             Map<String, Object> data = new HashMap<>();
 
             boolean result = evaluator.evaluateConditionGroup(group, data, null);
@@ -342,9 +344,9 @@ class EnrichmentConditionEvaluatorBranchTest {
             YamlEnrichment.MappingRule rule = new YamlEnrichment.MappingRule();
             rule.setId("test-rule");
 
-            YamlEnrichment.ConditionGroup conditions = new YamlEnrichment.ConditionGroup();
+            SharedConditionGroup conditions = new SharedConditionGroup();
             conditions.setOperator("AND");
-            YamlEnrichment.ConditionRule cond = new YamlEnrichment.ConditionRule();
+            SharedConditionRule cond = new SharedConditionRule();
             cond.setCondition("#amount > 100");
             conditions.setRules(List.of(cond));
             rule.setConditions(conditions);
@@ -364,16 +366,16 @@ class EnrichmentConditionEvaluatorBranchTest {
 
     // ─── Helpers ─────────────────────────────────────────────────────────
 
-    private static YamlEnrichment.ConditionGroup conditionGroup(String operator,
-                                                                 YamlEnrichment.ConditionRule... rules) {
-        YamlEnrichment.ConditionGroup group = new YamlEnrichment.ConditionGroup();
+    private static SharedConditionGroup conditionGroup(String operator,
+                                                                 SharedConditionRule... rules) {
+        SharedConditionGroup group = new SharedConditionGroup();
         group.setOperator(operator);
         group.setRules(List.of(rules));
         return group;
     }
 
-    private static YamlEnrichment.ConditionRule lookupRule(String resultField, String condition) {
-        YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+    private static SharedConditionRule lookupRule(String resultField, String condition) {
+        SharedConditionRule rule = new SharedConditionRule();
         rule.setType("lookup");
         rule.setResultField(resultField);
         rule.setCondition(condition);
@@ -393,7 +395,7 @@ class EnrichmentConditionEvaluatorBranchTest {
     private static ConditionActionExecutor stubLookupExecutor(Object fixedResult) {
         return new ConditionActionExecutor(null, null, null, null) {
             @Override
-            public Object executeLookup(YamlEnrichment.ConditionRule rule, Object targetObject,
+            public Object executeLookup(SharedConditionRule rule, Object targetObject,
                                         YamlRuleConfiguration config) {
                 return fixedResult;
             }
@@ -406,7 +408,7 @@ class EnrichmentConditionEvaluatorBranchTest {
     private static ConditionActionExecutor stubFunctionExecutor(Object fixedResult) {
         return new ConditionActionExecutor(null, null, null, null) {
             @Override
-            public Object executeFunction(YamlEnrichment.ConditionRule rule, Object targetObject,
+            public Object executeFunction(SharedConditionRule rule, Object targetObject,
                                           YamlRuleConfiguration config) {
                 return fixedResult;
             }

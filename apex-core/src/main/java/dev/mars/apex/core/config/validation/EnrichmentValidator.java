@@ -20,6 +20,8 @@ import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.util.EnabledFilter;
 import org.slf4j.Logger;
@@ -712,7 +714,7 @@ public class EnrichmentValidator {
     /**
      * Validate condition group for conditional mappings.
      */
-    private void validateConditionGroup(YamlEnrichment.ConditionGroup conditionGroup, String enrichmentId, int mappingIndex) throws ConfigurationException {
+    private void validateConditionGroup(SharedConditionGroup conditionGroup, String enrichmentId, int mappingIndex) throws ConfigurationException {
         if (conditionGroup == null) {
             throw new ConfigurationException("Conditional mapping at index " + mappingIndex + " missing 'conditions' for enrichment: " + enrichmentId);
         }
@@ -730,7 +732,7 @@ public class EnrichmentValidator {
 
         // Validate each condition rule
         for (int j = 0; j < conditionGroup.getRules().size(); j++) {
-            YamlEnrichment.ConditionRule rule = conditionGroup.getRules().get(j);
+            SharedConditionRule rule = conditionGroup.getRules().get(j);
             if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
                 throw new ConfigurationException("Condition rule at index " + j + " in conditional mapping " + mappingIndex + " missing 'condition' for enrichment: " + enrichmentId);
             }

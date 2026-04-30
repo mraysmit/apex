@@ -4,6 +4,8 @@ import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
@@ -686,25 +688,25 @@ class EnrichmentProcessorCoverageGapTest {
         data.put("amount", 500.0);
 
         // Test 1: null condition -> true
-        YamlEnrichment.ConditionRule nullRule = new YamlEnrichment.ConditionRule();
+        SharedConditionRule nullRule = new SharedConditionRule();
         nullRule.setCondition(null);
-        YamlEnrichment.ConditionGroup nullGroup = new YamlEnrichment.ConditionGroup();
+        SharedConditionGroup nullGroup = new SharedConditionGroup();
         nullGroup.setOperator("AND");
         nullGroup.setRules(List.of(nullRule));
         assertTrue(evaluator.evaluateConditionGroup(nullGroup, data), "Null condition should return true");
 
         // Test 2: empty condition -> true
-        YamlEnrichment.ConditionRule emptyRule = new YamlEnrichment.ConditionRule();
+        SharedConditionRule emptyRule = new SharedConditionRule();
         emptyRule.setCondition("   ");
-        YamlEnrichment.ConditionGroup emptyGroup = new YamlEnrichment.ConditionGroup();
+        SharedConditionGroup emptyGroup = new SharedConditionGroup();
         emptyGroup.setOperator("AND");
         emptyGroup.setRules(List.of(emptyRule));
         assertTrue(evaluator.evaluateConditionGroup(emptyGroup, data), "Empty condition should return true");
 
         // Test 3: non-boolean expression result (string) -> true
-        YamlEnrichment.ConditionRule stringRule = new YamlEnrichment.ConditionRule();
+        SharedConditionRule stringRule = new SharedConditionRule();
         stringRule.setCondition("'hello'");
-        YamlEnrichment.ConditionGroup stringGroup = new YamlEnrichment.ConditionGroup();
+        SharedConditionGroup stringGroup = new SharedConditionGroup();
         stringGroup.setOperator("AND");
         stringGroup.setRules(List.of(stringRule));
         assertTrue(evaluator.evaluateConditionGroup(stringGroup, data),
@@ -715,29 +717,27 @@ class EnrichmentProcessorCoverageGapTest {
 
     @Test
     @DisplayName("GAP 5.9: evaluateConditionGroup with unknown operator should default to AND")
-    void testEvaluateConditionGroupUnknownOperator() throws Exception {
+    void testEvaluateConditionGroupUnknownOperator() {
         logger.info("GAP 5.9: Testing evaluateConditionGroup with unknown operator");
 
-        Method evaluateConditionGroup = EnrichmentProcessor.class
-                .getDeclaredMethod("evaluateConditionGroup",
-                        YamlEnrichment.ConditionGroup.class, Object.class);
-        evaluateConditionGroup.setAccessible(true);
+        EnrichmentConditionEvaluator evaluator = new EnrichmentConditionEvaluator(
+                evaluatorService.getParser(), evaluatorService::createEvaluationContext);
 
         Map<String, Object> data = new HashMap<>();
         data.put("amount", 500.0);
 
         // Condition group with unknown operator
-        YamlEnrichment.ConditionGroup group = new YamlEnrichment.ConditionGroup();
+        SharedConditionGroup group = new SharedConditionGroup();
         group.setOperator("XOR"); // Unknown operator → defaults to AND
-        YamlEnrichment.ConditionRule rule = new YamlEnrichment.ConditionRule();
+        SharedConditionRule rule = new SharedConditionRule();
         rule.setCondition("#amount > 100");
         group.setRules(List.of(rule));
 
-        boolean result = (boolean) evaluateConditionGroup.invoke(processor, group, data);
+        boolean result = evaluator.evaluateConditionGroup(group, data, null);
         assertTrue(result, "Unknown operator should default to AND and evaluate conditions");
 
         // Null condition group → should return true
-        boolean nullResult = (boolean) evaluateConditionGroup.invoke(processor, (Object) null, data);
+        boolean nullResult = evaluator.evaluateConditionGroup(null, data, null);
         assertTrue(nullResult, "Null condition group should return true");
 
         logger.info("GAP 5.9 PASSED: Unknown operator defaults to AND correctly");
@@ -837,10 +837,10 @@ class EnrichmentProcessorCoverageGapTest {
                 new EnrichmentConditionEvaluator(evaluatorService.getParser(), evaluatorService::createEvaluationContext);
 
         Map<String, Object> data = new HashMap<>();
-        YamlEnrichment.ConditionRule badRule = new YamlEnrichment.ConditionRule();
+        SharedConditionRule badRule = new SharedConditionRule();
         badRule.setCondition("!!!INVALID_SPEL!!!");
 
-        YamlEnrichment.ConditionGroup group = new YamlEnrichment.ConditionGroup();
+        SharedConditionGroup group = new SharedConditionGroup();
         group.setOperator("OR");
         group.setRules(List.of(badRule));
 
@@ -861,10 +861,10 @@ class EnrichmentProcessorCoverageGapTest {
                                 new EnrichmentConditionEvaluator(evaluatorService.getParser(), evaluatorService::createEvaluationContext);
 
                 Map<String, Object> data = new HashMap<>();
-                YamlEnrichment.ConditionRule badRule = new YamlEnrichment.ConditionRule();
+                SharedConditionRule badRule = new SharedConditionRule();
                 badRule.setCondition("!!!INVALID_SPEL!!!");
 
-                YamlEnrichment.ConditionGroup group = new YamlEnrichment.ConditionGroup();
+                SharedConditionGroup group = new SharedConditionGroup();
                 group.setOperator("AND");
                 group.setRules(List.of(badRule));
 
