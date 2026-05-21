@@ -92,7 +92,7 @@ class RecoveryMetricsIntegrationTest {
             "test-rule-with-default",
             new HashSet<>(),  // categories
             "Test Rule With Default",
-            "nonExistentField == 'value'",  // This will cause NullPointerException
+            "nonExistentField.toString().equals('value')",  // null.toString() throws NPE, triggering error recovery
             "Test rule with default value",
             "Test rule description",
             1,  // priority
@@ -151,7 +151,7 @@ class RecoveryMetricsIntegrationTest {
             "test-rule",
             new HashSet<>(),  // categories
             "Test Rule",
-            "nonExistentField == 'value'",
+            "nonExistentField.toString().equals('value')",  // null.toString() throws NPE, triggering error recovery
             "Test rule",
             "Test rule description",
             1,  // priority
@@ -189,7 +189,7 @@ class RecoveryMetricsIntegrationTest {
             "aggregation-test-rule",
             new HashSet<>(),  // categories
             "Aggregation Test Rule",
-            "nonExistentField == 'value'",
+            "nonExistentField.toString().equals('value')",  // null.toString() throws NPE, triggering error recovery
             "Test rule for aggregation",
             "Test rule description",
             1,  // priority

@@ -176,6 +176,10 @@ public class StageExecutionConcurrencyTest {
             logger.info("TEST: concurrent addStageOutput with setStageOutputs consistency");
             
             StageExecutionResult result = StageExecutionResult.success("test-stage", null);
+            // Pre-populate so the map is never empty from the start; the checker thread
+            // must never observe an empty map, but the initial state IS empty before any
+            // thread runs — pre-seeding a sentinel entry eliminates that false-positive.
+            result.addStageOutput("sentinel", "value");
             int iterations = 10000;
             ExecutorService executor = Executors.newFixedThreadPool(3);
             CountDownLatch startLatch = new CountDownLatch(1);

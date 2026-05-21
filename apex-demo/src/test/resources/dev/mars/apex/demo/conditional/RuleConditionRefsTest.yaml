@@ -59,6 +59,5 @@ rules:
           enrichment-group-ref: "rule-validate-group"
           output-field: "validation_status"
           condition: "#validation_status != null and #validation_status.startsWith('VALID')"
-    condition: "#validation_status != null"
     message: "Trade currency validation passed"
     severity: "INFO"

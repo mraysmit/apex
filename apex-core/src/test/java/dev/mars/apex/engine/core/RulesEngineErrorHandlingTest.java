@@ -100,10 +100,14 @@ class RulesEngineErrorHandlingTest {
         List<String> failureMessages = result.getFailureMessages();
         assertFalse(failureMessages.isEmpty(), "Should have failure messages reporting SpEL errors");
         
-        // Step 5: Verify specific error messages about missing fields
+        // Step 5: Verify specific error messages about missing/failed fields.
+        // After the MapPropertyAccessor null-safe fix, null-safe conditions (e.g. age != null && ...)
+        // evaluate to false instead of throwing EL1008E. Failure messages now come from rule
+        // messages (e.g. "Customer ID is mandatory") and rule IDs (e.g. "mandatory-field-check").
         boolean hasFieldErrors = failureMessages.stream().anyMatch(msg -> 
             msg.contains("age") || msg.contains("email") || msg.contains("creditScore") || 
-            msg.contains("customerId") || msg.contains("principal") || msg.contains("value"));
+            msg.contains("customerId") || msg.contains("principal") || msg.contains("value") ||
+            msg.contains("mandatory-field-check") || msg.contains("Customer ID"));
         
         assertTrue(hasFieldErrors, 
             "Should report errors about missing fields in RuleResult. Messages: " + failureMessages);
