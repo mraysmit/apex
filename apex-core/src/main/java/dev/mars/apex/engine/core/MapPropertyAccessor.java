@@ -40,11 +40,7 @@ public class MapPropertyAccessor implements PropertyAccessor {
 
     @Override
     public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-        if (target instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) target;
-            return map.containsKey(name);
-        }
-        return false;
+        return target instanceof Map;
     }
 
     @Override

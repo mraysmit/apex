@@ -1,0 +1,26 @@
+metadata:
+  id: "fx-new"
+  name: "FX New Transaction Validation"
+  version: "1.0.0"
+  description: "Validates an incoming FX new transaction"
+  type: "scenario"
+  business-domain: "FX Trading"
+  owner: "APEX Test Suite"
+
+scenario:
+  scenario-id: "fx-new"
+  name: "FX New Transaction Validation"
+  description: "Validates an incoming FX new transaction"
+
+  data-types:
+    - "java.util.Map"
+
+  processing-stages:
+
+    - stage-name: "fx-validation"
+      # Short relative path — resolved relative to this scenario file's directory.
+      config-file: "stages/validation.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      depends-on: []

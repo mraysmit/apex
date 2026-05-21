@@ -1,0 +1,13 @@
+metadata:
+  id: "stage-path-resolution-registry"
+  name: "Stage Path Resolution Registry"
+  version: "1.0.0"
+  description: "Registry for testing relative stage config-file path resolution"
+  type: "scenario-registry"
+  created-by: "APEX Test Suite"
+
+scenarios:
+  - scenario-id: "fx-new"
+    config-file: "src/test/java/dev/mars/apex/core/config/loader/stage-path-resolution/scenarios/fx-validation-scenario.yaml"
+    enabled: true
+    description: "FX validation scenario with a relative stage path"

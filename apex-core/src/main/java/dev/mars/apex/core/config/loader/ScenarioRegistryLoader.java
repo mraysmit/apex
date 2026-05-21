@@ -441,7 +441,18 @@ public class ScenarioRegistryLoader {
                 throw new ConfigurationException("Scenario resource not found: " + resourcePath);
             }
             
-            return loadScenarioFromStream(inputStream);
+            ScenarioConfiguration scenario = loadScenarioFromStream(inputStream);
+
+            // Attempt filesystem-relative stage path resolution.
+            // When the classpath resource path also exists as a filesystem path (the
+            // typical externalized-repo deployment), stage config-file values that are
+            // short relative paths (e.g. "stages/validation.yaml") are resolved against
+            // the scenario file's parent directory.  For truly classpath-only resources
+            // the filesystem check in resolveStageConfigFilePaths fails silently and the
+            // paths are left as-is for later classpath fallback.
+            resolveStageConfigFilePaths(scenario, resourcePath);
+
+            return scenario;
             
         } catch (IOException e) {
             throw new ConfigurationException("Failed to load scenario from classpath: " + resourcePath, e);
@@ -656,7 +667,12 @@ public class ScenarioRegistryLoader {
                 if (fileMetadata != null && scenario.getMetadata() == null) {
                     scenario.setMetadata(fileMetadata);
                 }
-                
+
+                // Resolve stage config-file paths relative to this scenario file's directory.
+                // This allows externalized YAML repos to use short relative paths like
+                // "stages/validation.yaml" rather than full absolute paths.
+                resolveStageConfigFilePaths(scenario, configFile);
+
                 return scenario;
             } else {
                 throw new ConfigurationException(
@@ -670,7 +686,54 @@ public class ScenarioRegistryLoader {
             throw new ConfigurationException("Failed to load scenario from file: " + configFile, e);
         }
     }
-    
+
+    /**
+     * Resolves each stage's config-file path relative to the scenario file that declared it.
+     *
+     * <p>Resolution order (first match wins):
+     * <ol>
+     *   <li>Absolute path — used as-is.</li>
+     *   <li>Exists relative to the JVM working directory — used as-is (preserves existing behaviour
+     *       for tests that use full {@code src/test/java/...} prefixes).</li>
+     *   <li>Resolves relative to the scenario file's parent directory — used when the file exists
+     *       there (the new externalized-repo case).</li>
+     *   <li>Left unchanged — will fail later with a meaningful "not found" message.</li>
+     * </ol>
+     *
+     * @param scenario         the parsed scenario whose stages will be updated in-place
+     * @param scenarioFilePath the path from which the scenario was loaded
+     */
+    private void resolveStageConfigFilePaths(ScenarioConfiguration scenario, String scenarioFilePath) {
+        if (scenario.getProcessingStages() == null || scenario.getProcessingStages().isEmpty()) {
+            return;
+        }
+        Path scenarioDir = Paths.get(scenarioFilePath).toAbsolutePath().getParent();
+        for (ScenarioStage stage : scenario.getProcessingStages()) {
+            String raw = stage.getConfigFile();
+            if (raw == null || raw.isBlank()) {
+                continue;
+            }
+            Path rawPath = Paths.get(raw);
+            // Step 1: already absolute
+            if (rawPath.isAbsolute()) {
+                continue;
+            }
+            // Step 2: exists relative to CWD (full src/test/java/... style paths)
+            if (Files.exists(rawPath)) {
+                continue;
+            }
+            // Step 3: resolve relative to the scenario file's own directory
+            Path resolved = scenarioDir.resolve(raw).normalize();
+            if (Files.exists(resolved)) {
+                logger.debug("Resolved stage '{}' config-file '{}' -> '{}'",
+                    stage.getStageName(), raw, resolved);
+                stage.setConfigFile(resolved.toString());
+                continue;
+            }
+            // Step 4: leave as-is — loader will emit a clear "not found" error
+        }
+    }
+
     /**
      * Parse scenario configuration from YAML data map.
      *

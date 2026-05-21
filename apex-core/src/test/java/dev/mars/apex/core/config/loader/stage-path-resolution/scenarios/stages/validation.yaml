@@ -1,0 +1,33 @@
+metadata:
+  id: "fx-validation-rules"
+  name: "FX Validation Rules"
+  version: "1.0.0"
+  description: "Basic FX trade field validation"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+rules:
+
+  - id: "currency-pair-required"
+    name: "Currency Pair Required"
+    description: "Currency pair must be present and non-empty"
+    condition: "#currencyPair != null && !#currencyPair.toString().isEmpty()"
+    message: "Currency pair is valid"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "notional-positive"
+    name: "Notional Positive"
+    description: "Trade notional must be a positive number"
+    condition: "#notional != null && T(java.lang.Double).parseDouble(#notional.toString()) > 0"
+    message: "Notional amount is valid"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "direction-valid"
+    name: "Direction Valid"
+    description: "Trade direction must be BUY or SELL"
+    condition: "#direction != null && (#direction == 'BUY' || #direction == 'SELL')"
+    message: "Trade direction is valid"
+    severity: "ERROR"
+    enabled: true
