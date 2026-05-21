@@ -1,0 +1,13 @@
+metadata:
+  id: "nested-ref-path-resolution-registry"
+  name: "Nested Ref Path Resolution Registry"
+  version: "1.0.0"
+  description: "Registry for testing relative rule-ref path resolution inside stage YAMLs"
+  type: "scenario-registry"
+  created-by: "APEX Test Suite"
+
+scenarios:
+  - scenario-id: "fx-nested"
+    config-file: "src/test/java/dev/mars/apex/core/config/loader/nested-ref-path-resolution/scenarios/fx-nested-scenario.yaml"
+    enabled: true
+    description: "FX scenario whose stage YAML uses relative rule-refs"

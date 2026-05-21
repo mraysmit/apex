@@ -1,6 +1,7 @@
 package dev.mars.apex.core.config.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.sequential.ProcessingItem;
@@ -526,5 +527,21 @@ public class YamlRuleConfiguration {
      */
     public void setReferencedRuleGroupIds(Set<String> referencedRuleGroupIds) {
         this.referencedRuleGroupIds = referencedRuleGroupIds;
+    }
+
+    /**
+     * The directory of the YAML file this configuration was loaded from.
+     * Set by ConfigurationLoader when loading from the filesystem.
+     * Not serialized — used only for relative reference resolution.
+     */
+    @JsonIgnore
+    private String sourceDirectory;
+
+    public String getSourceDirectory() {
+        return sourceDirectory;
+    }
+
+    public void setSourceDirectory(String sourceDirectory) {
+        this.sourceDirectory = sourceDirectory;
     }
 }

@@ -1,0 +1,15 @@
+metadata:
+  id: "fx-stage-rules"
+  name: "FX Stage Rules"
+  version: "1.0.0"
+  description: "Stage config that pulls in rules via a relative rule-ref"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+# Rule reference using a path relative to THIS file's directory.
+# Without sourceDirectory propagation this resolves against CWD and fails.
+rule-refs:
+  - name: "extra-rules"
+    source: "rules/extra-rules.yaml"
+    enabled: true
+    description: "FX trade rules loaded via relative path"

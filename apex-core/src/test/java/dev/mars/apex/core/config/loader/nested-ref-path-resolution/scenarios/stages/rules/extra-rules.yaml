@@ -1,0 +1,25 @@
+metadata:
+  id: "fx-extra-rules"
+  name: "FX Extra Rules"
+  version: "1.0.0"
+  description: "FX validation rules referenced via a relative rule-ref"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+rules:
+
+  - id: "notional-positive"
+    name: "Notional Positive"
+    description: "Trade notional must be a positive number"
+    condition: "#notional != null && T(java.lang.Double).parseDouble(#notional.toString()) > 0"
+    message: "Notional amount is valid"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "direction-valid"
+    name: "Direction Valid"
+    description: "Trade direction must be BUY or SELL"
+    condition: "#direction != null && (#direction == 'BUY' || #direction == 'SELL')"
+    message: "Direction is valid"
+    severity: "ERROR"
+    enabled: true

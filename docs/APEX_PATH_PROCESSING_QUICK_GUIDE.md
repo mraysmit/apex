@@ -132,3 +132,14 @@ Include attempted locations in diagnostics when possible.
 - `RulesEngine.fromScenarioRegistry(...)`: simplest entry point for scenario registry loading.
 - `ConfigurationContext`: name-based runtime lookup and bulk preload.
 - `ResourceResolver`: consistent path existence and resolution behavior.
+
+## Known Limitations
+
+### `loadFromStream` cannot resolve relative references
+
+`ConfigurationLoader.loadFromStream(InputStream)` has no knowledge of where the stream originated, so `sourceDirectory` is always `null`. Any `rule-refs`, `enrichment-refs`, or `data-source-refs` inside a stream-loaded config that use relative paths (e.g. `source: "rules/extra-rules.yaml"`) will fail to resolve.
+
+**Use `loadFromFile` or `loadFromClasspath` instead.** Both methods set `sourceDirectory` before processing references:
+- `loadFromFile(String)` / `loadFromFile(File)` — always sets `sourceDirectory` to the file's parent directory.
+- `loadFromClasspath(String)` — sets `sourceDirectory` when the classpath resource resolves to a file on disk (standard in test environments and exploded-WAR deployments); `null` inside a JAR.
+

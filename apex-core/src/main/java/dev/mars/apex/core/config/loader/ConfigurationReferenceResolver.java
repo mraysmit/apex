@@ -120,7 +120,7 @@ class ConfigurationReferenceResolver {
                 logger.debug("Resolving external rule reference (recursive): " + ref.getName() + " from " + ref.getSource());
 
                 // Load the referenced rule file recursively
-                YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
+                YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles, config.getSourceDirectory());
 
                 // Check if external file has BOTH rules and rule-groups
                 boolean hasRules = referencedConfig.getRules() != null && !referencedConfig.getRules().isEmpty();
@@ -240,7 +240,7 @@ class ConfigurationReferenceResolver {
                 logger.debug("Resolving external enrichment reference (recursive): " + ref.getName() + " from " + ref.getSource());
 
                 // Load the referenced enrichment file recursively
-                YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
+                YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles, config.getSourceDirectory());
 
                 // Check if external file has enrichments and/or enrichment-groups
                 boolean hasEnrichments = referencedConfig.getEnrichments() != null && !referencedConfig.getEnrichments().isEmpty();
@@ -363,8 +363,19 @@ class ConfigurationReferenceResolver {
             try {
                 logger.info("Resolving external data-source reference: " + ref.getName() + " from " + ref.getSource());
 
-                // Resolve the external configuration
-                ExternalDataSourceConfig externalConfig = dataSourceResolver.resolveDataSource(ref.getSource());
+                // Resolve the external configuration, with source-dir-relative fallback
+                String dataSourceRef = ref.getSource();
+                if (config.getSourceDirectory() != null && dataSourceRef != null) {
+                    Path dsPath = Paths.get(dataSourceRef);
+                    if (!dsPath.isAbsolute() && !Files.exists(dsPath)) {
+                        Path candidate = Paths.get(config.getSourceDirectory()).resolve(dataSourceRef).normalize();
+                        if (Files.exists(candidate)) {
+                            logger.debug("Resolved data-source ref '{}' relative to source dir: {}", dataSourceRef, candidate);
+                            dataSourceRef = candidate.toString();
+                        }
+                    }
+                }
+                ExternalDataSourceConfig externalConfig = dataSourceResolver.resolveDataSource(dataSourceRef);
 
                 // Convert external configuration to YamlDataSource
                 YamlDataSource yamlDataSource = convertExternalToYamlDataSource(externalConfig, ref);
@@ -395,9 +406,21 @@ class ConfigurationReferenceResolver {
      * @return The loaded rule configuration
      * @throws ConfigurationException if loading fails or cycle detected
      */
-    private YamlRuleConfiguration loadRuleFileRecursive(String source, Set<String> loadedFiles) throws ConfigurationException {
+    private YamlRuleConfiguration loadRuleFileRecursive(String source, Set<String> loadedFiles, String sourceDirectory) throws ConfigurationException {
+        // Resolve path: as-is (absolute or CWD-relative) > sourceDirectory-relative
+        Path path = Paths.get(source);
+        if (!path.isAbsolute() && !Files.exists(path) && sourceDirectory != null) {
+            Path candidate = Paths.get(sourceDirectory).resolve(source).normalize();
+            if (Files.exists(candidate)) {
+                logger.debug("Resolved ref '{}' relative to source dir: {}", source, candidate);
+                path = candidate;
+            }
+        }
+
         // Normalize path for cycle detection and duplicate prevention
-        String normalizedSource = Paths.get(source).normalize().toString();
+        String normalizedSource = Files.exists(path)
+            ? path.toAbsolutePath().normalize().toString()
+            : Paths.get(source).normalize().toString();
 
         // Check if already loaded - if so, return empty config to avoid duplicates
         if (loadedFiles.contains(normalizedSource)) {
@@ -415,13 +438,11 @@ class ConfigurationReferenceResolver {
         loadedFiles.add(normalizedSource);
 
         try {
-            // Try file system first, then classpath (same pattern as DataSourceResolver)
-            Path path = Paths.get(source);
             YamlRuleConfiguration config;
 
             if (Files.exists(path)) {
                 // Load from file system
-                logger.debug("Loading rule file from file system: " + source);
+                logger.debug("Loading rule file from file system: " + path);
                 config = loadFromFileWithoutProcessing(path.toFile());
             } else {
                 // Load from classpath
@@ -470,6 +491,7 @@ class ConfigurationReferenceResolver {
             String resolvedContent = resolveProperties(rawContent);
 
             YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
+            config.setSourceDirectory(file.getParentFile().getAbsolutePath());
 
             // Skip processRuleReferences() and processDataSourceReferences() to avoid recursion
             // Skip validateConfiguration() as this will be done on the merged configuration

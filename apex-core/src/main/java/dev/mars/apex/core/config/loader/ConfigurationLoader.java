@@ -105,7 +105,8 @@ public class ConfigurationLoader {
 
             logger.info("Loading YAML configuration from file: " + filePath);
             String rawContent = Files.readString(path);
-            return loadFromResolvedContent(resolveProperties(rawContent), filePath);
+            return loadFromResolvedContent(resolveProperties(rawContent), filePath,
+                path.toAbsolutePath().getParent().toString());
 
         } catch (IOException e) {
             throw new ConfigurationException("Failed to load configuration from file: " + filePath, e);
@@ -127,7 +128,8 @@ public class ConfigurationLoader {
 
             logger.info("Loading YAML configuration from file: " + file.getAbsolutePath());
             String rawContent = Files.readString(file.toPath());
-            return loadFromResolvedContent(resolveProperties(rawContent), file.getAbsolutePath());
+            return loadFromResolvedContent(resolveProperties(rawContent), file.getAbsolutePath(),
+                file.toPath().toAbsolutePath().getParent().toString());
 
         } catch (IOException e) {
             throw new ConfigurationException("Failed to load configuration from file: " + file.getAbsolutePath(), e);
@@ -145,7 +147,7 @@ public class ConfigurationLoader {
         try {
             logger.info("Loading YAML configuration from input stream");
             String rawContent = new String(inputStream.readAllBytes());
-            return loadFromResolvedContent(resolveProperties(rawContent), "<stream>");
+            return loadFromResolvedContent(resolveProperties(rawContent), "<stream>", null);
 
         } catch (IOException e) {
             throw new ConfigurationException("Failed to load configuration from input stream", e);
@@ -160,7 +162,7 @@ public class ConfigurationLoader {
      * @return The fully loaded and validated configuration
      * @throws ConfigurationException if any processing or validation step fails
      */
-    private YamlRuleConfiguration loadFromResolvedContent(String resolvedContent, String sourceName) throws ConfigurationException {
+    private YamlRuleConfiguration loadFromResolvedContent(String resolvedContent, String sourceName, String sourceDirectory) throws ConfigurationException {
         // Use OrderedYamlParser to preserve section order
         OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, sourceName);
         YamlRuleConfiguration config = orderedConfig.getConfiguration();
@@ -170,6 +172,11 @@ public class ConfigurationLoader {
         config.setItemOrder(orderedConfig.getItemOrder());
         logger.debug("Section order from YAML: " + orderedConfig.getSectionOrder());
         logger.debug("Item order from YAML: " + orderedConfig.getItemOrder().size() + " items");
+
+        // Set source directory before processing references so relative refs can be resolved
+        if (sourceDirectory != null) {
+            config.setSourceDirectory(sourceDirectory);
+        }
 
         // Process external rule references
         processRuleReferences(config);
@@ -209,7 +216,21 @@ public class ConfigurationLoader {
             }
 
             logger.info("Loading YAML configuration from classpath: " + resourcePath);
-            return loadFromStream(inputStream);
+            String rawContent = new String(inputStream.readAllBytes());
+
+            // Derive sourceDirectory when the classpath resource is a file on disk
+            // (common in test environments and exploded classpath deployments)
+            String sourceDirectory = null;
+            java.net.URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
+            if (resourceUrl != null && "file".equals(resourceUrl.getProtocol())) {
+                try {
+                    sourceDirectory = Paths.get(resourceUrl.toURI()).getParent().toString();
+                } catch (Exception ignored) {
+                    logger.debug("Could not derive sourceDirectory for classpath resource: {}", resourcePath);
+                }
+            }
+
+            return loadFromResolvedContent(resolveProperties(rawContent), resourcePath, sourceDirectory);
 
         } catch (IOException e) {
             throw new ConfigurationException("Failed to load configuration from classpath: " + resourcePath, e);

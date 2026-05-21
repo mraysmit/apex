@@ -1,0 +1,26 @@
+metadata:
+  id: "fx-nested"
+  name: "FX Nested Ref Scenario"
+  version: "1.0.0"
+  description: "Stage uses relative rule-refs; paths must resolve relative to the stage file"
+  type: "scenario"
+  business-domain: "FX Trading"
+  owner: "APEX Test Suite"
+
+scenario:
+  scenario-id: "fx-nested"
+  name: "FX Nested Ref Scenario"
+  description: "Stage uses relative rule-refs resolved relative to the stage file's directory"
+
+  data-types:
+    - "java.util.Map"
+
+  processing-stages:
+
+    - stage-name: "fx-validation"
+      # Short relative path — resolved relative to this scenario file's directory.
+      config-file: "stages/fx-stage.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      depends-on: []
