@@ -86,3 +86,4 @@ apex-data-sync/reports/json-serialization-test.html
 apex-data-sync/reports/schema-diff-module-root.html
 apex-core/reports/test-schema-report.html
 apex-demo/demo-data/transform-test/output/transformed-output.json
+docs-design/task/task.md

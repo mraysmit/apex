@@ -363,18 +363,8 @@ class ConfigurationReferenceResolver {
             try {
                 logger.info("Resolving external data-source reference: " + ref.getName() + " from " + ref.getSource());
 
-                // Resolve the external configuration, with source-dir-relative fallback
-                String dataSourceRef = ref.getSource();
-                if (config.getSourceDirectory() != null && dataSourceRef != null) {
-                    Path dsPath = Paths.get(dataSourceRef);
-                    if (!dsPath.isAbsolute() && !Files.exists(dsPath)) {
-                        Path candidate = Paths.get(config.getSourceDirectory()).resolve(dataSourceRef).normalize();
-                        if (Files.exists(candidate)) {
-                            logger.debug("Resolved data-source ref '{}' relative to source dir: {}", dataSourceRef, candidate);
-                            dataSourceRef = candidate.toString();
-                        }
-                    }
-                }
+                // Resolve the external configuration, walking up ancestor directories as needed
+                String dataSourceRef = resolveRefPath(ref.getSource(), config.getSourceDirectory());
                 ExternalDataSourceConfig externalConfig = dataSourceResolver.resolveDataSource(dataSourceRef);
 
                 // Convert external configuration to YamlDataSource
@@ -407,20 +397,14 @@ class ConfigurationReferenceResolver {
      * @throws ConfigurationException if loading fails or cycle detected
      */
     private YamlRuleConfiguration loadRuleFileRecursive(String source, Set<String> loadedFiles, String sourceDirectory) throws ConfigurationException {
-        // Resolve path: as-is (absolute or CWD-relative) > sourceDirectory-relative
-        Path path = Paths.get(source);
-        if (!path.isAbsolute() && !Files.exists(path) && sourceDirectory != null) {
-            Path candidate = Paths.get(sourceDirectory).resolve(source).normalize();
-            if (Files.exists(candidate)) {
-                logger.debug("Resolved ref '{}' relative to source dir: {}", source, candidate);
-                path = candidate;
-            }
-        }
+        // Resolve path: as-is > sourceDirectory-relative > ancestor walk-up
+        String resolvedSource = resolveRefPath(source, sourceDirectory);
+        Path path = Paths.get(resolvedSource);
 
         // Normalize path for cycle detection and duplicate prevention
         String normalizedSource = Files.exists(path)
             ? path.toAbsolutePath().normalize().toString()
-            : Paths.get(source).normalize().toString();
+            : Paths.get(resolvedSource).normalize().toString();
 
         // Check if already loaded - if so, return empty config to avoid duplicates
         if (loadedFiles.contains(normalizedSource)) {
@@ -601,5 +585,47 @@ class ConfigurationReferenceResolver {
         } catch (PropertyResolver.PropertyResolutionException e) {
             throw new ConfigurationException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Resolve a relative file reference against the source directory and its ancestors.
+     *
+     * <p>Resolution order:
+     * <ol>
+     *   <li>Return {@code ref} unchanged if it is absolute or already exists at the CWD.</li>
+     *   <li>Try {@code sourceDirectory/ref}.</li>
+     *   <li>Walk up ancestor directories of {@code sourceDirectory}, trying each one until
+     *       the file is found or the filesystem root is reached.</li>
+     * </ol>
+     *
+     * <p>This supports shared config-repo layouts where stage YAMLs live in deep
+     * sub-folders (e.g. {@code configuration/FX/NEW/}) and infrastructure configs
+     * live in sibling folders (e.g. {@code configuration/DB/}) referenced by short
+     * relative paths such as {@code "DB/database-postgres.yaml"}.
+     *
+     * @param ref             the reference path as written in the YAML
+     * @param sourceDirectory the directory of the file containing the reference (may be null)
+     * @return the resolved path string, or {@code ref} unchanged if not resolved
+     */
+    private String resolveRefPath(String ref, String sourceDirectory) {
+        if (ref == null) {
+            return null;
+        }
+        Path refPath = Paths.get(ref);
+        if (refPath.isAbsolute() || Files.exists(refPath)) {
+            return ref;
+        }
+        if (sourceDirectory != null) {
+            Path dir = Paths.get(sourceDirectory);
+            while (dir != null) {
+                Path candidate = dir.resolve(ref).normalize();
+                if (Files.exists(candidate)) {
+                    logger.debug("Resolved ref '{}' against ancestor dir '{}': {}", ref, dir, candidate);
+                    return candidate.toString();
+                }
+                dir = dir.getParent();
+            }
+        }
+        return ref;
     }
 }
