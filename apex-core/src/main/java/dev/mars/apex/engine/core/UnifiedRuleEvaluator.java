@@ -18,6 +18,10 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.service.lookup.LookupService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +56,9 @@ public class UnifiedRuleEvaluator {
     private final MessageTemplateResolver messageTemplateResolver;
     private final FieldMappingProcessor fieldMappingProcessor;
     private final ErrorRecoveryHandler errorRecoveryHandler;
+
+    // Optional: enables lookup predicate execution in structured condition rules (Phase 3)
+    private LookupServiceRegistry serviceRegistry;
     
     /**
      * Create a new UnifiedRuleEvaluator with default components.
@@ -123,7 +130,24 @@ public class UnifiedRuleEvaluator {
         this.fieldMappingProcessor = new FieldMappingProcessor(this.parser);
         this.errorRecoveryHandler = new ErrorRecoveryHandler(this.errorRecoveryConfig, this.errorRecoveryService, this.performanceMonitor);
     }
-    
+
+    /**
+     * Create a new UnifiedRuleEvaluator with lookup execution support (Phase 3).
+     *
+     * <p>Lookup predicates in structured condition groups will be executed via the
+     * supplied registry. Named lookup services registered under
+     * {@link LookupServiceRegistry} are resolved at evaluation time using the
+     * {@code lookup-service} name from the predicate's {@code lookup-config}.
+     * The result is stashed as a context variable under {@code result-field} before
+     * the SpEL gate condition is evaluated.</p>
+     *
+     * @param serviceRegistry Registry of named lookup services for condition predicate execution
+     */
+    public UnifiedRuleEvaluator(LookupServiceRegistry serviceRegistry) {
+        this();
+        this.serviceRegistry = serviceRegistry;
+    }
+
     /**
      * Evaluate a single rule against the provided context.
      * This is the core evaluation method that all other methods delegate to.
@@ -552,8 +576,11 @@ public class UnifiedRuleEvaluator {
     /**
      * Evaluate a structured condition group (AND/OR) against the evaluation context.
      * Supports expression-type predicates with full SpEL evaluation.
-     * Lookup and function predicates evaluate their SpEL condition gate if present,
-     * defaulting to true if absent (action execution requires Phase 3 wiring).
+     * Lookup predicates execute via the injected {@link LookupServiceRegistry} (if configured)
+     * before evaluating their condition gate. Function predicates evaluate their gate only
+     * (function execution requires {@code EnrichmentGroupExecutor} — not yet wired).
+     * The gate may be a flat SpEL {@code condition} string or a nested {@code conditions}
+     * structured group; if both are set, {@code conditions} takes precedence.
      *
      * @param group   The structured condition group
      * @param context The SpEL evaluation context
@@ -593,11 +620,14 @@ public class UnifiedRuleEvaluator {
     /**
      * Evaluate a single structured condition predicate.
      * <ul>
-     *   <li>{@code expression}: Evaluates the SpEL condition directly.</li>
-     *   <li>{@code lookup}: Action execution deferred to Phase 3 wiring;
-     *       evaluates the SpEL condition gate if present, defaults to true if absent.</li>
-     *   <li>{@code function}: Action execution deferred to Phase 3 wiring;
-     *       evaluates the SpEL condition gate if present, defaults to true if absent.</li>
+     *   <li>{@code expression}: Evaluates the SpEL condition or nested conditions group directly.</li>
+     *   <li>{@code lookup}: Executes the lookup via the injected {@link LookupServiceRegistry} (if present),
+     *       stashes the result as a context variable under {@code result-field}, then evaluates the
+     *       SpEL condition gate or nested conditions group. Falls back to gate-only evaluation when
+     *       no registry is configured.</li>
+     *   <li>{@code function}: Action execution not yet wired (requires {@code EnrichmentGroupExecutor}
+     *       and {@code YamlRuleConfiguration} — deferred to a future phase); evaluates the SpEL
+     *       condition gate or nested conditions group if present, defaults to true if absent.</li>
      * </ul>
      *
      * @param rule    The condition predicate
@@ -608,22 +638,114 @@ public class UnifiedRuleEvaluator {
         String type = rule.getType();
 
         if ("lookup".equalsIgnoreCase(type)) {
-            logger.debug("Lookup predicate '{}' — action execution requires Phase 3 wiring; evaluating condition gate only",
-                    rule.getDescription());
+            if (serviceRegistry != null) {
+                executeLookupPredicate(rule, context);
+            } else {
+                logger.debug("Lookup predicate '{}' — no LookupServiceRegistry configured; evaluating gate only",
+                        rule.getDescription());
+            }
         } else if ("function".equalsIgnoreCase(type)) {
-            logger.debug("Function predicate '{}' — action execution requires Phase 3 wiring; evaluating condition gate only",
+            logger.debug("Function predicate '{}' — function execution requires EnrichmentGroupExecutor (not yet wired); evaluating gate only",
                     rule.getDescription());
         }
 
-        // Evaluate the SpEL condition gate (shared across all predicate types)
+        // Evaluate the condition gate — supports both 'conditions' (structured group) and 'condition' (SpEL string)
+        SharedConditionGroup nestedConditions = rule.getConditions();
         String condition = rule.getCondition();
-        if (condition == null || condition.trim().isEmpty()) {
+
+        if (nestedConditions != null) {
+            // Nested structured condition gate — delegate recursively
+            logger.debug("Evaluating nested structured conditions gate for predicate '{}'", rule.getDescription());
+            return evaluateStructuredConditionGroup(nestedConditions, context);
+        } else if (condition == null || condition.trim().isEmpty()) {
             // No condition gate — implicitly true (valid for function/lookup without a condition)
             return true;
+        } else {
+            // Simple SpEL condition gate
+            Expression exp = parser.parseExpression(condition);
+            Boolean result = exp.getValue(context, Boolean.class);
+            return result != null && result;
+        }
+    }
+
+    /**
+     * Execute the lookup for a {@code lookup}-type condition predicate and stash the result
+     * into the evaluation context so the gate condition can reference it via {@code #result-field}.
+     *
+     * <p>Resolution order:
+     * <ol>
+     *   <li>Resolve the named {@link LookupService} from {@link #serviceRegistry} using
+     *       {@code lookup-config.lookup-service}.</li>
+     *   <li>Evaluate the {@code lookup-key} SpEL expression against the current context.</li>
+     *   <li>Call {@link LookupService#transform(Object)} with the resolved key.</li>
+     *   <li>Stash the result into the context via
+     *       {@link StandardEvaluationContext#setVariable(String, Object)} under {@code result-field},
+     *       so the gate SpEL expression (e.g. {@code #customerTier == 'PREMIUM'}) can access it.</li>
+     * </ol>
+     * If the result is a {@code Map} that contains the {@code result-field} key, the scalar value
+     * under that key is stashed (not the whole map) to avoid double-nesting.</p>
+     *
+     * <p>All failures (missing config, service not found, key evaluation failure, lookup exception)
+     * are logged as warnings and silently swallowed so the evaluator can fall through to gate
+     * evaluation with whatever value (or absence of value) is currently in the context.</p>
+     *
+     * @param rule    The condition predicate with {@code lookup-config} and {@code result-field}
+     * @param context The SpEL evaluation context to mutate with the stashed result
+     */
+    private void executeLookupPredicate(SharedConditionRule rule, EvaluationContext context) {
+        YamlEnrichment.LookupConfig lookupConfig = rule.getLookupConfig();
+        if (lookupConfig == null) {
+            logger.warn("Lookup predicate '{}' has no lookup-config; skipping execution", rule.getDescription());
+            return;
         }
 
-        Expression exp = parser.parseExpression(condition);
-        Boolean result = exp.getValue(context, Boolean.class);
-        return result != null && result;
+        String serviceName = lookupConfig.getLookupService();
+        if (serviceName == null || serviceName.trim().isEmpty()) {
+            logger.warn("Lookup predicate '{}' specifies no lookup-service name; skipping execution", rule.getDescription());
+            return;
+        }
+
+        LookupService lookupService = serviceRegistry.getService(serviceName, LookupService.class);
+        if (lookupService == null) {
+            logger.warn("Lookup service '{}' not found in registry for predicate '{}'",
+                    serviceName, rule.getDescription());
+            return;
+        }
+
+        try {
+            Expression keyExpr = parser.parseExpression(lookupConfig.getLookupKey());
+            Object lookupKey = keyExpr.getValue(context);
+
+            if (lookupKey == null) {
+                logger.warn("Lookup key expression '{}' evaluated to null for predicate '{}'",
+                        lookupConfig.getLookupKey(), rule.getDescription());
+                return;
+            }
+
+            Object result = lookupService.transform(lookupKey);
+            logger.debug("Lookup predicate '{}' executed with key '{}', result: {}",
+                    rule.getDescription(), lookupKey, result);
+
+            String resultField = rule.getResultField();
+            if (resultField != null && !resultField.trim().isEmpty()
+                    && context instanceof StandardEvaluationContext) {
+                StandardEvaluationContext stdCtx = (StandardEvaluationContext) context;
+                // If the result is a Map containing the resultField key, extract the scalar
+                // to avoid stashing {resultField: value} as a whole-map context variable.
+                if (result instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> resultMap = (Map<String, Object>) result;
+                    stdCtx.setVariable(resultField,
+                            resultMap.containsKey(resultField) ? resultMap.get(resultField) : result);
+                } else {
+                    stdCtx.setVariable(resultField, result);
+                }
+                logger.debug("Lookup predicate '{}' stashed result into context variable '{}': {}",
+                        rule.getDescription(), resultField, result);
+            }
+        } catch (Exception e) {
+            logger.warn("Lookup predicate '{}' execution failed: {}", rule.getDescription(), e.getMessage());
+            logger.debug("Full stack trace for lookup predicate execution failure:", e);
+        }
     }
 }

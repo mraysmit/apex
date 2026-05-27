@@ -44,7 +44,10 @@ public class SharedConditionRule {
     private String type; // "expression" (default), "lookup", "function"
 
     @JsonProperty("condition")
-    private String condition; // SpEL expression → Boolean (always present)
+    private String condition; // SpEL expression → Boolean (simple gate)
+
+    @JsonProperty("conditions")
+    private SharedConditionGroup conditions; // Structured condition group gate (alternative to 'condition')
 
     @JsonProperty("description")
     private String description;
@@ -82,6 +85,14 @@ public class SharedConditionRule {
 
     public void setCondition(String condition) {
         this.condition = condition;
+    }
+
+    public SharedConditionGroup getConditions() {
+        return conditions;
+    }
+
+    public void setConditions(SharedConditionGroup conditions) {
+        this.conditions = conditions;
     }
 
     public String getDescription() {

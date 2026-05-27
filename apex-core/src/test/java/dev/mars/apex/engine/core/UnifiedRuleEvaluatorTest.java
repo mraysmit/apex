@@ -1,19 +1,12 @@
 package dev.mars.apex.engine.core;
 
 import dev.mars.apex.engine.model.Rule;
-import dev.mars.apex.engine.core.RuleBuilder;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-
-import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
-import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
-
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -23,6 +16,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
+import dev.mars.apex.core.config.model.condition.SharedConditionRule;
+import dev.mars.apex.core.service.lookup.LookupService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -810,6 +809,458 @@ class UnifiedRuleEvaluatorTest {
         assertTrue(result.isTriggered());
         assertEquals("Structured Rule", result.getRuleName(),
                 "Structured condition rule should be the first match");
+    }
+
+    // =========================================================================
+    // Nested Conditions Gate Tests (conditions field on SharedConditionRule)
+    // =========================================================================
+    //
+    // WHY WERE THERE NO FAILING TESTS FOR THIS GAP?
+    //
+    // The `conditions` field did not exist on SharedConditionRule before the fix.
+    // No test could ever call setConditions() on a predicate, so the code path in
+    // evaluateStructuredConditionRule that only checked getCondition() (flat SpEL string)
+    // was never challenged. The feature was half-implemented invisibly — the model
+    // didn't expose the capability, so no test could exercise or detect its absence.
+    // All existing lookup/function predicate tests used no condition (defaults to true)
+    // or a flat `condition` string, which already worked. The gap only became visible
+    // once the model field and the evaluator branch were added together.
+
+    @Test
+    @DisplayName("Nested AND conditions gate on expression predicate - all true → MATCH")
+    void testNestedConditions_ExpressionPredicate_AndGate_AllTrue() {
+        // Given: expression predicate whose gate is a nested AND group (both sub-conditions true)
+        var innerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        innerGroup.setOperator("AND");
+        var inner1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner1.setType("expression");
+        inner1.setCondition("#amount > 500");        // true  (1000 > 500)
+        var inner2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner2.setType("expression");
+        inner2.setCondition("#currency == 'USD'");   // true
+        innerGroup.setRules(List.of(inner1, inner2));
+
+        var outerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        outerGroup.setOperator("AND");
+        var pred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred.setType("expression");
+        pred.setDescription("Nested AND gate predicate");
+        pred.setConditions(innerGroup);              // nested conditions — no flat condition string
+        outerGroup.setRules(List.of(pred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Nested AND Gate Rule")
+                .withConditions(outerGroup)
+                .withMessage("Nested conditions matched")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertTrue(result.isTriggered(), "Nested AND gate with all-true sub-conditions should match");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("Nested AND conditions gate on expression predicate - one false → NO_MATCH")
+    void testNestedConditions_ExpressionPredicate_AndGate_OneFalse() {
+        // Given: expression predicate with nested AND gate where one sub-condition is false
+        var innerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        innerGroup.setOperator("AND");
+        var inner1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner1.setType("expression");
+        inner1.setCondition("#amount > 500");        // true
+        var inner2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner2.setType("expression");
+        inner2.setCondition("#amount > 5000");       // false (1000 < 5000)
+        innerGroup.setRules(List.of(inner1, inner2));
+
+        var outerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        outerGroup.setOperator("AND");
+        var pred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred.setType("expression");
+        pred.setConditions(innerGroup);
+        outerGroup.setRules(List.of(pred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Nested AND Gate - One False")
+                .withConditions(outerGroup)
+                .withMessage("Should not match")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertFalse(result.isTriggered(), "Nested AND gate with one false sub-condition should not match");
+        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("Nested OR conditions gate on lookup predicate - one true → MATCH (Phase 3 deferred)")
+    void testNestedConditions_LookupPredicate_OrGate_OneTrue() {
+        // BEFORE FIX: 'conditions' field didn't exist on SharedConditionRule.
+        //             evaluateStructuredConditionRule only checked getCondition() (flat string).
+        //             Setting a nested group was impossible and the nested-gate code path
+        //             was entirely untestable and untested.
+        //
+        // Given: lookup predicate (Phase 3 deferred — no actual lookup executed) with nested OR gate
+        var innerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        innerGroup.setOperator("OR");
+        var inner1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner1.setType("expression");
+        inner1.setCondition("#amount > 5000");       // false
+        var inner2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner2.setType("expression");
+        inner2.setCondition("#currency == 'USD'");   // true → OR group resolves to true
+        innerGroup.setRules(List.of(inner1, inner2));
+
+        var outerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        outerGroup.setOperator("AND");
+        var lookupPred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        lookupPred.setType("lookup");
+        lookupPred.setDescription("Customer creditworthiness lookup");
+        lookupPred.setResultField("creditScore");
+        lookupPred.setConditions(innerGroup);        // nested OR gate
+        outerGroup.setRules(List.of(lookupPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Lookup Nested OR Gate Rule")
+                .withConditions(outerGroup)
+                .withMessage("Lookup nested gate passed")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then: OR gate is true (currency == 'USD'), so the lookup predicate resolves to true
+        assertTrue(result.isTriggered(),
+                "Lookup predicate with nested OR gate (one true sub-condition) should match");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("Nested AND conditions gate on lookup predicate - all false → NO_MATCH (Phase 3 deferred)")
+    void testNestedConditions_LookupPredicate_AndGate_AllFalse() {
+        // Given: lookup predicate with nested AND gate where both sub-conditions are false
+        var innerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        innerGroup.setOperator("AND");
+        var inner1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner1.setType("expression");
+        inner1.setCondition("#amount > 5000");       // false
+        var inner2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner2.setType("expression");
+        inner2.setCondition("#currency == 'GBP'");   // false (it's USD)
+        innerGroup.setRules(List.of(inner1, inner2));
+
+        var outerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        outerGroup.setOperator("AND");
+        var lookupPred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        lookupPred.setType("lookup");
+        lookupPred.setDescription("Customer lookup");
+        lookupPred.setConditions(innerGroup);
+        outerGroup.setRules(List.of(lookupPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Lookup Nested AND Gate - All False")
+                .withConditions(outerGroup)
+                .withMessage("Should not match")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertFalse(result.isTriggered(),
+                "Lookup predicate with nested AND gate (all false) should not match");
+        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("Nested AND conditions gate on function predicate - all true → MATCH (Phase 3 deferred)")
+    void testNestedConditions_FunctionPredicate_AndGate_AllTrue() {
+        // BEFORE FIX: SharedConditionRule had no 'conditions' field.
+        //             evaluateStructuredConditionRule only checked getCondition() — the nested
+        //             group path was entirely missing from the evaluator. Function predicates
+        //             with a nested conditions gate could never be configured or tested.
+        //
+        // Given: function predicate (Phase 3 deferred) with nested AND gate (both true)
+        var innerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        innerGroup.setOperator("AND");
+        var inner1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner1.setType("expression");
+        inner1.setCondition("#amount > 500");        // true
+        var inner2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner2.setType("expression");
+        inner2.setCondition("#riskLevel == 'LOW'");  // true
+        innerGroup.setRules(List.of(inner1, inner2));
+
+        var outerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        outerGroup.setOperator("AND");
+        var funcPred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        funcPred.setType("function");
+        funcPred.setDescription("Risk classification function");
+        funcPred.setEnrichmentGroupRef("risk-classification");
+        funcPred.setOutputField("riskCategory");
+        funcPred.setConditions(innerGroup);          // nested AND gate
+        outerGroup.setRules(List.of(funcPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Function Nested AND Gate Rule")
+                .withConditions(outerGroup)
+                .withMessage("Function nested gate passed")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertTrue(result.isTriggered(),
+                "Function predicate with nested AND gate (all true) should match");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("Nested OR conditions gate on function predicate - all false → NO_MATCH (Phase 3 deferred)")
+    void testNestedConditions_FunctionPredicate_OrGate_AllFalse() {
+        // Given: function predicate with nested OR gate where all sub-conditions are false
+        var innerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        innerGroup.setOperator("OR");
+        var inner1 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner1.setType("expression");
+        inner1.setCondition("#amount > 9000");       // false
+        var inner2 = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner2.setType("expression");
+        inner2.setCondition("#currency == 'EUR'");   // false (it's USD)
+        innerGroup.setRules(List.of(inner1, inner2));
+
+        var outerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        outerGroup.setOperator("AND");
+        var funcPred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        funcPred.setType("function");
+        funcPred.setEnrichmentGroupRef("risk-classification");
+        funcPred.setConditions(innerGroup);
+        outerGroup.setRules(List.of(funcPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Function Nested OR Gate - All False")
+                .withConditions(outerGroup)
+                .withMessage("Should not match")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertFalse(result.isTriggered(),
+                "Function predicate with nested OR gate (all false) should not match");
+        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType());
+    }
+
+    @Test
+    @DisplayName("'conditions' nested group takes precedence over flat 'condition' string on same predicate")
+    void testNestedConditions_TakesPrecedenceOverFlatCondition() {
+        // Given: predicate with BOTH 'condition' (evaluates false) and 'conditions' (evaluates true)
+        //        'conditions' is checked first in the evaluator, so it should win.
+        var innerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        innerGroup.setOperator("AND");
+        var inner = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        inner.setType("expression");
+        inner.setCondition("#amount > 500");         // true
+        innerGroup.setRules(List.of(inner));
+
+        var outerGroup = new dev.mars.apex.core.config.model.condition.SharedConditionGroup();
+        outerGroup.setOperator("AND");
+        var pred = new dev.mars.apex.core.config.model.condition.SharedConditionRule();
+        pred.setType("expression");
+        pred.setCondition("#amount > 9999");         // false — would produce NO_MATCH if used
+        pred.setConditions(innerGroup);              // true  — takes precedence → should MATCH
+        outerGroup.setRules(List.of(pred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Conditions Precedence Rule")
+                .withConditions(outerGroup)
+                .withMessage("Conditions group took precedence")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then: 'conditions' (true) wins over flat 'condition' (false)
+        assertTrue(result.isTriggered(),
+                "'conditions' nested group should take precedence over flat 'condition' string");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
+    }
+
+    // =========================================================================
+    // Phase 3 — Lookup Predicate Execution Tests (TDD: RED first, then GREEN)
+    // =========================================================================
+    //
+    // These tests require actual lookup execution inside evaluateStructuredConditionRule.
+    // The evaluator must:
+    //   1. Resolve the named LookupService from the injected LookupServiceRegistry
+    //   2. Evaluate the lookup-key SpEL expression against the current context
+    //   3. Call lookupService.transform(key) to obtain the result
+    //   4. Stash the result into the EvaluationContext via setVariable(result-field, result)
+    //      so the gate condition (#result-field == ...) can resolve it
+    //
+    // RED STATE (constructor stub only — no executeLookupPredicate wired):
+    //   The lookup never executes. The context variable for result-field is never set
+    //   (or retains the pre-existing fact value). Gate evaluations that depend on the
+    //   stashed result return the wrong answer → assertion failures.
+    //
+    // GREEN STATE (executeLookupPredicate implemented):
+    //   Lookup executes, result stashed, gate re-evaluated → correct MATCH / NO_MATCH.
+
+    @Test
+    @DisplayName("[Phase 3] Lookup predicate executes and stashes result; gate overrides pre-existing fact value")
+    void testPhase3_LookupExecuted_OverridesExistingFactValue_GatePasses() {
+        // Given: LookupService that maps CUST001 → PREMIUM
+        LookupService tierLookup = new LookupService("tier-lookup", List.of("CUST001"));
+        Map<String, Object> tierData = new HashMap<>();
+        tierData.put("CUST001", "PREMIUM");
+        tierLookup.setEnrichmentData(tierData);
+
+        LookupServiceRegistry registry = new LookupServiceRegistry();
+        registry.registerService(tierLookup);
+
+        UnifiedRuleEvaluator evaluatorWithLookup = new UnifiedRuleEvaluator(registry);
+
+        // Facts deliberately pre-seed customerTier = "BASIC" so that without lookup
+        // execution the gate #customerTier == 'PREMIUM' returns false (NO_MATCH).
+        // After Phase 3 lookup execution the context variable is overridden to "PREMIUM"
+        // and the gate returns true (MATCH).
+        Map<String, Object> facts = new HashMap<>(testFacts);
+        facts.put("customerId", "CUST001");
+        facts.put("customerTier", "BASIC"); // RED: gate reads this → false; GREEN: lookup overrides → PREMIUM → true
+
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        lookupConfig.setLookupService("tier-lookup");
+        lookupConfig.setLookupKey("#customerId");
+
+        SharedConditionRule lookupPred = new SharedConditionRule();
+        lookupPred.setType("lookup");
+        lookupPred.setDescription("Customer tier lookup");
+        lookupPred.setLookupConfig(lookupConfig);
+        lookupPred.setResultField("customerTier");
+        lookupPred.setCondition("#customerTier == 'PREMIUM'");
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(lookupPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Customer Tier Check")
+                .withConditions(group)
+                .withMessage("Customer is PREMIUM tier")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluatorWithLookup.evaluateRule(rule, facts);
+
+        // Then: MATCH because lookup overrides "BASIC" with "PREMIUM" in the context
+        // RED: fails because lookup not yet executed → gate reads "BASIC" → NO_MATCH
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Lookup should execute and override 'BASIC' with 'PREMIUM' from the lookup service");
+        assertTrue(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 3] Lookup predicate executes; gate correctly fails when lookup returns non-matching value")
+    void testPhase3_LookupExecuted_GateFails_WhenLookupReturnsWrongValue() {
+        // Given: LookupService that maps CUST001 → BASIC (not PREMIUM)
+        LookupService tierLookup = new LookupService("tier-lookup-basic", List.of("CUST001"));
+        Map<String, Object> tierData = new HashMap<>();
+        tierData.put("CUST001", "BASIC");
+        tierLookup.setEnrichmentData(tierData);
+
+        LookupServiceRegistry registry = new LookupServiceRegistry();
+        registry.registerService(tierLookup);
+
+        UnifiedRuleEvaluator evaluatorWithLookup = new UnifiedRuleEvaluator(registry);
+
+        // Facts have no customerTier (no pre-existing value)
+        Map<String, Object> facts = new HashMap<>(testFacts);
+        facts.put("customerId", "CUST001");
+
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        lookupConfig.setLookupService("tier-lookup-basic");
+        lookupConfig.setLookupKey("#customerId");
+
+        SharedConditionRule lookupPred = new SharedConditionRule();
+        lookupPred.setType("lookup");
+        lookupPred.setDescription("Customer tier lookup - expects PREMIUM");
+        lookupPred.setLookupConfig(lookupConfig);
+        lookupPred.setResultField("customerTier");
+        lookupPred.setCondition("#customerTier == 'PREMIUM'"); // gate should fail: lookup returns BASIC
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(lookupPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Customer PREMIUM Check")
+                .withConditions(group)
+                .withMessage("Not PREMIUM")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluatorWithLookup.evaluateRule(rule, facts);
+
+        // Then: NO_MATCH because lookup stashes "BASIC" and gate #customerTier == 'PREMIUM' fails
+        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
+                "Gate should fail when lookup returns BASIC (not PREMIUM)");
+        assertFalse(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 3] No registry configured — lookup predicate falls back to gate-only evaluation")
+    void testPhase3_NoRegistry_LookupPredicate_FallsBackToGateOnly() {
+        // Given: evaluator with no LookupServiceRegistry (default constructor)
+        // Facts pre-seed customerTier = PREMIUM so gate passes without any lookup
+        Map<String, Object> facts = new HashMap<>(testFacts);
+        facts.put("customerTier", "PREMIUM");
+
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        lookupConfig.setLookupService("any-service");
+        lookupConfig.setLookupKey("#customerId");
+
+        SharedConditionRule lookupPred = new SharedConditionRule();
+        lookupPred.setType("lookup");
+        lookupPred.setDescription("Lookup with no registry");
+        lookupPred.setLookupConfig(lookupConfig);
+        lookupPred.setResultField("customerTier");
+        lookupPred.setCondition("#customerTier == 'PREMIUM'");
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(lookupPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Fallback Gate Rule")
+                .withConditions(group)
+                .withMessage("Gate only")
+                .withSeverity("INFO")
+                .build();
+
+        // When: plain evaluator (no registry)
+        RuleResult result = evaluator.evaluateRule(rule, facts);
+
+        // Then: MATCH — no lookup executed, gate reads existing fact value PREMIUM → true
+        // This verifies backward compatibility: adding Phase 3 doesn't break no-registry deployments.
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Without registry, gate should evaluate against existing fact value");
+        assertTrue(result.isTriggered());
     }
 
     @AfterAll
