@@ -1,0 +1,46 @@
+metadata:
+  id: "missing-output-field-test"
+  name: "Missing Output Field Test"
+  version: "1.0.0"
+  description: "Test graceful handling when output-field is not written by enrichment group execution"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+# The enrichment group writes to "actual_output" but the function mapping asks for
+# "nonexistent_output_field". getFieldValue returns null, so the function mapping
+# returns null. With stop-on-first-match: false the direct fallback fires.
+enrichments:
+  - id: "writes-different-field"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "actual_output"
+        expression: "'WRITTEN'"
+
+  - id: "wrong-output-field-cme"
+    type: "conditional-mapping-enrichment"
+    target-field: "RESULT"
+    mapping-rules:
+      - id: "function-rule"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#TRIGGER == true"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "output-group"
+          output-field: "nonexistent_output_field"
+      - id: "fallback"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'FALLBACK_APPLIED'"
+    execution-settings:
+      stop-on-first-match: false
+
+enrichment-groups:
+  - id: "output-group"
+    name: "Output Group"
+    enrichment-ids:
+      - "writes-different-field"

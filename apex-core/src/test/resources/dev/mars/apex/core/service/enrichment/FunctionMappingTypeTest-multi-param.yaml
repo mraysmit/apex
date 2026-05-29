@@ -1,0 +1,44 @@
+metadata:
+  id: "multi-param-test"
+  name: "Multi Parameter Test"
+  version: "1.0.0"
+  description: "Test multiple input parameters binding"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+enrichments:
+  - id: "multi-field-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "combined_result"
+        expression: "#param_a + ':' + #param_b + ':' + #param_c"
+
+  - id: "multi-param-function"
+    type: "conditional-mapping-enrichment"
+    target-field: "COMBINED"
+    mapping-rules:
+      - id: "multi-param-rule"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#FIELD_A != null"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "multi-group"
+          input-parameters:
+            - source-field: "#FIELD_A"
+              target-field: "param_a"
+            - source-field: "#FIELD_B"
+              target-field: "param_b"
+            - source-field: "constant"
+              target-field: "param_c"
+              expression: "'CONST_VAL'"
+          output-field: "combined_result"
+
+enrichment-groups:
+  - id: "multi-group"
+    name: "Multi Parameter Group"
+    enrichment-ids:
+      - "multi-field-enrichment"

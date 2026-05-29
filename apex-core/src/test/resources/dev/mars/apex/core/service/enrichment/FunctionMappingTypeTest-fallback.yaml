@@ -1,0 +1,45 @@
+metadata:
+  id: "function-mapping-fallback-test"
+  name: "Function Mapping Fallback Test"
+  version: "1.0.0"
+  description: "Test fallback to direct rule when function condition not met"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+enrichments:
+  - id: "translator"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "translation_result"
+        expression: "'TRANSLATED'"
+
+  - id: "function-with-fallback"
+    type: "conditional-mapping-enrichment"
+    target-field: "FINAL_RESULT"
+    mapping-rules:
+      - id: "function-rule"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#TRIGGER == 'YES'"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "translator-group"
+          input-parameters:
+            - source-field: "constant"
+              target-field: "Translation_Type"
+              expression: "'TYPE_A'"
+          output-field: "translation_result"
+      - id: "fallback-rule"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'DEFAULT_FALLBACK'"
+
+enrichment-groups:
+  - id: "translator-group"
+    name: "Translator Group"
+    enrichment-ids:
+      - "translator"

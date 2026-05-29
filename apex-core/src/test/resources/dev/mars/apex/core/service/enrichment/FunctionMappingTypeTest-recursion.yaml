@@ -1,0 +1,40 @@
+metadata:
+  id: "recursion-depth-test"
+  name: "Recursion Depth Guard Test"
+  version: "1.0.0"
+  description: "Test that recursion depth guard prevents stack overflow in self-referencing function mappings"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+# A self-referencing CME: the function mapping points to a group that contains
+# the same CME. This creates a recursion chain capped by MAX_FUNCTION_MAPPING_DEPTH=5.
+# With stop-on-first-match: false, the direct fallback fires at the leaf level,
+# returning 'DEPTH_GUARD_TRIGGERED' back up the call chain.
+enrichments:
+  - id: "recursive-cme"
+    type: "conditional-mapping-enrichment"
+    target-field: "RECURSION_RESULT"
+    mapping-rules:
+      - id: "recursive-function-rule"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#RECURSE == true"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "recursive-group"
+          output-field: "RECURSION_RESULT"
+      - id: "depth-guard-fallback"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'DEPTH_GUARD_TRIGGERED'"
+    execution-settings:
+      stop-on-first-match: false
+
+enrichment-groups:
+  - id: "recursive-group"
+    name: "Recursive Self-Reference Group"
+    enrichment-ids:
+      - "recursive-cme"

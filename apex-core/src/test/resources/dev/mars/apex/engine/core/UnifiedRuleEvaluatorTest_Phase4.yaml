@@ -1,0 +1,43 @@
+metadata:
+  id: "unified-rule-evaluator-phase4-test"
+  name: "UnifiedRuleEvaluator Phase 4 Test Config"
+  version: "1.0.0"
+  description: "YAML configuration for function-predicate tests (type=function in SharedConditionRule). Covers two scenarios: a classifier that writes HIGH and a downgrader that writes LOW."
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+# Two calculation enrichments used by the Phase 4 function-predicate tests.
+# The function predicate (SharedConditionRule type="function") calls an enrichment group
+# by reference, which executes the enrichment and writes the result-field into the facts Map.
+enrichments:
+  - id: "risk-level-calc"
+    name: "Risk Level Classifier"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "'HIGH'"
+      result-field: "riskLevel"
+
+  - id: "risk-downgrade-calc"
+    name: "Risk Downgrade Calculator"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "'LOW'"
+      result-field: "riskLevel"
+
+# Two enrichment groups — each test uses a different group via enrichment-group-ref.
+enrichment-groups:
+  - id: "risk-classifier-group"
+    name: "Risk Classifier Group"
+    description: "Enrichment group that classifies risk as HIGH (used by testPhase4_FunctionExecuted_StashesOutput_GatePasses)"
+    enrichment-ids:
+      - "risk-level-calc"
+    enabled: true
+
+  - id: "risk-downgrade-group"
+    name: "Risk Downgrade Group"
+    description: "Enrichment group that downgrades risk to LOW (used by testPhase4_FunctionExecuted_GateFails_WhenGroupOverridesToNonMatchingValue)"
+    enrichment-ids:
+      - "risk-downgrade-calc"
+    enabled: true

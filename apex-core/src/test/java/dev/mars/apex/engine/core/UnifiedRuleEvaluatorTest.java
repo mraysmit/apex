@@ -17,11 +17,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
 import dev.mars.apex.core.config.model.condition.SharedConditionRule;
+import dev.mars.apex.core.service.enrichment.EnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.engine.core.ExpressionEvaluatorService;
+import dev.mars.apex.engine.execution.EnrichmentGroupExecutor;
+import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,6 +46,9 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @DisplayName("Unified Rule Evaluator Tests")
 class UnifiedRuleEvaluatorTest {
+
+    private static final String PHASE4_YAML =
+            "src/test/resources/dev/mars/apex/engine/core/UnifiedRuleEvaluatorTest_Phase4.yaml";
     
     private static final Logger logger = LoggerFactory.getLogger(UnifiedRuleEvaluatorTest.class);
     private UnifiedRuleEvaluator evaluator;
@@ -1260,6 +1269,160 @@ class UnifiedRuleEvaluatorTest {
         // This verifies backward compatibility: adding Phase 3 doesn't break no-registry deployments.
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
                 "Without registry, gate should evaluate against existing fact value");
+        assertTrue(result.isTriggered());
+    }
+
+    // =========================================================================
+    // Phase 4 — Function Predicate Execution Tests (TDD: RED first, then GREEN)
+    // =========================================================================
+    //
+    // These tests verify that a "function"-type structured condition predicate:
+    //   1. Executes the referenced enrichment group (mutates the facts Map in place)
+    //   2. Stashes the output-field value from facts Map into the SpEL context
+    //   3. Evaluates the gate condition against the updated context
+    //
+    // RED STATE (before executeFunctionPredicate is wired):
+    //   The function branch logs a debug message and falls through to gate evaluation
+    //   using whatever value is already in the context from the original facts Map.
+    //   Tests 1 and 2 assert the WRONG values from the stub → assertion failures.
+    //
+    // GREEN STATE (executeFunctionPredicate implemented and wired):
+    //   Enrichment group executes, result stashed into context, gate re-evaluated
+    //   against updated value → correct MATCH / NO_MATCH.
+
+    /**
+     * Helper: build a fully-wired EnrichmentGroupExecutor backed by real APEX services.
+     * The executor is generic — it processes whichever enrichment group it is asked to run;
+     * the actual enrichment definitions come from the YAML config passed at evaluation time.
+     */
+    private EnrichmentGroupExecutor buildExecutor() {
+        UnifiedRuleEvaluator miniEvaluator = new UnifiedRuleEvaluator();
+        RuleGroupEvaluationService rgs = new RuleGroupEvaluationService(miniEvaluator);
+        ExpressionEvaluatorService evs = new ExpressionEvaluatorService();
+        EnrichmentProcessor ep = new EnrichmentProcessor(
+                new LookupServiceRegistry(), evs, null, rgs);
+        return new EnrichmentGroupExecutor(ep);
+    }
+
+    @Test
+    @DisplayName("[Phase 4] Function predicate executes; enrichment group writes outputField; gate passes on updated value")
+    void testPhase4_FunctionExecuted_StashesOutput_GatePasses() throws Exception {
+        // Given: facts with riskLevel = LOW (gate will FAIL without function execution)
+        Map<String, Object> facts = new HashMap<>(testFacts);
+        facts.put("riskLevel", "LOW"); // RED: gate reads LOW → NO_MATCH; GREEN: function writes HIGH → MATCH
+
+        // Load enrichment config from YAML — all business logic lives in the YAML file
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE4_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator evaluatorWithFunction = new UnifiedRuleEvaluator();
+        evaluatorWithFunction.setYamlRuleConfiguration(config);
+        evaluatorWithFunction.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        SharedConditionRule funcPred = new SharedConditionRule();
+        funcPred.setType("function");
+        funcPred.setDescription("Risk classifier");
+        funcPred.setEnrichmentGroupRef("risk-classifier-group");
+        funcPred.setOutputField("riskLevel");
+        funcPred.setCondition("#riskLevel == 'HIGH'");
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(funcPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Risk Level Check")
+                .withConditions(group)
+                .withMessage("Risk is HIGH")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluatorWithFunction.evaluateRule(rule, facts);
+
+        // Then: MATCH because function wrote HIGH into facts, stashed into context, gate passes
+        // RED: fails because function not yet executed → gate reads LOW → NO_MATCH
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Function should execute and write riskLevel=HIGH; gate #riskLevel=='HIGH' should pass");
+        assertTrue(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 4] Function predicate executes; enrichment group overrides pre-seeded value; gate correctly fails")
+    void testPhase4_FunctionExecuted_GateFails_WhenGroupOverridesToNonMatchingValue() throws Exception {
+        // Given: facts with riskLevel = HIGH (without function exec, gate would PASS)
+        Map<String, Object> facts = new HashMap<>(testFacts);
+        facts.put("riskLevel", "HIGH"); // RED: gate reads HIGH → MATCH; GREEN: function writes LOW → NO_MATCH
+
+        // Load enrichment config from YAML — all business logic lives in the YAML file
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE4_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator evaluatorWithFunction = new UnifiedRuleEvaluator();
+        evaluatorWithFunction.setYamlRuleConfiguration(config);
+        evaluatorWithFunction.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        SharedConditionRule funcPred = new SharedConditionRule();
+        funcPred.setType("function");
+        funcPred.setDescription("Risk downgrade check");
+        funcPred.setEnrichmentGroupRef("risk-downgrade-group");
+        funcPred.setOutputField("riskLevel");
+        funcPred.setCondition("#riskLevel == 'HIGH'");
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(funcPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Risk Level Must Be HIGH")
+                .withConditions(group)
+                .withMessage("Risk must be HIGH")
+                .withSeverity("INFO")
+                .build();
+
+        // When
+        RuleResult result = evaluatorWithFunction.evaluateRule(rule, facts);
+
+        // Then: NO_MATCH because function overwrote HIGH with LOW; gate #riskLevel=='HIGH' fails
+        // RED: fails because function not yet executed → gate reads HIGH → MATCH
+        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
+                "Function should overwrite riskLevel to LOW; gate #riskLevel=='HIGH' should fail → NO_MATCH");
+        assertFalse(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 4] Function predicate with no executor falls back to gate-only evaluation (backward compatibility)")
+    void testPhase4_FunctionWithNoExecutor_FallsBackToGateOnly() {
+        // Given: facts with riskLevel = HIGH; no executor wired → gate reads pre-seeded value
+        Map<String, Object> facts = new HashMap<>(testFacts);
+        facts.put("riskLevel", "HIGH");
+
+        // Plain evaluator — no function executor configured
+        SharedConditionRule funcPred = new SharedConditionRule();
+        funcPred.setType("function");
+        funcPred.setDescription("Risk gate fallback");
+        funcPred.setEnrichmentGroupRef("any-group");
+        funcPred.setOutputField("riskLevel");
+        funcPred.setCondition("#riskLevel == 'HIGH'");
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(funcPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Risk Level Gate Fallback")
+                .withConditions(group)
+                .withMessage("Gate fallback")
+                .withSeverity("INFO")
+                .build();
+
+        // When: plain evaluator (no executor)
+        RuleResult result = evaluator.evaluateRule(rule, facts);
+
+        // Then: MATCH — no function execution, gate reads existing fact value HIGH → true
+        // This verifies backward compatibility: adding Phase 4 doesn't break no-executor deployments.
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Without executor, gate should evaluate against existing fact value HIGH");
         assertTrue(result.isTriggered());
     }
 

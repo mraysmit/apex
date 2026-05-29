@@ -19,8 +19,6 @@ package dev.mars.apex.core.service.enrichment;
 import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.model.condition.SharedConditionGroup;
-import dev.mars.apex.core.config.model.condition.SharedConditionRule;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -30,9 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,91 +41,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(ColoredTestOutputExtension.class)
 public class FunctionMappingTypeTest {
 
+    private static final String YAML_PATH = "src/test/resources/dev/mars/apex/core/service/enrichment/";
+
     private static final Logger logger = LoggerFactory.getLogger(FunctionMappingTypeTest.class);
-
-    @Test
-    @DisplayName("Should create function mapping config structure with new fields")
-    void shouldCreateFunctionMappingConfigStructure() {
-        logger.info("=== Testing Function Mapping: Model Structure (Programmatic Construction) ===");
-        logger.info("Verifying that MappingConfig supports 'function' type with enrichment-group-ref, input-parameters, and output-field");
-
-        // Create a conditional-mapping-enrichment with function mapping type
-        YamlEnrichment enrichment = new YamlEnrichment();
-        enrichment.setId("test-function-mapping");
-        enrichment.setType("conditional-mapping-enrichment");
-        enrichment.setTargetField("IS_NDF");
-
-        // Create mapping rules with function type
-        List<YamlEnrichment.MappingRule> mappingRules = new ArrayList<>();
-
-        YamlEnrichment.MappingRule rule = new YamlEnrichment.MappingRule();
-        rule.setId("translate-via-function");
-        rule.setPriority(1);
-
-        // Create conditions
-        SharedConditionGroup conditions = new SharedConditionGroup();
-        conditions.setOperator("AND");
-        List<SharedConditionRule> conditionRules = new ArrayList<>();
-        SharedConditionRule condRule = new SharedConditionRule();
-        condRule.setCondition("#IS_NDF != null");
-        conditionRules.add(condRule);
-        conditions.setRules(conditionRules);
-        rule.setConditions(conditions);
-
-        // Create function mapping
-        YamlEnrichment.MappingConfig mapping = new YamlEnrichment.MappingConfig();
-        mapping.setType("function");
-        mapping.setEnrichmentGroupRef("translation-group");
-
-        // Create input parameters
-        List<YamlEnrichment.FieldMapping> inputParams = new ArrayList<>();
-        YamlEnrichment.FieldMapping param1 = new YamlEnrichment.FieldMapping();
-        param1.setSourceField("constant");
-        param1.setTargetField("#translation.Translation_Type");
-        param1.setExpression("'IS_NDF'");
-        inputParams.add(param1);
-
-        YamlEnrichment.FieldMapping param2 = new YamlEnrichment.FieldMapping();
-        param2.setSourceField("#client_code");
-        param2.setTargetField("#translation.Client_Code");
-        inputParams.add(param2);
-
-        mapping.setInputParameters(inputParams);
-        mapping.setOutputField("translation_result");
-
-        rule.setMapping(mapping);
-        mappingRules.add(rule);
-        enrichment.setMappingRules(mappingRules);
-
-        // Verify structure
-        logger.info("Verifying enrichment structure...");
-        assertNotNull(enrichment);
-        assertEquals("conditional-mapping-enrichment", enrichment.getType());
-        assertEquals("IS_NDF", enrichment.getTargetField());
-        assertEquals(1, enrichment.getMappingRules().size());
-        logger.info("[OK] Enrichment id='{}', type='{}', target-field='{}', mapping-rules count={}",
-                enrichment.getId(), enrichment.getType(), enrichment.getTargetField(),
-                enrichment.getMappingRules().size());
-
-        YamlEnrichment.MappingConfig resultMapping = enrichment.getMappingRules().get(0).getMapping();
-        assertEquals("function", resultMapping.getType());
-        assertEquals("translation-group", resultMapping.getEnrichmentGroupRef());
-        assertEquals("translation_result", resultMapping.getOutputField());
-        assertEquals(2, resultMapping.getInputParameters().size());
-        assertEquals("constant", resultMapping.getInputParameters().get(0).getSourceField());
-        assertEquals("#translation.Translation_Type", resultMapping.getInputParameters().get(0).getTargetField());
-        assertEquals("'IS_NDF'", resultMapping.getInputParameters().get(0).getExpression());
-        logger.info("[OK] MappingConfig: type='{}', enrichment-group-ref='{}', output-field='{}'",
-                resultMapping.getType(), resultMapping.getEnrichmentGroupRef(), resultMapping.getOutputField());
-        logger.info("[OK] Input parameters: {} entries — [0] source='{}' target='{}' expr='{}', [1] source='{}' target='{}'",
-                resultMapping.getInputParameters().size(),
-                resultMapping.getInputParameters().get(0).getSourceField(),
-                resultMapping.getInputParameters().get(0).getTargetField(),
-                resultMapping.getInputParameters().get(0).getExpression(),
-                resultMapping.getInputParameters().get(1).getSourceField(),
-                resultMapping.getInputParameters().get(1).getTargetField());
-        logger.info("[OK] Programmatic model construction verified — all 3 new MappingConfig fields populated correctly");
-    }
 
     @Test
     @DisplayName("Should deserialize function mapping from YAML")
@@ -137,57 +51,7 @@ public class FunctionMappingTypeTest {
         logger.info("=== Testing Function Mapping: YAML Deserialization ===");
         logger.info("Verifying Jackson @JsonProperty deserialization of function mapping type fields");
 
-        String yamlConfig = """
-            metadata:
-              id: "function-mapping-deserialize-test"
-              name: "Function Mapping Deserialization Test"
-              version: "1.0.0"
-              description: "Test YAML deserialization of function mapping type"
-              type: "rule-config"
-
-            enrichments:
-              - id: "translation-enrichment"
-                type: "field-enrichment"
-                field-mappings:
-                  - source-field: "constant"
-                    target-field: "translation_result"
-                    expression: "'TRANSLATED_' + #Translation_Type"
-
-              - id: "function-mapping-test"
-                type: "conditional-mapping-enrichment"
-                target-field: "RESULT_FIELD"
-                mapping-rules:
-                  - id: "function-rule"
-                    priority: 1
-                    conditions:
-                      operator: "AND"
-                      rules:
-                        - condition: "#INPUT_VALUE != null"
-                    mapping:
-                      type: "function"
-                      enrichment-group-ref: "translation-group"
-                      input-parameters:
-                        - source-field: "constant"
-                          target-field: "Translation_Type"
-                          expression: "'TEST_TYPE'"
-                        - source-field: "#INPUT_VALUE"
-                          target-field: "Input_Code"
-                      output-field: "translation_result"
-                  - id: "direct-fallback"
-                    priority: 999
-                    mapping:
-                      type: "direct"
-                      expression: "'FALLBACK'"
-
-            enrichment-groups:
-              - id: "translation-group"
-                name: "Translation Group"
-                enrichment-ids:
-                  - "translation-enrichment"
-            """;
-
-        ConfigurationLoader loader = new ConfigurationLoader();
-        YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(YAML_PATH + "FunctionMappingTypeTest-deserialize.yaml");
         logger.info("[OK] YAML parsed successfully — {} enrichments, {} enrichment-groups",
                 config.getEnrichments().size(),
                 config.getEnrichmentGroups() != null ? config.getEnrichmentGroups().size() : 0);
@@ -245,52 +109,7 @@ public class FunctionMappingTypeTest {
         // 2. Function mapping binds input parameters
         // 3. Enrichment group executes (field-enrichment writes translation_result)
         // 4. Output field extracted and written to target-field
-        String yamlConfig = """
-            metadata:
-              id: "function-mapping-e2e-test"
-              name: "Function Mapping E2E Test"
-              version: "1.0.0"
-              description: "End-to-end test of function mapping type"
-              type: "rule-config"
-
-            enrichments:
-              - id: "translator"
-                type: "field-enrichment"
-                field-mappings:
-                  - source-field: "constant"
-                    target-field: "translation_result"
-                    expression: "'TRANSLATED_' + #Translation_Type + '_' + #Input_Code"
-
-              - id: "function-cme"
-                type: "conditional-mapping-enrichment"
-                target-field: "FINAL_RESULT"
-                mapping-rules:
-                  - id: "translate-rule"
-                    priority: 1
-                    conditions:
-                      operator: "AND"
-                      rules:
-                        - condition: "#INPUT_VALUE != null"
-                    mapping:
-                      type: "function"
-                      enrichment-group-ref: "translator-group"
-                      input-parameters:
-                        - source-field: "constant"
-                          target-field: "Translation_Type"
-                          expression: "'NDF_TYPE'"
-                        - source-field: "#INPUT_VALUE"
-                          target-field: "Input_Code"
-                      output-field: "translation_result"
-
-            enrichment-groups:
-              - id: "translator-group"
-                name: "Translator Group"
-                enrichment-ids:
-                  - "translator"
-            """;
-
-        ConfigurationLoader loader = new ConfigurationLoader();
-        YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(YAML_PATH + "FunctionMappingTypeTest-e2e.yaml");
 
         Map<String, Object> testData = new HashMap<>();
         testData.put("INPUT_VALUE", "ABC123");
@@ -317,55 +136,7 @@ public class FunctionMappingTypeTest {
         logger.info("=== Testing Function Mapping: Priority Fallback ===");
         logger.info("Function rule (priority 1) condition will NOT match -> fallback direct rule (priority 999) should fire");
 
-        String yamlConfig = """
-            metadata:
-              id: "function-mapping-fallback-test"
-              name: "Function Mapping Fallback Test"
-              version: "1.0.0"
-              description: "Test fallback to direct rule when function condition not met"
-              type: "rule-config"
-
-            enrichments:
-              - id: "translator"
-                type: "field-enrichment"
-                field-mappings:
-                  - source-field: "constant"
-                    target-field: "translation_result"
-                    expression: "'TRANSLATED'"
-
-              - id: "function-with-fallback"
-                type: "conditional-mapping-enrichment"
-                target-field: "FINAL_RESULT"
-                mapping-rules:
-                  - id: "function-rule"
-                    priority: 1
-                    conditions:
-                      operator: "AND"
-                      rules:
-                        - condition: "#TRIGGER == 'YES'"
-                    mapping:
-                      type: "function"
-                      enrichment-group-ref: "translator-group"
-                      input-parameters:
-                        - source-field: "constant"
-                          target-field: "Translation_Type"
-                          expression: "'TYPE_A'"
-                      output-field: "translation_result"
-                  - id: "fallback-rule"
-                    priority: 999
-                    mapping:
-                      type: "direct"
-                      expression: "'DEFAULT_FALLBACK'"
-
-            enrichment-groups:
-              - id: "translator-group"
-                name: "Translator Group"
-                enrichment-ids:
-                  - "translator"
-            """;
-
-        ConfigurationLoader loader = new ConfigurationLoader();
-        YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(YAML_PATH + "FunctionMappingTypeTest-fallback.yaml");
 
         // Test data does NOT have TRIGGER='YES', so function rule should not match
         Map<String, Object> testData = new HashMap<>();
@@ -390,41 +161,7 @@ public class FunctionMappingTypeTest {
         logger.info("=== Testing Function Mapping: Missing Group Reference (Error Handling) ===");
         logger.info("enrichment-group-ref points to 'nonexistent-group' — function should return null, fallback should apply");
 
-        String yamlConfig = """
-            metadata:
-              id: "missing-group-ref-test"
-              name: "Missing Group Ref Test"
-              version: "1.0.0"
-              description: "Test graceful handling of missing enrichment group reference"
-              type: "rule-config"
-
-            enrichments:
-              - id: "function-with-bad-ref"
-                type: "conditional-mapping-enrichment"
-                target-field: "RESULT"
-                mapping-rules:
-                  - id: "function-rule"
-                    priority: 1
-                    conditions:
-                      operator: "AND"
-                      rules:
-                        - condition: "#INPUT != null"
-                    mapping:
-                      type: "function"
-                      enrichment-group-ref: "nonexistent-group"
-                      output-field: "some_field"
-                  - id: "fallback"
-                    priority: 999
-                    mapping:
-                      type: "direct"
-                      expression: "'SAFE_DEFAULT'"
-
-                execution-settings:
-                  stop-on-first-match: false
-            """;
-
-        ConfigurationLoader loader = new ConfigurationLoader();
-        YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(YAML_PATH + "FunctionMappingTypeTest-missing-group.yaml");
 
         Map<String, Object> testData = new HashMap<>();
         testData.put("INPUT", "something");
@@ -450,66 +187,7 @@ public class FunctionMappingTypeTest {
         logger.info("Three rules: direct (priority 1), function (priority 2), default (priority 999)");
         logger.info("Sub-test 1: MODE='DIRECT' -> direct rule wins; Sub-test 2: MODE='FUNCTION' -> function rule invokes group");
 
-        String yamlConfig = """
-            metadata:
-              id: "mixed-mapping-types-test"
-              name: "Mixed Mapping Types Test"
-              version: "1.0.0"
-              description: "Test mixing direct and function mapping types"
-              type: "rule-config"
-
-            enrichments:
-              - id: "calculator"
-                type: "field-enrichment"
-                field-mappings:
-                  - source-field: "constant"
-                    target-field: "calc_result"
-                    expression: "'CALCULATED_' + #calc_input"
-
-              - id: "mixed-mappings"
-                type: "conditional-mapping-enrichment"
-                target-field: "OUTPUT"
-                mapping-rules:
-                  - id: "direct-high-priority"
-                    priority: 1
-                    conditions:
-                      operator: "AND"
-                      rules:
-                        - condition: "#MODE == 'DIRECT'"
-                    mapping:
-                      type: "direct"
-                      expression: "'DIRECT_RESULT'"
-                  - id: "function-medium-priority"
-                    priority: 2
-                    conditions:
-                      operator: "AND"
-                      rules:
-                        - condition: "#MODE == 'FUNCTION'"
-                    mapping:
-                      type: "function"
-                      enrichment-group-ref: "calc-group"
-                      input-parameters:
-                        - source-field: "#INPUT_DATA"
-                          target-field: "calc_input"
-                      output-field: "calc_result"
-                  - id: "default-lowest"
-                    priority: 999
-                    mapping:
-                      type: "direct"
-                      expression: "'NONE'"
-
-            enrichment-groups:
-              - id: "calc-group"
-                name: "Calculation Group"
-                enrichment-ids:
-                  - "calculator"
-
-                execution-settings:
-                  stop-on-first-match: true
-            """;
-
-        ConfigurationLoader loader = new ConfigurationLoader();
-        YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(YAML_PATH + "FunctionMappingTypeTest-mixed.yaml");
 
         // Test 1: Direct mode should pick direct mapping
         Map<String, Object> directData = new HashMap<>();
@@ -546,54 +224,7 @@ public class FunctionMappingTypeTest {
         logger.info("=== Testing Function Mapping: Multiple Input Parameter Binding ===");
         logger.info("Three input-parameters: #FIELD_A -> param_a, #FIELD_B -> param_b, constant -> param_c='CONST_VAL'");
 
-        String yamlConfig = """
-            metadata:
-              id: "multi-param-test"
-              name: "Multi Parameter Test"
-              version: "1.0.0"
-              description: "Test multiple input parameters binding"
-              type: "rule-config"
-
-            enrichments:
-              - id: "multi-field-enrichment"
-                type: "field-enrichment"
-                field-mappings:
-                  - source-field: "constant"
-                    target-field: "combined_result"
-                    expression: "#param_a + ':' + #param_b + ':' + #param_c"
-
-              - id: "multi-param-function"
-                type: "conditional-mapping-enrichment"
-                target-field: "COMBINED"
-                mapping-rules:
-                  - id: "multi-param-rule"
-                    priority: 1
-                    conditions:
-                      operator: "AND"
-                      rules:
-                        - condition: "#FIELD_A != null"
-                    mapping:
-                      type: "function"
-                      enrichment-group-ref: "multi-group"
-                      input-parameters:
-                        - source-field: "#FIELD_A"
-                          target-field: "param_a"
-                        - source-field: "#FIELD_B"
-                          target-field: "param_b"
-                        - source-field: "constant"
-                          target-field: "param_c"
-                          expression: "'CONST_VAL'"
-                      output-field: "combined_result"
-
-            enrichment-groups:
-              - id: "multi-group"
-                name: "Multi Parameter Group"
-                enrichment-ids:
-                  - "multi-field-enrichment"
-            """;
-
-        ConfigurationLoader loader = new ConfigurationLoader();
-        YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(YAML_PATH + "FunctionMappingTypeTest-multi-param.yaml");
 
         Map<String, Object> testData = new HashMap<>();
         testData.put("FIELD_A", "alpha");
@@ -612,5 +243,55 @@ public class FunctionMappingTypeTest {
                 "All input parameters should be bound and available to the enrichment group");
         logger.info("[OK] COMBINED='{}' — all 3 input parameters (2 dynamic + 1 constant) bound correctly",
                 enrichedData.get("COMBINED"));
+    }
+
+    @Test
+    @DisplayName("Should trigger recursion depth guard and not throw StackOverflowError")
+    void shouldHandleRecursionDepthGuard() throws Exception {
+        logger.info("=== Testing Function Mapping: Recursion Depth Guard ===");
+        logger.info("Self-referencing CME: function-rule -> recursive-group -> recursive-cme (same CME)");
+        logger.info("MAX_FUNCTION_MAPPING_DEPTH=5 — guard should fire, no StackOverflowError, fallback applies");
+
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(YAML_PATH + "FunctionMappingTypeTest-recursion.yaml");
+
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("RECURSE", true);
+        logger.info("Input data: {} — RECURSE=true triggers the recursive function rule", testData);
+
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        // Key assertion: must complete without StackOverflowError
+        RuleResult result = engine.evaluate(testData);
+        Map<String, Object> enrichedData = result.getEnrichedData();
+
+        assertNotNull(enrichedData, "Engine should complete without exception");
+        assertEquals("DEPTH_GUARD_TRIGGERED", enrichedData.get("RECURSION_RESULT"),
+                "Depth guard should fire at depth 5, leaf-level fallback propagates back as result");
+        logger.info("[OK] RECURSION_RESULT='{}' — depth guard fired, no StackOverflowError, fallback applied",
+                enrichedData.get("RECURSION_RESULT"));
+    }
+
+    @Test
+    @DisplayName("Should return null gracefully when output-field is absent after group execution")
+    void shouldHandleMissingOutputFieldGracefully() throws Exception {
+        logger.info("=== Testing Function Mapping: Missing Output Field ===");
+        logger.info("Enrichment group writes to 'actual_output'; function mapping requests 'nonexistent_output_field'");
+        logger.info("getFieldValue returns null -> function mapping returns null -> fallback applies");
+
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(YAML_PATH + "FunctionMappingTypeTest-missing-output-field.yaml");
+
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("TRIGGER", true);
+        logger.info("Input data: {} — TRIGGER=true fires the function rule", testData);
+
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(testData);
+        Map<String, Object> enrichedData = result.getEnrichedData();
+        logger.info("[OK] Enrichment completed (no exception thrown). Full result: {}", enrichedData);
+
+        assertNotNull(enrichedData);
+        assertEquals("FALLBACK_APPLIED", enrichedData.get("RESULT"),
+                "When output-field is absent after group execution, function returns null and fallback should apply");
+        logger.info("[OK] RESULT='{}' — absent output-field handled gracefully, fallback applied",
+                enrichedData.get("RESULT"));
     }
 }

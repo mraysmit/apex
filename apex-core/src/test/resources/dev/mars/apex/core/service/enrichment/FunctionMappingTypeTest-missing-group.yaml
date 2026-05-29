@@ -1,0 +1,30 @@
+metadata:
+  id: "missing-group-ref-test"
+  name: "Missing Group Ref Test"
+  version: "1.0.0"
+  description: "Test graceful handling of missing enrichment group reference"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+enrichments:
+  - id: "function-with-bad-ref"
+    type: "conditional-mapping-enrichment"
+    target-field: "RESULT"
+    mapping-rules:
+      - id: "function-rule"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#INPUT != null"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "nonexistent-group"
+          output-field: "some_field"
+      - id: "fallback"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'SAFE_DEFAULT'"
+    execution-settings:
+      stop-on-first-match: false

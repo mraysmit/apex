@@ -1,0 +1,47 @@
+metadata:
+  id: "function-mapping-deserialize-test"
+  name: "Function Mapping Deserialization Test"
+  version: "1.0.0"
+  description: "Test YAML deserialization of function mapping type"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+enrichments:
+  - id: "translation-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "translation_result"
+        expression: "'TRANSLATED_' + #Translation_Type"
+
+  - id: "function-mapping-test"
+    type: "conditional-mapping-enrichment"
+    target-field: "RESULT_FIELD"
+    mapping-rules:
+      - id: "function-rule"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#INPUT_VALUE != null"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "translation-group"
+          input-parameters:
+            - source-field: "constant"
+              target-field: "Translation_Type"
+              expression: "'TEST_TYPE'"
+            - source-field: "#INPUT_VALUE"
+              target-field: "Input_Code"
+          output-field: "translation_result"
+      - id: "direct-fallback"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'FALLBACK'"
+
+enrichment-groups:
+  - id: "translation-group"
+    name: "Translation Group"
+    enrichment-ids:
+      - "translation-enrichment"

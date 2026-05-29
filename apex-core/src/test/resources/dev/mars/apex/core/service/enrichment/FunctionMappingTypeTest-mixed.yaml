@@ -1,0 +1,55 @@
+metadata:
+  id: "mixed-mapping-types-test"
+  name: "Mixed Mapping Types Test"
+  version: "1.0.0"
+  description: "Test mixing direct and function mapping types"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+enrichments:
+  - id: "calculator"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "calc_result"
+        expression: "'CALCULATED_' + #calc_input"
+
+  - id: "mixed-mappings"
+    type: "conditional-mapping-enrichment"
+    target-field: "OUTPUT"
+    mapping-rules:
+      - id: "direct-high-priority"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#MODE == 'DIRECT'"
+        mapping:
+          type: "direct"
+          expression: "'DIRECT_RESULT'"
+      - id: "function-medium-priority"
+        priority: 2
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#MODE == 'FUNCTION'"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "calc-group"
+          input-parameters:
+            - source-field: "#INPUT_DATA"
+              target-field: "calc_input"
+          output-field: "calc_result"
+      - id: "default-lowest"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'NONE'"
+
+enrichment-groups:
+  - id: "calc-group"
+    name: "Calculation Group"
+    enrichment-ids:
+      - "calculator"
+    execution-settings:
+      stop-on-first-match: true

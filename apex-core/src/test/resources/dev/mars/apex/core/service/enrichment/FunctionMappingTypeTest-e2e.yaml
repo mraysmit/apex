@@ -1,0 +1,42 @@
+metadata:
+  id: "function-mapping-e2e-test"
+  name: "Function Mapping E2E Test"
+  version: "1.0.0"
+  description: "End-to-end test of function mapping type"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+enrichments:
+  - id: "translator"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "translation_result"
+        expression: "'TRANSLATED_' + #Translation_Type + '_' + #Input_Code"
+
+  - id: "function-cme"
+    type: "conditional-mapping-enrichment"
+    target-field: "FINAL_RESULT"
+    mapping-rules:
+      - id: "translate-rule"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#INPUT_VALUE != null"
+        mapping:
+          type: "function"
+          enrichment-group-ref: "translator-group"
+          input-parameters:
+            - source-field: "constant"
+              target-field: "Translation_Type"
+              expression: "'NDF_TYPE'"
+            - source-field: "#INPUT_VALUE"
+              target-field: "Input_Code"
+          output-field: "translation_result"
+
+enrichment-groups:
+  - id: "translator-group"
+    name: "Translator Group"
+    enrichment-ids:
+      - "translator"

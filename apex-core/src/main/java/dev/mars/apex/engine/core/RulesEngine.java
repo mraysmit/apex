@@ -272,6 +272,10 @@ public class RulesEngine {
         // to support function mapping type (breaks circular dependency via lazy supplier)
         this.enrichmentProcessor.setEnrichmentGroupExecutorSupplier(() -> this.enrichmentGroupExecutor);
 
+        // Wire function predicate execution into the unified evaluator (Phase 4)
+        this.unifiedEvaluator.setEnrichmentGroupExecutorSupplier(() -> this.enrichmentGroupExecutor);
+        this.unifiedEvaluator.setYamlRuleConfiguration(yamlConfig);
+
         this.ruleChainExecutor = new RuleChainExecutor(this.unifiedEvaluator, this.enrichmentGroupExecutor);
         this.sequentialProcessor = new SequentialProcessor(
             this.configuration,

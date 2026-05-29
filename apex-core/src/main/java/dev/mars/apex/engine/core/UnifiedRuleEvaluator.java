@@ -18,12 +18,18 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import dev.mars.apex.core.config.EnrichmentGroupFactory;
 import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.engine.execution.EnrichmentGroupExecutor;
+import dev.mars.apex.engine.model.EnrichmentGroup;
+import dev.mars.apex.engine.model.EnrichmentGroupResult;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Unified Rule Evaluator - Single evaluation engine for all APEX rule evaluation paths.
@@ -59,6 +65,10 @@ public class UnifiedRuleEvaluator {
 
     // Optional: enables lookup predicate execution in structured condition rules (Phase 3)
     private LookupServiceRegistry serviceRegistry;
+
+    // Optional: enables function predicate execution in structured condition rules (Phase 4)
+    private YamlRuleConfiguration yamlRuleConfiguration;
+    private Supplier<EnrichmentGroupExecutor> enrichmentGroupExecutorSupplier;
     
     /**
      * Create a new UnifiedRuleEvaluator with default components.
@@ -149,14 +159,49 @@ public class UnifiedRuleEvaluator {
     }
 
     /**
+     * Set the YAML rule configuration for function predicate execution.
+     * Required for function-type structured condition predicates.
+     * Called by {@link RulesEngine} after construction.
+     */
+    public void setYamlRuleConfiguration(YamlRuleConfiguration config) {
+        this.yamlRuleConfiguration = config;
+    }
+
+    /**
+     * Set the enrichment group executor supplier for function predicate execution.
+     * Uses a supplier to break the circular construction dependency in
+     * {@link RulesEngine} (same pattern as
+     * {@code EnrichmentProcessor.setEnrichmentGroupExecutorSupplier}).
+     */
+    public void setEnrichmentGroupExecutorSupplier(Supplier<EnrichmentGroupExecutor> supplier) {
+        this.enrichmentGroupExecutorSupplier = supplier;
+    }
+
+    /**
      * Evaluate a single rule against the provided context.
-     * This is the core evaluation method that all other methods delegate to.
-     * 
+     * This is the public entry-point for callers that supply a pre-built context.
+     * Delegates to {@link #evaluateRuleInternal} with a {@code null} facts Map.
+     *
      * @param rule The rule to evaluate
      * @param context The evaluation context
      * @return The rule evaluation result
      */
     public RuleResult evaluateRule(Rule rule, EvaluationContext context) {
+        return evaluateRuleInternal(rule, context, null);
+    }
+
+    /**
+     * Core evaluation method. Accepts an optional facts Map so that function-type
+     * structured-condition predicates can execute enrichment groups that mutate the
+     * facts Map in place and then stash the output into the SpEL context.
+     *
+     * @param rule    The rule to evaluate
+     * @param context The SpEL evaluation context
+     * @param facts   The live facts Map, or {@code null} when called from the
+     *                context-only path (function predicates fall back to gate-only evaluation)
+     * @return The rule evaluation result
+     */
+    private RuleResult evaluateRuleInternal(Rule rule, EvaluationContext context, Map<String, Object> facts) {
         if (rule == null) {
             logger.debug("No rule provided for evaluation");
             return RuleResult.noRules();
@@ -184,7 +229,7 @@ public class UnifiedRuleEvaluator {
                         rule.getName(), rule.getConditions().getOperator(),
                         rule.getConditions().getRules() != null ? rule.getConditions().getRules().size() : 0);
                 try {
-                    result = evaluateStructuredConditionGroup(rule.getConditions(), context);
+                    result = evaluateStructuredConditionGroup(rule.getConditions(), context, facts);
                     logger.debug("Structured condition evaluation for rule '{}' returned: {}", rule.getName(), result);
                 } catch (Exception e) {
                     logger.debug("Structured condition evaluation exception for rule '{}': {}", rule.getName(), e.getMessage());
@@ -335,7 +380,7 @@ public class UnifiedRuleEvaluator {
         logger.debug("Creating evaluation context for rule '{}' with {} fact entries", rule.getName(), facts.size());
         StandardEvaluationContext context = createEvaluationContext(facts);
 
-        RuleResult result = evaluateRule(rule, context);
+        RuleResult result = evaluateRuleInternal(rule, context, facts);
         logger.debug("Rule '{}' evaluation result - triggered: {}, resultType: {}", 
                         rule.getName(), result.isTriggered(), result.getResultType());
 
@@ -575,18 +620,32 @@ public class UnifiedRuleEvaluator {
 
     /**
      * Evaluate a structured condition group (AND/OR) against the evaluation context.
-     * Supports expression-type predicates with full SpEL evaluation.
-     * Lookup predicates execute via the injected {@link LookupServiceRegistry} (if configured)
-     * before evaluating their condition gate. Function predicates evaluate their gate only
-     * (function execution requires {@code EnrichmentGroupExecutor} — not yet wired).
-     * The gate may be a flat SpEL {@code condition} string or a nested {@code conditions}
-     * structured group; if both are set, {@code conditions} takes precedence.
+     * No-facts delegation wrapper — calls the facts-aware overload with {@code null}.
      *
      * @param group   The structured condition group
      * @param context The SpEL evaluation context
      * @return true if the group evaluates to true, false otherwise
      */
     private boolean evaluateStructuredConditionGroup(SharedConditionGroup group, EvaluationContext context) {
+        return evaluateStructuredConditionGroup(group, context, null);
+    }
+
+    /**
+     * Evaluate a structured condition group (AND/OR) against the evaluation context.
+     * Supports expression-type predicates with full SpEL evaluation.
+     * Lookup predicates execute via the injected {@link LookupServiceRegistry} (if configured)
+     * before evaluating their condition gate. Function predicates execute via the injected
+     * {@link EnrichmentGroupExecutor} (if configured and {@code facts} is non-null).
+     * The gate may be a flat SpEL {@code condition} string or a nested {@code conditions}
+     * structured group; if both are set, {@code conditions} takes precedence.
+     *
+     * @param group   The structured condition group
+     * @param context The SpEL evaluation context
+     * @param facts   The live facts Map, or {@code null} when called from the context-only path
+     * @return true if the group evaluates to true, false otherwise
+     */
+    private boolean evaluateStructuredConditionGroup(SharedConditionGroup group, EvaluationContext context,
+                                                     Map<String, Object> facts) {
         if (group.getRules() == null || group.getRules().isEmpty()) {
             logger.debug("Structured condition group has no predicates, returning true");
             return true;
@@ -599,7 +658,7 @@ public class UnifiedRuleEvaluator {
 
         if ("OR".equalsIgnoreCase(operator)) {
             for (SharedConditionRule rule : group.getRules()) {
-                if (evaluateStructuredConditionRule(rule, context)) {
+                if (evaluateStructuredConditionRule(rule, context, facts)) {
                     logger.debug("OR predicate satisfied: {}", rule.getDescription());
                     return true;
                 }
@@ -608,7 +667,7 @@ public class UnifiedRuleEvaluator {
         } else {
             // AND (default)
             for (SharedConditionRule rule : group.getRules()) {
-                if (!evaluateStructuredConditionRule(rule, context)) {
+                if (!evaluateStructuredConditionRule(rule, context, facts)) {
                     logger.debug("AND predicate failed: {}", rule.getDescription());
                     return false;
                 }
@@ -619,22 +678,37 @@ public class UnifiedRuleEvaluator {
 
     /**
      * Evaluate a single structured condition predicate.
-     * <ul>
-     *   <li>{@code expression}: Evaluates the SpEL condition or nested conditions group directly.</li>
-     *   <li>{@code lookup}: Executes the lookup via the injected {@link LookupServiceRegistry} (if present),
-     *       stashes the result as a context variable under {@code result-field}, then evaluates the
-     *       SpEL condition gate or nested conditions group. Falls back to gate-only evaluation when
-     *       no registry is configured.</li>
-     *   <li>{@code function}: Action execution not yet wired (requires {@code EnrichmentGroupExecutor}
-     *       and {@code YamlRuleConfiguration} — deferred to a future phase); evaluates the SpEL
-     *       condition gate or nested conditions group if present, defaults to true if absent.</li>
-     * </ul>
+     * No-facts delegation wrapper — calls the facts-aware overload with {@code null}.
      *
      * @param rule    The condition predicate
      * @param context The SpEL evaluation context
      * @return true if the predicate is satisfied
      */
     private boolean evaluateStructuredConditionRule(SharedConditionRule rule, EvaluationContext context) {
+        return evaluateStructuredConditionRule(rule, context, null);
+    }
+
+    /**
+     * Evaluate a single structured condition predicate.
+     * <ul>
+     *   <li>{@code expression}: Evaluates the SpEL condition or nested conditions group directly.</li>
+     *   <li>{@code lookup}: Executes the lookup via the injected {@link LookupServiceRegistry} (if present),
+     *       stashes the result as a context variable under {@code result-field}, then evaluates the
+     *       SpEL condition gate or nested conditions group. Falls back to gate-only evaluation when
+     *       no registry is configured.</li>
+     *   <li>{@code function}: Executes the referenced enrichment group via the injected
+     *       {@link EnrichmentGroupExecutor} (if present), binds input-parameters into the facts Map,
+     *       stashes the {@code output-field} value into the context, then evaluates the SpEL condition
+     *       gate. Falls back to gate-only evaluation when executor/config/facts are unavailable.</li>
+     * </ul>
+     *
+     * @param rule    The condition predicate
+     * @param context The SpEL evaluation context
+     * @param facts   The live facts Map, or {@code null} when called from the context-only path
+     * @return true if the predicate is satisfied
+     */
+    private boolean evaluateStructuredConditionRule(SharedConditionRule rule, EvaluationContext context,
+                                                    Map<String, Object> facts) {
         String type = rule.getType();
 
         if ("lookup".equalsIgnoreCase(type)) {
@@ -645,8 +719,12 @@ public class UnifiedRuleEvaluator {
                         rule.getDescription());
             }
         } else if ("function".equalsIgnoreCase(type)) {
-            logger.debug("Function predicate '{}' — function execution requires EnrichmentGroupExecutor (not yet wired); evaluating gate only",
-                    rule.getDescription());
+            if (enrichmentGroupExecutorSupplier != null && yamlRuleConfiguration != null && facts != null) {
+                executeFunctionPredicate(rule, context, facts);
+            } else {
+                logger.debug("Function predicate '{}' — EnrichmentGroupExecutor/YamlRuleConfiguration/facts not available; evaluating gate only",
+                        rule.getDescription());
+            }
         }
 
         // Evaluate the condition gate — supports both 'conditions' (structured group) and 'condition' (SpEL string)
@@ -656,7 +734,7 @@ public class UnifiedRuleEvaluator {
         if (nestedConditions != null) {
             // Nested structured condition gate — delegate recursively
             logger.debug("Evaluating nested structured conditions gate for predicate '{}'", rule.getDescription());
-            return evaluateStructuredConditionGroup(nestedConditions, context);
+            return evaluateStructuredConditionGroup(nestedConditions, context, facts);
         } else if (condition == null || condition.trim().isEmpty()) {
             // No condition gate — implicitly true (valid for function/lookup without a condition)
             return true;
@@ -665,6 +743,104 @@ public class UnifiedRuleEvaluator {
             Expression exp = parser.parseExpression(condition);
             Boolean result = exp.getValue(context, Boolean.class);
             return result != null && result;
+        }
+    }
+
+    /**
+     * Execute a function predicate: binds input-parameters, invokes the referenced enrichment group,
+     * and stashes the {@code output-field} value from the facts Map into the evaluation context so
+     * the gate condition can access it via {@code #outputField}.
+     *
+     * <p>Resolution order:
+     * <ol>
+     *   <li>Guard: {@code enrichment-group-ref} must be non-empty.</li>
+     *   <li>Apply {@code input-parameters}: evaluate each {@code source-field} SpEL expression and
+     *       put the result into {@code facts.put(targetField, value)}.</li>
+     *   <li>Resolve enrichment group by {@code enrichment-group-ref} via
+     *       {@link EnrichmentGroupFactory#buildEnrichmentGroups(YamlRuleConfiguration)}.</li>
+     *   <li>Execute via {@link EnrichmentGroupExecutor#processEnrichmentGroup} passing the facts Map
+     *       as {@code targetObject} (mutates Map in place).</li>
+     *   <li>Read {@code output-field} from the facts Map and stash into the context.</li>
+     * </ol>
+     *
+     * <p>All failures are logged as warnings and silently swallowed so the evaluator falls through
+     * to gate evaluation with whatever value is currently in the context.</p>
+     *
+     * @param rule    The condition predicate
+     * @param context The SpEL evaluation context to mutate with the stashed output
+     * @param facts   The live facts Map — serves as {@code targetObject} for the enrichment group
+     */
+    private void executeFunctionPredicate(SharedConditionRule rule,
+                                          EvaluationContext context,
+                                          Map<String, Object> facts) {
+        String groupRef = rule.getEnrichmentGroupRef();
+        if (groupRef == null || groupRef.trim().isEmpty()) {
+            logger.warn("Function predicate '{}' has no enrichment-group-ref; skipping execution",
+                    rule.getDescription());
+            return;
+        }
+
+        try {
+            // Step 1: Apply input-parameters — bind values into the facts Map
+            List<YamlEnrichment.FieldMapping> inputParams = rule.getInputParameters();
+            if (inputParams != null) {
+                for (YamlEnrichment.FieldMapping param : inputParams) {
+                    try {
+                        String src = param.getSourceField();
+                        if (src == null || src.trim().isEmpty()) {
+                            continue;
+                        }
+                        String spel = src.startsWith("#") ? src : "#" + src;
+                        Object value = parser.parseExpression(spel).getValue(context);
+                        if (param.getTargetField() != null) {
+                            facts.put(param.getTargetField(), value);
+                            logger.debug("Function predicate '{}' input: {} -> {} = {}",
+                                    rule.getDescription(), src, param.getTargetField(), value);
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Function predicate '{}' failed to bind input-parameter '{}': {}",
+                                rule.getDescription(), param.getSourceField(), e.getMessage());
+                    }
+                }
+            }
+
+            // Step 2: Resolve enrichment group by ref
+            List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlRuleConfiguration);
+            EnrichmentGroup targetGroup = groups.stream()
+                    .filter(g -> groupRef.equals(g.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (targetGroup == null) {
+                logger.warn("Function predicate '{}': enrichment-group-ref '{}' not found in configuration",
+                        rule.getDescription(), groupRef);
+                return;
+            }
+
+            // Step 3: Execute the enrichment group — mutates the facts Map in place
+            EnrichmentGroupExecutor executor = enrichmentGroupExecutorSupplier.get();
+            EnrichmentGroupResult groupResult =
+                    executor.processEnrichmentGroup(targetGroup, facts, yamlRuleConfiguration);
+
+            if (!groupResult.isSuccess()) {
+                logger.warn("Function predicate '{}': enrichment group '{}' execution failed: {}",
+                        rule.getDescription(), groupRef, groupResult.getMessage());
+                return;
+            }
+
+            // Step 4: Stash output-field from facts Map into context variable
+            String outputField = rule.getOutputField();
+            if (outputField != null && !outputField.trim().isEmpty()
+                    && context instanceof StandardEvaluationContext) {
+                Object outputValue = facts.get(outputField);
+                ((StandardEvaluationContext) context).setVariable(outputField, outputValue);
+                logger.debug("Function predicate '{}' stashed output into context variable '{}': {}",
+                        rule.getDescription(), outputField, outputValue);
+            }
+
+        } catch (Exception e) {
+            logger.warn("Function predicate '{}' execution failed: {}", rule.getDescription(), e.getMessage());
+            logger.debug("Full stack trace for function predicate execution failure:", e);
         }
     }
 
