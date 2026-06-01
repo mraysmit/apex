@@ -1,0 +1,65 @@
+metadata:
+  id: "unified-rule-evaluator-phase5-test"
+  name: "UnifiedRuleEvaluator Phase 5 Test Config"
+  version: "1.0.0"
+  description: "YAML configuration for Phase 5 input-parameter binding tests (executeFunctionPredicate). Covers constant+expression params, dynamic params, multi-param binding, null output-field, and no-output-field paths."
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+# Enrichments used by Phase 5 function-predicate input-parameter binding tests.
+#
+# translation-enrichment: used by tests 1 & 2 (constant+expression param binding, dynamic param binding)
+#   Reads #Translation_Type and #Input_Code from context/facts, produces translation_result.
+#
+# multi-combine-enrichment: used by test 3 (multiple params — 2 dynamic + 1 constant)
+#   Reads #p_a, #p_b, #p_c and concatenates them into 'combined'.
+#
+# nooutput-enrichment: used by test 7 (null output-field — group runs but nothing stashed)
+#   Writes 'calc_ran' into facts; function predicate output-field is set to null,
+#   so the stash step is skipped and the pre-seeded context value is used for the gate.
+enrichments:
+  - id: "translation-enrichment"
+    name: "Translation Enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "translation_result"
+        expression: "'TRANSLATED_' + #Translation_Type + '_' + #Input_Code"
+
+  - id: "multi-combine-enrichment"
+    name: "Multi Combine Enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "combined"
+        expression: "#p_a + ':' + #p_b + ':' + #p_c"
+
+  - id: "nooutput-enrichment"
+    name: "No Output Enrichment"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "'CALC_DONE'"
+      result-field: "calc_ran"
+
+enrichment-groups:
+  - id: "translation-group"
+    name: "Translation Group"
+    description: "Used by tests 1, 2, 4, 8 — translation_enrichment reads bound params and writes translation_result"
+    enrichment-ids:
+      - "translation-enrichment"
+    enabled: true
+
+  - id: "multi-combine-group"
+    name: "Multi Combine Group"
+    description: "Used by test 3 — combines p_a, p_b, p_c into combined field"
+    enrichment-ids:
+      - "multi-combine-enrichment"
+    enabled: true
+
+  - id: "nooutput-group"
+    name: "No Output Group"
+    description: "Used by test 7 — writes calc_ran but function predicate output-field is null so nothing is stashed"
+    enrichment-ids:
+      - "nooutput-enrichment"
+    enabled: true

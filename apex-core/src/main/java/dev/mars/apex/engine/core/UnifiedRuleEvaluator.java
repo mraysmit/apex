@@ -787,11 +787,28 @@ public class UnifiedRuleEvaluator {
                 for (YamlEnrichment.FieldMapping param : inputParams) {
                     try {
                         String src = param.getSourceField();
-                        if (src == null || src.trim().isEmpty()) {
-                            continue;
+                        // "constant" (or null/empty) source-field means the value comes from
+                        // the expression or defaultValue — not a lookup in the facts/context.
+                        boolean isConstant = "constant".equals(src)
+                                || src == null
+                                || src.trim().isEmpty();
+                        Object value;
+                        if (isConstant) {
+                            if (param.getExpression() != null && !param.getExpression().trim().isEmpty()) {
+                                value = parser.parseExpression(param.getExpression()).getValue(context);
+                            } else {
+                                value = param.getDefaultValue();
+                            }
+                        } else {
+                            // Source field reference — look up value from the context
+                            String spel = src.startsWith("#") ? src : "#" + src;
+                            value = parser.parseExpression(spel).getValue(context);
+                            // Apply expression as a transformation if specified
+                            if (value != null && param.getExpression() != null
+                                    && !param.getExpression().trim().isEmpty()) {
+                                value = parser.parseExpression(param.getExpression()).getValue(context);
+                            }
                         }
-                        String spel = src.startsWith("#") ? src : "#" + src;
-                        Object value = parser.parseExpression(spel).getValue(context);
                         if (param.getTargetField() != null) {
                             facts.put(param.getTargetField(), value);
                             logger.debug("Function predicate '{}' input: {} -> {} = {}",

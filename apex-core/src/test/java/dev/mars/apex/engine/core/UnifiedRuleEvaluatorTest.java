@@ -1426,6 +1426,360 @@ class UnifiedRuleEvaluatorTest {
         assertTrue(result.isTriggered());
     }
 
+    // =========================================================================
+    // Phase 5 — executeFunctionPredicate Input-Parameter Binding Tests
+    // =========================================================================
+    //
+    // These tests cover every code path in the input-parameter binding loop of
+    // executeFunctionPredicate — the path that was previously untested because
+    // Phase 4 tests used enrichment groups that computed their own values
+    // internally and never needed input-parameters to be bound.
+    //
+    // The specific bug: source-field="constant" + expression="'VALUE'" was
+    // silently ignored — the old code evaluated "#constant" (null) instead of
+    // the expression, so the group received null and produced a wrong result.
+    //
+    // BUG REGRESSION  → Test 1 (constant+expression param)
+    // Dynamic param   → Test 2 (#field from facts)
+    // Multi-param     → Test 3 (2 dynamic + 1 constant)
+    // Null expression → Test 4 (constant, no expression → null bound, no throw)
+    // Null group ref  → Test 5 (guard: groupRef null → early return)
+    // Unknown group   → Test 6 (group not found → early return)
+    // Null outputField→ Test 7 (group runs, stash skipped, context unchanged)
+    // Bad param       → Test 8 (exception in one param caught, rest still run)
+
+    private static final String PHASE5_YAML =
+            "src/test/resources/dev/mars/apex/engine/core/UnifiedRuleEvaluatorTest_Phase5.yaml";
+
+    /**
+     * Helper: wire a function predicate SharedConditionRule with a gate condition,
+     * wrap it in an AND group, and attach it to a new Rule.
+     */
+    private Rule buildFunctionPredicateRule(String ruleName,
+                                            String groupRef,
+                                            List<YamlEnrichment.FieldMapping> inputParams,
+                                            String outputField,
+                                            String gateCondition) {
+        SharedConditionRule funcPred = new SharedConditionRule();
+        funcPred.setType("function");
+        funcPred.setDescription(ruleName);
+        funcPred.setEnrichmentGroupRef(groupRef);
+        funcPred.setInputParameters(inputParams);
+        funcPred.setOutputField(outputField);
+        funcPred.setCondition(gateCondition);
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(funcPred));
+
+        return new RuleBuilder()
+                .withName(ruleName)
+                .withConditions(group)
+                .withMessage(ruleName + " result")
+                .withSeverity("INFO")
+                .build();
+    }
+
+    /** Build a FieldMapping with sourceField, targetField, and optional expression. */
+    private YamlEnrichment.FieldMapping param(String sourceField, String targetField, String expression) {
+        YamlEnrichment.FieldMapping p = new YamlEnrichment.FieldMapping();
+        p.setSourceField(sourceField);
+        p.setTargetField(targetField);
+        p.setExpression(expression);
+        return p;
+    }
+
+    @Test
+    @DisplayName("[Phase 5 - BUG REGRESSION] constant+expression param binds correctly; gate passes on translated value")
+    void testPhase5_ConstantExpressionParam_BindsAndGatePasses() throws Exception {
+        // Given: two input params — constant+'NDF_TYPE' bound to Translation_Type,
+        //        #INPUT_VALUE bound to Input_Code.
+        // Group enrichment produces: 'TRANSLATED_' + #Translation_Type + '_' + #Input_Code
+        // BUG (before fix): Translation_Type was null → 'TRANSLATED_null_ABC123' → gate fails
+        // FIXED: Translation_Type = 'NDF_TYPE' → 'TRANSLATED_NDF_TYPE_ABC123' → gate passes
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE5_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator ev = new UnifiedRuleEvaluator();
+        ev.setYamlRuleConfiguration(config);
+        ev.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        Map<String, Object> facts = new HashMap<>();
+        facts.put("INPUT_VALUE", "ABC123");
+
+        List<YamlEnrichment.FieldMapping> params = List.of(
+                param("constant", "Translation_Type", "'NDF_TYPE'"),
+                param("#INPUT_VALUE", "Input_Code", null)
+        );
+        Rule rule = buildFunctionPredicateRule(
+                "Constant Expr Param Test",
+                "translation-group",
+                params,
+                "translation_result",
+                "#translation_result == 'TRANSLATED_NDF_TYPE_ABC123'");
+
+        RuleResult result = ev.evaluateRule(rule, facts);
+
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "constant+expression param must bind 'NDF_TYPE' so gate #translation_result == 'TRANSLATED_NDF_TYPE_ABC123' passes");
+        assertTrue(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 5] Dynamic param (#field from facts) passed to group; constant expression also bound")
+    void testPhase5_DynamicParam_FactValuePassedToGroup() throws Exception {
+        // Dynamic: #tradeCode → Translation_Type; constant: 'FIXED' → Input_Code
+        // Group produces: 'TRANSLATED_TRD-999_FIXED'
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE5_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator ev = new UnifiedRuleEvaluator();
+        ev.setYamlRuleConfiguration(config);
+        ev.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        Map<String, Object> facts = new HashMap<>();
+        facts.put("tradeCode", "TRD-999");
+
+        List<YamlEnrichment.FieldMapping> params = List.of(
+                param("#tradeCode", "Translation_Type", null),
+                param("constant", "Input_Code", "'FIXED'")
+        );
+        Rule rule = buildFunctionPredicateRule(
+                "Dynamic Param Test",
+                "translation-group",
+                params,
+                "translation_result",
+                "#translation_result == 'TRANSLATED_TRD-999_FIXED'");
+
+        RuleResult result = ev.evaluateRule(rule, facts);
+
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Dynamic #tradeCode and constant 'FIXED' should both bind correctly");
+        assertTrue(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 5] Multiple params (2 dynamic + 1 constant) all bound; group concatenates correctly")
+    void testPhase5_MultipleParams_ConstantAndDynamic_AllBound() throws Exception {
+        // 3 params: #FIELD_A → p_a, #FIELD_B → p_b, constant 'gamma' → p_c
+        // Group produces: 'alpha:beta:gamma'
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE5_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator ev = new UnifiedRuleEvaluator();
+        ev.setYamlRuleConfiguration(config);
+        ev.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        Map<String, Object> facts = new HashMap<>();
+        facts.put("FIELD_A", "alpha");
+        facts.put("FIELD_B", "beta");
+
+        List<YamlEnrichment.FieldMapping> params = List.of(
+                param("#FIELD_A", "p_a", null),
+                param("#FIELD_B", "p_b", null),
+                param("constant", "p_c", "'gamma'")
+        );
+        Rule rule = buildFunctionPredicateRule(
+                "Multi Param Test",
+                "multi-combine-group",
+                params,
+                "combined",
+                "#combined == 'alpha:beta:gamma'");
+
+        RuleResult result = ev.evaluateRule(rule, facts);
+
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "All 3 params (2 dynamic + 1 constant) should bind; combined must equal 'alpha:beta:gamma'");
+        assertTrue(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 5] constant param with no expression binds null; group still runs without exception")
+    void testPhase5_ConstantParam_NoExpression_BindsNull() throws Exception {
+        // param1: constant, no expression → null bound to Translation_Type
+        // param2: constant 'CODE' → Input_Code
+        // Group produces: 'TRANSLATED_null_CODE' (not null) → gate #translation_result != null passes
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE5_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator ev = new UnifiedRuleEvaluator();
+        ev.setYamlRuleConfiguration(config);
+        ev.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        Map<String, Object> facts = new HashMap<>();
+
+        List<YamlEnrichment.FieldMapping> params = List.of(
+                param("constant", "Translation_Type", null),   // no expression → null
+                param("constant", "Input_Code", "'CODE'")
+        );
+        Rule rule = buildFunctionPredicateRule(
+                "Null Constant Param Test",
+                "translation-group",
+                params,
+                "translation_result",
+                "#translation_result != null");
+
+        RuleResult result = ev.evaluateRule(rule, facts);
+
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Null constant param must not throw; group must run and produce a non-null result");
+        assertTrue(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 5] null enrichment-group-ref guard fires; gate reads pre-seeded fact value")
+    void testPhase5_NoEnrichmentGroupRef_FallsThroughToGate() throws Exception {
+        // groupRef is null → early return in executeFunctionPredicate → gate reads pre-seeded value
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE4_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator ev = new UnifiedRuleEvaluator();
+        ev.setYamlRuleConfiguration(config);
+        ev.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        Map<String, Object> facts = new HashMap<>(testFacts);
+        facts.put("riskLevel", "HIGH");  // pre-seeded; gate should read this
+
+        SharedConditionRule funcPred = new SharedConditionRule();
+        funcPred.setType("function");
+        funcPred.setDescription("Null groupRef guard test");
+        funcPred.setEnrichmentGroupRef(null);          // guard fires → early return
+        funcPred.setOutputField("riskLevel");
+        funcPred.setCondition("#riskLevel == 'HIGH'");
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(funcPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Null GroupRef Guard")
+                .withConditions(group)
+                .withMessage("Guard fired")
+                .withSeverity("INFO")
+                .build();
+
+        RuleResult result = ev.evaluateRule(rule, facts);
+
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Null groupRef guard must fire early; gate reads pre-seeded HIGH → MATCH");
+        assertTrue(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 5] enrichment-group-ref not found in config; gate reads pre-seeded fact value")
+    void testPhase5_GroupRefNotFound_FallsThroughToGate() throws Exception {
+        // groupRef resolves to nothing → early return → gate reads pre-seeded value
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE4_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator ev = new UnifiedRuleEvaluator();
+        ev.setYamlRuleConfiguration(config);
+        ev.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        Map<String, Object> facts = new HashMap<>(testFacts);
+        facts.put("riskLevel", "HIGH");
+
+        SharedConditionRule funcPred = new SharedConditionRule();
+        funcPred.setType("function");
+        funcPred.setDescription("Unknown groupRef test");
+        funcPred.setEnrichmentGroupRef("nonexistent-group");  // not in YAML → early return
+        funcPred.setOutputField("riskLevel");
+        funcPred.setCondition("#riskLevel == 'HIGH'");
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(funcPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Unknown GroupRef")
+                .withConditions(group)
+                .withMessage("Group not found")
+                .withSeverity("INFO")
+                .build();
+
+        RuleResult result = ev.evaluateRule(rule, facts);
+
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Unknown groupRef must return early; gate reads pre-seeded HIGH → MATCH");
+        assertTrue(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 5] null output-field: group executes but stash step is skipped; gate uses pre-seeded value")
+    void testPhase5_NullOutputField_GroupExecutes_ContextNotStashed() throws Exception {
+        // nooutput-group runs (writes calc_ran) but outputField=null → stash skipped
+        // Gate reads pre-seeded riskLevel='LOW' from original context → MATCH
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE5_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator ev = new UnifiedRuleEvaluator();
+        ev.setYamlRuleConfiguration(config);
+        ev.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        Map<String, Object> facts = new HashMap<>(testFacts);
+        facts.put("riskLevel", "LOW");  // pre-seeded; gate should read this
+
+        SharedConditionRule funcPred = new SharedConditionRule();
+        funcPred.setType("function");
+        funcPred.setDescription("Null outputField test");
+        funcPred.setEnrichmentGroupRef("nooutput-group");
+        funcPred.setOutputField(null);                  // stash step skipped
+        funcPred.setCondition("#riskLevel == 'LOW'");   // reads pre-seeded value
+
+        SharedConditionGroup group = new SharedConditionGroup();
+        group.setOperator("AND");
+        group.setRules(List.of(funcPred));
+
+        Rule rule = new RuleBuilder()
+                .withName("Null OutputField Test")
+                .withConditions(group)
+                .withMessage("Group ran, stash skipped")
+                .withSeverity("INFO")
+                .build();
+
+        RuleResult result = ev.evaluateRule(rule, facts);
+
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Group must run OK; null outputField means stash skipped; gate reads pre-seeded LOW → MATCH");
+        assertTrue(result.isTriggered());
+    }
+
+    @Test
+    @DisplayName("[Phase 5] exception in one param binding is caught and warned; subsequent params still execute")
+    void testPhase5_ExceptionInParamBinding_ContinuesWithRemainingParams() throws Exception {
+        // param1: bad SpEL → exception caught → Translation_Type not set (null)
+        // param2: constant 'NDF_TYPE' → overrides Translation_Type with correct value
+        // param3: constant 'CODE123' → Input_Code
+        // Group produces: 'TRANSLATED_NDF_TYPE_CODE123' → gate passes
+        YamlRuleConfiguration config = new ConfigurationLoader().loadFromFile(PHASE5_YAML);
+        EnrichmentGroupExecutor executor = buildExecutor();
+
+        UnifiedRuleEvaluator ev = new UnifiedRuleEvaluator();
+        ev.setYamlRuleConfiguration(config);
+        ev.setEnrichmentGroupExecutorSupplier(() -> executor);
+
+        Map<String, Object> facts = new HashMap<>();
+        facts.put("amount", 1000.0);  // amount is a Double — .badMethod() will throw
+
+        List<YamlEnrichment.FieldMapping> params = List.of(
+                param("#amount.badMethod()", "Translation_Type", null),  // bad SpEL → exception caught
+                param("constant", "Translation_Type", "'NDF_TYPE'"),      // overwrites with correct value
+                param("constant", "Input_Code", "'CODE123'")
+        );
+        Rule rule = buildFunctionPredicateRule(
+                "Exception In Param Test",
+                "translation-group",
+                params,
+                "translation_result",
+                "#translation_result == 'TRANSLATED_NDF_TYPE_CODE123'");
+
+        RuleResult result = ev.evaluateRule(rule, facts);
+
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Bad param exception must be caught; subsequent params run; gate must pass with correct result");
+        assertTrue(result.isTriggered());
+    }
+
     @AfterAll
     static void classTearDown() {
         LoggerFactory.getLogger(UnifiedRuleEvaluatorTest.class)
